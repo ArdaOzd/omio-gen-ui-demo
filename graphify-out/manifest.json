@@ -1,0 +1,20 @@
+{
+  ".github/pull_request_template.md": {
+    "mtime": 1790894782.984605,
+    "seen": 1790895079.2617972,
+    "ast_hash": "2d6ecb9844ea83a2ee2e416c237732ba",
+    "semantic_hash": "2d6ecb9844ea83a2ee2e416c237732ba"
+  },
+  "CONTRIBUTING.md": {
+    "mtime": 1790894782.927421,
+    "seen": 1790895079.2618,
+    "ast_hash": "21d58246eabc17941c2a4059119950fd",
+    "semantic_hash": "21d58246eabc17941c2a4059119950fd"
+  },
+  "README.md": {
+    "mtime": 1790894782.9043777,
+    "seen": 1790895079.261801,
+    "ast_hash": "acc4750823958f34fe96062b991f52ac",
+    "semantic_hash": "acc4750823958f34fe96062b991f52ac"
+  }
+}
