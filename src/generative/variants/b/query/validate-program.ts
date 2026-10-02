@@ -17,6 +17,7 @@ export function validateReactiveProgram(program:string,options:{complete?:boolea
  for(const statement of statements){const ast=parseExpression(statement.tokens);expressions.set(statement.id,ast)
   walkAST(ast,node=>{if(++nodes>4000)throw new Error('PROGRAM_BUDGET');inspect(node);if(node.k==='Comp'&&['Set','Reset'].includes(node.name))assignments.push(node)
    if(node.k==='Comp'&&catalogDescriptors.some(d=>d.name===node.name)){
+    const title=node.args[4];if(title?.k==='Str'&&title.v.length>(node.name==='Callout'?600:160))throw new Error('COMPONENT_TITLE_LENGTH')
     const artifact=node.args[0],binding=node.args[8],variable=node.args[7],query=node.args[9]
     if(query?.k==='Ref'&&artifact?.k==='Str')queryBindings.push({kind:node.name,artifactRef:artifact.v,datasetRef:node.args[1]?.k==='Str'?node.args[1].v:undefined,title:node.args[4]?.k==='Str'?node.args[4].v:undefined,queryId:query.n})
     if(binding&&binding.k!=='Null'){

@@ -8,7 +8,7 @@ import { WorkerResponseSchema } from '../../../query/protocol'
 import { useSceneQuery } from './query-context'
 import { runBoundQueryResult } from '../query/result-ownership'
 import { parseAction } from '../query/action'
-import { bPropsSchema } from '../query/schema'
+import { bPropsSchema,bComponentPropsSchema } from '../query/schema'
 type Props=z.infer<typeof bPropsSchema>
 function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Props>){
  const host=useTravelServices(),{state}=useArtifact(props.artifactRef),trigger=useTriggerAction(),scene=useSceneQuery()
@@ -33,7 +33,8 @@ function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Pr
  },[host,queryEncoded,props.binding,field,state.revision,props.artifactRef,generatedQuery?.queryId,scene?.execute])
  const {children,value,binding,query,action,...common}=props
  const scalar=Object.fromEntries(Object.entries(common).filter(([,value])=>value!==null&&value!==undefined))
- const checked=bPropsSchema.parse(scalar)
+ const normalized=name==='Callout'&&typeof scalar.title==='string'&&scalar.title.length>160?{...scalar,title:undefined,body:scalar.body??scalar.title}:scalar
+ const checked=bPropsSchema.parse(normalized)
  return <TravelProvider services={services}><div onClick={action?()=>trigger(props.title??name,undefined,parseAction(action)):undefined}><CatalogNode kind={name} {...checked}>{renderNode(children)}</CatalogNode></div></TravelProvider>
 }
-export const bLibrary=createLibrary({root:'TravelSurface',components:catalogDescriptors.map(d=>defineComponent({name:d.name,description:d.description,props:bPropsSchema.extend({}),component:input=><BoundNode name={d.name} {...input}/>}))})
+export const bLibrary=createLibrary({root:'TravelSurface',components:catalogDescriptors.map(d=>defineComponent({name:d.name,description:d.description,props:bComponentPropsSchema(d.name),component:input=><BoundNode name={d.name} {...input}/>}))})

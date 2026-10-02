@@ -1,0 +1,10 @@
+{
+  "provenance": "Exact Callout line captured read-only by root from current user B diagnostics; full3339-character source not copied here. No model-authored source invented. Native regression wraps this captured copy in a minimal known-artifact scene.",
+  "artifactRef": "artifact-372a6384-6768-42e0-850e-519a230e35ff",
+  "toolCallId": "61f37f07-cc25-41d5-b175-3f4103dd09e1",
+  "programRevision": 3,
+  "uiRevision": 5,
+  "sourceLine": "notice = Callout(\"artifact-372a6384-6768-42e0-850e-519a230e35ff\", null, null, null, \"Demo fares cover October 2–8. Choose dates allowing two nights in Paris, then four in Barcelona. No return leg or accommodation is included. Ferry fares are absent from this synthetic coverage.\")",
+  "error": "Callout title too_big maximum160",
+  "titleCharacters": 193
+}

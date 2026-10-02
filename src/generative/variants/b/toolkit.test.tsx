@@ -64,3 +64,16 @@ it.each(['accepted','pending','error','invalid','different','older-turn'])('pres
  if(scenario==='accepted'){await screen.findByText('New accepted scene');expect(screen.queryByText('First usable scene')).toBeNull()}
  else{await screen.findByText('First usable scene');if(scenario==='different'||scenario==='older-turn')await screen.findByText('New accepted scene')}
 })
+
+it.each(['legacy-title','body'])('renders captured explanatory Callout text through native %s history',async shape=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}})
+ vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{})
+ const services={state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}
+ const explanation='Demo fares cover October 2–8. Choose dates allowing two nights in Paris, then four in Barcelona. No return leg or accommodation is included. Ferry fares are absent from this synthetic coverage.'
+ const notice=shape==='legacy-title'?`note = Callout("art", null, null, null, ${JSON.stringify(explanation)})`:`note = Callout("art", null, null, null, "Coverage notes", null, null, null, null, null, null, ${JSON.stringify(explanation)})`
+ const messages:UIMessage[]=[{id:'explanatory-scene',role:'assistant',parts:[{type:'tool-compose_reactive_scene',toolCallId:'callout-scene',state:'output-available',input:{artifactRef:'art',programRevision:1,program:`root = TravelSurface("art", null, null, null, "Travel options", null, [note])\n${notice}`},output:{artifactId:'art',programRevision:1,status:'accepted'}}]}]
+ render(<GenerativeChat variant="b" services={services} sceneToolkit={bToolkit} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ expect(await screen.findByText(explanation)).toHaveProperty('tagName','P')
+ expect(screen.queryByRole('alert')).toBeNull()
+})

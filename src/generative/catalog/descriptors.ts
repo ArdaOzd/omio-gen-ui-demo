@@ -2,7 +2,7 @@ import type { ComponentDescriptor } from '../contracts';
 const refs = [
   {name:'artifactRef',kind:'ref',required:true}, {name:'datasetRef',kind:'ref',required:false},
   {name:'actionRef',kind:'ref',required:false}, {name:'selectorRef',kind:'ref',required:false},
-  {name:'title',kind:'text',required:false}, {name:'variant',kind:'variant',required:false},
+  {name:'title',kind:'text',required:false}, {name:'variant',kind:'variant',required:false}, {name:'body',kind:'text',required:false},
 ] satisfies ComponentDescriptor['props'];
 const descriptor = (name: string, group: ComponentDescriptor['group'], description: string, children = false): ComponentDescriptor => ({ name, group, description, props: refs, children });
 export const descriptors: ReadonlyArray<ComponentDescriptor> = [
@@ -19,7 +19,7 @@ export const descriptors: ReadonlyArray<ComponentDescriptor> = [
   descriptor('SplitPane','layout','Responsive primary and supporting sections',true),
   descriptor('StickySummary','layout','Persistent selected-trip summary',true),
   descriptor('Tabs','layout','Accessible tabbed sections',true),
-  descriptor('Callout','layout','Bounded explanatory content',true),
+  descriptor('Callout','layout','Short heading and explanatory body text up to600 characters',true),
   descriptor('DateStrip','control','Direct local date selection'),
   descriptor('ModeChips','control','Direct local transport mode filtering'),
   descriptor('CarrierFilter','control','Direct local carrier selection'),
