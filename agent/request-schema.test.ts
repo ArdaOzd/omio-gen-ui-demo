@@ -28,3 +28,10 @@ it('rejects camelCase row arrays hidden behind an arbitrary tool-input alias',()
  const row={id:'fare1',originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true};
  expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'assistant',role:'assistant',parts:[{type:'tool-get_fare',toolCallId:'t1',state:'input-available',input:{payload:Array.from({length:100},()=>row)}}]}]})).toThrow();
 });
+
+it('continues after the captured failed B compose placeholder without replaying it',()=>{
+ const failed={type:'tool-compose_reactive_scene',toolCallId:'ba0dbf46-f26a-4def-95d7-4a3150fdf266',state:'output-error',input:{},errorText:'This scene could not be completed. One bounded repair is allowed.'}
+ const parsed=parseChatRequest({...request,variant:'b',messages:[...request.messages,{id:'failed-scene',role:'assistant',parts:[failed]},{id:'follow-up',role:'user',parts:[{type:'text',text:'I will stay 5 days'}]}]})
+ expect(parsed.messages[1]?.parts).toEqual([])
+ expect(parsed.messages[2]?.parts[0]?.text).toBe('I will stay 5 days')
+})
