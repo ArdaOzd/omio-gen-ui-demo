@@ -1,5 +1,5 @@
 import { z } from 'zod';
-const locationsSchema=z.object({locations:z.array(z.object({id:z.string().max(96),city:z.string().max(96),display_name:z.string().max(120)})).max(128)});
+const locationsSchema=z.object({locations:z.array(z.object({id:z.string().max(96),city:z.string().max(96),display_name:z.string().max(120)})).max(256)});
 export function selectLocations(input:unknown,history:unknown){
  const locations=locationsSchema.parse(input).locations;
  const text=JSON.stringify(history).toLowerCase();
