@@ -39,3 +39,9 @@ node_modules/.bin/vite --config verification/generative-ui/a/spike/vite.config.t
 ```
 
 Playwright used installed Chrome with `chromium.launch({ headless: true, channel: 'chrome' })`. The default downloaded Chromium executable was absent.
+
+## Shared catalog and paused-stream proof
+
+The repeatable `run-browser-proof.mjs` exercises three different recursive arrangements through native present tool argument deltas. Five cases cover desktop and 360px blue/sand themes, keyboard mode filtering before the closing root arrives, ordered text/UI/text, continuation, a fresh next-request snapshot, and preserved focus and host revision after completion. The recorded results identify these fixtures as deterministic runtime evidence, not live model authorship.
+
+`toolkit-client.tsx` retains the native present schema, identity, and empty execution result. Its display boundary prunes incomplete or invalid children independently, validates registered scalar props and existing refs, and applies the shared 80-node and eight-level limits before calling the native renderer. Final oversized or invalid trees show a stable error instead of silently truncating. The original compiler-owned toolkit remains unchanged.

@@ -32,3 +32,11 @@ describe('shared direct travel controls',()=>{
   expect(screen.getByRole('button',{name:'Bus'})).toHaveAttribute('aria-pressed','true');expect(state.get(artifactId).revision).toBe(revision)
  })
 })
+
+it('moves tab focus with arrow keys and keeps roving focus in the selected tab',async()=>{
+ const{services}=await setup()
+ render(<TravelProvider services={services}><CatalogNode kind="Tabs" artifactRef={artifactId}><p>Calendar</p><p>Timeline</p></CatalogNode></TravelProvider>)
+ const tabs=screen.getAllByRole('tab');tabs[0]?.focus();fireEvent.keyDown(tabs[0]!,{key:'ArrowRight'})
+ expect(tabs[1]).toHaveFocus();expect(tabs[1]).toHaveAttribute('aria-selected','true')
+ fireEvent.keyDown(tabs[1]!,{key:'Home'});expect(tabs[0]).toHaveFocus()
+})
