@@ -29,7 +29,7 @@ Reproduce these checks with:
 ```sh
 python3 -m unittest discover -s backend/tests -v
 python3 verification/verify_pasted_coverage.py \
-  "/Users/ardaozdogru/.codex/attachments/727d7bc3-772d-43e9-b33b-dfb3bf812cd5/Pasted text.txt" \
+  "/path/to/source-requirements.txt" \
   --database data/omio.sqlite3
 ```
 
