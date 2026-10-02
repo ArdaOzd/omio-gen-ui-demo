@@ -27,7 +27,8 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  case 'FareCards':case 'FarePicker':content=<FareCards {...props}/>;break
  case 'PriceCalendar':content=<PriceCalendar {...props}/>;break
  case 'ComparisonTable':case 'ComparisonMatrix':case 'ModeBreakdown':content=<Comparison {...props}/>;break
- case 'SyntheticTotal':case 'SelectedItinerary':content=<Total {...props}/>;break
+ case 'SyntheticTotal':content=<Total {...props}/>;break
+ case 'SelectedItinerary':content=<Total {...props} detail/>;break
  case 'CoverageSummary':content=<Coverage {...props}/>;break
  case 'RouteMap':case 'CitySequence':content=<Route {...props}/>;break
  case 'ItineraryTimeline':content=<Timeline {...props}/>;break

@@ -5,8 +5,8 @@ Signed-in Codex `gpt-6.1-sol`, high reasoning, Chrome 154, 1280×1000, real Pyth
 | Arrangement | Completion | Recursive composition |
 | --- | --- | --- |
 | Compare | 69.2 s | SplitPane, Section, StickySummary |
-| Calendar | See case-1.json | PriceCalendar, ResponsiveGrid, controls, offers |
-| Journey | See case-2.json | RouteMap, Section, ItineraryTimeline, Inline |
+| Calendar | 66.1 s | PriceCalendar, ResponsiveGrid, controls, offers |
+| Journey | 53.1 s | RouteMap, Section, ItineraryTimeline, Inline |
 
 These are machine observations. Human visual quality/usability ratings remain pending. The separate deterministic browser proof records partial-stream interaction, phone layouts, themes, and focus retention.
 

@@ -1,0 +1,1053 @@
+{
+  "classification": "AST analysis of two genuine completed Codex programs",
+  "programs": [
+    {
+      "index": 0,
+      "parserValid": true,
+      "variables": [
+        "$filters",
+        "$selectedFareIds",
+        "$show"
+      ],
+      "bindings": [
+        {
+          "variable": "$filters",
+          "field": "filters",
+          "artifactRef": "artifact-8119f590-0744-4fbc-b0ee-5ccf42cd5e84"
+        },
+        {
+          "variable": "$selectedFareIds",
+          "field": "selectedFareIds",
+          "artifactRef": "artifact-8119f590-0744-4fbc-b0ee-5ccf42cd5e84"
+        }
+      ],
+      "dependencies": [
+        {
+          "id": "modeQuery",
+          "deps": [
+            "$filters"
+          ]
+        },
+        {
+          "id": "fareQuery",
+          "deps": [
+            "$filters"
+          ]
+        }
+      ],
+      "queryBindings": [
+        {
+          "kind": "ComparisonTable",
+          "artifactRef": "artifact-8119f590-0744-4fbc-b0ee-5ccf42cd5e84",
+          "datasetRef": "dataset-1hq3nnw",
+          "title": "Minimum price, fastest duration and fare count by mode",
+          "queryId": "modeQuery"
+        },
+        {
+          "kind": "FarePicker",
+          "artifactRef": "artifact-8119f590-0744-4fbc-b0ee-5ccf42cd5e84",
+          "datasetRef": "dataset-1hq3nnw",
+          "title": "Choose a fare",
+          "queryId": "fareQuery"
+        }
+      ],
+      "queryStatements": [
+        {
+          "id": "modeQuery",
+          "deps": [
+            "$filters"
+          ],
+          "argsAST": {
+            "k": "Obj",
+            "entries": [
+              [
+                "version",
+                {
+                  "k": "Num",
+                  "v": 1
+                }
+              ],
+              [
+                "sources",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "datasetRef",
+                          {
+                            "k": "Str",
+                            "v": "dataset-1hq3nnw"
+                          }
+                        ],
+                        [
+                          "alias",
+                          {
+                            "k": "Str",
+                            "v": "fares"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "where",
+                {
+                  "k": "Ternary",
+                  "cond": {
+                    "k": "BinOp",
+                    "op": ">",
+                    "left": {
+                      "k": "Member",
+                      "obj": {
+                        "k": "Member",
+                        "obj": {
+                          "k": "StateRef",
+                          "n": "$filters"
+                        },
+                        "field": "modes"
+                      },
+                      "field": "length"
+                    },
+                    "right": {
+                      "k": "Num",
+                      "v": 0
+                    }
+                  },
+                  "then": {
+                    "k": "Obj",
+                    "entries": [
+                      [
+                        "all",
+                        {
+                          "k": "Arr",
+                          "els": [
+                            {
+                              "k": "Obj",
+                              "entries": [
+                                [
+                                  "field",
+                                  {
+                                    "k": "Str",
+                                    "v": "serviceDate"
+                                  }
+                                ],
+                                [
+                                  "op",
+                                  {
+                                    "k": "Str",
+                                    "v": "between"
+                                  }
+                                ],
+                                [
+                                  "value",
+                                  {
+                                    "k": "Arr",
+                                    "els": [
+                                      {
+                                        "k": "Str",
+                                        "v": "2026-10-09"
+                                      },
+                                      {
+                                        "k": "Str",
+                                        "v": "2026-10-15"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            },
+                            {
+                              "k": "Obj",
+                              "entries": [
+                                [
+                                  "field",
+                                  {
+                                    "k": "Str",
+                                    "v": "mode"
+                                  }
+                                ],
+                                [
+                                  "op",
+                                  {
+                                    "k": "Str",
+                                    "v": "in"
+                                  }
+                                ],
+                                [
+                                  "value",
+                                  {
+                                    "k": "Member",
+                                    "obj": {
+                                      "k": "StateRef",
+                                      "n": "$filters"
+                                    },
+                                    "field": "modes"
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  "else": {
+                    "k": "Obj",
+                    "entries": [
+                      [
+                        "field",
+                        {
+                          "k": "Str",
+                          "v": "serviceDate"
+                        }
+                      ],
+                      [
+                        "op",
+                        {
+                          "k": "Str",
+                          "v": "between"
+                        }
+                      ],
+                      [
+                        "value",
+                        {
+                          "k": "Arr",
+                          "els": [
+                            {
+                              "k": "Str",
+                              "v": "2026-10-09"
+                            },
+                            {
+                              "k": "Str",
+                              "v": "2026-10-15"
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                }
+              ],
+              [
+                "project",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Str",
+                      "v": "mode"
+                    }
+                  ]
+                }
+              ],
+              [
+                "groupBy",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Str",
+                      "v": "mode"
+                    }
+                  ]
+                }
+              ],
+              [
+                "metrics",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "as",
+                          {
+                            "k": "Str",
+                            "v": "minimum"
+                          }
+                        ],
+                        [
+                          "op",
+                          {
+                            "k": "Str",
+                            "v": "min"
+                          }
+                        ],
+                        [
+                          "field",
+                          {
+                            "k": "Str",
+                            "v": "priceCents"
+                          }
+                        ]
+                      ]
+                    },
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "as",
+                          {
+                            "k": "Str",
+                            "v": "fastest"
+                          }
+                        ],
+                        [
+                          "op",
+                          {
+                            "k": "Str",
+                            "v": "min"
+                          }
+                        ],
+                        [
+                          "field",
+                          {
+                            "k": "Str",
+                            "v": "durationMinutes"
+                          }
+                        ]
+                      ]
+                    },
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "as",
+                          {
+                            "k": "Str",
+                            "v": "count"
+                          }
+                        ],
+                        [
+                          "op",
+                          {
+                            "k": "Str",
+                            "v": "count"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "orderBy",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "field",
+                          {
+                            "k": "Str",
+                            "v": "minimum"
+                          }
+                        ],
+                        [
+                          "direction",
+                          {
+                            "k": "Str",
+                            "v": "asc"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "limit",
+                {
+                  "k": "Num",
+                  "v": 4
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "id": "fareQuery",
+          "deps": [
+            "$filters"
+          ],
+          "argsAST": {
+            "k": "Obj",
+            "entries": [
+              [
+                "version",
+                {
+                  "k": "Num",
+                  "v": 1
+                }
+              ],
+              [
+                "sources",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "datasetRef",
+                          {
+                            "k": "Str",
+                            "v": "dataset-1hq3nnw"
+                          }
+                        ],
+                        [
+                          "alias",
+                          {
+                            "k": "Str",
+                            "v": "fares"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "where",
+                {
+                  "k": "Ternary",
+                  "cond": {
+                    "k": "BinOp",
+                    "op": ">",
+                    "left": {
+                      "k": "Member",
+                      "obj": {
+                        "k": "Member",
+                        "obj": {
+                          "k": "StateRef",
+                          "n": "$filters"
+                        },
+                        "field": "modes"
+                      },
+                      "field": "length"
+                    },
+                    "right": {
+                      "k": "Num",
+                      "v": 0
+                    }
+                  },
+                  "then": {
+                    "k": "Obj",
+                    "entries": [
+                      [
+                        "all",
+                        {
+                          "k": "Arr",
+                          "els": [
+                            {
+                              "k": "Obj",
+                              "entries": [
+                                [
+                                  "field",
+                                  {
+                                    "k": "Str",
+                                    "v": "serviceDate"
+                                  }
+                                ],
+                                [
+                                  "op",
+                                  {
+                                    "k": "Str",
+                                    "v": "between"
+                                  }
+                                ],
+                                [
+                                  "value",
+                                  {
+                                    "k": "Arr",
+                                    "els": [
+                                      {
+                                        "k": "Str",
+                                        "v": "2026-10-09"
+                                      },
+                                      {
+                                        "k": "Str",
+                                        "v": "2026-10-15"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              ]
+                            },
+                            {
+                              "k": "Obj",
+                              "entries": [
+                                [
+                                  "field",
+                                  {
+                                    "k": "Str",
+                                    "v": "mode"
+                                  }
+                                ],
+                                [
+                                  "op",
+                                  {
+                                    "k": "Str",
+                                    "v": "in"
+                                  }
+                                ],
+                                [
+                                  "value",
+                                  {
+                                    "k": "Member",
+                                    "obj": {
+                                      "k": "StateRef",
+                                      "n": "$filters"
+                                    },
+                                    "field": "modes"
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  },
+                  "else": {
+                    "k": "Obj",
+                    "entries": [
+                      [
+                        "field",
+                        {
+                          "k": "Str",
+                          "v": "serviceDate"
+                        }
+                      ],
+                      [
+                        "op",
+                        {
+                          "k": "Str",
+                          "v": "between"
+                        }
+                      ],
+                      [
+                        "value",
+                        {
+                          "k": "Arr",
+                          "els": [
+                            {
+                              "k": "Str",
+                              "v": "2026-10-09"
+                            },
+                            {
+                              "k": "Str",
+                              "v": "2026-10-15"
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                }
+              ],
+              [
+                "project",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Str",
+                      "v": "id"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "originId"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "destinationId"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "serviceDate"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "mode"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "carrierId"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "priceCents"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "durationMinutes"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "departureMinutes"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "availableSeats"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "currency"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "synthetic"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "priceBasis"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "direct"
+                    }
+                  ]
+                }
+              ],
+              [
+                "orderBy",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "field",
+                          {
+                            "k": "Str",
+                            "v": "priceCents"
+                          }
+                        ],
+                        [
+                          "direction",
+                          {
+                            "k": "Str",
+                            "v": "asc"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "limit",
+                {
+                  "k": "Num",
+                  "v": 100
+                }
+              ]
+            ]
+          }
+        }
+      ],
+      "mutationCount": 1
+    },
+    {
+      "index": 1,
+      "parserValid": true,
+      "variables": [
+        "$dates",
+        "$sort",
+        "$selectedFareIds",
+        "$showTimeline"
+      ],
+      "bindings": [
+        {
+          "variable": "$dates",
+          "field": "dates",
+          "artifactRef": "artifact-94a9bc98-5acd-4494-a466-5b98dbc11de5"
+        },
+        {
+          "variable": "$sort",
+          "field": "sort",
+          "artifactRef": "artifact-94a9bc98-5acd-4494-a466-5b98dbc11de5"
+        },
+        {
+          "variable": "$selectedFareIds",
+          "field": "selectedFareIds",
+          "artifactRef": "artifact-94a9bc98-5acd-4494-a466-5b98dbc11de5"
+        }
+      ],
+      "dependencies": [
+        {
+          "id": "calendarQuery"
+        },
+        {
+          "id": "fareQuery",
+          "deps": [
+            "$dates",
+            "$sort"
+          ]
+        }
+      ],
+      "queryBindings": [
+        {
+          "kind": "PriceCalendar",
+          "artifactRef": "artifact-94a9bc98-5acd-4494-a466-5b98dbc11de5",
+          "datasetRef": "dataset-1hq3nnw",
+          "title": "Minimum price and fare count by day",
+          "queryId": "calendarQuery"
+        },
+        {
+          "kind": "FarePicker",
+          "artifactRef": "artifact-94a9bc98-5acd-4494-a466-5b98dbc11de5",
+          "datasetRef": "dataset-1hq3nnw",
+          "title": "Choose a fare for the selected date",
+          "queryId": "fareQuery"
+        },
+        {
+          "kind": "ItineraryTimeline",
+          "artifactRef": "artifact-94a9bc98-5acd-4494-a466-5b98dbc11de5",
+          "datasetRef": "dataset-1hq3nnw",
+          "title": "Journey timeline",
+          "queryId": "fareQuery"
+        }
+      ],
+      "queryStatements": [
+        {
+          "id": "calendarQuery",
+          "argsAST": {
+            "k": "Obj",
+            "entries": [
+              [
+                "version",
+                {
+                  "k": "Num",
+                  "v": 1
+                }
+              ],
+              [
+                "sources",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "datasetRef",
+                          {
+                            "k": "Str",
+                            "v": "dataset-1hq3nnw"
+                          }
+                        ],
+                        [
+                          "alias",
+                          {
+                            "k": "Str",
+                            "v": "fares"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "groupBy",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Str",
+                      "v": "serviceDate"
+                    }
+                  ]
+                }
+              ],
+              [
+                "metrics",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "as",
+                          {
+                            "k": "Str",
+                            "v": "minimum"
+                          }
+                        ],
+                        [
+                          "op",
+                          {
+                            "k": "Str",
+                            "v": "min"
+                          }
+                        ],
+                        [
+                          "field",
+                          {
+                            "k": "Str",
+                            "v": "priceCents"
+                          }
+                        ]
+                      ]
+                    },
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "as",
+                          {
+                            "k": "Str",
+                            "v": "count"
+                          }
+                        ],
+                        [
+                          "op",
+                          {
+                            "k": "Str",
+                            "v": "count"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "orderBy",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "field",
+                          {
+                            "k": "Str",
+                            "v": "serviceDate"
+                          }
+                        ],
+                        [
+                          "direction",
+                          {
+                            "k": "Str",
+                            "v": "asc"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "limit",
+                {
+                  "k": "Num",
+                  "v": 7
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "id": "fareQuery",
+          "deps": [
+            "$dates",
+            "$sort"
+          ],
+          "argsAST": {
+            "k": "Obj",
+            "entries": [
+              [
+                "version",
+                {
+                  "k": "Num",
+                  "v": 1
+                }
+              ],
+              [
+                "sources",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "datasetRef",
+                          {
+                            "k": "Str",
+                            "v": "dataset-1hq3nnw"
+                          }
+                        ],
+                        [
+                          "alias",
+                          {
+                            "k": "Str",
+                            "v": "fares"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "where",
+                {
+                  "k": "Obj",
+                  "entries": [
+                    [
+                      "field",
+                      {
+                        "k": "Str",
+                        "v": "serviceDate"
+                      }
+                    ],
+                    [
+                      "op",
+                      {
+                        "k": "Str",
+                        "v": "eq"
+                      }
+                    ],
+                    [
+                      "value",
+                      {
+                        "k": "Member",
+                        "obj": {
+                          "k": "StateRef",
+                          "n": "$dates"
+                        },
+                        "field": "start"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "project",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Str",
+                      "v": "id"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "originId"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "destinationId"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "serviceDate"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "mode"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "carrierId"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "priceCents"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "durationMinutes"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "departureMinutes"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "availableSeats"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "currency"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "synthetic"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "priceBasis"
+                    },
+                    {
+                      "k": "Str",
+                      "v": "direct"
+                    }
+                  ]
+                }
+              ],
+              [
+                "orderBy",
+                {
+                  "k": "Arr",
+                  "els": [
+                    {
+                      "k": "Obj",
+                      "entries": [
+                        [
+                          "field",
+                          {
+                            "k": "Member",
+                            "obj": {
+                              "k": "StateRef",
+                              "n": "$sort"
+                            },
+                            "field": "field"
+                          }
+                        ],
+                        [
+                          "direction",
+                          {
+                            "k": "Member",
+                            "obj": {
+                              "k": "StateRef",
+                              "n": "$sort"
+                            },
+                            "field": "direction"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "limit",
+                {
+                  "k": "Num",
+                  "v": 100
+                }
+              ]
+            ]
+          }
+        }
+      ],
+      "mutationCount": 2
+    }
+  ]
+}
