@@ -51,3 +51,11 @@ it('rejects changed source versions and clears unsupported old selections explic
  router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await router.whenIdle(id)
  expect(store.get(id).datasetRefs).toEqual([seed.datasetId]);expect(store.get(id).selectedFareIds).toEqual([]);expect(warnings.at(-1)).toMatch(/source.*changed/i);router.dispose()
 })
+
+it('restores the whole seeded mode scope after a narrow outside-date load',async()=>{
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`train-${input.date}`),serviceDate:input.date},{...row,id:FareIdSchema.parse(`bus-${input.date}`),serviceDate:input.date,mode:'bus'}],total:2,pages:1,page:input.page,sourceVersion:'v1'})});const seed=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['train','bus']},new AbortController().signal)
+ const store=createUIStateStore();const id=ArtifactIdSchema.parse('modes');store.initializeMissing(id,{datasetRefs:[seed.datasetId],dates:{start:'2026-10-02'}});const router=createActionRouter(store,{bridge})
+ router({kind:'modesByLeg',artifactId:id,modesByLeg:{'london:paris':['bus']}});await router.whenIdle(id);router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await router.whenIdle(id)
+ router({kind:'modesByLeg',artifactId:id,modesByLeg:{'london:paris':[]}});await router.whenIdle(id)
+ const current=bridge.getManifest(resolveBoundDatasetId(store.get(id),bridge,seed.datasetId));expect(current.coverage.dateWindow.from).toBe('2026-11-01');expect(current.coverage.modes).toEqual(['train','bus']);router.dispose()
+})
