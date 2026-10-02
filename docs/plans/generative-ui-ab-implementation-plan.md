@@ -1,8 +1,42 @@
 # Generative travel UI A/B implementation plan
 
-Status: implementation handoff. This document contains no implementation. It defines two complete versions, their shared contracts, the work breakdown, and the evidence required before choosing one.
+Status: local comparison demo implemented; reported conversation errors fixed and verified; work stopped at the user’s request. The full counterbalanced study is paused and remains outstanding. Start continuation from [`generative-ui-ab-handoff.md`](../status/generative-ui-ab-handoff.md). The original design below remains the acceptance reference. Current implementation, measured evidence, and limitations are recorded here and in `verification/generative-ui/`.
 
 Prepared on 2026-10-02 from local `dev` at `e6f718d`. The planning agent verified a clean checkout, a healthy local project graph, the current build, the backend tests, and the generated database. A future implementation run must repeat the startup checks because branches, dependencies, credentials, and framework APIs can change.
+
+## Implementation and evidence status (2026-10-03)
+
+Implementation started from `dev` at `dc14f22` in an isolated integration worktree. Separate A, B, and data/state branches were used; `dev` and `main` remain unmerged. All workers used the explicitly requested GPT-6.1 Sol. The runnable routes are `/a`, `/b`, `/generative`, `/study` and the preserved classic `/` search.
+
+The shared spine implements strict versioned contracts, one forty-component descriptor vocabulary, native A and OpenUI B adapters, browser resource loading, stable references, a TypeScript query worker, revisioned host state, bounded tools, atomic current snapshots, descriptor-only IndexedDB persistence, and the three-process local launcher. Model-authored state initialization uses typed `edit_artifact` commands at an observed revision and waits for adjacent-leg coverage; explicit `create_artifact` allocates independent host-owned state. Direct controls remain local.
+
+Both variants use signed-in local Codex `gpt-6.1-sol` with high reasoning. The app-server adapter forwards genuine agent-message deltas; it does not slice a completed response to simulate streaming. No separate API key is required. The isolated model subprocess has no shell, web, apps, plugins, MCP or delegation tools. The browser executes registered host tools. One invalid decision may receive one bounded repair from the original compact snapshot; cancellation prevents a repair. Provider token-usage accounting is unavailable and is recorded as null.
+
+| Task family | Evidence and classification |
+| --- | --- |
+| Cheapest/fastest; train/bus | Real A composition and zero-chat Bus edits; bounded query oracles and engine benchmark |
+| Price calendar | Real A calendar/ResponsiveGrid tree; deterministic shared calendar controls |
+| Three cities/stays/mixed modes | Real local-fare browser proof: Paris stay2→3 moves second leg Oct11→12; outside date Oct20 yields Oct20/23; same-leg selection replacement, plus typed command and stale-load tests |
+| Rearranged timeline | Real A RouteMap/ItineraryTimeline/Inline tree; native render replays |
+| Text-only current state | Real Codex answer after local edit and reload: Bus, October 9, one selected fare; 30 genuine text deltas, no scene tool |
+| Local filters/sort/date/selection | Native/B control tests; real Bus and fare selection with zero chat traffic |
+| Outside coverage and stale work | Superseded load/query tests; scoped current-leg resource rebinding |
+| Edits while streaming | Five native paused-stream browser cases; B host-hydration tests |
+| Independent artifacts | Two restored native views share one dataset; second state and active ID remain independent; B isolation tests |
+| Complete/partial reload | Descriptor-only persistence tests; real two-artifact selection/total reload proof |
+| Cancel/invalid/repair/retry | Real Stop preserves the useful view; bounded parsers, single-repair regression tests and runtime retry controls |
+
+Real A authorship produced three materially different recursive arrangements with no page errors or repair attempts. Each completed three HTTP200 model/tool continuation requests; completion times were 69.2, 66.1 and 53.1 seconds on this machine. The associated local Bus click made zero additional chat calls. The separate state proof replays a genuinely authored tree to isolate persistence, then makes a new live text-only call. These classifications are explicit in each evidence file. B produced two genuinely authored reactive graphs with complete tool and text-only continuations. Exact-source browser replays show nonempty mode aggregates, fare cards, a seven-day calendar and a timeline; original date-comparison failures are retained alongside their fix. Later user conversations exposed cumulative message IDs, repeated accepted scene continuations, terminal rendering, long Callout copy and restore/persistence failures. Exact sources and historical failures are retained; the corrections and final real completion checks are recorded in the continuation handoff.
+
+At 50k and 200k rows, both TypeScript and DuckDB matched the declared workload oracles. TypeScript 200k query p95 was 353/261/313/375 ms for top-K/filter/group/join, with zero normal-query main-thread long tasks and worker cancellation acknowledgment at most 5.5 ms. DuckDB was faster for repeated large analytics. The production TypeScript worker meets the predeclared demo gates and avoids the 40 MiB WASM asset and separate cold startup. The optional 1M stress attempt was not run. See the exact thresholds, hardware, raw results and trace in `verification/generative-ui/query-engine-2026-10-02.md`.
+
+`experiment:live` records selected or all twelve shared families in stable A/B or B/A order using runtime-seeded withheld wording, requests, snapshots, SSE events, traces and screenshots. Interaction/recovery families also need their deterministic tests and manual steps; a prompt-only run does not prove those actions. `/study?participant=anonymous-01` provides a local, anonymous, counterbalanced human review form with framework labels hidden. No human ratings have been fabricated or collected by an agent. Both variants remain runnable for this personal demo; selecting or removing one is unnecessary for completion.
+
+The final full checks at frozen `a36f434` passed: 108 Vitest tests across 29 files, strict TypeScript, byte-exact catalog check, production build and 8 Python backend tests. Seven installed-Chrome responsive/classic-shell checks passed at the final revision. Root saved-chat reload preserves the current A/B IDs, source, preferences and selection. One additional genuine completion proof per variant passes; B reuses the exact captured source rather than generating a new graph. These are engineering checks, separate from real model completion and the formal study.
+
+The user externally regenerated the preserved fixture to 10,000,000 fares. Its authoritative version is `sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6`; health, metadata and searches agree. The read-only verifier confirms exact count, metadata count, route-day coverage, valid fares, integrity and indexes, then fails the newer source-manifest gate because this generator_version2 fixture lacks several newly listed destinations/routes/providers. No regeneration or silent data replacement was performed. Earlier evidence on the 1M fixture remains historical. Source-generation checks and descriptor migration preserve saved conversations while refreshing resources; temporary API failure offers retry and stale tabs cannot overwrite newer saved records.
+
+The reported errors are fixed, verified and documented. The user requested stopping at this point. The full twelve-family cold/warm counterbalanced machine matrix and human ratings therefore remain outstanding for a later authorized session. Both variants stay available and no subjective or statistical winner is claimed. Current runtime, saved thread references, PRs, last completed gates and precise resume commands are recorded in the [continuation handoff](../status/generative-ui-ab-handoff.md).
 
 ## User-intent contract
 
@@ -915,7 +949,7 @@ The recommended starting point is P00 followed by P01 and P02. Do not fan out th
 
 ## Fresh implementation starter prompt
 
-When the user starts implementation in a new chat, the following is a sufficient orchestration handoff:
+When the user explicitly resumes work in a new chat, read `docs/status/generative-ui-ab-handoff.md` first. The following original starter describes the broader acceptance scope; it does not authorize restarting the paused study without the user’s new instruction:
 
 > Read the repository `AGENTS.md`, `CONTRIBUTING.md`, and `docs/plans/generative-ui-ab-implementation-plan.md` in full. Act as the implementation orchestrator and carry the work through the complete A/B acceptance gates, not only a mock, scaffold, or one preset layout. Re-run the startup checklist and P00 compatibility gate against current official APIs before freezing contracts. Use managed worktrees, one owner per path, meaningful verified commits, task-owned feature-branch pushes, tests, and incremental draft PRs as authorized for this implementation. Use `feature/gen-ui-ab-integration` as the published integration branch after confirming the live remote and authentication; target worker PRs to it and its draft PR to `dev`. Never force-push, push a protected branch directly, merge the final protected-branch PR, or deploy. Keep model rows in the browser, preserve one shared host engine and visual catalog, implement genuine Version A composition and Version B reactive authorship, and leave live-model gates pending rather than substituting mocks when provider access is unavailable.
 
