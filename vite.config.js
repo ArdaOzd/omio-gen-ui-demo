@@ -6,4 +6,4 @@ const proxy={
  '/api/agent':{target:process.env.OMIO_AGENT_URL||`http://127.0.0.1:${process.env.AGENT_PORT||8010}`,changeOrigin:true},
  '/api':{target:process.env.OMIO_API_URL||`http://127.0.0.1:${process.env.API_PORT||8000}`,changeOrigin:true},
 }
-export default defineConfig({plugins:[aui({backendless:true}),react()],server:{host:'127.0.0.1',port:Number(process.env.WEB_PORT||5173),proxy},preview:{host:'127.0.0.1',port:Number(process.env.WEB_PORT||4173),proxy}})
+export default defineConfig({optimizeDeps:{entries:['index.html']},plugins:[aui({backendless:true}),react()],server:{host:'127.0.0.1',port:Number(process.env.WEB_PORT||5173),proxy},preview:{host:'127.0.0.1',port:Number(process.env.WEB_PORT||4173),proxy}})

@@ -1,0 +1,130 @@
+{
+  "index": 1,
+  "prompt": "For London to Paris on 2026-10-09 through 2026-10-15, one passenger, all train bus flight modes: make the calendar the main story. Put PriceCalendar first, followed by a ResponsiveGrid with mode comparison, duration-price plot and local controls. Keep fare choices in a compact Section below. Explain what I should compare.",
+  "liveModelAuthorship": true,
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "browser": "154.0.8037.97",
+  "requests": 3,
+  "localClickChatDelta": 0,
+  "elapsedMs": 66086,
+  "errors": [],
+  "completed": true,
+  "tree": {
+    "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+    "datasetRef": "dataset-1hq3nnw",
+    "$type": "TravelSurface",
+    "$key": "london-paris-surface",
+    "children": [
+      {
+        "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+        "datasetRef": "dataset-1hq3nnw",
+        "title": "October 9–15 · Synthetic fares",
+        "variant": "emphasis",
+        "$type": "PriceCalendar",
+        "$key": "price-calendar"
+      },
+      {
+        "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+        "datasetRef": "dataset-1hq3nnw",
+        "$type": "ResponsiveGrid",
+        "$key": "comparison-grid",
+        "children": [
+          {
+            "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+            "datasetRef": "dataset-1hq3nnw",
+            "title": "Compare train, bus and flight",
+            "$type": "ComparisonMatrix",
+            "$key": "mode-comparison"
+          },
+          {
+            "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+            "datasetRef": "dataset-1hq3nnw",
+            "title": "Price versus travel time",
+            "$type": "DurationPricePlot",
+            "$key": "duration-price"
+          },
+          {
+            "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+            "datasetRef": "dataset-1hq3nnw",
+            "title": "Refine your comparison",
+            "$type": "Section",
+            "$key": "local-controls",
+            "children": [
+              {
+                "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "DateStrip",
+                "$key": "date-control"
+              },
+              {
+                "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "ModeChips",
+                "$key": "mode-control"
+              },
+              {
+                "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "PriceRange",
+                "$key": "price-control"
+              },
+              {
+                "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "DurationRange",
+                "$key": "duration-control"
+              },
+              {
+                "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "DirectToggle",
+                "$key": "direct-control"
+              },
+              {
+                "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "SortSelect",
+                "$key": "sort-control"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+        "datasetRef": "dataset-1hq3nnw",
+        "title": "Synthetic fare choices · One passenger",
+        "variant": "compact",
+        "$type": "Section",
+        "$key": "fare-choices",
+        "children": [
+          {
+            "artifactRef": "artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02",
+            "datasetRef": "dataset-1hq3nnw",
+            "variant": "compact",
+            "$type": "FareCards",
+            "$key": "fare-cards"
+          }
+        ]
+      }
+    ]
+  },
+  "componentTypes": [
+    "TravelSurface",
+    "PriceCalendar",
+    "ResponsiveGrid",
+    "ComparisonMatrix",
+    "DurationPricePlot",
+    "Section",
+    "DateStrip",
+    "ModeChips",
+    "PriceRange",
+    "DurationRange",
+    "DirectToggle",
+    "SortSelect",
+    "Section",
+    "FareCards"
+  ],
+  "visibleText": "Compare interfacesClassic searchVersion A · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nFor London to Paris on 2026-10-09 through 2026-10-15, one passenger, all train bus flight modes: make the calendar the main story. Put PriceCalendar first, followed by a ResponsiveGrid with mode comparison, duration-price plot and local controls. Keep fare choices in a compact Section below. Explain what I should compare.\n\nI’ll load synthetic fares for London–Paris across October 9–15, then build a calendar-first comparison.\n\nTravel data updated locally.\n\nI’ll load synthetic fares for London–Paris across October 9–15, then build a calendar-first comparison.\n\nHere’s a calendar-first view of your synthetic London–Paris fares.\n\nOctober 9–15 · Synthetic fares\nFri 9 Oct\n€25.43\n7 options\nSat 10 Oct\n€27.60\n9 options\nSun 11 Oct\n€22.87\n9 options\nMon 12 Oct\n€20.79\n8 options\nTue 13 Oct\n€28.44\n6 options\nWed 14 Oct\n€32.74\n9 options\nThu 15 Oct\n€23.90\n9 options\nCompare train, bus and flight\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\nBus\t€25.43\t8h 40m\t3\nFlight\t€42.19\t1h 23m\t2\nTrain\t€64.28\t2h 12m\t2\nPrice versus travel time\n\nLeft is faster · lower is cheaper · choose a point to select\n\nJourney duration\nRefine your comparison\nDeparture date\nTransport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nMaximum fare\nEUR per passenger, synthetic\nMaximum journey time\nMinutes\nDirect connections only\nSort options\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nSynthetic fare choices · One passenger\nYour options\n\n7 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelect\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nFLIGHT\nCarrier X6trm8\n\n01:58 · 1h 23m\n\nLondon → Paris · 2026-10-09\n€42.19\nSelect\nFLIGHT\nCarrier 1pameyy\n\n09:08 · 1h 26m\n\nLondon → Paris · 2026-10-09\n€61.34\nSelect\nTRAIN\nCarrier Oc85vc\n\n01:02 · 2h 12m\n\nLondon → Paris · 2026-10-09\n€64.28\nSelect\nTRAIN\nCarrier Oc85vc\n\n10:54 · 2h 26m\n\nLondon → Paris · 2026-10-09\n€68.50\nSelect\n\nCompare prices across days first, then weigh savings against travel time across modes. Check departure times and directness before choosing. Controls update the views locally; fares are synthetic, not live quotes.\n\nI’ll load synthetic fares for London–Paris across October 9–15, then build a calendar-first comparison.\n\nHere’s a calendar-first view of your synthetic London–Paris fares.\n\nCompare prices across days first, then weigh savings against travel time across modes. Check departure times and directness before choosing. Controls update the views locally; fares are synthetic, not live quotes.\n\nCompare prices across days first, then weigh savings against travel time, departure times and directness. Controls update the views locally. Fares are synthetic, not live quotes.\n\nRetry\nActive travel view · artifact-4cd06c74-2a95-45a7-99d9-d5b13e66be02\nSynthetic fares\nSend\nStop"
+}
