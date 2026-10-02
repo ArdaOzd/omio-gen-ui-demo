@@ -1,30 +1,39 @@
 {
-  "created_at": "2026-10-02T16:46:48.047054+00:00",
-  "strategy": "preserve the prior detailed semantic extraction for the substantively unchanged interactive evaluation while adding a fresh local extraction for the new browser-local decision",
+  "created_at": "2026-10-02T16:51:26.874610+00:00",
+  "strategy": "compose the unchanged pre-task post-build graph with the fresh local browser-decision extraction, then remap cross-document references to preserved canonical node IDs",
   "strictly_local": true,
   "external_provider_calls": 0,
-  "sources": {
-    "docs/research/interactive-travel-ui-evaluation.md": {
-      "preserved_nodes": 39,
-      "preserved_edges": 49,
-      "preserved_hyperedges": 2,
-      "reason": "only a superseding crosslink was added; prior detailed findings remain valid"
-    },
-    "docs/research/browser-local-generative-ui-decision.md": {
-      "fresh_nodes": 26,
-      "fresh_edges": 48,
-      "fresh_hyperedges": 2,
-      "includes_ui_state_revision_policy": true
+  "baseline": {
+    "commit": "8c5bae8",
+    "nodes": 336,
+    "edges": 521,
+    "raw_health_recorded_at_baseline": {
+      "dangling_endpoint_edges": 49,
+      "collapsed_directed_edges": 16,
+      "collapsed_undirected_edges": 16
     }
+  },
+  "addition": {
+    "source_file": "docs/research/browser-local-generative-ui-decision.md",
+    "nodes": 26,
+    "edges": 48,
+    "hyperedges": 2,
+    "endpoint_references_remapped": 11
   },
   "final_extraction": {
     "nodes": 362,
-    "raw_edges": 622,
-    "hyperedges": 11
+    "raw_edges": 569,
+    "hyperedges": 12
   },
   "final_graph": {
     "nodes": 362,
-    "edges": 544,
-    "communities": 28
+    "edges": 569,
+    "communities": 26
+  },
+  "health": {
+    "dangling_endpoint_edges": 0,
+    "missing_endpoint_edges": 0,
+    "collapsed_directed_edges": 0,
+    "collapsed_undirected_edges": 0
   }
 }

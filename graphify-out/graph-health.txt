@@ -4,23 +4,23 @@ input_stage: provided JSON (normal graph.json is post-build)
 effective_directed: <direct-call>
 nodes: 362
 unverified_code_nodes: 0
-raw_edges: 622
-valid_candidate_edges: 562
+raw_edges: 569
+valid_candidate_edges: 569
 missing_endpoint_edges: 0
-dangling_endpoint_edges: 60
+dangling_endpoint_edges: 0
 self_loop_edges: 0
-exact_duplicate_edges: 2
-directed_unique_endpoint_pairs: 544
-directed_same_endpoint_collapsed_edges: 18
-undirected_unique_endpoint_pairs: 544
-undirected_same_endpoint_collapsed_edges: 18
-same_endpoint_group_count: 17
-relation_variant_groups: 15
+exact_duplicate_edges: 0
+directed_unique_endpoint_pairs: 569
+directed_same_endpoint_collapsed_edges: 0
+undirected_unique_endpoint_pairs: 569
+undirected_same_endpoint_collapsed_edges: 0
+same_endpoint_group_count: 0
+relation_variant_groups: 0
 source_file_variant_groups: 0
 source_location_variant_groups: 0
-context_variant_groups: 1
+context_variant_groups: 0
 post_build_graph_type: Graph
-post_build_edges: 544
+post_build_edges: 569
 producer_suppression_sites: 12
 producer_suppression_examples:
   - L1172 seen_ids arity=unknown
@@ -31,11 +31,5 @@ producer_suppression_examples:
   - L2565 seen_keys arity=unknown
   - L2734 seen_keys arity=unknown
   - L4230 seen_ids arity=unknown
-examples:
-  - backend_generate_db_dates -> backend_generate_db_py_date edges=3 relations=['references'] locations=['L162'] contexts=['generic_arg', 'parameter_type']
-  - backend_app_parse_search_query -> backend_app_searchquery edges=2 relations=['calls', 'references'] locations=['L107', 'L89'] contexts=['call', 'return_type']
-  - backend_generate_db_direction -> backend_seeds_routeseed edges=2 relations=['references', 'uses'] locations=['L128'] contexts=['', 'parameter_type']
-  - backend_generate_db_direction -> backend_generate_db_directionalroute edges=2 relations=['calls', 'references'] locations=['L128', 'L130'] contexts=['call', 'return_type']
-  - backend_generate_db_generate_database -> backend_generate_db_py_date edges=2 relations=['references'] locations=['L256'] contexts=['parameter_type']
 note: normal graph.json is post-build; raw producer loss must be measured earlier.
-GRAPH HEALTH WARNING: 60 dangling-endpoint edges; 18 collapsed (directed) edges; 18 collapsed (undirected) edges - graph may be incomplete/corrupt.
+Graph health: OK (no dangling/missing/collapsed edges).
