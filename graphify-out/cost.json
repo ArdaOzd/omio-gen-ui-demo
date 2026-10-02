@@ -23,6 +23,13 @@
       "input_tokens": 0,
       "output_tokens": 0,
       "files": 2
+    },
+    {
+      "date": "2026-10-02T16:12:42.554352+00:00",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "files": 39,
+      "token_usage_status": "unavailable_from_collaboration_result"
     }
   ],
   "total_input_tokens": 0,
