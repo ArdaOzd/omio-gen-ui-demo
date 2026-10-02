@@ -12,7 +12,7 @@ function requestsFor(state:ArtifactUIState,bridge:FareDataBridge):CoverageReques
   const stops=[first.coverage.originIds[0],...state.stays.map(stay=>stay.cityId)].filter((id,index,all):id is string=>!!id&&id!==all[index-1])
   return stops.slice(1).map((destination,index)=>legRequest(state,{...first.coverage,originIds:[stops[index]!],destinationIds:[destination]}))
  }
- const unique=new Map<string,CoverageRequest>();for(const manifest of manifests)unique.set(legKey(manifest.coverage)??manifest.datasetId,legRequest(state,manifest.coverage))
+ const unique=new Map<string,CoverageRequest>();for(const manifest of manifests){const key=legKey(manifest.coverage)??manifest.datasetId;if(!unique.has(key))unique.set(key,legRequest(state,manifest.coverage))}
  return [...unique.values()]
 }
 export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataBridge;activate?:(id:ArtifactId)=>void;onCoverageStatus?:(status:CoverageLoadStatus)=>void}={}){
