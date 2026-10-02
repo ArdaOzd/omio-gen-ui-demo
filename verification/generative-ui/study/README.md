@@ -1,5 +1,7 @@
 # Automated twelve-family matrix
 
+Status: parked at the user’s explicit request to fix the current errors, document the remaining work and stop. No live matrix cells have run. The offline runner and its five tests are retained on `feature/gen-ui-study` (PR5); this is preparation, not completed P51 evidence. Do not start the command below without a later request to resume the study.
+
 The plan's minimum machine matrix has96cells: twelve shared task families × A/B × cold/warm × fixed/withheld wording. Budgets are declared before the first live run:180seconds per HTTP model call,600seconds per visible turn with tool continuations, and1800seconds per complete cell including prerequisites, cancellation and retry. These are recording safety limits, not claims about good latency. Each pair runs in counterbalanced order, with at most three independent browser contexts active. There are no extra statistical repetitions beyond the two required wordings.
 
 Dry-run preparation makes no model calls:
@@ -9,10 +11,10 @@ npm run experiment:live -- --dry-run
 node --test verification/generative-ui/study/matrix.test.mjs
 ```
 
-After the live user bug is resolved, run against the stable local demo:
+For a later authorized study, first rebase this branch onto the verified integration revision, read `docs/status/generative-ui-ab-handoff.md`, check both health endpoints and pin the served app revision and fixture identity. Then run against the stable local demo:
 
 ```sh
-OMIO_APP_REVISION=<frozen-preview-commit> OMIO_SOURCE_VERSION=<verified-source-version> OMIO_FIXTURE_ROWS=10000000 OMIO_DEMO_URL=http://127.0.0.1:5194 OMIO_SCENARIOS=all OMIO_CONCURRENCY=3 npm run experiment:live
+OMIO_APP_REVISION=<frozen-preview-commit> OMIO_SOURCE_VERSION=sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6 OMIO_FIXTURE_ROWS=10000000 OMIO_DEMO_URL=http://127.0.0.1:5194 OMIO_SCENARIOS=all OMIO_CONCURRENCY=3 npm run experiment:live
 ```
 
 `OMIO_EXPERIMENT_OUTPUT` selects an evidence directory; `OMIO_SCENARIOS` selects a comma-separated subset for a targeted verification. Each cell retains its source/tool events, request sizes and compact snapshots, worker timings and result sizes, screenshot, trace, state, outcome and failure reason. The result index is updated after every cell. The frozen preview commit is required before live calls. Existing completed cell records from that same commit and matrix are resumed, including failures, so a targeted first batch and subsequent full run do not create extra model repetitions. Use a new output directory when changing the tested app or rerunning a failed cell; preserve the previous corpus.
