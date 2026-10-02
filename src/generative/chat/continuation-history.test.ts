@@ -14,6 +14,10 @@ describe('persisted native tool continuations',()=>{
   expect(normalizeToolContinuations([first,different,user,later])).toEqual([first,different,user,later])
   const prose=assistant('prose',[text('Same words.')]);expect(normalizeToolContinuations([prose,assistant('more-prose',[...prose.parts,text('More detail.')])])).toHaveLength(2)
  })
+ it('keeps terminal tool results when a later message regresses or changes them',()=>{
+  const complete=assistant('complete',[text('Route.'),tool('load')]);const pending=assistant('pending',[text('Route.'),tool('load','input-available'),text('More.')]);const changed=assistant('changed',[text('Route.'),{type:'tool-load_fares',toolCallId:'load',state:'output-available',input:{coverage:'same fixture'},output:{status:'different result'}},text('More.')])
+  expect(normalizeToolContinuations([complete,pending])).toEqual([complete,pending]);expect(normalizeToolContinuations([complete,changed])).toEqual([complete,changed])
+ })
  it('retains separate source revisions and does not mutate persisted arrays',()=>{
   const first=assistant('first',[text('Earlier wording.'),tool('load')]);const changed=assistant('changed',[text('New wording.'),tool('load'),text('Done.')]);const input=[first,changed];expect(normalizeToolContinuations(input)).toEqual(input);expect(input).toHaveLength(2)
  })

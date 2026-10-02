@@ -8,6 +8,7 @@ export function normalizeToolContinuations(messages:UIMessage[]):UIMessage[]{
    const next=message.parts[index];if(!next||part.type!==next.type)return false
    if(isToolUIPart(part)&&isToolUIPart(next)){
     if(part.toolCallId!==next.toolCallId||JSON.stringify(part.input)!==JSON.stringify(next.input))return false
+    if(['output-available','output-error','output-denied'].includes(part.state)&&JSON.stringify(part)!==JSON.stringify(next))return false
     sharedTool=true;return true
    }
    return part.type==='text'&&next.type==='text'?part.text===next.text:JSON.stringify(part)===JSON.stringify(next)
