@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "module": "ESNext", "moduleResolution": "Bundler", "jsx": "react-jsx",
+    "strict": true, "noEmit": true, "skipLibCheck": true, "resolveJsonModule": true,
+    "allowJs": true, "checkJs": false, "esModuleInterop": true,
+    "types": ["vite/client", "node", "vitest/globals"]
+  },
+  "include": ["src", "agent", "tests", "benchmarks", "*.config.ts"]
+}
