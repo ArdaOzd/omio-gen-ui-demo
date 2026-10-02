@@ -24,3 +24,7 @@ export const withheld=[
  'Create an interactive London→Paris October 9–15, 2026 view with modes, dates, sorting, fares and selected itinerary. I will select a fare and reload; preserve the conversation and choices even after partially loaded coverage.',
  'Compose London→Paris October 9–15, 2026 with modes, dates, sorting and fares. I may stop and retry a replacement; keep the existing artifact usable and recover from one invalid scene without losing my choices.'
 ]
+
+export function canResume(previous,cell,appRevision){
+ return previous?.appRevision===appRevision&&previous?.model==='gpt-6.1-sol'&&previous?.reasoning==='high'&&previous?.provider==='signed-in-codex'&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
+}

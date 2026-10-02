@@ -12,10 +12,10 @@ node --test verification/generative-ui/study/matrix.test.mjs
 After the live user bug is resolved, run against the stable local demo:
 
 ```sh
-OMIO_DEMO_URL=http://127.0.0.1:5194 OMIO_SCENARIOS=all OMIO_CONCURRENCY=3 npm run experiment:live
+OMIO_APP_REVISION=<frozen-preview-commit> OMIO_DEMO_URL=http://127.0.0.1:5194 OMIO_SCENARIOS=all OMIO_CONCURRENCY=3 npm run experiment:live
 ```
 
-`OMIO_EXPERIMENT_OUTPUT` selects an evidence directory; `OMIO_SCENARIOS` selects a comma-separated subset for a targeted verification. Each cell retains its source/tool events, request sizes and compact snapshots, worker timings and result sizes, screenshot, trace, state, outcome and failure reason. The result index is updated after every cell.
+`OMIO_EXPERIMENT_OUTPUT` selects an evidence directory; `OMIO_SCENARIOS` selects a comma-separated subset for a targeted verification. Each cell retains its source/tool events, request sizes and compact snapshots, worker timings and result sizes, screenshot, trace, state, outcome and failure reason. The result index is updated after every cell. The frozen preview commit is required before live calls. Existing completed cell records from that same commit and matrix are resumed, including failures, so a targeted first batch and subsequent full run do not create extra model repetitions. Use a new output directory when changing the tested app or rerunning a failed cell; preserve the previous corpus.
 
 Cold means a fresh browser and worker with no restored coverage descriptors. Warm means the same normalized London–Paris coverage is actually loaded and restored before the task; it does not replay a scene or use a separate layout model. The SQLite source and signed-in provider process are shared. Later-turn task prerequisites are recorded separately; their follow-up context is naturally warm in both conditions.
 
