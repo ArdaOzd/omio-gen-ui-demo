@@ -118,8 +118,17 @@ def parse_search_query(query: dict[str, list[str]]) -> SearchQuery:
 
 
 def _source_version(database: Path) -> str:
-    stat = database.stat()
+    try:
+        stat = database.stat()
+    except FileNotFoundError:
+        raise ApiError(HTTPStatus.SERVICE_UNAVAILABLE, "database_unavailable", "The fare database is unavailable.") from None
     return f"sqlite-demo-v2-{stat.st_ino:x}-{stat.st_size:x}-{stat.st_mtime_ns:x}"
+
+
+def _verified_source_version(database: Path, expected: str) -> str:
+    if _source_version(database) != expected:
+        raise ApiError(HTTPStatus.SERVICE_UNAVAILABLE, "source_changed", "The fare source changed during this request. Retry with the current source.")
+    return expected
 
 
 def _connect(database: Path) -> sqlite3.Connection:
@@ -206,6 +215,7 @@ def get_locations(database: Path) -> dict[str, object]:
 
 
 def get_metadata(database: Path) -> dict[str, object]:
+    source_version = _source_version(database)
     with closing(_connect(database)) as connection:
         values = _metadata_values(connection)
         mode_rows = connection.execute(
@@ -230,7 +240,7 @@ def get_metadata(database: Path) -> dict[str, object]:
         ).fetchall()
 
     return {
-        "source_version": _source_version(database),
+        "source_version": _verified_source_version(database, source_version),
         "timetable": {
             "start_date": values["start_date"],
             "end_date": values["end_date"],
@@ -401,6 +411,7 @@ def _search_leg(
 
 
 def search(database: Path, query: SearchQuery) -> dict[str, object]:
+    source_version = _source_version(database)
     with closing(_connect(database)) as connection:
         metadata = _metadata_values(connection)
         _validate_timetable_date(query.departure_date, metadata, "departure_date")
@@ -431,7 +442,7 @@ def search(database: Path, query: SearchQuery) -> dict[str, object]:
                 limit=query.limit,
             )
     return {
-        "source_version": _source_version(database),
+        "source_version": _verified_source_version(database, source_version),
         "query": {
             "origin": query.origin,
             "destination": query.destination,
@@ -450,9 +461,10 @@ def dispatch(
     database: Path, path: str, query: dict[str, list[str]]
 ) -> tuple[HTTPStatus, dict[str, object]]:
     if path == "/api/health":
+        source_version = _source_version(database)
         with closing(_connect(database)) as connection:
             fare_count = int(_metadata_values(connection)["fare_count"])
-        return HTTPStatus.OK, {"status": "ok", "fare_count": fare_count, "source_version": _source_version(database), "service": "omio-fare-api", "pid": os.getpid()}
+        return HTTPStatus.OK, {"status": "ok", "fare_count": fare_count, "source_version": _verified_source_version(database, source_version), "service": "omio-fare-api", "pid": os.getpid()}
     if path == "/api/locations":
         return HTTPStatus.OK, get_locations(database)
     if path == "/api/metadata":

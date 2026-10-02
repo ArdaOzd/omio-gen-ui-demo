@@ -7,6 +7,9 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest.mock import patch
+
+from backend import app
 
 from backend.app import ApiError, dispatch, parse_search_query, search
 from backend.generate_db import directional_routes, generate_database
@@ -39,6 +42,25 @@ class BackendTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         cls.temporary_directory.cleanup()
+
+    def test_search_rejects_a_source_replaced_during_its_read(self) -> None:
+        source = Path(self.temporary_directory.name) / "read-race.sqlite3"
+        replacement = source.with_name("read-race-replacement.sqlite3")
+        shutil.copy2(self.database, source)
+        shutil.copy2(self.database, replacement)
+        query = parse_search_query({"origin": ["london"], "destination": ["paris"], "departure_date": ["2026-10-02"]})
+        original = app._search_leg
+
+        def replace_after_read(*args, **kwargs):
+            result = original(*args, **kwargs)
+            os.replace(replacement, source)
+            return result
+
+        with patch.object(app, "_search_leg", side_effect=replace_after_read):
+            with self.assertRaises(ApiError) as raised:
+                search(source, query)
+        self.assertEqual(raised.exception.status, 503)
+        self.assertEqual(raised.exception.code, "source_changed")
 
     def test_source_version_changes_with_regenerated_fare_facts(self) -> None:
         changed = Path(self.temporary_directory.name) / "changed-source.sqlite3"
