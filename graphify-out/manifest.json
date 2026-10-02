@@ -214,5 +214,11 @@
     "seen": 1790899751.994415,
     "ast_hash": "581be447bdb977688193208ae32bca2a",
     "semantic_hash": "581be447bdb977688193208ae32bca2a"
+  },
+  "verification/acceptance.md": {
+    "mtime": 1790899978.3167374,
+    "seen": 1790900212.688134,
+    "ast_hash": "40b0ffd87f6a502f8b57deae6afb229e",
+    "semantic_hash": "40b0ffd87f6a502f8b57deae6afb229e"
   }
 }
