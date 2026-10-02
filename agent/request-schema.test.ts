@@ -24,3 +24,7 @@ describe('host request boundary',()=>{
   expect(()=>spendTool(acceptTurn(parsed),'get_top_fares')).toThrow('budget');
  });
 });
+it('rejects camelCase row arrays hidden behind an arbitrary tool-input alias',()=>{
+ const row={id:'fare1',originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true};
+ expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'assistant',role:'assistant',parts:[{type:'tool-get_fare',toolCallId:'t1',state:'input-available',input:{payload:Array.from({length:100},()=>row)}}]}]})).toThrow();
+});

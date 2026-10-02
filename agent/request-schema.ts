@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { DatasetManifestSchema,BoundedFareFactSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
+import { EditArtifactInputSchema,CoverageRequestSchema,ArtifactIdSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,DatasetManifestSchema,BoundedFareFactSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
+import { validatePresentTree } from '../src/generative/variants/a/tree';
+import { validateReactiveProgram } from '../src/generative/variants/b/query/validate-program';
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
 export const TOOL_NAMES=['load_fares','summarize_fares','get_top_fares','get_fare','get_route','find_carriers','present','compose_reactive_scene','edit_artifact','create_artifact'] as const;
 const ToolSchema=z.strictObject({description:z.string().max(3000).optional(),parameters:z.record(z.string(),z.unknown()),providerOptions:z.record(z.string(),z.unknown()).optional()});
@@ -23,12 +25,15 @@ export function parseChatRequest(input:unknown):ChatRequest {
    if(part.type.startsWith('tool-')||part.type==='dynamic-tool'){
     const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5);
     if(!name||!TOOL_NAMES.some(tool=>tool===name)||!part.toolCallId)throw new Error('Invalid tool identity');
+    if(part.input!==undefined && part.state!=='input-streaming')parseToolInput(name,part.input);
     if(part.output!==undefined)parseToolOutput(name,part.output);
    }
   }
  }
  if(!request.messages.some(message=>message.role==='user'))throw new Error('Missing visible user turn');
- return {...request,currentContext:context};
+ if(JSON.stringify(request.messages).length>40_000)throw new Error('History exceeds byte budget');
+ const messages=request.messages.map(message=>({...message,parts:message.parts.filter(part=>part.state!=='input-streaming')}));
+ return {...request,messages,currentContext:context};
 }
 
 const id=z.string().min(1).max(96);
@@ -47,4 +52,18 @@ export function parseToolOutput(name:string,input:unknown):unknown {
  if(name==='edit_artifact')return z.strictObject({artifactId:id,revision,status:z.enum(['applied','stale'])}).parse(input);
  if(name==='create_artifact')return z.strictObject({artifactId:id,revision}).parse(input);
  throw new Error('Unregistered tool output');
+}
+
+export function parseToolInput(name:string,input:unknown):unknown {
+ assertNoBulkData(input);
+ if(name==='load_fares')return z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}).parse(input);
+ if(name==='summarize_fares')return z.strictObject({datasetRef:DatasetIdSchema,groupBy:FareFieldSchema}).parse(input);
+ if(name==='get_top_fares')return z.strictObject({datasetRef:DatasetIdSchema,objective:z.enum(['cheapest','fastest'])}).parse(input);
+ if(name==='get_fare')return z.strictObject({fareId:FareIdSchema}).parse(input);
+ if(name==='get_route'||name==='find_carriers')return z.strictObject({datasetRef:DatasetIdSchema}).parse(input);
+ if(name==='edit_artifact')return EditArtifactInputSchema.parse(input);
+ if(name==='create_artifact')return z.strictObject({}).parse(input);
+ if(name==='present')return validatePresentTree(input);
+ if(name==='compose_reactive_scene'){const parsed=z.strictObject({program:z.string().max(60000),artifactRef:ArtifactIdSchema,programRevision:z.number().int().nonnegative()}).parse(input);validateReactiveProgram(parsed.program,{complete:true});return parsed;}
+ throw new Error('Unregistered tool input');
 }

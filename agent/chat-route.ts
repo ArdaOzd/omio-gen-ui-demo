@@ -5,12 +5,14 @@ import { randomUUID } from 'node:crypto';
 import { catalogDescriptors,catalogHash,catalogVersion } from '../src/generative/catalog/generated/catalog';
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
 import { codexDecision, type Decision } from './codex-provider';
+import { parseToolInput } from './request-schema';
 import type { ChatRequest } from './request-schema';
+import { aPrompt } from '../src/generative/variants/a/prompt';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { acceptTurn,spendTool } from './turn-budget';
 export async function handleChat(request:ChatRequest,response:ServerResponse,signal:AbortSignal):Promise<void>{
  const key=acceptTurn(request);const tools=request.tools??{};
- const prompt=JSON.stringify({variant:request.variant,catalogVersion,catalogHash,components:catalogDescriptors,policy:'Browser owns rows. Only supplied scalar refs and bounded summaries can enter tools. Local edits do not need model requests. Native present uses $type plus scalar props and children. B uses valid OpenUI v0.5 program with registered components.',frontendInstructions:request.system??'',tools,context:request.currentContext,history:request.messages.slice(-20)});
+ const prompt=JSON.stringify({variant:request.variant,catalogVersion,catalogHash,components:catalogDescriptors,policy:'Browser owns rows. Only supplied scalar refs and bounded summaries can enter tools. Local edits do not need model requests. Native present uses $type plus scalar props and children. B uses valid OpenUI v0.5 program with registered components.',frontendInstructions:(request.variant==='a'?aPrompt+'\n':'')+(request.system??''),tools,context:request.currentContext,history:request.messages.slice(-20)});
  const stream=createUIMessageStream({execute:async({writer})=>{
   writer.write({type:'start',messageId:randomUUID()});writer.write({type:'start-step'});
   const callId=randomUUID();let toolStarted=false;const textStarted=new Set<string>();
@@ -30,7 +32,7 @@ export async function handleChat(request:ChatRequest,response:ServerResponse,sig
   for(const field of textStarted)writer.write({type:'text-end',id:field});
   if(decision.toolName!=='none'){
    const tool=tools[decision.toolName];if(!tool)throw new Error('Model selected an unregistered tool');
-   const input:unknown=JSON.parse(decision.toolInput);assertNoBulkData(input);
+   const input:unknown=parseToolInput(decision.toolName,JSON.parse(decision.toolInput));assertNoBulkData(input);
    z.fromJSONSchema(tool.parameters).parse(input);
    if(decision.toolName==='present')validatePresentTree(input,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});
    spendTool(key,decision.toolName);
