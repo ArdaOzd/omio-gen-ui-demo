@@ -36,7 +36,7 @@ export function GenerativeRoute({variant,blinded=false}:{variant:'a'|'b';blinded
  useEffect(()=>runtime.artifacts.subscribe(()=>setRegistryRevision(value=>value+1)),[runtime]);
  useEffect(()=>{if(!ready)return;let timer:ReturnType<typeof setTimeout>|undefined;const persist=()=>void save(messages).catch(()=>setNotice('Local history could not be saved.'));const changed=()=>{clearTimeout(timer);timer=setTimeout(()=>{timer=undefined;persist()},30)};const unsub=runtime.artifacts.getIds().map(id=>runtime.services.state.subscribe(id,changed));const stopActive=runtime.artifacts.subscribe(changed);return()=>{if(timer){clearTimeout(timer);persist()}stopActive();unsub.forEach(stop=>stop())}},[runtime,ready,messages,registryRevision]);
  if(!ready)return <div className="travel-app"><p role="status">Restoring travel conversation…</p></div>;
- 
+
  return <>{!blinded&&<nav className="travel-variant-nav"><a href="/generative">Compare interfaces</a><a href="/">Classic search</a><span>Version {variant.toUpperCase()} · Signed-in Codex</span></nav>}{notice&&<p role="status">{notice}</p>}<GenerativeChat sceneToolkit={variant==='b'?bToolkit:undefined} variant={variant} services={runtime.services} capture={capture} initialMessages={messages} onMessages={next=>void save(next).catch(()=>setNotice('Local history could not be saved.'))}/></>;
 }
 export function GenerativeChooser(){return <main className="travel-app"><div className="travel-welcome"><h1>Choose your travel conversation</h1><p>Both interfaces share the same synthetic fares, local controls, and signed-in Codex model.</p><a href="/a">Component composition</a><a href="/b">Reactive program</a><a href="/">Classic travel search</a></div></main>}
