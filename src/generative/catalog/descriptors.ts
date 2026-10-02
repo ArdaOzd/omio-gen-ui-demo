@@ -6,6 +6,11 @@ const refs = [
 ] satisfies ComponentDescriptor['props'];
 const descriptor = (name: string, group: ComponentDescriptor['group'], description: string, children = false): ComponentDescriptor => ({ name, group, description, props: refs, children });
 export const descriptors: ReadonlyArray<ComponentDescriptor> = [
+  descriptor('TravelHero','layout','Travel artifact headline and introduction',true),
+  descriptor('Carousel','layout','Accessible horizontal panels',true),
+  descriptor('DateWindow','control','Bounded local date window'),
+  descriptor('FarePicker','control','Direct local fare selection'),
+  descriptor('CheapestFastest','view','Local cheapest and fastest comparison'),
   descriptor('TravelSurface','layout','Root travel artifact with subscribed local state',true),
   descriptor('Section','layout','Named story section',true),
   descriptor('Stack','layout','Vertical arrangement',true),

@@ -1,9 +1,14 @@
 # Shared catalog 1.0.0
 
-Manifest hash: 421be56cd56cdecd2f036ee205d94d057aea770b3465e8cccc46673479ae4624
+Manifest hash: ed1b21ba3b552484f68ee9421068207149725ac2357f513f7620c9affbc48246
 
 Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
+- TravelHero: Travel artifact headline and introduction. May contain catalog children.
+- Carousel: Accessible horizontal panels. May contain catalog children.
+- DateWindow: Bounded local date window.
+- FarePicker: Direct local fare selection.
+- CheapestFastest: Local cheapest and fastest comparison.
 - TravelSurface: Root travel artifact with subscribed local state. May contain catalog children.
 - Section: Named story section. May contain catalog children.
 - Stack: Vertical arrangement. May contain catalog children.
