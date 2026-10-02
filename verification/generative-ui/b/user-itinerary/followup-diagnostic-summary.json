@@ -1,0 +1,95 @@
+{
+  "liveModelAuthorship": true,
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "passed": false,
+  "acceptedProgramCount": 5,
+  "acceptedPrograms": [
+    {
+      "toolCallId": "a62214e9-c3c2-42a2-b2a4-24d0f23626ee",
+      "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+      "programRevision": 5,
+      "programCharacters": 5880,
+      "sha256": "3732061fa99a3508585dfeadd672714e8f4de70f07c7c38d26712e69ddf22ea0",
+      "sourceFile": "followup-accepted-1.openui",
+      "status": "accepted"
+    },
+    {
+      "toolCallId": "a9807081-9c1f-473a-b787-f4f1970b964e",
+      "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+      "programRevision": 5,
+      "programCharacters": 5593,
+      "sha256": "fffc53ec89c5767b93d4bb64cb1a5a3daed766c1bdcbe84def5d1255016c3c2a",
+      "sourceFile": "followup-accepted-2.openui",
+      "status": "accepted"
+    },
+    {
+      "toolCallId": "eb8145dd-e7f1-4b92-be74-27252395f925",
+      "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+      "programRevision": 5,
+      "programCharacters": 5581,
+      "sha256": "64610bf4d4ac302ec389adcc733da6b777ef322249d7efe137c87fd9d88eb8e1",
+      "sourceFile": "followup-accepted-3.openui",
+      "status": "accepted"
+    },
+    {
+      "toolCallId": "7f1c11f0-0230-4b6a-858c-0e7c17f96bb7",
+      "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+      "programRevision": 5,
+      "programCharacters": 5565,
+      "sha256": "d554700309e16cb8ae4729966f63b78d6e4b251877fda9617e3a5ee6b6953257",
+      "sourceFile": "followup-accepted-4.openui",
+      "status": "accepted"
+    },
+    {
+      "toolCallId": "0611c38a-7ab7-4dd4-91ae-cf751dd1a2d3",
+      "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+      "programRevision": 5,
+      "programCharacters": 5388,
+      "sha256": "816235cba7e97fbe3d206138bf7c24d2de1399d18b2f9e8dd45dfb0542087b31",
+      "sourceFile": "followup-accepted-5.openui",
+      "status": "accepted"
+    }
+  ],
+  "httpSequence": [
+    {
+      "number": 1,
+      "status": 200,
+      "tool": "compose_reactive_scene",
+      "statusOutput": "accepted"
+    },
+    {
+      "number": 2,
+      "status": 200,
+      "tool": "compose_reactive_scene",
+      "statusOutput": "accepted"
+    },
+    {
+      "number": 3,
+      "status": 200,
+      "tool": "compose_reactive_scene",
+      "statusOutput": "accepted"
+    },
+    {
+      "number": 4,
+      "status": 200,
+      "tool": "compose_reactive_scene",
+      "statusOutput": "accepted"
+    },
+    {
+      "number": 5,
+      "status": 200,
+      "tool": "compose_reactive_scene",
+      "statusOutput": "accepted"
+    },
+    {
+      "number": 6,
+      "status": 400,
+      "reason": "History exceeds byte budget",
+      "historyCharacters": 40665
+    }
+  ],
+  "diagnosis": "Canonical accepted acknowledgments reach the model. Repeated same-artifact compose decisions grow history past40K; no complete text-finalization gate claimed.",
+  "originalRejectedSourceRetained": false,
+  "userSessionMutated": false
+}
