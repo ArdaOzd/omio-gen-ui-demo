@@ -8,6 +8,7 @@ import { createBrowserTools } from '../tools/browser-tools'
 import aToolkit from '../variants/a/toolkit-client'
 import { createSnapshotTransport } from './transport'
 import { ThreadShell } from './thread-shell'
+import { normalizeToolContinuations } from './continuation-history'
 import '../catalog/tokens.css'
 export type GenerativeChatProps={variant:'a'|'b';services:TravelServices;capture:()=>AgentContextEnvelope;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];onMessages?:(messages:UIMessage[])=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand'}
 export function GenerativeChat(props:GenerativeChatProps){
@@ -17,6 +18,7 @@ export function GenerativeChat(props:GenerativeChatProps){
   return {...frontend,...(props.sceneToolkit??aToolkit)} satisfies Toolkit
  },[props.services,props.sceneToolkit])
  const transport=useMemo(()=>createSnapshotTransport({variant:props.variant,capture:props.capture,transport:{body:{provider:props.provider??'codex'}}}),[props.variant,props.capture,props.provider])
- const runtime=useChatRuntime({transport,messages:props.initialMessages,sendAutomaticallyWhen:lastAssistantMessageIsCompleteWithToolCalls,onFinish:({messages})=>props.onMessages?.(messages)})
+ const messages=useMemo(()=>props.initialMessages?normalizeToolContinuations(props.initialMessages):undefined,[props.initialMessages])
+ const runtime=useChatRuntime({transport,messages,sendAutomaticallyWhen:lastAssistantMessageIsCompleteWithToolCalls,onFinish:({messages})=>props.onMessages?.(normalizeToolContinuations(messages))})
  return <div className="travel-app" data-theme={props.theme??'blue'}><TravelProvider services={props.services}><AssistantRuntimeProvider runtime={runtime} config={AuiConfig({tools:Tools({toolkit})})}><ThreadShell/></AssistantRuntimeProvider></TravelProvider></div>
 }
