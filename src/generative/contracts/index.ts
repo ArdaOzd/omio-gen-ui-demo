@@ -63,8 +63,9 @@ export const SortSpecSchema = z.strictObject({ field: z.enum(['priceCents', 'dur
 export type SortSpec = z.infer<typeof SortSpecSchema>;
 export const StayAllocationSchema = z.strictObject({ cityId: ref, nights: z.number().int().min(0).max(30) });
 export type StayAllocation = z.infer<typeof StayAllocationSchema>;
+export const RuntimeVariablesSchema=z.record(z.string().regex(/^\$[A-Za-z][A-Za-z0-9_]{0,39}$/),z.union([z.string().max(160),z.number().finite(),z.boolean(),z.null()])).refine(value=>Object.keys(value).length<=16,'Runtime variable count exceeded');
 export const ArtifactUIStateSchema = z.strictObject({
-  artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema, datasetRefs: z.array(DatasetIdSchema).max(8),
+  artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema, runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(8),
   filters: TravelFiltersSchema, dates: z.strictObject({ start: DateSchema, end: DateSchema.optional() }),
   stays: z.array(StayAllocationSchema).max(8), modesByLeg: z.record(ref, z.array(TransportModeSchema).max(4)),
   sort: SortSpecSchema, selectedFareIds: z.array(FareIdSchema).max(8),
@@ -80,7 +81,7 @@ export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: Tr
   synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees') });
 export type BoundedFareFact = z.infer<typeof BoundedFareFactSchema>;
 export const CompactArtifactSnapshotSchema = z.strictObject({ artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema,
-  datasetRefs: z.array(DatasetIdSchema).max(8), selectedFareIds: z.array(FareIdSchema).max(8), filters: TravelFiltersSchema,
+  runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(8), selectedFareIds: z.array(FareIdSchema).max(8), filters: TravelFiltersSchema,
   dates: ArtifactUIStateSchema.shape.dates, stays: z.array(StayAllocationSchema).max(8), sort: SortSpecSchema,
   modesByLeg: ArtifactUIStateSchema.shape.modesByLeg, pending: ArtifactUIStateSchema.shape.pending,
   layoutSummary: z.string().max(600), catalogVersion: z.literal(CATALOG_VERSION) });
@@ -122,7 +123,7 @@ export type BoundedQueryResult = { rows: Array<Record<string, JsonScalar>>; tota
 export type UICommand = { artifactId: ArtifactId; expectedRevision?: UIStateRevision } & (
   { kind: 'filters'; filters: TravelFilters } | { kind: 'dates'; dates: ArtifactUIState['dates'] } |
   { kind: 'sort'; sort: SortSpec } | { kind: 'select'; fareId: FareId; selected: boolean } |
-  { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
+  { kind: 'runtimeVariables'; runtimeVariables: ArtifactUIState['runtimeVariables'] } | { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
 export type DispatchResult = { status: 'applied'; revision: UIStateRevision } | { status: 'stale'; revision: UIStateRevision };
 export interface FareDataBridge {
   load(request: CoverageRequest, signal: AbortSignal): Promise<DatasetManifest>;
@@ -177,6 +178,9 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   });
   query.orderBy?.forEach(order => { if (!outputNames.has(order.field)) throw new Error('Unknown ordering'); });
   if (query.topK && !outputNames.has(query.topK.by)) throw new Error('Unknown topK field');
+  const remainingAliases=query.sources.slice(1).map(source=>source.alias);
+  const joinedAliases=(query.joins??[]).map(join=>join.rightAlias);
+  if(joinedAliases.length!==remainingAliases.length||new Set(joinedAliases).size!==joinedAliases.length||remainingAliases.some(alias=>!joinedAliases.includes(alias)))throw new Error('Every additional source requires exactly one right-side join');
   query.joins?.forEach(join => {
     if (!aliases.has(join.rightAlias) || !fields.get(join.leftKey)?.joinKey || !fields.get(join.rightKey)?.joinKey) throw new Error('Unsupported join');
   });
@@ -188,6 +192,7 @@ export const UICommandPatchSchema = z.discriminatedUnion('kind', [
  z.strictObject({kind:z.literal('dates'),dates:ArtifactUIStateSchema.shape.dates}),
  z.strictObject({kind:z.literal('sort'),sort:SortSpecSchema}),
  z.strictObject({kind:z.literal('stays'),stays:ArtifactUIStateSchema.shape.stays}),
+ z.strictObject({kind:z.literal('runtimeVariables'),runtimeVariables:RuntimeVariablesSchema}),
  z.strictObject({kind:z.literal('modesByLeg'),modesByLeg:ArtifactUIStateSchema.shape.modesByLeg}),
  z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.boolean()}),
 ]);
