@@ -1,8 +1,8 @@
 # Shared catalog 1.0.0
 
-Manifest hash: ed1b21ba3b552484f68ee9421068207149725ac2357f513f7620c9affbc48246
+Manifest hash: 719e6a069e63ec5f806909391b35dffebea39a3645016b60dd47fca01aaab1dd
 
-Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
+Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
 - TravelHero: Travel artifact headline and introduction. May contain catalog children.
 - Carousel: Accessible horizontal panels. May contain catalog children.
@@ -17,7 +17,7 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - SplitPane: Responsive primary and supporting sections. May contain catalog children.
 - StickySummary: Persistent selected-trip summary. May contain catalog children.
 - Tabs: Accessible tabbed sections. May contain catalog children.
-- Callout: Bounded explanatory content. May contain catalog children.
+- Callout: Short heading and explanatory body text up to600 characters. May contain catalog children.
 - DateStrip: Direct local date selection.
 - ModeChips: Direct local transport mode filtering.
 - CarrierFilter: Direct local carrier selection.
