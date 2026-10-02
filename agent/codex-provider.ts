@@ -25,6 +25,7 @@ function readString(source:string,field:string):string|undefined {
  return undefined;
 }
 export async function codexDecision(options:{prompt:string;toolNames:string[];signal:AbortSignal;onDelta:DecisionDelta}):Promise<Decision> {
+ if(options.signal.aborted)throw new Error('Generation cancelled');
  const cwd=await mkdtemp(join(tmpdir(),'omio-model-only-'));
  const config=await readFile(join(homedir(),'.codex/config.toml'),'utf8').catch(()=> '');
  const names=[...config.matchAll(/^\[mcp_servers\.([^\].]+)\]/gm)].map(match=>match[1]);

@@ -8,7 +8,16 @@ export function acceptTurn(request:ChatRequest):string {
  const key=createHash('sha256').update(request.id+':'+user.id).digest('hex');
  for(const [id,entry]of ledger)if(entry.expires<Date.now())ledger.delete(id);
  if(ledger.size>1000)throw new Error('Too many active turns');
- if(!ledger.has(key))ledger.set(key,{calls:0,facts:0,expires:Date.now()+30*60_000});
+ const userIndex=request.messages.indexOf(user);
+ const calls=new Set<string>();let facts=0;
+ for(const message of request.messages.slice(userIndex+1)){for(const part of message.parts){
+  if((part.type.startsWith('tool-')||part.type==='dynamic-tool')&&part.toolCallId&&!calls.has(part.toolCallId)){
+   calls.add(part.toolCallId);const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5);facts+=name==='get_top_fares'?5:name==='get_fare'?1:0;
+  }
+ }}
+ if(calls.size>LIMITS.toolCalls||facts>LIMITS.factBudget)throw new Error('History exceeds visible-turn tool budget');
+ const existing=ledger.get(key);
+ ledger.set(key,{calls:Math.max(existing?.calls??0,calls.size),facts:Math.max(existing?.facts??0,facts),expires:Date.now()+30*60_000});
  return key;
 }
 export function spendTool(key:string,name:string):void {
