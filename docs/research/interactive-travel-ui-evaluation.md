@@ -1,5 +1,7 @@
 # Interactive conversational travel UI evaluation
 
+> **Updated product decision:** [`browser-local-generative-ui-decision.md`](browser-local-generative-ui-decision.md) supersedes this report's recommendation and scoring rubric for the current demo. The clarified goal prioritizes adaptive visual composition and browser-local fare interaction over a server-owned production travel plan. This report remains the detailed 13-repository survey and record of the earlier full travel-domain analysis.
+
 Checked 2026-10-02.
 
 ## Decision

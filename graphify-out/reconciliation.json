@@ -1,69 +1,30 @@
 {
-  "created_at": "2026-10-02T16:10:51.265460+00:00",
-  "strategy": "replace lossy fresh semantic fragments with committed fragments whose manifest semantic hash exactly matches current file content",
-  "base_graph_built_at_commit": "692750fa60d0349ed9e5706f0a17f7809bc194fe",
-  "token_usage": "unavailable from collaboration result; zero fields are schema placeholders",
+  "created_at": "2026-10-02T16:46:48.047054+00:00",
+  "strategy": "preserve the prior detailed semantic extraction for the substantively unchanged interactive evaluation while adding a fresh local extraction for the new browser-local decision",
+  "strictly_local": true,
+  "external_provider_calls": 0,
   "sources": {
-    "AGENTS.md": {
-      "manifest_semantic_hash": "4d065aec36d9cb1c63d16c07dc4eb323",
-      "current_md5": "4d065aec36d9cb1c63d16c07dc4eb323",
-      "match": true
-    },
-    "backend/README.md": {
-      "manifest_semantic_hash": "9dd02b8fe7fa1b352330689ca3918f96",
-      "current_md5": "9dd02b8fe7fa1b352330689ca3918f96",
-      "match": true
-    },
     "docs/research/interactive-travel-ui-evaluation.md": {
-      "manifest_semantic_hash": "092bdeb6d44168be924a0329476d403d",
-      "current_md5": "092bdeb6d44168be924a0329476d403d",
-      "match": true
+      "preserved_nodes": 39,
+      "preserved_edges": 49,
+      "preserved_hyperedges": 2,
+      "reason": "only a superseding crosslink was added; prior detailed findings remain valid"
     },
-    "public/assets/omio/SOURCES.md": {
-      "manifest_semantic_hash": "1f4093d3f295bd0dc8b5d7eeffb75fc3",
-      "current_md5": "1f4093d3f295bd0dc8b5d7eeffb75fc3",
-      "match": true
-    },
-    "verification/acceptance.md": {
-      "manifest_semantic_hash": "9a3e07cfe21bd7bda0e1e22b0e2d5c54",
-      "current_md5": "9a3e07cfe21bd7bda0e1e22b0e2d5c54",
-      "match": true
+    "docs/research/browser-local-generative-ui-decision.md": {
+      "fresh_nodes": 26,
+      "fresh_edges": 48,
+      "fresh_hyperedges": 2,
+      "includes_ui_state_revision_policy": true
     }
   },
-  "fresh_candidate_before": {
-    "nodes": 298,
-    "raw_edges": 532,
-    "post_build_edges": 465
-  },
-  "reused_source_nodes": 81,
-  "reused_endpoint_nodes": 0,
-  "reused_edges": 105,
-  "reused_hyperedges": 6,
-  "removed_fresh_source_node_ids": [
-    "docs_research_interactive_travel_ui_evaluation_a2ui",
-    "docs_research_interactive_travel_ui_evaluation_active_plan_and_immutable_history",
-    "docs_research_interactive_travel_ui_evaluation_ag_ui",
-    "docs_research_interactive_travel_ui_evaluation_assistant_ui",
-    "docs_research_interactive_travel_ui_evaluation_authoritative_search_and_quote_service",
-    "docs_research_interactive_travel_ui_evaluation_copilotkit",
-    "docs_research_interactive_travel_ui_evaluation_direct_interaction_flow",
-    "docs_research_interactive_travel_ui_evaluation_incremental_typescript_migration",
-    "docs_research_interactive_travel_ui_evaluation_interactive_conversational_travel_ui",
-    "docs_research_interactive_travel_ui_evaluation_json_render",
-    "docs_research_interactive_travel_ui_evaluation_openui",
-    "docs_research_interactive_travel_ui_evaluation_plan_command_interface",
-    "docs_research_interactive_travel_ui_evaluation_present_generative_ui",
-    "docs_research_interactive_travel_ui_evaluation_revision_guarded_async_results",
-    "docs_research_interactive_travel_ui_evaluation_semantic_component_vocabulary",
-    "docs_research_interactive_travel_ui_evaluation_tambo",
-    "docs_research_interactive_travel_ui_evaluation_vercel_ai_sdk",
-    "verification_acceptance_browser_flow_verification",
-    "verification_acceptance_http_api_verification",
-    "verification_acceptance_responsive_omio_style_ui"
-  ],
   "final_extraction": {
-    "nodes": 336,
-    "raw_edges": 586,
-    "hyperedges": 10
+    "nodes": 362,
+    "raw_edges": 622,
+    "hyperedges": 11
+  },
+  "final_graph": {
+    "nodes": 362,
+    "edges": 544,
+    "communities": 28
   }
 }
