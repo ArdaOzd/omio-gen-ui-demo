@@ -3,6 +3,9 @@ graphify-out/.graphify_python
 graphify-out/.graphify_root
 graphify-out/cache/
 
+# Local code-review-graph database
+.code-review-graph/
+
 # Frontend build artifacts
 node_modules/
 dist/
