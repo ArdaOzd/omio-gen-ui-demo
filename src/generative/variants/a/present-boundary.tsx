@@ -1,12 +1,14 @@
 import type { ComponentType } from 'react'
-import type { ToolCallMessagePartProps } from '@assistant-ui/react'
+import { useAuiState,type ToolCallMessagePartProps } from '@assistant-ui/react'
+import { hasLaterAcceptedScene } from '../../chat/tool-supersession'
 import { getPartialJsonObjectMeta } from 'assistant-stream/utils'
 import { useTravelServices } from '../../catalog/context'
 import { ArtifactIdSchema, DatasetIdSchema } from '../../contracts'
 import { prunePresentTree, validatePresentTree, type PresentNode } from './tree'
 type Props=ToolCallMessagePartProps<Record<string,unknown>,Record<string,never>>
 export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}){
- const services=useTravelServices();const meta=getPartialJsonObjectMeta(props.args)
+ const superseded=useAuiState(state=>hasLaterAcceptedScene(state.message.parts,props.toolCallId,'present',typeof props.args.artifactRef==='string'?props.args.artifactRef:undefined,part=>{if(part.isError||typeof part.result!=='object'||part.result===null||Object.keys(part.result).length)return false;try{validatePresentTree(part.args);return true}catch{return false}}))
+ const services=useTravelServices();if(superseded)return null;const meta=getPartialJsonObjectMeta(props.args)
  const partial=props.status.type!=='complete'&&(props.status.type!=='requires-action'||meta?.state==='partial')
  try{
   let tree=partial?prunePresentTree(props.args,undefined,meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args)
