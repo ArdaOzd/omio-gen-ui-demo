@@ -162,7 +162,7 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
     const values = Array.isArray(predicate.value) ? predicate.value : [predicate.value];
     if (values.some(value => typeof value !== field.type)) throw new Error('Predicate type mismatch');
     if (predicate.op === 'contains' && field.type !== 'string') throw new Error('Contains requires text');
-    if (['gte','lte','between'].includes(predicate.op) && field.type !== 'number') throw new Error('Comparison requires number');
+    if (['gte','lte','between'].includes(predicate.op) && field.type !== 'number' && predicate.field !== 'serviceDate') throw new Error('Comparison requires number or serviceDate');
     if (predicate.op === 'between' && (values.length !== 2 || values[0] === undefined || values[1] === undefined || values[0] > values[1])) throw new Error('Between requires ordered pair');
     if (predicate.op === 'in' && !Array.isArray(predicate.value)) throw new Error('In requires list');
     if (!['in','between'].includes(predicate.op) && Array.isArray(predicate.value)) throw new Error('Operator requires scalar');
