@@ -1,7 +1,7 @@
 # Graph Report - omio-gen-ui-demo  (2026-10-03)
 
 ## Corpus Check
-- 237 files · ~485,862 words
+- 237 files · ~485,913 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -119,12 +119,12 @@
   .github/pull_request_template.md → CONTRIBUTING.md
 - `capture()` --calls--> `exportAgentContext()`  [EXTRACTED]
   verification/generative-ui/a/spike/main.tsx → src/generative/state/snapshot-exporter.ts
+- `run()` --calls--> `createSyntheticRows()`  [EXTRACTED]
+  benchmarks/query-engine/browser.ts → src/generative/data/synthetic-source.ts
+- `parseToolInput()` --calls--> `validatePresentTree()`  [EXTRACTED]
+  agent/request-schema.ts → src/generative/variants/a/tree.ts
 - `parseChatRequest()` --calls--> `parseAgentContext()`  [EXTRACTED]
   agent/request-schema.ts → src/generative/contracts/index.ts
-- `parseChatRequest()` --calls--> `assertNoBulkData()`  [EXTRACTED]
-  agent/request-schema.ts → src/generative/contracts/privacy.ts
-- `parseToolInput()` --calls--> `assertNoBulkData()`  [EXTRACTED]
-  agent/request-schema.ts → src/generative/contracts/privacy.ts
 
 ## Import Cycles
 - None detected.
@@ -155,7 +155,7 @@ Nodes (31): Implemented comparison demo and evidence matrix, Paused demo continu
 
 ### Community 3 - "package.json"
 Cohesion: 0.04
-Nodes (43): ai, @ai-sdk/react, assistant-stream, @assistant-ui/ai-sdk, @assistant-ui/react, @assistant-ui/react-generative-ui, @openuidev/lang-core, @openuidev/react-lang (+35 more)
+Nodes (44): ai, @ai-sdk/react, assistant-stream, @assistant-ui/ai-sdk, @assistant-ui/react, @assistant-ui/react-generative-ui, @openuidev/lang-core, @openuidev/react-lang (+36 more)
 
 ### Community 4 - "backend · app.py"
 Cohesion: 0.13
@@ -446,18 +446,18 @@ Cohesion: 0.67
 Nodes (3): Synchronization, Update and Refresh, Updates Icon
 
 ## Knowledge Gaps
-- **476 isolated node(s):** `DecisionDelta`, `SceneCompletion`, `Props`, `CoverageLoadStatus`, `FarePage` (+471 more)
+- **476 isolated node(s):** `CoverageLoadStatus`, `FarePage`, `LoadedResource`, `PageInput`, `SceneCompletion` (+471 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `devDependencies` connect `package.json` to `package.json`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `createUIStateStore()` connect `Travel data` to `Travel catalog`, `Travel state`, `Travel contracts`, `Travel variants`, `Travel state`, `Travel contracts`, `Model agent · request-schema.ts`, `Model agent · turn-budget.ts`, `Evidence a`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `createUIStateStore()` (e.g. with `dispatch()` and `get()`) actually correct?**
   _`createUIStateStore()` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `DecisionDelta`, `SceneCompletion`, `Props` to the rest of the system?**
+- **What connects `CoverageLoadStatus`, `FarePage`, `LoadedResource` to the rest of the system?**
   _476 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `src · api.js` be split into smaller, more focused modules?**
   _Cohesion score 0.06892230576441102 - nodes in this community are weakly interconnected._

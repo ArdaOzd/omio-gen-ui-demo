@@ -9,7 +9,7 @@ Status: reported errors fixed and verified; agent work stopped at the user's req
 3. Check the existing preview before starting another server: `curl http://127.0.0.1:5194/api/health` and `curl http://127.0.0.1:5194/api/agent/health`.
 4. Open `http://127.0.0.1:5194/a` or `/b`. Do not reset IndexedDB or replace the current conversation with an older evidence capture.
 
-The integration branch is `feature/gen-ui-ab-integration`, managed checkout `/Users/ardaozdogru/.codex/worktrees/generative-spine/omio-gen-ui-demo`. Original checkout: `/Users/ardaozdogru/projects/omio-gen-ui-demo`. `dev` and `main` remain unmerged. Frozen runtime code: `a36f4340bf66219ff7c6e1205cc216e7c71865b8`. Evidence/docs commits follow it. The original checkout is handed off on `feature/gen-ui-ab-demo` at the final integration commit; use `git rev-parse HEAD` for that exact docs-inclusive revision.
+The integration branch is `feature/gen-ui-ab-integration`, managed checkout `/Users/ardaozdogru/.codex/worktrees/generative-spine/omio-gen-ui-demo`. Original checkout: `/Users/ardaozdogru/projects/omio-gen-ui-demo`. `dev` and `main` remain unmerged. A newer external local `dev` commit `719d03ce4b4c11a9c8e882303b19e826065d032d` was discovered during handoff and is preserved untouched on `dev`; it was not reset or merged into this demo branch. Frozen runtime code: `a36f4340bf66219ff7c6e1205cc216e7c71865b8`. Evidence/docs commits follow it. The original checkout passed `npm ci --no-audit --no-fund`, `npm run typecheck` and `npm run build` with matching locked dependencies; its task branch is clean. The original checkout is handed off on `feature/gen-ui-ab-demo` at the final integration commit; use `git rev-parse HEAD` for that exact docs-inclusive revision.
 
 ## Runtime
 
