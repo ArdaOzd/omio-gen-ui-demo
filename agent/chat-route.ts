@@ -17,8 +17,8 @@ export async function handleChat(request:ChatRequest,response:ServerResponse,sig
  const key=acceptTurn(request);const tools=request.tools??{};
  const locations=await loadLocationCatalog(request.messages);
  const prompt=JSON.stringify({locations,locationPolicy:'Coverage originIds/destinationIds use these actual location IDs. Translate natural city names to their IDs; do not invent dataset refs. Load coverage before composing a view.',variant:request.variant,catalogVersion,catalogHash,components:catalogDescriptors,policy:'Browser owns rows. Only supplied scalar refs and bounded summaries can enter tools. Local edits do not need model requests. Native present uses $type plus scalar props and children. B uses valid OpenUI v0.5 program with registered components.',frontendInstructions:(request.variant==='a'?aPrompt+'\n':'')+(request.system??''),tools,context:request.currentContext,history:request.messages.slice(-20)});
- const stream=createUIMessageStream({execute:async({writer})=>{
-  writer.write({type:'start',messageId:randomUUID()});writer.write({type:'start-step'});
+ const stream=createUIMessageStream({originalMessages:request.messages.map(({id,role})=>({id,role,parts:[]})),execute:async({writer})=>{
+  writer.write({type:'start'});writer.write({type:'start-step'});
   let callId=randomUUID(),attempt=0,currentTool='none';let toolStarted=false;let toolPrefix='';const textStarted=new Set<string>();
   const delta=(field:'intro'|'toolInput'|'outro',value:string,toolName:string)=>{
    currentTool=toolName;
