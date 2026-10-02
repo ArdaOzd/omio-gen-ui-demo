@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-10-02T19:46:57.407Z",
+  "kind": "deterministic-native-runtime-proof",
+  "liveModelAuthorship": false,
+  "results": [
+    {
+      "scene": 0,
+      "width": 1280,
+      "theme": "blue",
+      "browser": "154.0.8037.97",
+      "partialControls": true,
+      "currentStatePreserved": true,
+      "continuationPosts": 2,
+      "latestSnapshot": true,
+      "keyboard": true,
+      "reducedMotion": true,
+      "horizontalOverflow": false,
+      "pageErrors": []
+    },
+    {
+      "scene": 1,
+      "width": 1280,
+      "theme": "blue",
+      "browser": "154.0.8037.97",
+      "partialControls": true,
+      "currentStatePreserved": true,
+      "continuationPosts": 2,
+      "latestSnapshot": true,
+      "keyboard": true,
+      "reducedMotion": true,
+      "horizontalOverflow": false,
+      "pageErrors": []
+    },
+    {
+      "scene": 2,
+      "width": 1280,
+      "theme": "blue",
+      "browser": "154.0.8037.97",
+      "partialControls": true,
+      "currentStatePreserved": true,
+      "continuationPosts": 2,
+      "latestSnapshot": true,
+      "keyboard": true,
+      "reducedMotion": true,
+      "horizontalOverflow": false,
+      "pageErrors": []
+    },
+    {
+      "scene": 0,
+      "width": 360,
+      "theme": "blue",
+      "browser": "154.0.8037.97",
+      "partialControls": true,
+      "currentStatePreserved": true,
+      "continuationPosts": 2,
+      "latestSnapshot": true,
+      "keyboard": true,
+      "reducedMotion": true,
+      "horizontalOverflow": false,
+      "pageErrors": []
+    },
+    {
+      "scene": 0,
+      "width": 360,
+      "theme": "sand",
+      "browser": "154.0.8037.97",
+      "partialControls": true,
+      "currentStatePreserved": true,
+      "continuationPosts": 2,
+      "latestSnapshot": true,
+      "keyboard": true,
+      "reducedMotion": true,
+      "horizontalOverflow": false,
+      "pageErrors": []
+    }
+  ]
+}
