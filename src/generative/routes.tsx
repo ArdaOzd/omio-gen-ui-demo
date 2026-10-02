@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import bToolkit from './variants/b/toolkit';
-import { validatePresentTree, type PresentNode } from './variants/a/tree';
-import { catalogDescriptors } from './catalog/generated/catalog';
+import { getSceneMetadata } from './scene-metadata';
 import type { UIMessage } from 'ai';
 import { ArtifactIdSchema, CATALOG_VERSION, CONTRACT_VERSION, type ArtifactId } from './contracts';
 import { createFareDataBridge } from './data/fare-data-bridge';
@@ -27,12 +26,11 @@ export function GenerativeRoute({variant,blinded=false}:{variant:'a'|'b';blinded
   if(record){await persistence.restore(record,runtime.services.bridge,runtime.services.state,controller.signal);for(const artifact of record.artifacts)runtime.artifacts.register(artifact.state.artifactId);if(record.activeArtifactId)runtime.artifacts.activate(record.activeArtifactId);const valid=record.messages.filter((message):message is UIMessage=>typeof message==='object'&&message!==null&&'id' in message&&'role' in message&&'parts' in message);setMessages(valid);}
   if(!runtime.artifacts.getIds().length)runtime.createArtifact();setReady(true);
  }).catch(()=>{if(!runtime.artifacts.getIds().length)runtime.createArtifact();setNotice('Saved history could not be restored. Start a new travel conversation.');setReady(true);});return()=>controller.abort();},[runtime,persistence,key]);
- const sceneSources=new Map<string,string>();const layouts=new Map<string,string>();
- for(const message of messages)for(const part of message.parts){if(part.type==='tool-present'&&part.input){try{const tree=validatePresentTree(part.input);const describe=(node:PresentNode):string=>node.$type+(node.children?`(${(Array.isArray(node.children)?node.children:typeof node.children==='object'?[node.children]:[]).map(describe).join(',')})`:'');sceneSources.set(tree.artifactRef,JSON.stringify(tree));layouts.set(tree.artifactRef,describe(tree).slice(0,600));}catch{}}else if(part.type==='tool-compose_reactive_scene'&&part.input&&typeof part.input==='object'&&'program' in part.input&&'artifactRef' in part.input&&typeof part.input.program==='string'&&typeof part.input.artifactRef==='string'){sceneSources.set(part.input.artifactRef,part.input.program);layouts.set(part.input.artifactRef,catalogDescriptors.filter(descriptor=>part.input&&typeof part.input==='object'&&'program' in part.input&&typeof part.input.program==='string'&&part.input.program.includes(descriptor.name+'(')).map(d=>d.name).join(' / ').slice(0,600));}}
+ const {layouts}=getSceneMetadata(messages);
  const capture=()=>{const snapshot=exportAgentContext({turnId:`turn-${crypto.randomUUID()}`,activeArtifactId:runtime.artifacts.getActiveId(),artifactIds:runtime.artifacts.getIds(),store:runtime.services.state,bridge:runtime.services.bridge});snapshot.artifacts=snapshot.artifacts.map(artifact=>({...artifact,layoutSummary:layouts.get(artifact.artifactId)??artifact.layoutSummary}));return snapshot;};
  const save=async(next:UIMessage[])=>{
-  assertNoBulkData(next);const states=runtime.artifacts.getIds().map(id=>runtime.services.state.get(id));const refs=[...new Set(states.flatMap(state=>state.datasetRefs))];
-  await persistence.save(key,{schemaVersion:CONTRACT_VERSION,catalogVersion:CATALOG_VERSION,activeArtifactId:runtime.artifacts.getActiveId(),parserVersion:'openui-0.3.0',queryVersion:'1',messages:next,artifacts:states.map(state=>({variant,source:sceneSources.get(state.artifactId)??'No scene authored yet.',state})),descriptors:refs.map(datasetId=>{const manifest=runtime.services.bridge.getManifest(datasetId);return {datasetId,request:{originIds:manifest.coverage.originIds,destinationIds:manifest.coverage.destinationIds,dateWindow:manifest.coverage.dateWindow,modes:manifest.coverage.modes,passengers:manifest.coverage.passengers},sourceVersion:manifest.source.sourceVersion,complete:manifest.coverage.complete}})});
+  assertNoBulkData(next);const {sources}=getSceneMetadata(next);const states=runtime.artifacts.getIds().map(id=>runtime.services.state.get(id));const refs=[...new Set(states.flatMap(state=>state.datasetRefs))];
+  await persistence.save(key,{schemaVersion:CONTRACT_VERSION,catalogVersion:CATALOG_VERSION,activeArtifactId:runtime.artifacts.getActiveId(),parserVersion:'openui-0.3.0',queryVersion:'1',messages:next,artifacts:states.map(state=>({variant,source:sources.get(state.artifactId)??'No scene authored yet.',state})),descriptors:refs.map(datasetId=>{const manifest=runtime.services.bridge.getManifest(datasetId);return {datasetId,request:{originIds:manifest.coverage.originIds,destinationIds:manifest.coverage.destinationIds,dateWindow:manifest.coverage.dateWindow,modes:manifest.coverage.modes,passengers:manifest.coverage.passengers},sourceVersion:manifest.source.sourceVersion,complete:manifest.coverage.complete}})});
   setMessages(next);
  };
  useEffect(()=>runtime.artifacts.subscribe(()=>setRegistryRevision(value=>value+1)),[runtime]);
