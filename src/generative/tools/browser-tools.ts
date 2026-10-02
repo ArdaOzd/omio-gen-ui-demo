@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId } from '../contracts';
+import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId,type UICommand,type DispatchResult } from '../contracts';
 import { assertNoBulkData } from '../contracts/privacy';
-export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal}) {
+export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal;dispatch?:(command:UICommand)=>DispatchResult;whenIdle?:(id:ArtifactId)=>Promise<void>}) {
  const signal=()=>options.signal?.()??new AbortController().signal;
  const wrap=<T>(schema:z.ZodType<T>,description:string,execute:(input:T)=>Promise<unknown>)=>({
   description, parameters:schema,
@@ -13,10 +13,11 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
   edit_artifact:wrap(EditArtifactInputSchema,'Apply a bounded typed state patch only at the observed revision',async({artifactRef,expectedRevision,commands})=>{
    for(const command of commands)if(command.kind==='select')await options.bridge.lookupFare(command.fareId,['id']);
    let current=options.store.get(artifactRef);if(current.revision!==expectedRevision)return {artifactId:artifactRef,status:'stale',revision:current.revision};
-   for(const command of commands){const result=options.store.dispatch({...command,artifactId:artifactRef,expectedRevision:current.revision});if(result.status==='stale')return {artifactId:artifactRef,...result};current=options.store.get(artifactRef);}
-   return {artifactId:artifactRef,status:'applied',revision:current.revision};
+   for(const command of commands){const result=(options.dispatch??options.store.dispatch)({...command,artifactId:artifactRef,expectedRevision:current.revision});if(result.status==='stale')return {artifactId:artifactRef,...result};current=options.store.get(artifactRef);}
+   await options.whenIdle?.(artifactRef);
+   return {artifactId:artifactRef,status:'applied',revision:options.store.get(artifactRef).revision};
   }),
-  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest',async({coverage,artifactRef})=>{
+  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest. Coverage originIds/destinationIds use actual city slugs from the host location catalog (for example london, paris, barcelona), never dataset IDs.',async({coverage,artifactRef})=>{
    const artifactId=artifactRef??options.activeArtifactId();const before=options.store.get(artifactId);
    const manifest=DatasetManifestSchema.parse(await options.bridge.load(coverage,signal()));
    const current=options.store.get(artifactId);

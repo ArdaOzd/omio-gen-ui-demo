@@ -1,7 +1,9 @@
+import { legState, resolveBoundDatasetId } from '../state/leg-bindings'
+export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type PredicateTree, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
-export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: (command:UICommand)=>DispatchResult; record?: (input: unknown) => void; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
+export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: (command:UICommand)=>DispatchResult; record?: (input: unknown) => void; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
 export function TravelProvider({ services, children }: { services: TravelServices; children: ReactNode }) { return <TravelContext.Provider value={services}>{children}</TravelContext.Provider> }
 export function useTravelServices() { const services = useContext(TravelContext); if (!services) throw new Error('Travel provider missing'); return services }
@@ -29,10 +31,11 @@ export function filterPredicate(state: ArtifactUIState, includeDate = true): Pre
 }
 export function useTravelQuery(ref: string, datasetRef: string | undefined, make: (state: ArtifactUIState, datasetId: ReturnType<typeof DatasetIdSchema.parse>) => QueryIR) {
   const { services, state } = useArtifact(ref)
-  const datasetId = datasetRef ? DatasetIdSchema.parse(datasetRef) : state.datasetRefs[0]
+  const requestedId = datasetRef ? DatasetIdSchema.parse(datasetRef) : state.datasetRefs[0]
+  const datasetId=requestedId?resolveBoundDatasetId(state,services.bridge,requestedId):undefined
   const [resourceRevision, refresh] = useState(0)
   useEffect(() => datasetId ? services.bridge.subscribe(datasetId, () => refresh(n => n + 1)) : undefined, [services.bridge, datasetId])
-  const encoded = datasetId ? JSON.stringify(make(state, datasetId)) : ''
+  const encoded = datasetId ? JSON.stringify(make(legState(state,services.bridge.getManifest(datasetId).coverage), datasetId)) : ''
   const [result, setResult] = useState<{status:'loading'|'ready'|'error'; data?:BoundedQueryResult}>({status:'loading'})
   useEffect(() => {
     if (!datasetId) { setResult({status:'error'}); return }

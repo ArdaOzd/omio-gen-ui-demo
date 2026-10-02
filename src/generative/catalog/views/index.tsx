@@ -16,22 +16,26 @@ export function Comparison(props:WidgetProps) {
  const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),groupBy:['mode'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'fastest',op:'min',field:'durationMinutes'},{as:'count',op:'count'}],limit:4}));
  return <section className="travel-panel"><h3>{props.title??'Compare your way there'}</h3><div className="travel-table-wrap"><table><caption>Synthetic fares per passenger</caption><thead><tr><th scope="col">Mode</th><th scope="col">From</th><th scope="col">Fastest</th><th scope="col">Options</th></tr></thead><tbody>{result.data?.rows.map(row=><tr key={String(row.mode)}><th scope="row">{cityLabel(String(row.mode))}</th><td>{typeof row.minimum==='number'?money(row.minimum):'–'}</td><td>{typeof row.fastest==='number'?duration(row.fastest):'–'}</td><td>{row.count}</td></tr>)}</tbody></table></div></section>
 }
-export function Total(props:WidgetProps) {
- const {services,state}=useArtifact(props.artifactRef);const [facts,setFacts]=useState<BoundedFareFact[]>([])
- useEffect(()=>{let active=true;Promise.all(state.selectedFareIds.map(id=>services.bridge.lookupFare(id,[]))).then(items=>{if(active)setFacts(items)}).catch(()=>{if(active)setFacts([])});return()=>{active=false}},[services.bridge,state.selectedFareIds])
+function useSelectedFacts(ref:string){
+ const {services,state}=useArtifact(ref);const [facts,setFacts]=useState<BoundedFareFact[]>([]);const selected=JSON.stringify(state.selectedFareIds)
+ useEffect(()=>{let active=true;Promise.all(state.selectedFareIds.map(id=>services.bridge.lookupFare(id,[]))).then(items=>{if(active)setFacts(items)}).catch(()=>{if(active)setFacts([])});return()=>{active=false}},[services.bridge,selected])
+ return{services,state,facts}
+}
+export function Total(props:WidgetProps&{detail?:boolean}) {
+ const {services,state,facts}=useSelectedFacts(props.artifactRef)
  const passengers=state.datasetRefs[0]?services.bridge.getManifest(state.datasetRefs[0]).coverage.passengers:1
- return <section className="travel-total"><span>{props.title??'Your selected trip'}</span><strong>{money(facts.reduce((sum,f)=>sum+f.priceCents,0)*passengers)}</strong><p>{facts.length} selected leg{facts.length===1?'':'s'} · {passengers} passenger{passengers===1?'':'s'}</p><small>Synthetic total, including demo fees. No booking is available.</small></section>
+ return <section className="travel-total"><span>{props.title??'Your selected trip'}</span><strong>{money(facts.reduce((sum,f)=>sum+f.priceCents,0)*passengers)}</strong><p>{facts.length} selected leg{facts.length===1?'':'s'} · {passengers} passenger{passengers===1?'':'s'}</p><small>Synthetic total, including demo fees. No booking is available.</small>{props.detail&&<ol className="travel-timeline">{facts.map(fact=><li key={fact.id}><strong>{cityLabel(fact.originId)} → {cityLabel(fact.destinationId)}</strong><span>{fact.serviceDate} · {cityLabel(fact.mode)} · {money(fact.priceCents)} per passenger</span></li>)}</ol>}</section>
 }
 export function Coverage(props:WidgetProps) {
  const {services,state}=useArtifact(props.artifactRef); const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
  return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
 }
 export function Route(props:WidgetProps) {
- const {services,state}=useArtifact(props.artifactRef);const legs=state.datasetRefs.map(id=>services.bridge.getManifest(id).coverage);const cities=legs.length?[legs[0].originIds[0],...legs.map(l=>l.destinationIds[0])].filter((c):c is string=>typeof c==='string'):[]
+ const {services,state}=useArtifact(props.artifactRef);const legs=state.datasetRefs.map(id=>services.bridge.getManifest(id).coverage);const distinct=legs.filter((leg,index)=>legs.findIndex(other=>other.originIds[0]===leg.originIds[0]&&other.destinationIds[0]===leg.destinationIds[0])===index);const cities=distinct.length?[distinct[0].originIds[0],...distinct.map(l=>l.destinationIds[0])].filter((c):c is string=>typeof c==='string'):[]
  return <section className="travel-panel"><h3>{props.title??'Your route'}</h3><svg viewBox="0 0 600 135" role="img" aria-label={`Schematic route: ${cities.map(cityLabel).join(' to ')}`}><path d="M45 55H555" stroke="var(--travel-blue)" strokeWidth="3" fill="none"/>{cities.map((city,i)=>{const x=45+i*510/Math.max(1,cities.length-1);return <g key={`${city}-${i}`}><circle cx={x} cy="55" r="9" fill="var(--travel-blue)"/><text x={x} y="92" textAnchor="middle">{cityLabel(city)}</text></g>})}</svg><small>Schematic route, not a geographic map.</small></section>
 }
 export function Timeline(props:WidgetProps) {
- const result=useFareRows(props.artifactRef,props.datasetRef);const selected=result.rows.filter(row=>result.state.selectedFareIds.includes(row.id));const rows=selected.length?selected:result.rows.slice(0,5)
+ const result=useFareRows(props.artifactRef,props.datasetRef);const selected=useSelectedFacts(props.artifactRef);const rows=selected.facts.length?selected.facts:result.rows.slice(0,5)
  return <section className="travel-panel"><h3>{props.title??'Journey timeline'}</h3><ol className="travel-timeline">{rows.map(row=><li key={row.id}><span>{row.serviceDate} · {departure(row.departureMinutes)}</span><strong>{cityLabel(row.originId)} → {cityLabel(row.destinationId)}</strong><p>{cityLabel(row.mode)} · {duration(row.durationMinutes)} · {money(row.priceCents)}</p></li>)}</ol></section>
 }
 export function Plot(props:WidgetProps) {

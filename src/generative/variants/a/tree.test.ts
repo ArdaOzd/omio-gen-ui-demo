@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validatePresentTree } from './tree'
+import { prunePresentTree, validatePresentTree } from './tree'
 import { LEAKAGE_SENTINEL } from '../../contracts/privacy'
 const leaf=(name:string,key:string)=>({$type:name,$key:key,artifactRef:'artifact-1',datasetRef:'dataset-1'})
 const tree=(children:unknown[])=>({$type:'TravelSurface',artifactRef:'artifact-1',children})
@@ -17,5 +17,24 @@ describe('native present boundary',()=>{
   expect(()=>validatePresentTree(tree([leaf('FareCards','same'),leaf('FareCards','same')]),scope)).toThrow('Duplicate')
   let node:unknown=leaf('FareCards','f');for(let i=0;i<10;i++)node={...leaf('Stack',`stack-${i}`),children:[node]}
   expect(()=>validatePresentTree(tree([node]),scope)).toThrow('budget')
+ })
+})
+
+describe('partial native rendering boundary',()=>{
+ it('retains valid completed siblings and drops incomplete or row-shaped children',()=>{
+  const tree={$type:'TravelSurface',artifactRef:'artifact-1',children:[{$type:'ModeChips',artifactRef:'artifact-1'},{$type:'FareCards',artifactRef:'artifact-'},{$type:'Section',artifactRef:'artifact-1',payload:[{id:'f',priceCents:10}]},{$type:'DateStrip',artifactRef:'artifact-1'}]}
+  const result=prunePresentTree(tree,{artifactIds:new Set(['artifact-1']),datasetIds:new Set()},['children','1','artifactRef'])
+  expect(result?.children).toEqual([tree.children[0],tree.children[3]])
+ })
+ it('bounds streamed nodes and depth before native rendering while final validation rejects excess',()=>{
+  const tree={$type:'TravelSurface',artifactRef:'artifact-1',children:Array.from({length:90},()=>({$type:'ModeChips',artifactRef:'artifact-1'}))}
+  expect((prunePresentTree(tree)?.children as unknown[]).length).toBe(79)
+  expect(()=>validatePresentTree(tree)).toThrow()
+  let nested:unknown={$type:'ModeChips',artifactRef:'artifact-1'}
+  for(let i=0;i<20;i++)nested={$type:'Section',artifactRef:'artifact-1',children:nested}
+  const result=prunePresentTree({$type:'TravelSurface',artifactRef:'artifact-1',children:nested})
+  let depth=0;let current:unknown=result
+  while(current&&typeof current==='object'&&'children' in current){depth++;current=current.children}
+  expect(depth).toBeLessThanOrEqual(8)
  })
 })

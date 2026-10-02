@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-02T19:46:57.407Z",
+  "timestamp": "2026-10-02T20:18:47.057Z",
   "kind": "deterministic-native-runtime-proof",
   "liveModelAuthorship": false,
   "results": [
@@ -13,6 +13,7 @@
       "continuationPosts": 2,
       "latestSnapshot": true,
       "keyboard": true,
+      "focusPreserved": true,
       "reducedMotion": true,
       "horizontalOverflow": false,
       "pageErrors": []
@@ -27,6 +28,7 @@
       "continuationPosts": 2,
       "latestSnapshot": true,
       "keyboard": true,
+      "focusPreserved": true,
       "reducedMotion": true,
       "horizontalOverflow": false,
       "pageErrors": []
@@ -41,6 +43,7 @@
       "continuationPosts": 2,
       "latestSnapshot": true,
       "keyboard": true,
+      "focusPreserved": true,
       "reducedMotion": true,
       "horizontalOverflow": false,
       "pageErrors": []
@@ -55,6 +58,7 @@
       "continuationPosts": 2,
       "latestSnapshot": true,
       "keyboard": true,
+      "focusPreserved": true,
       "reducedMotion": true,
       "horizontalOverflow": false,
       "pageErrors": []
@@ -69,6 +73,7 @@
       "continuationPosts": 2,
       "latestSnapshot": true,
       "keyboard": true,
+      "focusPreserved": true,
       "reducedMotion": true,
       "horizontalOverflow": false,
       "pageErrors": []
