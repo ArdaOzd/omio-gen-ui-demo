@@ -12,7 +12,7 @@ import '../catalog/tokens.css'
 export type GenerativeChatProps={variant:'a'|'b';services:TravelServices;capture:()=>AgentContextEnvelope;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];onMessages?:(messages:UIMessage[])=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand'}
 export function GenerativeChat(props:GenerativeChatProps){
  const toolkit=useMemo(()=>{
-  const browser=createBrowserTools({bridge:props.services.bridge,store:props.services.state,activeArtifactId:()=>ArtifactIdSchema.parse(props.services.activeId())})
+  const browser=createBrowserTools({bridge:props.services.bridge,store:props.services.state,activeArtifactId:()=>ArtifactIdSchema.parse(props.services.activeId()),createArtifact:props.services.createArtifact})
   const frontend=Object.fromEntries(Object.entries(browser).map(([name,tool])=>[name,{...tool,type:'frontend' as const,render:()=> <div className="travel-caption" role="status">Travel data updated locally.</div>}]))
   return {...frontend,...(props.sceneToolkit??aToolkit)} satisfies Toolkit
  },[props.services,props.sceneToolkit])

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type PredicateTree, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
-export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: (command:UICommand)=>DispatchResult; record?: (input: unknown) => void }
+export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: (command:UICommand)=>DispatchResult; record?: (input: unknown) => void; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
 export function TravelProvider({ services, children }: { services: TravelServices; children: ReactNode }) { return <TravelContext.Provider value={services}>{children}</TravelContext.Provider> }
 export function useTravelServices() { const services = useContext(TravelContext); if (!services) throw new Error('Travel provider missing'); return services }

@@ -24,6 +24,7 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
       case 'dates': patch={dates:command.dates};break
       case 'sort': patch={sort:command.sort};break
       case 'stays': patch={stays:command.stays};break
+      case 'runtimeVariables': patch={runtimeVariables:command.runtimeVariables};break
       case 'modesByLeg': patch={modesByLeg:command.modesByLeg};break
       case 'datasets': patch={datasetRefs:command.datasetRefs};break
       case 'select': patch={selectedFareIds:command.selected ? [...new Set([...current.selectedFareIds,command.fareId])] : current.selectedFareIds.filter(id => id !== command.fareId)};break
@@ -36,6 +37,6 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
   }
   return {get,initializeMissing,dispatch,
     subscribe(id,listener) {const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
-    exportSnapshot(id) {const state=get(id);return CompactArtifactSnapshotSchema.parse({artifactId:state.artifactId,revision:state.revision,datasetRefs:state.datasetRefs,selectedFareIds:state.selectedFareIds,filters:state.filters,dates:state.dates,stays:state.stays,modesByLeg:state.modesByLeg,pending:state.pending,sort:state.sort,layoutSummary:'Travel artifact with local dates, filters and selections.',catalogVersion:CATALOG_VERSION})},
+    exportSnapshot(id) {const state=get(id);return CompactArtifactSnapshotSchema.parse({artifactId:state.artifactId,revision:state.revision,datasetRefs:state.datasetRefs,selectedFareIds:state.selectedFareIds,filters:state.filters,dates:state.dates,stays:state.stays,modesByLeg:state.modesByLeg,pending:state.pending,sort:state.sort,runtimeVariables:state.runtimeVariables,layoutSummary:'Travel artifact with local dates, filters and selections.',catalogVersion:CATALOG_VERSION})},
   }
 }
