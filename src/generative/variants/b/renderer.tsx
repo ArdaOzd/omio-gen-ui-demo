@@ -4,6 +4,7 @@ import { useTravelServices } from '../../catalog/context'
 import { ArtifactIdSchema,RuntimeVariablesSchema,QueryIRSchema,UICommandPatchSchema,parseQuery } from '../../contracts'
 import { bLibrary } from './components/library'
 import { validateReactiveProgram } from './query/validate-program'
+import { resolveBoundDatasetId } from '../../state/leg-bindings'
 import { rememberQueryResult } from './query/result-ownership'
 import { hydrateBindings,applyBindingState } from './state-bridge'
 export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{program:string;artifactRef:string;isStreaming?:boolean;onError?:(code:string)=>void}){
@@ -16,7 +17,7 @@ export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{p
  for(const binding of bindings)latest.current[binding.variable]=hydrated[binding.variable]
  for(const [key,value]of Object.entries(host.state.get(id).runtimeVariables))if(validation.result?.variables.includes(key))latest.current[key]=value
  const provider=useMemo(()=>({
-  local_query:async(input:Record<string,unknown>)=>{const query=QueryIRSchema.parse(input),manifests=query.sources.map(s=>host.bridge.getManifest(s.datasetRef));const parsed=parseQuery(query,manifests)
+  local_query:async(input:Record<string,unknown>)=>{const original=QueryIRSchema.parse(input),snapshot=host.state.get(id),query={...original,sources:original.sources.map(source=>({...source,datasetRef:resolveBoundDatasetId(snapshot,host.bridge,source.datasetRef)}))},manifests=query.sources.map(s=>host.bridge.getManifest(s.datasetRef));const parsed=parseQuery(query,manifests)
    const lane=JSON.stringify(query);controllers.current.get(lane)?.abort();const controller=new AbortController();controllers.current.set(lane,controller)
    const revision=host.state.get(id).revision,result=await host.bridge.query(parsed,controller.signal)
    if(controller.signal.aborted||host.state.get(id).revision!==revision)throw new Error('STALE_QUERY')
