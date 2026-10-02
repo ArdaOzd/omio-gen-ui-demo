@@ -8,7 +8,7 @@ export function buildMatrix(scenarios,{selected=['all'],seed=17}={}){
 }
 export function summarize(records){
  const passing=records.filter(record=>record.outcome==='pass').length
- return {cells:records.length,passing,failing:records.length-passing,byVariant:Object.fromEntries(['a','b'].map(variant=>[variant,{cells:records.filter(record=>record.variant===variant).length,passing:records.filter(record=>record.variant===variant&&record.outcome==='pass').length}])),humanRatings:null}
+ return {cells:records.length,excludedFromComparison:records.filter(record=>record.excludedFromComparison===true).length,passing,failing:records.length-passing,byVariant:Object.fromEntries(['a','b'].map(variant=>[variant,{cells:records.filter(record=>record.variant===variant).length,passing:records.filter(record=>record.variant===variant&&record.outcome==='pass').length}])),humanRatings:null}
 }
 export const withheld=[
  'Explore London to Paris October 9–15, 2026 for one passenger. Put cheap choices and quick choices in separate sections, make duration versus price visible, and let me switch modes and inspect a selected journey.',
@@ -25,6 +25,10 @@ export const withheld=[
  'Compose London→Paris October 9–15, 2026 with modes, dates, sorting and fares. I may stop and retry a replacement; keep the existing artifact usable and recover from one invalid scene without losing my choices.'
 ]
 
-export function canResume(previous,cell,appRevision){
- return previous?.appRevision===appRevision&&previous?.model==='gpt-6.1-sol'&&previous?.reasoning==='high'&&previous?.provider==='signed-in-codex'&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
+export function canResume(previous,cell,appRevision,fixture){
+ return previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.appRevision===appRevision&&previous?.model==='gpt-6.1-sol'&&previous?.reasoning==='high'&&previous?.provider==='signed-in-codex'&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
+}
+
+export function assertFixture(actual,expected){
+ if(!actual?.sourceVersion||!Number.isSafeInteger(actual?.rowCount)||actual.rowCount<1||actual.sourceVersion!==expected.sourceVersion||actual.rowCount!==expected.rowCount)throw new Error(`Fixture identity changed or could not be verified: expected ${JSON.stringify(expected)}, observed ${JSON.stringify(actual)}`)
 }
