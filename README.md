@@ -29,10 +29,13 @@ npm run check:catalog
 npm test
 npm run test:browser
 npm run build
+npm run benchmark:query # optional TS/DuckDB browser benchmark
 python3 -m unittest discover -s backend/tests -v
 ```
 
 Playwright uses installed Chrome. Signed-in live composition replay: `OMIO_DEMO_URL=http://127.0.0.1:5173 node verification/generative-ui/a/run-live.mjs`. Evidence lives in `verification/generative-ui/`; real model outputs and deterministic renderer fixtures are labeled separately. The optional TS-versus-DuckDB benchmark has its own dependency manifest under `benchmarks/query-engine/`; recorded thresholds and results are checked in.
+
+For automated cold-context model recordings, use `OMIO_SCENARIOS=cheap-fast,calendar npm run experiment:live` against the running demo. Set `OMIO_SCENARIOS=all` for all twelve families; interaction/recovery families additionally require the deterministic browser tests and manual steps listed in the plan. This can consume substantial signed-in model usage.
 
 For anonymous counterbalanced review, open `/study?participant=anonymous-01`. Both variants remain available. Ratings are entered by the human and exported locally; no winner has been chosen from machine checks.
 

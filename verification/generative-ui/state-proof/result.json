@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-10-02T20:35:22.172Z",
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "initialScene": "replayed from genuine case-0; text answer is a new live call",
+  "noChatForEdit": true,
+  "restoredBus": "true",
+  "activeArtifactId": "artifact-second",
+  "artifacts": [
+    {
+      "artifactId": "artifact-second",
+      "revision": 2,
+      "runtimeVariables": {},
+      "datasetRefs": [
+        "dataset-1hq3nnw"
+      ],
+      "selectedFareIds": [
+        "fare_000404844"
+      ],
+      "filters": {
+        "modes": [],
+        "carrierIds": [],
+        "directOnly": false
+      },
+      "dates": {
+        "start": "2026-10-09"
+      },
+      "stays": [],
+      "sort": {
+        "field": "priceCents",
+        "direction": "asc"
+      },
+      "modesByLeg": {
+        "london:paris": [
+          "bus"
+        ]
+      },
+      "pending": [],
+      "layoutSummary": "TravelSurface(SplitPane(Section(DateStrip,ModeChips,SortSelect,FareCards),StickySummary(CheapestFastest,SyntheticTotal)))",
+      "catalogVersion": "1.0.0"
+    },
+    {
+      "artifactId": "artifact-first",
+      "revision": 0,
+      "runtimeVariables": {},
+      "datasetRefs": [
+        "dataset-1hq3nnw"
+      ],
+      "selectedFareIds": [],
+      "filters": {
+        "modes": [],
+        "carrierIds": [],
+        "directOnly": false
+      },
+      "dates": {
+        "start": "2026-10-09"
+      },
+      "stays": [],
+      "sort": {
+        "field": "priceCents",
+        "direction": "asc"
+      },
+      "modesByLeg": {},
+      "pending": [],
+      "layoutSummary": "TravelSurface(SplitPane(Section(DateStrip,ModeChips,SortSelect,FareCards),StickySummary(CheapestFastest,SyntheticTotal)))",
+      "catalogVersion": "1.0.0"
+    }
+  ],
+  "textOnlyNoTool": true,
+  "textDeltas": 30,
+  "requests": 2,
+  "statuses": [
+    200
+  ],
+  "cancelStopped": true,
+  "preservedControl": "true",
+  "restoredViews": 2,
+  "restoredSelection": 1,
+  "errors": [],
+  "text": "Compare interfacesClassic searchVersion A · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nShow London to Paris options for October9–15,2026.\n\nLondon–Paris · Synthetic fares\nDates, transport and offers\nDeparture date\nTransport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nSort options\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nSynthetic fare choices\n\n7 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelect\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nFLIGHT\nCarrier X6trm8\n\n01:58 · 1h 23m\n\nLondon → Paris · 2026-10-09\n€42.19\nSelect\nFLIGHT\nCarrier 1pameyy\n\n09:08 · 1h 26m\n\nLondon → Paris · 2026-10-09\n€61.34\nSelect\nTRAIN\nCarrier Oc85vc\n\n01:02 · 2h 12m\n\nLondon → Paris · 2026-10-09\n€64.28\nSelect\nTRAIN\nCarrier Oc85vc\n\n10:54 · 2h 26m\n\nLondon → Paris · 2026-10-09\n€68.50\nSelect\nPrice versus journey time\nCheapest and fastest\nLowest fare\n€25.43\n\n8h 45m Bus\n\nFastest journey\n€42.19\n\n1h 23m Flight\n\nSynthetic total per passenger\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nLondon–Paris · Synthetic fares\nDates, transport and offers\nDeparture date\nTransport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nSort options\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nSynthetic fare choices\n\n3 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelected\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nPrice versus journey time\nCheapest and fastest\nLowest fare\n€25.43\n\n8h 45m Bus\n\nFastest journey\n€26.55\n\n8h 40m Bus\n\nSynthetic total per passenger\n€25.43\n\n1 selected leg · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nRetry\n\nText only: what are my active travel view’s currently selected modes, departure date and number of selected fares? Do not call tools and do not replace or generate any view.\n\nSelected mode: bus for London–Paris; no global mode filter. Departure date: 9 October 2026. Selected fares: 1.\n\nRetry\nActive travel view · artifact-second\nSynthetic fares\nSend\nStop"
+}

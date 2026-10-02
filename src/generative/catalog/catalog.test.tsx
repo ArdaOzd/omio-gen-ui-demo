@@ -48,3 +48,10 @@ it('keeps explicit leg mode controls separate from the global mode filter',async
  await screen.findByText('Flixbus');await waitFor(()=>expect(screen.queryByText('Eurostar')).not.toBeInTheDocument())
  expect(state.get(artifactId).filters.modes).toEqual([]);expect(state.get(artifactId).modesByLeg['london:paris']).toEqual(['bus'])
 })
+
+it.each(['ComparisonTable','PriceCalendar'])('explains a ready empty %s result instead of leaving a blank view',async kind=>{
+ const{services,state,manifest}=await setup();state.dispatch({kind:'filters',artifactId,filters:{...state.get(artifactId).filters,maxPriceCents:0}})
+ render(<TravelProvider services={services}><CatalogNode kind={kind} artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
+ await screen.findByText('No options match. Try another mode, date, or price limit.')
+ expect(screen.queryByText(/Infinity|NaN/)).not.toBeInTheDocument();expect(screen.queryByText('€0.00')).not.toBeInTheDocument()
+})
