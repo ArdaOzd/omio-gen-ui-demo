@@ -30,7 +30,7 @@ export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{p
   const compact:Record<string,unknown>={};for(const variable of validation.result?.variables??[]){if(variable in raw)compact[variable]=raw[variable]}
   latest.current=compact;applyBindingState(compact,bindings,host.state,host.dispatch??host.state.dispatch)
   const primitive=Object.fromEntries(Object.entries(compact).filter(([key,value])=>!bindings.some(b=>b.variable===key)&&(value===null||typeof value==='string'||typeof value==='number'||typeof value==='boolean')))
-  const variables=RuntimeVariablesSchema.parse(primitive),current=host.state.get(id)
+  const current=host.state.get(id),variables=RuntimeVariablesSchema.parse(Object.fromEntries([...Object.entries(primitive),...Object.entries(current.runtimeVariables).filter(([key])=>!(key in primitive))].slice(0,16)))
   if(JSON.stringify(current.runtimeVariables)!==JSON.stringify(variables))(host.dispatch??host.state.dispatch)({kind:'runtimeVariables',artifactId:id,expectedRevision:current.revision,runtimeVariables:variables})
  }}/>{validation.error&&<div className="travel-tools-error" role="alert">This generated view could not be applied. The last usable view remains available; ask the assistant to repair it.</div>}</>
 }
