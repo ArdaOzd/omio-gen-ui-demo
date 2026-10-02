@@ -5,12 +5,14 @@ import { catalogDescriptors } from '../../../catalog/generated/catalog'
 import { CatalogNode } from '../../../catalog/component'
 import { TravelProvider,useArtifact,useTravelServices } from '../../../catalog/context'
 import { WorkerResponseSchema } from '../../../query/protocol'
-import { isCurrentQueryResult } from '../query/result-ownership'
+import { useSceneQuery } from './query-context'
+import { runBoundQueryResult } from '../query/result-ownership'
 import { parseAction } from '../query/action'
 import { bPropsSchema } from '../query/schema'
 type Props=z.infer<typeof bPropsSchema>
 function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Props>){
- const host=useTravelServices(),{state}=useArtifact(props.artifactRef),trigger=useTriggerAction()
+ const host=useTravelServices(),{state}=useArtifact(props.artifactRef),trigger=useTriggerAction(),scene=useSceneQuery()
+ const generatedQuery=scene?.bindings.find(binding=>binding.kind===name&&binding.artifactRef===props.artifactRef&&binding.datasetRef===(props.datasetRef??undefined)&&binding.title===(props.title??undefined))
  const field=useStateField(`${props.artifactRef}:${props.binding??name}`,props.value)
  const hostValue=props.binding?state[props.binding]:undefined
  const encoded=JSON.stringify(field.value),desired=JSON.stringify(hostValue)
@@ -19,14 +21,16 @@ function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Pr
  const services=useMemo(()=>{
   const validated=WorkerResponseSchema.safeParse({kind:'result',id:'view',result:props.query})
   return {...host,bridge:{...host.bridge,query:async(input:Parameters<typeof host.bridge.query>[0],signal:AbortSignal)=>{
-   if(validated.success&&validated.data.kind==='result'&&isCurrentQueryResult(validated.data.result,props.artifactRef,state.revision))return validated.data.result
+   if(generatedQuery&&scene)return scene.execute(generatedQuery.queryId,signal,name)
+   if(validated.success&&validated.data.kind==='result')return runBoundQueryResult(validated.data.result,props.artifactRef,signal)
+   if(props.query!==undefined&&props.query!==null)throw new Error('GENERATED_QUERY_PENDING')
    return host.bridge.query(input,signal)
   }},dispatch:(command:Parameters<typeof host.state.dispatch>[0])=>{
    const result=(host.dispatch??host.state.dispatch)(command)
    if(result.status==='applied'&&props.binding)field.setValue(host.state.get(command.artifactId)[props.binding])
    return result
   }}
- },[host,queryEncoded,props.binding,field,state.revision,props.artifactRef])
+ },[host,queryEncoded,props.binding,field,state.revision,props.artifactRef,generatedQuery?.queryId,scene?.execute])
  const {children,value,binding,query,action,...common}=props
  const scalar=Object.fromEntries(Object.entries(common).filter(([,value])=>value!==null&&value!==undefined))
  const checked=bPropsSchema.parse(scalar)
