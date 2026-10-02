@@ -2,6 +2,8 @@
 
 > **Status:** focused decision for the generative travel demo. This document supersedes the architecture priority and scoring rubric in [`interactive-travel-ui-evaluation.md`](interactive-travel-ui-evaluation.md). The earlier report remains the source inventory and detailed framework survey; its server-owned `TravelPlan` and production quote model are not requirements for this demo.
 
+The implementation handoff for two comparable versions is [`generative-ui-ab-implementation-plan.md`](../plans/generative-ui-ab-implementation-plan.md). It defines Version A with assistant-ui `present`, Version B with an OpenUI reactive program, their shared browser data engine, tests, worktree ownership, and incremental PR gates.
+
 ## Decision to make
 
 Choose the framework and renderer for a conversational travel demo whose strongest quality is the experience: polished visual design, usable controls, adaptive arrangements, and fast direct manipulation. The assistant should stream prose and generated interface blocks into one conversation. It may choose different arrangements from a trusted component catalog, or a comparably safe constrained representation, rather than always returning one fixed itinerary workspace.

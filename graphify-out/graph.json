@@ -35,6 +35,52 @@
         "source_file": "docs/research/browser-local-generative-ui-decision.md"
       },
       {
+        "id": "docs_plans_generative_ui_ab_implementation_plan_ab_variant_comparison",
+        "label": "A/B generative renderer comparison",
+        "nodes": [
+          "docs_plans_generative_ui_ab_implementation_plan_version_a",
+          "docs_plans_generative_ui_ab_implementation_plan_version_b",
+          "docs_plans_generative_ui_ab_implementation_plan_query_ir",
+          "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+          "docs_plans_generative_ui_ab_implementation_plan_hard_gates"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "docs/plans/generative-ui-ab-implementation-plan.md"
+      },
+      {
+        "id": "docs_plans_generative_ui_ab_implementation_plan_implementation_delivery",
+        "label": "Incremental swarm implementation delivery",
+        "nodes": [
+          "docs_plans_generative_ui_ab_implementation_plan_repository_map",
+          "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+          "docs_plans_generative_ui_ab_implementation_plan_package_ownership",
+          "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+          "docs_plans_generative_ui_ab_implementation_plan_graph_ownership",
+          "docs_plans_generative_ui_ab_implementation_plan_completion_audit"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "docs/plans/generative-ui-ab-implementation-plan.md"
+      },
+      {
+        "id": "docs_plans_generative_ui_ab_implementation_plan_shared_browser_local_flow",
+        "label": "Shared browser-local generative UI flow",
+        "nodes": [
+          "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+          "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+          "docs_plans_generative_ui_ab_implementation_plan_bounded_tools",
+          "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+          "docs_plans_generative_ui_ab_implementation_plan_component_catalog"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "docs/plans/generative-ui-ab-implementation-plan.md"
+      },
+      {
         "id": "docs_research_generative_ui_resources_composition_options",
         "label": "Declarative Composition Options",
         "nodes": [
@@ -3106,6 +3152,286 @@
       "source_url": null
     },
     {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+      "label": "Controlled A/B comparison protocol",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "controlled a/b comparison protocol",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L630-L696",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+      "label": "Chat artifact and persistence policy",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "chat artifact and persistence policy",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L271-L280",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_baseline",
+      "label": "Verified repository baseline",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "verified repository baseline",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L53-L91",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_bounded_tools",
+      "label": "Bounded browser agent tools",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "bounded browser agent tools",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L252-L270",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+      "label": "FareDataBridge and UIStateStore",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "faredatabridge and uistatestore",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L204-L232",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_completion_audit",
+      "label": "Requirement completion audit",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "requirement completion audit",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L890-L915",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_component_catalog",
+      "label": "Canonical shared component catalog",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "canonical shared component catalog",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L281-L316",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_end_state",
+      "label": "End-state generative travel experience",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "end-state generative travel experience",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L92-L110",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_hard_gates",
+      "label": "Live A/B hard gates",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "live a/b hard gates",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L668-L684",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "label": "Phased implementation DAG",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "phased implementation dag",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L746-L824",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_query_engine",
+      "label": "Browser query-engine decision",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "browser query-engine decision",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L233-L245",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_query_ir",
+      "label": "Closed bounded QueryIR",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "closed bounded queryir",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L441-L490",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_repository_map",
+      "label": "Exact repository change map",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "exact repository change map",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L513-L629",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_risks",
+      "label": "Evidence-based fallback order",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "evidence-based fallback order",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L867-L889",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+      "label": "Shared browser-local architecture",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "shared browser-local architecture",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L111-L280",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_starter_prompt",
+      "label": "Fresh implementation starter prompt",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "fresh implementation starter prompt",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L916-L921",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_startup",
+      "label": "Fresh-context startup checklist",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "fresh-context startup checklist",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L28-L52",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+      "label": "Swarm worktree commit and PR protocol",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "swarm worktree commit and pr protocol",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L825-L866",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_user_intent",
+      "label": "A/B browser-local demo intent",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "a/b browser-local demo intent",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L7-L27",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_verification",
+      "label": "Implementation verification strategy",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "implementation verification strategy",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L697-L745",
+      "source_url": null
+    },
+    {
       "id": "docs_research_browser_local_generative_ui_decision_bounded_agent_tools",
       "label": "Bounded agent tools",
       "author": null,
@@ -3116,7 +3442,7 @@
       "file_type": "concept",
       "norm_label": "bounded agent tools",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L120-L132",
+      "source_location": "L122-L134",
       "source_url": null
     },
     {
@@ -3130,7 +3456,7 @@
       "file_type": "concept",
       "norm_label": "browser-demo evaluation rubric",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L134-L144",
+      "source_location": "L136-L146",
       "source_url": null
     },
     {
@@ -3144,7 +3470,7 @@
       "file_type": "concept",
       "norm_label": "compact current-context snapshot",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L106-L118",
+      "source_location": "L108-L120",
       "source_url": null
     },
     {
@@ -3158,7 +3484,7 @@
       "file_type": "concept",
       "norm_label": "experience and acceptance scenarios",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L15-L37",
+      "source_location": "L17-L39",
       "source_url": null
     },
     {
@@ -3172,7 +3498,7 @@
       "file_type": "concept",
       "norm_label": "browser farestore",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L88-L92",
+      "source_location": "L90-L94",
       "source_url": null
     },
     {
@@ -3186,7 +3512,7 @@
       "file_type": "concept",
       "norm_label": "granular trusted component catalog",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L30-L37",
+      "source_location": "L32-L39",
       "source_url": null
     },
     {
@@ -3200,7 +3526,7 @@
       "file_type": "concept",
       "norm_label": "opaque dataset references",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L66-L92",
+      "source_location": "L68-L94",
       "source_url": null
     },
     {
@@ -3214,7 +3540,7 @@
       "file_type": "concept",
       "norm_label": "trusted selector and action registry",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L104",
+      "source_location": "L102-L106",
       "source_url": null
     },
     {
@@ -3228,7 +3554,7 @@
       "file_type": "concept",
       "norm_label": "per-artifact uistatestore",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L94-L98",
+      "source_location": "L96-L100",
       "source_url": null
     },
     {
@@ -3242,7 +3568,7 @@
       "file_type": "concept",
       "norm_label": "browser-local vertical-slice evidence plan",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L211-L220",
+      "source_location": "L213-L222",
       "source_url": null
     },
     {
@@ -3400,6 +3726,20 @@
       "source_url": null
     },
     {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "label": "Generative travel UI A/B implementation plan",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "document",
+      "norm_label": "generative travel ui a/b implementation plan",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L1-L926",
+      "source_url": null
+    },
+    {
       "id": "docs_research_browser_local_generative_ui_decision_document",
       "label": "Browser-local generative travel UI decision",
       "author": null,
@@ -3410,7 +3750,7 @@
       "file_type": "document",
       "norm_label": "browser-local generative travel ui decision",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L1-L236",
+      "source_location": "L1-L247",
       "source_url": null
     },
     {
@@ -3512,6 +3852,96 @@
       "source_url": null
     },
     {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_graph_ownership",
+      "label": "Canonical graph ownership",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "canonical graph ownership",
+      "rationale": "Workers verify graphs in isolated worktrees while the integration owner commits canonical graph artifacts.",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L861-L866",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_package_ownership",
+      "label": "Disjoint package ownership index",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "disjoint package ownership index",
+      "rationale": "Twenty-one phase-major packages have explicit, non-overlapping implementation paths.",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L797-L824",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_state_bridge",
+      "label": "Version B host state bridge",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "version b host state bridge",
+      "rationale": "Every visible reactive edit must reach the application-owned store and compact next-turn snapshot.",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L489",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_synthetic_rules",
+      "label": "Synthetic fare and itinerary rules",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "synthetic fare and itinerary rules",
+      "rationale": "Synthetic prices and itinerary totals use one explicit deterministic rule shared by both variants.",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L246-L251",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_version_a",
+      "label": "Version A assistant-ui composition",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "version a assistant-ui composition",
+      "rationale": "Version A uses native present with registered scalar references and host-owned local bindings.",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L317-L398",
+      "source_url": null
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "label": "Version B OpenUI reactive program",
+      "author": null,
+      "captured_at": null,
+      "community": 1,
+      "community_name": "Browser-Local Generative UI",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "version b openui reactive program",
+      "rationale": "Version B lets the model author a closed reactive dependency graph over the same host data and components.",
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L399-L512",
+      "source_url": null
+    },
+    {
       "id": "docs_research_browser_local_generative_ui_decision_artifact_state_isolation",
       "label": "Artifact state isolation",
       "author": null,
@@ -3523,7 +3953,7 @@
       "norm_label": "artifact state isolation",
       "rationale": "Artifacts may reuse datasets while keeping versioned presentation state separate; sharing requires an explicit semantic state object.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L94-L98",
+      "source_location": "L96-L100",
       "source_url": null
     },
     {
@@ -3538,7 +3968,7 @@
       "norm_label": "assistant-ui native present stack",
       "rationale": "assistant-ui is selected for ordered message parts, custom React composition, and the smallest complete integration for the current React and Vite demo.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L166-L179",
+      "source_location": "L168-L181",
       "source_url": null
     },
     {
@@ -3553,7 +3983,7 @@
       "norm_label": "browser-local demo scope",
       "rationale": "The demo prioritizes polished adaptive interaction over production booking, live inventory, and a server-authoritative plan ledger.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L5-L13",
+      "source_location": "L7-L15",
       "source_url": null
     },
     {
@@ -3568,7 +3998,7 @@
       "norm_label": "dataset coverage contract",
       "rationale": "Dataset completeness must be declared or established by bounded loading rather than inferred from the current seed distribution.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L39-L64",
+      "source_location": "L41-L66",
       "source_url": null
     },
     {
@@ -3583,7 +4013,7 @@
       "norm_label": "generated html or react tradeoff",
       "rationale": "Generated code offers a higher one-off visual ceiling but adds sandboxing, lifecycle, accessibility, data-bridge, and semantic-state recovery costs.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L203-L209",
+      "source_location": "L205-L211",
       "source_url": null
     },
     {
@@ -3598,7 +4028,7 @@
       "norm_label": "streaming ui-state revision policy",
       "rationale": "Generated layouts bind to current host state, defaults fill only missing keys, and agent-proposed semantic changes apply only against a compatible UI-state revision so newer clicks survive streaming.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L100",
+      "source_location": "L102-L102",
       "source_url": null
     },
     {
@@ -3613,7 +4043,7 @@
       "norm_label": "synthetic itinerary total rule",
       "rationale": "Totals derive from selected synthetic fare rows under an explicit demo rule and are not presented as bookable quotes.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L104",
+      "source_location": "L102-L106",
       "source_url": null
     },
     {
@@ -4270,7 +4700,7 @@
       "file_type": "concept",
       "norm_label": "a2ui surface protocol role",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L159-L159",
+      "source_location": "L161-L161",
       "source_url": null
     },
     {
@@ -4284,7 +4714,7 @@
       "file_type": "concept",
       "norm_label": "ag-ui transport role",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L162-L162",
+      "source_location": "L164-L164",
       "source_url": null
     },
     {
@@ -4298,7 +4728,7 @@
       "file_type": "concept",
       "norm_label": "ant design x chat role",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L158-L158",
+      "source_location": "L160-L160",
       "source_url": null
     },
     {
@@ -4312,7 +4742,7 @@
       "file_type": "concept",
       "norm_label": "copilotkit dynamic a2ui alternative",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L191-L193",
+      "source_location": "L193-L195",
       "source_url": null
     },
     {
@@ -4326,7 +4756,7 @@
       "file_type": "concept",
       "norm_label": "json-render substitute renderer",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L187-L189",
+      "source_location": "L189-L191",
       "source_url": null
     },
     {
@@ -4340,7 +4770,7 @@
       "file_type": "concept",
       "norm_label": "openui reactive program alternative",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L183-L185",
+      "source_location": "L185-L187",
       "source_url": null
     },
     {
@@ -4354,7 +4784,7 @@
       "file_type": "concept",
       "norm_label": "thirteen-repository comparison",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L146-L164",
+      "source_location": "L148-L166",
       "source_url": null
     },
     {
@@ -4551,7 +4981,7 @@
       "norm_label": "google generative ui research role",
       "rationale": "The research demonstrates a generated-code visual ceiling but is not scored as a reusable SDK.",
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L164-L164",
+      "source_location": "L166-L166",
       "source_url": null
     },
     {
@@ -9317,7 +9747,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L175-L177",
+      "source_location": "L177-L179",
       "weight": 1.0
     },
     {
@@ -9327,7 +9757,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L187-L189",
+      "source_location": "L189-L191",
       "weight": 1.0
     },
     {
@@ -9337,7 +9767,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L183-L185",
+      "source_location": "L185-L187",
       "weight": 1.0
     },
     {
@@ -9347,7 +9777,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L120",
+      "source_location": "L102-L122",
       "weight": 1.0
     },
     {
@@ -9371,13 +9801,123 @@
       "weight": 1.0
     },
     {
+      "source": "docs_research_browser_local_generative_ui_decision_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "relation": "implemented_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/research/browser-local-generative-ui-decision.md",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_component_catalog",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_a",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L281-L316",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_component_catalog",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L281-L316",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_package_ownership",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L797-L824",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_verification",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L746-L824",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_query_engine",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_query_ir",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L233-L245",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_query_ir",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L441-L490",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_repository_map",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L513-L629",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_a",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L111-L280",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L111-L280",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L825-L866",
+      "weight": 1.0
+    },
+    {
       "source": "docs_research_browser_local_generative_ui_decision_assistant_ui_native_present",
       "target": "docs_research_browser_local_generative_ui_decision_granular_component_catalog",
       "relation": "implements",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L168-L177",
+      "source_location": "L170-L179",
       "weight": 1.0
     },
     {
@@ -9571,13 +10111,73 @@
       "weight": 1.0
     },
     {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_user_intent",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+      "relation": "motivates",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L7-L27",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_version_a",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+      "relation": "participates_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L317-L398",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+      "relation": "participates_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L399-L512",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_graph_ownership",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L861-L866",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_state_bridge",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L489",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_synthetic_rules",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_end_state",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L246-L251",
+      "weight": 1.0
+    },
+    {
       "source": "docs_research_browser_local_generative_ui_decision_artifact_state_isolation",
       "target": "docs_research_browser_local_generative_ui_decision_ui_state_store",
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L94-L98",
+      "source_location": "L96-L100",
       "weight": 1.0
     },
     {
@@ -9587,7 +10187,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L7-L13",
+      "source_location": "L9-L15",
       "weight": 1.0
     },
     {
@@ -9597,7 +10197,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L39-L64",
+      "source_location": "L41-L66",
       "weight": 1.0
     },
     {
@@ -9607,7 +10207,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L203-L209",
+      "source_location": "L205-L211",
       "weight": 1.0
     },
     {
@@ -9617,7 +10217,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L100",
+      "source_location": "L102-L102",
       "weight": 1.0
     },
     {
@@ -9627,7 +10227,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L104",
+      "source_location": "L102-L106",
       "weight": 1.0
     },
     {
@@ -9831,13 +10431,333 @@
       "weight": 1.0
     },
     {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_state_bridge",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L271-L280",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_bounded_tools",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L252-L270",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_bounded_tools",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L204-L232",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L111-L280",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L204-L232",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_query_engine",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L233-L245",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_synthetic_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L246-L251",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_bounded_tools",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L252-L270",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L271-L280",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_startup",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L28-L52",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_component_catalog",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L281-L316",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_a",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L317-L398",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_version_b",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L399-L512",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_query_ir",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L441-L490",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_state_bridge",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L489",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_repository_map",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L513-L629",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_baseline",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L53-L91",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L630-L696",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_hard_gates",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L668-L684",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_verification",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L697-L745",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_user_intent",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L7-L27",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L746-L824",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_package_ownership",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L797-L824",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L825-L866",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_graph_ownership",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L861-L866",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_risks",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L867-L889",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_completion_audit",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L890-L915",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_starter_prompt",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L916-L921",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_document",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_end_state",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L92-L110",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_risks",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L867-L889",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L111-L280",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_starter_prompt",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L916-L921",
+      "weight": 1.0
+    },
+    {
       "source": "docs_research_browser_local_generative_ui_decision_bounded_agent_tools",
       "target": "docs_research_browser_local_generative_ui_decision_trusted_selector_action_registry",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L120-L132",
+      "source_location": "L122-L134",
       "weight": 1.0
     },
     {
@@ -9847,7 +10767,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L106-L118",
+      "source_location": "L108-L120",
       "weight": 1.0
     },
     {
@@ -9857,7 +10777,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L106-L118",
+      "source_location": "L108-L120",
       "weight": 1.0
     },
     {
@@ -9867,7 +10787,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L106-L118",
+      "source_location": "L108-L120",
       "weight": 1.0
     },
     {
@@ -9877,7 +10797,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L134-L144",
+      "source_location": "L136-L146",
       "weight": 1.0
     },
     {
@@ -9887,7 +10807,17 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L146-L164",
+      "source_location": "L148-L166",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_browser_local_generative_ui_decision_document",
+      "target": "docs_research_browser_local_generative_ui_decision_assistant_ui_native_present",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/research/browser-local-generative-ui-decision.md",
+      "source_location": "L168-L181",
       "weight": 1.0
     },
     {
@@ -9897,17 +10827,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L15-L37",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_research_browser_local_generative_ui_decision_document",
-      "target": "docs_research_browser_local_generative_ui_decision_assistant_ui_native_present",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L166-L179",
+      "source_location": "L17-L39",
       "weight": 1.0
     },
     {
@@ -9917,7 +10837,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L203-L209",
+      "source_location": "L205-L211",
       "weight": 1.0
     },
     {
@@ -9927,7 +10847,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L211-L220",
+      "source_location": "L213-L222",
       "weight": 1.0
     },
     {
@@ -9937,7 +10857,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L5-L13",
+      "source_location": "L7-L15",
       "weight": 1.0
     },
     {
@@ -9947,7 +10867,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L88-L92",
+      "source_location": "L90-L94",
       "weight": 1.0
     },
     {
@@ -9957,32 +10877,12 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L94-L98",
+      "source_location": "L96-L100",
       "weight": 1.0
     },
     {
       "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
       "target": "docs_research_browser_local_generative_ui_decision_assistant_ui_native_present",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L152-L152",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
-      "target": "docs_research_browser_local_generative_ui_decision_openui_reactive_program",
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L153-L153",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
-      "target": "docs_research_browser_local_generative_ui_decision_json_render_substitute_renderer",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -9992,7 +10892,7 @@
     },
     {
       "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
-      "target": "docs_research_browser_local_generative_ui_decision_copilotkit_dynamic_a2ui",
+      "target": "docs_research_browser_local_generative_ui_decision_openui_reactive_program",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
@@ -10002,12 +10902,32 @@
     },
     {
       "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
+      "target": "docs_research_browser_local_generative_ui_decision_json_render_substitute_renderer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/research/browser-local-generative-ui-decision.md",
+      "source_location": "L156-L156",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
+      "target": "docs_research_browser_local_generative_ui_decision_copilotkit_dynamic_a2ui",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/research/browser-local-generative-ui-decision.md",
+      "source_location": "L157-L157",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_research_browser_local_generative_ui_decision_thirteen_repository_comparison",
       "target": "docs_research_browser_local_generative_ui_decision_ant_design_x_chat_role",
       "relation": "references",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L158-L158",
+      "source_location": "L160-L160",
       "weight": 1.0
     },
     {
@@ -10017,7 +10937,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L159-L159",
+      "source_location": "L161-L161",
       "weight": 1.0
     },
     {
@@ -10027,7 +10947,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L162-L162",
+      "source_location": "L164-L164",
       "weight": 1.0
     },
     {
@@ -10037,7 +10957,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L164-L164",
+      "source_location": "L166-L166",
       "weight": 1.0
     },
     {
@@ -10047,7 +10967,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L104",
+      "source_location": "L102-L106",
       "weight": 1.0
     },
     {
@@ -10057,7 +10977,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L104",
+      "source_location": "L102-L106",
       "weight": 1.0
     },
     {
@@ -10067,7 +10987,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L211-L220",
+      "source_location": "L213-L222",
       "weight": 1.0
     },
     {
@@ -10821,13 +11741,23 @@
       "weight": 1.0
     },
     {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L204-L232",
+      "weight": 1.0
+    },
+    {
       "source": "docs_research_browser_local_generative_ui_decision_fare_store",
       "target": "docs_research_browser_local_generative_ui_decision_opaque_dataset_references",
       "relation": "shares_data_with",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L66-L92",
+      "source_location": "L68-L94",
       "weight": 1.0
     },
     {
@@ -10837,7 +11767,37 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L94-L98",
+      "source_location": "L96-L100",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_completion_audit",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_hard_gates",
+      "relation": "verifies",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L890-L915",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_hard_gates",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+      "relation": "verifies",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L668-L684",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_plans_generative_ui_ab_implementation_plan_verification",
+      "target": "docs_plans_generative_ui_ab_implementation_plan_hard_gates",
+      "relation": "verifies",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md",
+      "source_location": "L697-L745",
       "weight": 1.0
     },
     {
@@ -10847,7 +11807,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.75,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L100-L104",
+      "source_location": "L102-L106",
       "weight": 1.0
     },
     {
@@ -10857,7 +11817,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.75,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L94-L118",
+      "source_location": "L96-L120",
       "weight": 1.0
     },
     {
@@ -10917,7 +11877,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L5-L13",
+      "source_location": "L7-L15",
       "weight": 1.0
     },
     {
@@ -10927,7 +11887,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.85,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L106-L118",
+      "source_location": "L108-L120",
       "weight": 1.0
     },
     {
@@ -11087,7 +12047,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L159-L159",
+      "source_location": "L161-L161",
       "weight": 1.0
     },
     {
@@ -11097,7 +12057,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L162-L162",
+      "source_location": "L164-L164",
       "weight": 1.0
     },
     {
@@ -11107,7 +12067,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L158-L158",
+      "source_location": "L160-L160",
       "weight": 1.0
     },
     {
@@ -11117,7 +12077,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L166-L179",
+      "source_location": "L168-L181",
       "weight": 1.0
     },
     {
@@ -11127,7 +12087,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L164-L164",
+      "source_location": "L166-L166",
       "weight": 1.0
     },
     {
@@ -11137,7 +12097,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L187-L189",
+      "source_location": "L189-L191",
       "weight": 1.0
     },
     {
@@ -11147,7 +12107,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.95,
       "source_file": "docs/research/browser-local-generative-ui-decision.md",
-      "source_location": "L183-L185",
+      "source_location": "L185-L187",
       "weight": 1.0
     }
   ],
@@ -11182,6 +12142,52 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/research/browser-local-generative-ui-decision.md"
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_ab_variant_comparison",
+      "label": "A/B generative renderer comparison",
+      "nodes": [
+        "docs_plans_generative_ui_ab_implementation_plan_version_a",
+        "docs_plans_generative_ui_ab_implementation_plan_version_b",
+        "docs_plans_generative_ui_ab_implementation_plan_query_ir",
+        "docs_plans_generative_ui_ab_implementation_plan_ab_protocol",
+        "docs_plans_generative_ui_ab_implementation_plan_hard_gates"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md"
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_implementation_delivery",
+      "label": "Incremental swarm implementation delivery",
+      "nodes": [
+        "docs_plans_generative_ui_ab_implementation_plan_repository_map",
+        "docs_plans_generative_ui_ab_implementation_plan_phased_dag",
+        "docs_plans_generative_ui_ab_implementation_plan_package_ownership",
+        "docs_plans_generative_ui_ab_implementation_plan_swarm_protocol",
+        "docs_plans_generative_ui_ab_implementation_plan_graph_ownership",
+        "docs_plans_generative_ui_ab_implementation_plan_completion_audit"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md"
+    },
+    {
+      "id": "docs_plans_generative_ui_ab_implementation_plan_shared_browser_local_flow",
+      "label": "Shared browser-local generative UI flow",
+      "nodes": [
+        "docs_plans_generative_ui_ab_implementation_plan_shared_architecture",
+        "docs_plans_generative_ui_ab_implementation_plan_browser_state",
+        "docs_plans_generative_ui_ab_implementation_plan_bounded_tools",
+        "docs_plans_generative_ui_ab_implementation_plan_artifact_persistence",
+        "docs_plans_generative_ui_ab_implementation_plan_component_catalog"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/plans/generative-ui-ab-implementation-plan.md"
     },
     {
       "id": "docs_research_generative_ui_resources_composition_options",
@@ -11325,5 +12331,5 @@
       "source_file": "backend/README.md"
     }
   ],
-  "built_at_commit": "e3fa7eff72316993ef5ef692f17b4391757d083c"
+  "built_at_commit": "e6f718d"
 }

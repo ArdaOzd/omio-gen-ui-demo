@@ -234,9 +234,15 @@
     "semantic_hash": "1391d96e640a5a4abf5929925e60cb2e"
   },
   "docs/research/browser-local-generative-ui-decision.md": {
-    "mtime": 1790959314.1129816,
-    "seen": 1790959608.044471,
-    "ast_hash": "ec065f7d882bbd7a7266e393ed4ab05e",
-    "semantic_hash": "ec065f7d882bbd7a7266e393ed4ab05e"
+    "mtime": 1790965750.2246902,
+    "seen": 1790966685.963756,
+    "ast_hash": "9b72e4353c1702bab6cf8d6b6772591f",
+    "semantic_hash": "9b72e4353c1702bab6cf8d6b6772591f"
+  },
+  "docs/plans/generative-ui-ab-implementation-plan.md": {
+    "mtime": 1790966427.3836858,
+    "seen": 1790966685.963756,
+    "ast_hash": "f6ec6dccba336a32bff5a90c05d13807",
+    "semantic_hash": "f6ec6dccba336a32bff5a90c05d13807"
   }
 }
