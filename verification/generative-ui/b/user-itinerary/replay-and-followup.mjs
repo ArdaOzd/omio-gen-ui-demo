@@ -6,10 +6,10 @@ const source=(await readFile(`${directory}/accepted-repair.openui`,'utf8')).trim
 const failed=JSON.parse(await readFile(`${directory}/failed-part.json`,'utf8'));delete failed.rejectedSourceRetained
 const browser=await chromium.launch({channel:'chrome',headless:true})
 const context=await browser.newContext({viewport:{width:1280,height:1000}}),page=await context.newPage(),requests=[],responses=[],errors=[]
-let inflight=0,lastActivity=Date.now()
+let inflight=0,lastActivity=Date.now(),requestStarted=Date.now(),closing=false
 page.on('pageerror',error=>errors.push(error.message))
-page.on('request',request=>{if(request.url().endsWith('/api/chat')){requests.push(request.postDataJSON());inflight++;lastActivity=Date.now();console.log('CHAT_REQUEST',requests.length)}})
-page.on('response',async response=>{if(response.url().endsWith('/api/chat')){try{responses.push({status:response.status(),body:(await response.body()).toString()})}finally{inflight--;lastActivity=Date.now();console.log('CHAT_FINISH',response.status())}}})
+page.on('request',request=>{if(request.url().endsWith('/api/chat')){requests.push(request.postDataJSON());inflight++;requestStarted=Date.now();lastActivity=Date.now();console.log('CHAT_REQUEST',requests.length)}})
+page.on('response',async response=>{if(response.url().endsWith('/api/chat')){try{responses.push({status:response.status(),body:(await response.body()).toString()})}catch(error){if(!closing)errors.push(error.message)}finally{inflight--;lastActivity=Date.now();console.log('CHAT_FINISH',response.status())}}})
 page.on('requestfailed',request=>{if(request.url().endsWith('/api/chat')){inflight--;lastActivity=Date.now()}})
 await page.goto('http://127.0.0.1:5194/b')
 const replay=await page.evaluate(async({captured,source,failed})=>{
@@ -38,10 +38,10 @@ const replayText=await page.locator('body').innerText();await page.screenshot({p
 await writeFile(`${directory}/replay-result.json`,JSON.stringify({timestamp:new Date().toISOString(),classification:'Exact accepted user source and failed part restored in isolated browser context; reconstructed itinerary user prompt; real Python fare API and browser query worker. Descending host sort intentionally seeded to check current-state preservation.',passed:true,capturedAggregateRows:captured.manifests.map(manifest=>manifest.rowCount),refreshedAggregateRows:replay.manifests.map(manifest=>manifest.rowCount),replay,requests:requests.length,errors,visibleText:replayText},null,2))
 console.log('REPLAY_PASS')
 await page.getByRole('textbox',{name:'Message'}).fill('I will stay 5 days in Paris. Keep Barcelona to Prague on October 3, Prague to Paris on October 5, and Paris to Prague on October 10, 2026. Show train and bus only, with clear per-leg empty results if none exist in the loaded demo. Preserve my current sort.');await page.getByRole('button',{name:'Send message'}).click()
-const deadline=Date.now()+240000;let completed=false
-while(Date.now()<deadline){await page.waitForTimeout(400);if(requests.length&&inflight===0&&Date.now()-lastActivity>2000){completed=true;break}}
+const deadline=Date.now()+600000;let completed=false
+while(Date.now()<deadline){await page.waitForTimeout(400);if(inflight&&Date.now()-requestStarted>180000)break;if(requests.length&&inflight===0&&Date.now()-lastActivity>2000){completed=true;break}}
 const visibleText=await page.locator('body').innerText()
 await page.screenshot({path:`${directory}/followup.png`,fullPage:true})
 await writeFile(`${directory}/followup-result.json`,JSON.stringify({timestamp:new Date().toISOString(),classification:'Signed-in Codex gpt-6.1-sol/high follow-up attempt to captured accepted-source replay in an isolated browser; no user session changes.',passed:completed&&responses.every(response=>response.status===200),transportCompleted:completed,requests,responses,errors,visibleText},null,2))
 console.log('FOLLOWUP',JSON.stringify({completed,requests:requests.length,statuses:responses.map(response=>response.status),errors,preparing:visibleText.includes('Preparing reactive view…')}))
-await context.close();await browser.close()
+closing=true;await context.close();await browser.close()
