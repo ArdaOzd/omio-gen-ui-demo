@@ -6,6 +6,7 @@ import { catalogDescriptors,catalogHash,catalogVersion } from '../src/generative
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
 import { codexDecision, type Decision } from './codex-provider';
 import type { ChatRequest } from './request-schema';
+import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { acceptTurn,spendTool } from './turn-budget';
 export async function handleChat(request:ChatRequest,response:ServerResponse,signal:AbortSignal):Promise<void>{
  const key=acceptTurn(request);const tools=request.tools??{};
@@ -31,6 +32,7 @@ export async function handleChat(request:ChatRequest,response:ServerResponse,sig
    const tool=tools[decision.toolName];if(!tool)throw new Error('Model selected an unregistered tool');
    const input:unknown=JSON.parse(decision.toolInput);assertNoBulkData(input);
    z.fromJSONSchema(tool.parameters).parse(input);
+   if(decision.toolName==='present')validatePresentTree(input,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});
    spendTool(key,decision.toolName);
    writer.write({type:'tool-input-available',toolCallId:callId,toolName:decision.toolName,input});
   }
