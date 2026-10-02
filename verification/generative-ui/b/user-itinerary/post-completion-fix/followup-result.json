@@ -1,0 +1,2824 @@
+{
+  "timestamp": "2026-10-02T23:08:47.932Z",
+  "servedAgent": {
+    "status": "ok",
+    "service": "omio-generative-agent",
+    "model": "gpt-6.1-sol",
+    "provider": "signed-in-codex",
+    "schemaVersion": "1.0.0",
+    "appRevision": "a36f4340bf66219ff7c6e1205cc216e7c71865b8",
+    "pid": 59406
+  },
+  "classification": "Signed-in Codex gpt-6.1-sol/high follow-up attempt to captured accepted-source replay in an isolated browser; no user session changes.",
+  "passed": true,
+  "finalStop": true,
+  "semanticPass": true,
+  "uiErrors": 0,
+  "transportCompleted": true,
+  "requests": [
+    {
+      "tools": {
+        "compose_reactive_scene": {
+          "description": "Write an OpenUI v0.5 program. Each newline separates a statement: name = Expression. root must be TravelSurface. All forty registered travel components use the same positional signature NAME(artifactRef, datasetRef?, actionRef?, selectorRef?, title?, variant?, children?, value?, binding?, query?, action?, body?). Optional positional fields use null. children is an array of component references. Declare state as $name = literal, use $name or $name.field in expressions, including ternary condition ? component : null. Bind a component's value to a $variable and binding to one of filters, dates, sort, stays, modesByLeg, selectedFareIds. Example of a generic binding: control = ModeChips(artifactRef, null, null, null, \"Modes\", null, null, $filters, \"filters\"). Use Query(\"local_query\", QueryIR) and supply its declaration reference to a view's query argument. Use Mutation(\"patch_artifact_state\", typed command patch); ordered Action([@Run(mutation), @Set($show, true)]) or @Reset($show) goes in the action argument of RetryAction. Computed queries and conditional children may depend on state variables. Programs must have different dependency and arrangement choices for different user needs.\nUse Query(\"local_query\", QueryIR), Mutation(\"patch_artifact_state\", typedUICommandPatch). No refresh intervals. Bind controls using canonical positional six props then children,value,binding,query,action,body. Titles are short headings of at most160 characters. Callout explanatory copy belongs in body (last argument), at most600 characters. Legacy Callout text in title is displayed as body when longer than160 characters. Object state is allowed only for validated semantic bindings. Other state is primitive and bounded. Query result props refer to Query declarations; never literal rows. Each editable semantic variable must have at least one component binding to its host field; Global ModeChips omits datasetRef and binds the entire filters object. A per-leg ModeChips supplies datasetRef and binds the entire modesByLeg map; use the stable originId:destinationId key in query mode predicates. Never bind a scalar mode. Optional positional arguments use null. Layout children contain references or conditionals. RetryAction can run an ordered Action as its last argument. Use latest context values as defaults. ComparisonTable, ComparisonMatrix and ModeBreakdown queries produce mode, minimum (min priceCents), fastest (min durationMinutes), count. PriceCalendar queries produce serviceDate, minimum and count. FareCards, FarePicker, ItineraryTimeline and DurationPricePlot queries project all FareRow fields so shared widgets can display them.\nHost semantic fields: {\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"filters\":{\"type\":\"object\",\"properties\":{\"modes\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}},\"carrierIds\":{\"maxItems\":20,\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}},\"minPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxDurationMinutes\":{\"type\":\"integer\",\"exclusiveMinimum\":0,\"maximum\":9007199254740991},\"directOnly\":{\"type\":\"boolean\"}},\"required\":[\"modes\",\"carrierIds\",\"directOnly\"],\"additionalProperties\":false},\"dates\":{\"type\":\"object\",\"properties\":{\"start\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"},\"end\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"}},\"required\":[\"start\"],\"additionalProperties\":false},\"sort\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"enum\":[\"priceCents\",\"durationMinutes\",\"departureMinutes\"]},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"field\",\"direction\"],\"additionalProperties\":false},\"stays\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"cityId\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"nights\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":30}},\"required\":[\"cityId\",\"nights\"],\"additionalProperties\":false}},\"modesByLeg\":{\"type\":\"object\",\"propertyNames\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"additionalProperties\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}}},\"selectedFareIds\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}}},\"required\":[\"filters\",\"dates\",\"sort\",\"stays\",\"modesByLeg\",\"selectedFareIds\"],\"additionalProperties\":false}\nlocal_query input: {\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"version\":{\"type\":\"number\",\"const\":1},\"sources\":{\"minItems\":1,\"maxItems\":3,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"datasetRef\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"alias\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}},\"required\":[\"datasetRef\",\"alias\"],\"additionalProperties\":false}},\"where\":{\"$ref\":\"#/$defs/__schema0\"},\"project\":{\"maxItems\":16,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]}},\"groupBy\":{\"maxItems\":3,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]}},\"metrics\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"as\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"op\":{\"type\":\"string\",\"enum\":[\"count\",\"sum\",\"min\",\"max\",\"avg\"]},\"field\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]}},\"required\":[\"as\",\"op\"],\"additionalProperties\":false}},\"orderBy\":{\"maxItems\":3,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"field\",\"direction\"],\"additionalProperties\":false}},\"topK\":{\"type\":\"object\",\"properties\":{\"k\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":5},\"by\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"k\",\"by\",\"direction\"],\"additionalProperties\":false},\"joins\":{\"maxItems\":2,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"rightAlias\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"leftKey\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]},\"rightKey\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]},\"kind\":{\"type\":\"string\",\"enum\":[\"inner\",\"left\"]}},\"required\":[\"rightAlias\",\"leftKey\",\"rightKey\",\"kind\"],\"additionalProperties\":false}},\"limit\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":100}},\"required\":[\"version\",\"sources\",\"limit\"],\"additionalProperties\":false,\"$defs\":{\"__schema0\":{\"anyOf\":[{\"type\":\"object\",\"properties\":{\"all\":{\"minItems\":1,\"maxItems\":16,\"type\":\"array\",\"items\":{\"$ref\":\"#/$defs/__schema0\"}}},\"required\":[\"all\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"any\":{\"minItems\":1,\"maxItems\":16,\"type\":\"array\",\"items\":{\"$ref\":\"#/$defs/__schema0\"}}},\"required\":[\"any\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]},\"op\":{\"type\":\"string\",\"enum\":[\"eq\",\"neq\",\"in\",\"gte\",\"lte\",\"between\",\"contains\"]},\"value\":{\"anyOf\":[{\"anyOf\":[{\"type\":\"string\",\"maxLength\":160},{\"type\":\"number\"},{\"type\":\"boolean\"}]},{\"minItems\":1,\"maxItems\":20,\"type\":\"array\",\"items\":{\"anyOf\":[{\"type\":\"string\",\"maxLength\":160},{\"type\":\"number\"},{\"type\":\"boolean\"}]}}]}},\"required\":[\"field\",\"op\",\"value\"],\"additionalProperties\":false}]}}}\npatch_artifact_state input: {\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"oneOf\":[{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"filters\"},\"filters\":{\"type\":\"object\",\"properties\":{\"modes\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}},\"carrierIds\":{\"maxItems\":20,\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}},\"minPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxDurationMinutes\":{\"type\":\"integer\",\"exclusiveMinimum\":0,\"maximum\":9007199254740991},\"directOnly\":{\"type\":\"boolean\"}},\"required\":[\"modes\",\"carrierIds\",\"directOnly\"],\"additionalProperties\":false}},\"required\":[\"kind\",\"filters\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"dates\"},\"dates\":{\"type\":\"object\",\"properties\":{\"start\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"},\"end\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"}},\"required\":[\"start\"],\"additionalProperties\":false}},\"required\":[\"kind\",\"dates\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"sort\"},\"sort\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"enum\":[\"priceCents\",\"durationMinutes\",\"departureMinutes\"]},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"field\",\"direction\"],\"additionalProperties\":false}},\"required\":[\"kind\",\"sort\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"stays\"},\"stays\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"cityId\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"nights\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":30}},\"required\":[\"cityId\",\"nights\"],\"additionalProperties\":false}}},\"required\":[\"kind\",\"stays\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"runtimeVariables\"},\"runtimeVariables\":{\"type\":\"object\",\"propertyNames\":{\"type\":\"string\",\"pattern\":\"^\\\\$[A-Za-z][A-Za-z0-9_]{0,39}$\"},\"additionalProperties\":{\"anyOf\":[{\"type\":\"string\",\"maxLength\":160},{\"type\":\"number\"},{\"type\":\"boolean\"},{\"type\":\"null\"}]}}},\"required\":[\"kind\",\"runtimeVariables\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"modesByLeg\"},\"modesByLeg\":{\"type\":\"object\",\"propertyNames\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"additionalProperties\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}}}},\"required\":[\"kind\",\"modesByLeg\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"select\"},\"fareId\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"selected\":{\"type\":\"boolean\"}},\"required\":[\"kind\",\"fareId\",\"selected\"],\"additionalProperties\":false}]}",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "artifactRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "programRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "program": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60000
+              }
+            },
+            "required": [
+              "artifactRef",
+              "programRevision",
+              "program"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "create_artifact": {
+          "description": "Create and activate a separate empty artifact with a host-owned ID",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          }
+        },
+        "edit_artifact": {
+          "description": "Apply a bounded typed state patch only at the observed revision",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "artifactRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "expectedRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "commands": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "filters"
+                        },
+                        "filters": {
+                          "type": "object",
+                          "properties": {
+                            "modes": {
+                              "maxItems": 4,
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "train",
+                                  "bus",
+                                  "flight",
+                                  "ferry"
+                                ]
+                              }
+                            },
+                            "carrierIds": {
+                              "maxItems": 20,
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 96,
+                                "pattern": "^[a-zA-Z0-9_.:-]+$"
+                              }
+                            },
+                            "minPriceCents": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "maxPriceCents": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "maxDurationMinutes": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "directOnly": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "modes",
+                            "carrierIds",
+                            "directOnly"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "filters"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "dates"
+                        },
+                        "dates": {
+                          "type": "object",
+                          "properties": {
+                            "start": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                            },
+                            "end": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                            }
+                          },
+                          "required": [
+                            "start"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "dates"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "sort"
+                        },
+                        "sort": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "enum": [
+                                "priceCents",
+                                "durationMinutes",
+                                "departureMinutes"
+                              ]
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "asc",
+                                "desc"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "direction"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "sort"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "stays"
+                        },
+                        "stays": {
+                          "maxItems": 8,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "cityId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 96,
+                                "pattern": "^[a-zA-Z0-9_.:-]+$"
+                              },
+                              "nights": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 30
+                              }
+                            },
+                            "required": [
+                              "cityId",
+                              "nights"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "stays"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "runtimeVariables"
+                        },
+                        "runtimeVariables": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string",
+                            "pattern": "^\\$[A-Za-z][A-Za-z0-9_]{0,39}$"
+                          },
+                          "additionalProperties": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 160
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "runtimeVariables"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "modesByLeg"
+                        },
+                        "modesByLeg": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 96,
+                            "pattern": "^[a-zA-Z0-9_.:-]+$"
+                          },
+                          "additionalProperties": {
+                            "maxItems": 4,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "train",
+                                "bus",
+                                "flight",
+                                "ferry"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "modesByLeg"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "select"
+                        },
+                        "fareId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 96,
+                          "pattern": "^[a-zA-Z0-9_.:-]+$"
+                        },
+                        "selected": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "fareId",
+                        "selected"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "artifactRef",
+              "expectedRevision",
+              "commands"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "find_carriers": {
+          "description": "Return at most20 carrier IDs",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "datasetRef"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "get_fare": {
+          "description": "Return one compact fare fact",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "fareId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "fareId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "get_route": {
+          "description": "Return compact route and mode coverage",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "datasetRef"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "get_top_fares": {
+          "description": "Return at most5 compact fare facts",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "objective": {
+                "type": "string",
+                "enum": [
+                  "cheapest",
+                  "fastest"
+                ]
+              }
+            },
+            "required": [
+              "datasetRef",
+              "objective"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "load_fares": {
+          "description": "Load or reuse a bounded browser resource; return only its manifest. Coverage originIds/destinationIds use actual city slugs from the host location catalog (for example london, paris, barcelona), never dataset IDs.",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "coverage": {
+                "type": "object",
+                "properties": {
+                  "originIds": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 96,
+                      "pattern": "^[a-zA-Z0-9_.:-]+$"
+                    }
+                  },
+                  "destinationIds": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 96,
+                      "pattern": "^[a-zA-Z0-9_.:-]+$"
+                    }
+                  },
+                  "dateWindow": {
+                    "type": "object",
+                    "properties": {
+                      "from": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      "to": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      }
+                    },
+                    "required": [
+                      "from",
+                      "to"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "modes": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "train",
+                        "bus",
+                        "flight",
+                        "ferry"
+                      ]
+                    }
+                  },
+                  "passengers": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9
+                  }
+                },
+                "required": [
+                  "originIds",
+                  "destinationIds",
+                  "dateWindow",
+                  "modes",
+                  "passengers"
+                ],
+                "additionalProperties": false
+              },
+              "artifactRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "coverage"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "summarize_fares": {
+          "description": "Return at most30 grouped counts",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "groupBy": {
+                "type": "string",
+                "enum": [
+                  "id",
+                  "originId",
+                  "destinationId",
+                  "serviceDate",
+                  "mode",
+                  "carrierId",
+                  "priceCents",
+                  "durationMinutes",
+                  "departureMinutes",
+                  "availableSeats",
+                  "currency",
+                  "synthetic",
+                  "priceBasis",
+                  "direct"
+                ]
+              }
+            },
+            "required": [
+              "datasetRef",
+              "groupBy"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "variant": "b",
+      "provider": "codex",
+      "id": "__LOCALID_9sL4srq",
+      "messages": [
+        {
+          "id": "isolated-itinerary-context",
+          "role": "user",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Compare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights."
+            }
+          ]
+        },
+        {
+          "id": "captured-repaired-assistant",
+          "role": "assistant",
+          "parts": [
+            {
+              "type": "tool-compose_reactive_scene",
+              "toolCallId": "ba0dbf46-f26a-4def-95d7-4a3150fdf266",
+              "state": "output-error",
+              "input": {},
+              "errorText": "This scene could not be completed. One bounded repair is allowed."
+            },
+            {
+              "type": "tool-compose_reactive_scene",
+              "toolCallId": "08f3349c-f9a8-43e6-91b6-6b47e1dbd83a",
+              "state": "output-available",
+              "input": {
+                "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "programRevision": 5,
+                "program": "$sort = {\"field\":\"priceCents\",\"direction\":\"asc\"}\n$selectedFareIds = []\nfirstComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nsecondComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-1opc18h\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-05\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nthirdComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-10j0qr8\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-10\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nfirstFares = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"project\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"],\"orderBy\":[{\"field\":$sort.field,\"direction\":$sort.direction}],\"limit\":100})\nsequence = CitySequence(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Barcelona → Prague → Paris → Prague\")\nroute = RouteMap(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\")\nhero = TravelHero(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Train versus bus · October 3–10, 2026\", null, [sequence, route])\nnotice = CoverageNotice(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Loaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\")\nmatrixOne = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, firstComparison)\nmatrixTwo = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, secondComparison)\nmatrixThree = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, thirdComparison)\nemptyTwo = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"No train or bus fares in the loaded demo resource\")\nemptyThree = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"No train or bus fares in the loaded demo resource\")\nlegOne = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"October 3 · Barcelona → Prague\", null, [matrixOne])\nlegTwo = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"October 5 · Prague → Paris · after 2 nights\", null, [matrixTwo, emptyTwo])\nlegThree = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"October 10 · Paris → Prague · after 5 nights\", null, [matrixThree, emptyThree])\ncomparison = ResponsiveGrid(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Compare the three legs\", null, [legOne, legTwo, legThree])\nsorting = SortSelect(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Sort available fares\", null, null, $sort, \"sort\")\nplot = DurationPricePlot(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Barcelona → Prague · price versus duration\", null, null, null, null, firstFares)\npicker = FarePicker(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Choose a Barcelona → Prague fare\", null, null, $selectedFareIds, \"selectedFareIds\", firstFares)\nchoices = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Explore available demo fares\", null, [sorting, plot, picker])\nselected = SelectedItinerary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Selected fares · not a complete trip quotation\")\nsummary = StickySummary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Your selection\", null, [selected])\ndetails = SplitPane(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Fare details and selection\", null, [choices, summary])\nroot = TravelSurface(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Three-leg train and bus comparison\", null, [hero, notice, comparison, details])"
+              },
+              "output": {
+                "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "programRevision": 5,
+                "status": "accepted"
+              }
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I will stay 5 days in Paris. Keep Barcelona to Prague on October 3, Prague to Paris on October 5, and Paris to Prague on October 10, 2026. Show train and bus only, with clear per-leg empty results if none exist in the loaded demo. Preserve my current sort."
+            }
+          ],
+          "metadata": {
+            "custom": {}
+          },
+          "id": "J0BkeQCs91olubW3"
+        }
+      ],
+      "trigger": "submit-message",
+      "metadata": {},
+      "currentContext": {
+        "schemaVersion": "1.0.0",
+        "turnId": "turn-4df42a1f-130f-465b-bf6a-b71bd8a46f07",
+        "activeArtifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+        "artifacts": [
+          {
+            "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+            "revision": 6,
+            "runtimeVariables": {},
+            "datasetRefs": [
+              "dataset-14rfd0v",
+              "dataset-1opc18h",
+              "dataset-10j0qr8"
+            ],
+            "selectedFareIds": [],
+            "filters": {
+              "modes": [],
+              "carrierIds": [],
+              "directOnly": false
+            },
+            "dates": {
+              "start": "2026-10-03",
+              "end": "2026-10-10"
+            },
+            "stays": [
+              {
+                "cityId": "barcelona",
+                "nights": 0
+              },
+              {
+                "cityId": "prague",
+                "nights": 2
+              },
+              {
+                "cityId": "paris",
+                "nights": 5
+              },
+              {
+                "cityId": "prague",
+                "nights": 0
+              }
+            ],
+            "sort": {
+              "field": "priceCents",
+              "direction": "desc"
+            },
+            "modesByLeg": {},
+            "pending": [],
+            "layoutSummary": "TravelHero / FarePicker / TravelSurface / Section / ResponsiveGrid / SplitPane / StickySummary / SortSelect / ComparisonMatrix / CitySequence / RouteMap / DurationPricePlot / SelectedItinerary / CoverageNotice / EmptyState",
+            "catalogVersion": "1.0.0"
+          }
+        ],
+        "datasets": [
+          {
+            "datasetId": "dataset-14rfd0v",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "barcelona",
+                "prague",
+                "paris"
+              ],
+              "destinationIds": [
+                "prague",
+                "paris"
+              ],
+              "dateWindow": {
+                "from": "2026-10-03",
+                "to": "2026-10-10"
+              },
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 268,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "minPriceCents": 4848,
+              "maxPriceCents": 11446,
+              "minDurationMinutes": 375,
+              "maxDurationMinutes": 441,
+              "modeCounts": {
+                "train": 268
+              }
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-14rfd0v",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          },
+          {
+            "datasetId": "dataset-1opc18h",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "prague"
+              ],
+              "destinationIds": [
+                "paris"
+              ],
+              "dateWindow": {
+                "from": "2026-10-05",
+                "to": "2026-10-12"
+              },
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 0,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "modeCounts": {}
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-1opc18h",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          },
+          {
+            "datasetId": "dataset-10j0qr8",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "paris"
+              ],
+              "destinationIds": [
+                "prague"
+              ],
+              "dateWindow": {
+                "from": "2026-10-10",
+                "to": "2026-10-17"
+              },
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 0,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "modeCounts": {}
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-10j0qr8",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          }
+        ],
+        "selectedFareFacts": []
+      }
+    },
+    {
+      "tools": {
+        "compose_reactive_scene": {
+          "description": "Write an OpenUI v0.5 program. Each newline separates a statement: name = Expression. root must be TravelSurface. All forty registered travel components use the same positional signature NAME(artifactRef, datasetRef?, actionRef?, selectorRef?, title?, variant?, children?, value?, binding?, query?, action?, body?). Optional positional fields use null. children is an array of component references. Declare state as $name = literal, use $name or $name.field in expressions, including ternary condition ? component : null. Bind a component's value to a $variable and binding to one of filters, dates, sort, stays, modesByLeg, selectedFareIds. Example of a generic binding: control = ModeChips(artifactRef, null, null, null, \"Modes\", null, null, $filters, \"filters\"). Use Query(\"local_query\", QueryIR) and supply its declaration reference to a view's query argument. Use Mutation(\"patch_artifact_state\", typed command patch); ordered Action([@Run(mutation), @Set($show, true)]) or @Reset($show) goes in the action argument of RetryAction. Computed queries and conditional children may depend on state variables. Programs must have different dependency and arrangement choices for different user needs.\nUse Query(\"local_query\", QueryIR), Mutation(\"patch_artifact_state\", typedUICommandPatch). No refresh intervals. Bind controls using canonical positional six props then children,value,binding,query,action,body. Titles are short headings of at most160 characters. Callout explanatory copy belongs in body (last argument), at most600 characters. Legacy Callout text in title is displayed as body when longer than160 characters. Object state is allowed only for validated semantic bindings. Other state is primitive and bounded. Query result props refer to Query declarations; never literal rows. Each editable semantic variable must have at least one component binding to its host field; Global ModeChips omits datasetRef and binds the entire filters object. A per-leg ModeChips supplies datasetRef and binds the entire modesByLeg map; use the stable originId:destinationId key in query mode predicates. Never bind a scalar mode. Optional positional arguments use null. Layout children contain references or conditionals. RetryAction can run an ordered Action as its last argument. Use latest context values as defaults. ComparisonTable, ComparisonMatrix and ModeBreakdown queries produce mode, minimum (min priceCents), fastest (min durationMinutes), count. PriceCalendar queries produce serviceDate, minimum and count. FareCards, FarePicker, ItineraryTimeline and DurationPricePlot queries project all FareRow fields so shared widgets can display them.\nHost semantic fields: {\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"filters\":{\"type\":\"object\",\"properties\":{\"modes\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}},\"carrierIds\":{\"maxItems\":20,\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}},\"minPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxDurationMinutes\":{\"type\":\"integer\",\"exclusiveMinimum\":0,\"maximum\":9007199254740991},\"directOnly\":{\"type\":\"boolean\"}},\"required\":[\"modes\",\"carrierIds\",\"directOnly\"],\"additionalProperties\":false},\"dates\":{\"type\":\"object\",\"properties\":{\"start\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"},\"end\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"}},\"required\":[\"start\"],\"additionalProperties\":false},\"sort\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"enum\":[\"priceCents\",\"durationMinutes\",\"departureMinutes\"]},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"field\",\"direction\"],\"additionalProperties\":false},\"stays\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"cityId\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"nights\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":30}},\"required\":[\"cityId\",\"nights\"],\"additionalProperties\":false}},\"modesByLeg\":{\"type\":\"object\",\"propertyNames\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"additionalProperties\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}}},\"selectedFareIds\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}}},\"required\":[\"filters\",\"dates\",\"sort\",\"stays\",\"modesByLeg\",\"selectedFareIds\"],\"additionalProperties\":false}\nlocal_query input: {\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"version\":{\"type\":\"number\",\"const\":1},\"sources\":{\"minItems\":1,\"maxItems\":3,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"datasetRef\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"alias\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}},\"required\":[\"datasetRef\",\"alias\"],\"additionalProperties\":false}},\"where\":{\"$ref\":\"#/$defs/__schema0\"},\"project\":{\"maxItems\":16,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]}},\"groupBy\":{\"maxItems\":3,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]}},\"metrics\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"as\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"op\":{\"type\":\"string\",\"enum\":[\"count\",\"sum\",\"min\",\"max\",\"avg\"]},\"field\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]}},\"required\":[\"as\",\"op\"],\"additionalProperties\":false}},\"orderBy\":{\"maxItems\":3,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"field\",\"direction\"],\"additionalProperties\":false}},\"topK\":{\"type\":\"object\",\"properties\":{\"k\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":5},\"by\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"k\",\"by\",\"direction\"],\"additionalProperties\":false},\"joins\":{\"maxItems\":2,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"rightAlias\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"leftKey\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]},\"rightKey\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]},\"kind\":{\"type\":\"string\",\"enum\":[\"inner\",\"left\"]}},\"required\":[\"rightAlias\",\"leftKey\",\"rightKey\",\"kind\"],\"additionalProperties\":false}},\"limit\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":100}},\"required\":[\"version\",\"sources\",\"limit\"],\"additionalProperties\":false,\"$defs\":{\"__schema0\":{\"anyOf\":[{\"type\":\"object\",\"properties\":{\"all\":{\"minItems\":1,\"maxItems\":16,\"type\":\"array\",\"items\":{\"$ref\":\"#/$defs/__schema0\"}}},\"required\":[\"all\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"any\":{\"minItems\":1,\"maxItems\":16,\"type\":\"array\",\"items\":{\"$ref\":\"#/$defs/__schema0\"}}},\"required\":[\"any\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"enum\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"]},\"op\":{\"type\":\"string\",\"enum\":[\"eq\",\"neq\",\"in\",\"gte\",\"lte\",\"between\",\"contains\"]},\"value\":{\"anyOf\":[{\"anyOf\":[{\"type\":\"string\",\"maxLength\":160},{\"type\":\"number\"},{\"type\":\"boolean\"}]},{\"minItems\":1,\"maxItems\":20,\"type\":\"array\",\"items\":{\"anyOf\":[{\"type\":\"string\",\"maxLength\":160},{\"type\":\"number\"},{\"type\":\"boolean\"}]}}]}},\"required\":[\"field\",\"op\",\"value\"],\"additionalProperties\":false}]}}}\npatch_artifact_state input: {\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"oneOf\":[{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"filters\"},\"filters\":{\"type\":\"object\",\"properties\":{\"modes\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}},\"carrierIds\":{\"maxItems\":20,\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"}},\"minPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxPriceCents\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":9007199254740991},\"maxDurationMinutes\":{\"type\":\"integer\",\"exclusiveMinimum\":0,\"maximum\":9007199254740991},\"directOnly\":{\"type\":\"boolean\"}},\"required\":[\"modes\",\"carrierIds\",\"directOnly\"],\"additionalProperties\":false}},\"required\":[\"kind\",\"filters\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"dates\"},\"dates\":{\"type\":\"object\",\"properties\":{\"start\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"},\"end\":{\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"}},\"required\":[\"start\"],\"additionalProperties\":false}},\"required\":[\"kind\",\"dates\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"sort\"},\"sort\":{\"type\":\"object\",\"properties\":{\"field\":{\"type\":\"string\",\"enum\":[\"priceCents\",\"durationMinutes\",\"departureMinutes\"]},\"direction\":{\"type\":\"string\",\"enum\":[\"asc\",\"desc\"]}},\"required\":[\"field\",\"direction\"],\"additionalProperties\":false}},\"required\":[\"kind\",\"sort\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"stays\"},\"stays\":{\"maxItems\":8,\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"cityId\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"nights\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":30}},\"required\":[\"cityId\",\"nights\"],\"additionalProperties\":false}}},\"required\":[\"kind\",\"stays\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"runtimeVariables\"},\"runtimeVariables\":{\"type\":\"object\",\"propertyNames\":{\"type\":\"string\",\"pattern\":\"^\\\\$[A-Za-z][A-Za-z0-9_]{0,39}$\"},\"additionalProperties\":{\"anyOf\":[{\"type\":\"string\",\"maxLength\":160},{\"type\":\"number\"},{\"type\":\"boolean\"},{\"type\":\"null\"}]}}},\"required\":[\"kind\",\"runtimeVariables\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"modesByLeg\"},\"modesByLeg\":{\"type\":\"object\",\"propertyNames\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"additionalProperties\":{\"maxItems\":4,\"type\":\"array\",\"items\":{\"type\":\"string\",\"enum\":[\"train\",\"bus\",\"flight\",\"ferry\"]}}}},\"required\":[\"kind\",\"modesByLeg\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"const\":\"select\"},\"fareId\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":96,\"pattern\":\"^[a-zA-Z0-9_.:-]+$\"},\"selected\":{\"type\":\"boolean\"}},\"required\":[\"kind\",\"fareId\",\"selected\"],\"additionalProperties\":false}]}",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "artifactRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "programRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "program": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60000
+              }
+            },
+            "required": [
+              "artifactRef",
+              "programRevision",
+              "program"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "create_artifact": {
+          "description": "Create and activate a separate empty artifact with a host-owned ID",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          }
+        },
+        "edit_artifact": {
+          "description": "Apply a bounded typed state patch only at the observed revision",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "artifactRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "expectedRevision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "commands": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "filters"
+                        },
+                        "filters": {
+                          "type": "object",
+                          "properties": {
+                            "modes": {
+                              "maxItems": 4,
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "train",
+                                  "bus",
+                                  "flight",
+                                  "ferry"
+                                ]
+                              }
+                            },
+                            "carrierIds": {
+                              "maxItems": 20,
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 96,
+                                "pattern": "^[a-zA-Z0-9_.:-]+$"
+                              }
+                            },
+                            "minPriceCents": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "maxPriceCents": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "maxDurationMinutes": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "directOnly": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "modes",
+                            "carrierIds",
+                            "directOnly"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "filters"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "dates"
+                        },
+                        "dates": {
+                          "type": "object",
+                          "properties": {
+                            "start": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                            },
+                            "end": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                            }
+                          },
+                          "required": [
+                            "start"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "dates"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "sort"
+                        },
+                        "sort": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "enum": [
+                                "priceCents",
+                                "durationMinutes",
+                                "departureMinutes"
+                              ]
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "asc",
+                                "desc"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "direction"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "sort"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "stays"
+                        },
+                        "stays": {
+                          "maxItems": 8,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "cityId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 96,
+                                "pattern": "^[a-zA-Z0-9_.:-]+$"
+                              },
+                              "nights": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 30
+                              }
+                            },
+                            "required": [
+                              "cityId",
+                              "nights"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "stays"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "runtimeVariables"
+                        },
+                        "runtimeVariables": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string",
+                            "pattern": "^\\$[A-Za-z][A-Za-z0-9_]{0,39}$"
+                          },
+                          "additionalProperties": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 160
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "runtimeVariables"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "modesByLeg"
+                        },
+                        "modesByLeg": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 96,
+                            "pattern": "^[a-zA-Z0-9_.:-]+$"
+                          },
+                          "additionalProperties": {
+                            "maxItems": 4,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "train",
+                                "bus",
+                                "flight",
+                                "ferry"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "modesByLeg"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "select"
+                        },
+                        "fareId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 96,
+                          "pattern": "^[a-zA-Z0-9_.:-]+$"
+                        },
+                        "selected": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "fareId",
+                        "selected"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "artifactRef",
+              "expectedRevision",
+              "commands"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "find_carriers": {
+          "description": "Return at most20 carrier IDs",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "datasetRef"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "get_fare": {
+          "description": "Return one compact fare fact",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "fareId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "fareId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "get_route": {
+          "description": "Return compact route and mode coverage",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "datasetRef"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "get_top_fares": {
+          "description": "Return at most5 compact fare facts",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "objective": {
+                "type": "string",
+                "enum": [
+                  "cheapest",
+                  "fastest"
+                ]
+              }
+            },
+            "required": [
+              "datasetRef",
+              "objective"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "load_fares": {
+          "description": "Load or reuse a bounded browser resource; return only its manifest. Coverage originIds/destinationIds use actual city slugs from the host location catalog (for example london, paris, barcelona), never dataset IDs.",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "coverage": {
+                "type": "object",
+                "properties": {
+                  "originIds": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 96,
+                      "pattern": "^[a-zA-Z0-9_.:-]+$"
+                    }
+                  },
+                  "destinationIds": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 96,
+                      "pattern": "^[a-zA-Z0-9_.:-]+$"
+                    }
+                  },
+                  "dateWindow": {
+                    "type": "object",
+                    "properties": {
+                      "from": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      },
+                      "to": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      }
+                    },
+                    "required": [
+                      "from",
+                      "to"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "modes": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "train",
+                        "bus",
+                        "flight",
+                        "ferry"
+                      ]
+                    }
+                  },
+                  "passengers": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9
+                  }
+                },
+                "required": [
+                  "originIds",
+                  "destinationIds",
+                  "dateWindow",
+                  "modes",
+                  "passengers"
+                ],
+                "additionalProperties": false
+              },
+              "artifactRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "coverage"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "summarize_fares": {
+          "description": "Return at most30 grouped counts",
+          "parameters": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+              "datasetRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 96,
+                "pattern": "^[a-zA-Z0-9_.:-]+$"
+              },
+              "groupBy": {
+                "type": "string",
+                "enum": [
+                  "id",
+                  "originId",
+                  "destinationId",
+                  "serviceDate",
+                  "mode",
+                  "carrierId",
+                  "priceCents",
+                  "durationMinutes",
+                  "departureMinutes",
+                  "availableSeats",
+                  "currency",
+                  "synthetic",
+                  "priceBasis",
+                  "direct"
+                ]
+              }
+            },
+            "required": [
+              "datasetRef",
+              "groupBy"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "variant": "b",
+      "provider": "codex",
+      "id": "__LOCALID_9sL4srq",
+      "messages": [
+        {
+          "id": "isolated-itinerary-context",
+          "role": "user",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Compare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights."
+            }
+          ]
+        },
+        {
+          "id": "captured-repaired-assistant",
+          "role": "assistant",
+          "parts": [
+            {
+              "type": "tool-compose_reactive_scene",
+              "toolCallId": "ba0dbf46-f26a-4def-95d7-4a3150fdf266",
+              "state": "output-error",
+              "input": {},
+              "errorText": "This scene could not be completed. One bounded repair is allowed."
+            },
+            {
+              "type": "tool-compose_reactive_scene",
+              "toolCallId": "08f3349c-f9a8-43e6-91b6-6b47e1dbd83a",
+              "state": "output-available",
+              "input": {
+                "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "programRevision": 5,
+                "program": "$sort = {\"field\":\"priceCents\",\"direction\":\"asc\"}\n$selectedFareIds = []\nfirstComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nsecondComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-1opc18h\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-05\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nthirdComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-10j0qr8\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-10\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nfirstFares = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"project\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"],\"orderBy\":[{\"field\":$sort.field,\"direction\":$sort.direction}],\"limit\":100})\nsequence = CitySequence(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Barcelona → Prague → Paris → Prague\")\nroute = RouteMap(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\")\nhero = TravelHero(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Train versus bus · October 3–10, 2026\", null, [sequence, route])\nnotice = CoverageNotice(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Loaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\")\nmatrixOne = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, firstComparison)\nmatrixTwo = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, secondComparison)\nmatrixThree = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, thirdComparison)\nemptyTwo = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"No train or bus fares in the loaded demo resource\")\nemptyThree = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"No train or bus fares in the loaded demo resource\")\nlegOne = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"October 3 · Barcelona → Prague\", null, [matrixOne])\nlegTwo = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"October 5 · Prague → Paris · after 2 nights\", null, [matrixTwo, emptyTwo])\nlegThree = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"October 10 · Paris → Prague · after 5 nights\", null, [matrixThree, emptyThree])\ncomparison = ResponsiveGrid(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Compare the three legs\", null, [legOne, legTwo, legThree])\nsorting = SortSelect(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Sort available fares\", null, null, $sort, \"sort\")\nplot = DurationPricePlot(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Barcelona → Prague · price versus duration\", null, null, null, null, firstFares)\npicker = FarePicker(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Choose a Barcelona → Prague fare\", null, null, $selectedFareIds, \"selectedFareIds\", firstFares)\nchoices = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Explore available demo fares\", null, [sorting, plot, picker])\nselected = SelectedItinerary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Selected fares · not a complete trip quotation\")\nsummary = StickySummary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Your selection\", null, [selected])\ndetails = SplitPane(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Fare details and selection\", null, [choices, summary])\nroot = TravelSurface(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Three-leg train and bus comparison\", null, [hero, notice, comparison, details])"
+              },
+              "output": {
+                "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "programRevision": 5,
+                "status": "accepted"
+              }
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I will stay 5 days in Paris. Keep Barcelona to Prague on October 3, Prague to Paris on October 5, and Paris to Prague on October 10, 2026. Show train and bus only, with clear per-leg empty results if none exist in the loaded demo. Preserve my current sort."
+            }
+          ],
+          "metadata": {
+            "custom": {}
+          },
+          "id": "J0BkeQCs91olubW3"
+        },
+        {
+          "id": "CSQJlgrN6EsFjoZK",
+          "role": "assistant",
+          "parts": [
+            {
+              "type": "step-start"
+            },
+            {
+              "type": "text",
+              "text": "I’ll keep the three dates, five nights in Paris, your current sort, and the per-leg empty results, while restricting modes to train and bus.",
+              "state": "done"
+            },
+            {
+              "type": "tool-edit_artifact",
+              "toolCallId": "9c5150e7-1469-4b1d-9272-366b4978a629",
+              "state": "output-available",
+              "input": {
+                "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "expectedRevision": 6,
+                "commands": [
+                  {
+                    "kind": "filters",
+                    "filters": {
+                      "modes": [
+                        "train",
+                        "bus"
+                      ],
+                      "carrierIds": [],
+                      "directOnly": false
+                    }
+                  }
+                ]
+              },
+              "output": {
+                "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "status": "applied",
+                "revision": 7
+              }
+            }
+          ]
+        }
+      ],
+      "trigger": "submit-message",
+      "messageId": "CSQJlgrN6EsFjoZK",
+      "metadata": {},
+      "currentContext": {
+        "schemaVersion": "1.0.0",
+        "turnId": "turn-49dac108-6d34-4fbb-90e4-79bd67222a0c",
+        "activeArtifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+        "artifacts": [
+          {
+            "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+            "revision": 7,
+            "runtimeVariables": {},
+            "datasetRefs": [
+              "dataset-14rfd0v",
+              "dataset-1opc18h",
+              "dataset-10j0qr8"
+            ],
+            "selectedFareIds": [],
+            "filters": {
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "carrierIds": [],
+              "directOnly": false
+            },
+            "dates": {
+              "start": "2026-10-03",
+              "end": "2026-10-10"
+            },
+            "stays": [
+              {
+                "cityId": "barcelona",
+                "nights": 0
+              },
+              {
+                "cityId": "prague",
+                "nights": 2
+              },
+              {
+                "cityId": "paris",
+                "nights": 5
+              },
+              {
+                "cityId": "prague",
+                "nights": 0
+              }
+            ],
+            "sort": {
+              "field": "priceCents",
+              "direction": "desc"
+            },
+            "modesByLeg": {},
+            "pending": [],
+            "layoutSummary": "TravelHero / FarePicker / TravelSurface / Section / ResponsiveGrid / SplitPane / StickySummary / SortSelect / ComparisonMatrix / CitySequence / RouteMap / DurationPricePlot / SelectedItinerary / CoverageNotice / EmptyState",
+            "catalogVersion": "1.0.0"
+          }
+        ],
+        "datasets": [
+          {
+            "datasetId": "dataset-14rfd0v",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "barcelona",
+                "prague",
+                "paris"
+              ],
+              "destinationIds": [
+                "prague",
+                "paris"
+              ],
+              "dateWindow": {
+                "from": "2026-10-03",
+                "to": "2026-10-10"
+              },
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 268,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "minPriceCents": 4848,
+              "maxPriceCents": 11446,
+              "minDurationMinutes": 375,
+              "maxDurationMinutes": 441,
+              "modeCounts": {
+                "train": 268
+              }
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-14rfd0v",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          },
+          {
+            "datasetId": "dataset-1opc18h",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "prague"
+              ],
+              "destinationIds": [
+                "paris"
+              ],
+              "dateWindow": {
+                "from": "2026-10-05",
+                "to": "2026-10-12"
+              },
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 0,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "modeCounts": {}
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-1opc18h",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          },
+          {
+            "datasetId": "dataset-10j0qr8",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "paris"
+              ],
+              "destinationIds": [
+                "prague"
+              ],
+              "dateWindow": {
+                "from": "2026-10-10",
+                "to": "2026-10-17"
+              },
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 0,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "modeCounts": {}
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-10j0qr8",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          }
+        ],
+        "selectedFareFacts": []
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "body": "data: {\"type\":\"start\",\"messageId\":\"CSQJlgrN6EsFjoZK\"}\n\ndata: {\"type\":\"start-step\"}\n\ndata: {\"type\":\"text-start\",\"id\":\"0-intro\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\"I\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\"â€™ll\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" keep\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" the\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" three\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" dates\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" five\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" nights\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" in\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" Paris\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" your\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" current\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" sort\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" and\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" the\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" per\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\"-leg\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" empty\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" results\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" while\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" restricting\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" modes\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" to\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" train\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" and\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\" bus\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-intro\",\"delta\":\".\"}\n\ndata: {\"type\":\"tool-input-start\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"toolName\":\"edit_artifact\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"{\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"artifact\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"Ref\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"artifact\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"-\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"393\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"d\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"7\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"d\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"99\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"-\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"123\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"9\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"-\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"4\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"aec\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"-a\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"13\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"b\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"-dd\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"f\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"288\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"753\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"74\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"e\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\",\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"expected\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"Revision\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"6\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\",\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"commands\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":[\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"{\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"kind\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"filters\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\",\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"filters\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":{\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"m\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"odes\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":[\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"train\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\",\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"bus\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"],\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"carrier\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"Ids\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"[],\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\"\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"direct\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"Only\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"\\\":\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"false\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"}}\"}\n\ndata: {\"type\":\"tool-input-delta\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"inputTextDelta\":\"]}\"}\n\ndata: {\"type\":\"text-end\",\"id\":\"0-intro\"}\n\ndata: {\"type\":\"tool-input-available\",\"toolCallId\":\"9c5150e7-1469-4b1d-9272-366b4978a629\",\"toolName\":\"edit_artifact\",\"input\":{\"artifactRef\":\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\",\"expectedRevision\":6,\"commands\":[{\"kind\":\"filters\",\"filters\":{\"modes\":[\"train\",\"bus\"],\"carrierIds\":[],\"directOnly\":false}}]}}\n\ndata: {\"type\":\"finish-step\"}\n\ndata: {\"type\":\"finish\",\"finishReason\":\"tool-calls\"}\n\ndata: [DONE]\n\n"
+    },
+    {
+      "status": 200,
+      "body": "data: {\"type\":\"start\",\"messageId\":\"CSQJlgrN6EsFjoZK\"}\n\ndata: {\"type\":\"start-step\"}\n\ndata: {\"type\":\"text-start\",\"id\":\"0-outro\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\"Done\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\"â€”\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\"dates\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" Paris\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" stay\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" and\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" current\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" sort\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" preserved\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\".\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" Train\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" and\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" bus\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" only\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\",\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" with\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" clear\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" per\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\"-leg\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" empty\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" results\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" for\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" missing\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" demo\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\" fares\"}\n\ndata: {\"type\":\"text-delta\",\"id\":\"0-outro\",\"delta\":\".\"}\n\ndata: {\"type\":\"text-end\",\"id\":\"0-outro\"}\n\ndata: {\"type\":\"finish-step\"}\n\ndata: {\"type\":\"finish\",\"finishReason\":\"stop\"}\n\ndata: [DONE]\n\n"
+    }
+  ],
+  "errors": [],
+  "finalDiagnostics": {
+    "schemaVersion": "1.0.0",
+    "threadId": "travel-b",
+    "activeArtifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+    "messages": [
+      {
+        "id": "isolated-itinerary-context",
+        "role": "user",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Compare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights."
+          }
+        ]
+      },
+      {
+        "id": "captured-repaired-assistant",
+        "role": "assistant",
+        "parts": [
+          {
+            "type": "tool-compose_reactive_scene",
+            "toolCallId": "ba0dbf46-f26a-4def-95d7-4a3150fdf266",
+            "state": "output-error",
+            "input": {},
+            "errorText": "This scene could not be completed. One bounded repair is allowed."
+          },
+          {
+            "type": "tool-compose_reactive_scene",
+            "toolCallId": "08f3349c-f9a8-43e6-91b6-6b47e1dbd83a",
+            "state": "output-available",
+            "input": {
+              "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+              "programRevision": 5,
+              "program": "$sort = {\"field\":\"priceCents\",\"direction\":\"asc\"}\n$selectedFareIds = []\nfirstComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nsecondComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-1opc18h\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-05\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nthirdComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-10j0qr8\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-10\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nfirstFares = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"project\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"],\"orderBy\":[{\"field\":$sort.field,\"direction\":$sort.direction}],\"limit\":100})\nsequence = CitySequence(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Barcelona → Prague → Paris → Prague\")\nroute = RouteMap(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\")\nhero = TravelHero(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Train versus bus · October 3–10, 2026\", null, [sequence, route])\nnotice = CoverageNotice(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Loaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\")\nmatrixOne = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, firstComparison)\nmatrixTwo = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, secondComparison)\nmatrixThree = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, thirdComparison)\nemptyTwo = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"No train or bus fares in the loaded demo resource\")\nemptyThree = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"No train or bus fares in the loaded demo resource\")\nlegOne = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"October 3 · Barcelona → Prague\", null, [matrixOne])\nlegTwo = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"October 5 · Prague → Paris · after 2 nights\", null, [matrixTwo, emptyTwo])\nlegThree = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"October 10 · Paris → Prague · after 5 nights\", null, [matrixThree, emptyThree])\ncomparison = ResponsiveGrid(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Compare the three legs\", null, [legOne, legTwo, legThree])\nsorting = SortSelect(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Sort available fares\", null, null, $sort, \"sort\")\nplot = DurationPricePlot(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Barcelona → Prague · price versus duration\", null, null, null, null, firstFares)\npicker = FarePicker(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Choose a Barcelona → Prague fare\", null, null, $selectedFareIds, \"selectedFareIds\", firstFares)\nchoices = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Explore available demo fares\", null, [sorting, plot, picker])\nselected = SelectedItinerary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Selected fares · not a complete trip quotation\")\nsummary = StickySummary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Your selection\", null, [selected])\ndetails = SplitPane(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Fare details and selection\", null, [choices, summary])\nroot = TravelSurface(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Three-leg train and bus comparison\", null, [hero, notice, comparison, details])"
+            },
+            "output": {
+              "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+              "programRevision": 5,
+              "status": "accepted"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "parts": [
+          {
+            "type": "text",
+            "text": "I will stay 5 days in Paris. Keep Barcelona to Prague on October 3, Prague to Paris on October 5, and Paris to Prague on October 10, 2026. Show train and bus only, with clear per-leg empty results if none exist in the loaded demo. Preserve my current sort."
+          }
+        ],
+        "metadata": {
+          "custom": {}
+        },
+        "id": "J0BkeQCs91olubW3"
+      },
+      {
+        "id": "CSQJlgrN6EsFjoZK",
+        "role": "assistant",
+        "parts": [
+          {
+            "type": "step-start"
+          },
+          {
+            "type": "text",
+            "text": "I’ll keep the three dates, five nights in Paris, your current sort, and the per-leg empty results, while restricting modes to train and bus.",
+            "state": "done"
+          },
+          {
+            "type": "tool-edit_artifact",
+            "toolCallId": "9c5150e7-1469-4b1d-9272-366b4978a629",
+            "state": "output-available",
+            "input": {
+              "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+              "expectedRevision": 6,
+              "commands": [
+                {
+                  "kind": "filters",
+                  "filters": {
+                    "modes": [
+                      "train",
+                      "bus"
+                    ],
+                    "carrierIds": [],
+                    "directOnly": false
+                  }
+                }
+              ]
+            },
+            "output": {
+              "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+              "status": "applied",
+              "revision": 7
+            }
+          },
+          {
+            "type": "step-start"
+          },
+          {
+            "type": "text",
+            "text": "Done—dates, Paris stay, and current sort preserved. Train and bus only, with clear per-leg empty results for missing demo fares.",
+            "state": "done"
+          }
+        ]
+      }
+    ],
+    "artifactRecords": [
+      {
+        "state": {
+          "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+          "revision": 7,
+          "runtimeVariables": {},
+          "datasetRefs": [
+            "dataset-14rfd0v",
+            "dataset-1opc18h",
+            "dataset-10j0qr8"
+          ],
+          "filters": {
+            "modes": [
+              "train",
+              "bus"
+            ],
+            "carrierIds": [],
+            "directOnly": false
+          },
+          "dates": {
+            "start": "2026-10-03",
+            "end": "2026-10-10"
+          },
+          "stays": [
+            {
+              "cityId": "barcelona",
+              "nights": 0
+            },
+            {
+              "cityId": "prague",
+              "nights": 2
+            },
+            {
+              "cityId": "paris",
+              "nights": 5
+            },
+            {
+              "cityId": "prague",
+              "nights": 0
+            }
+          ],
+          "modesByLeg": {},
+          "sort": {
+            "field": "priceCents",
+            "direction": "desc"
+          },
+          "selectedFareIds": [],
+          "pending": [],
+          "lastInteractionAt": "2026-10-02T23:08:30.410Z"
+        },
+        "source": "$sort = {\"field\":\"priceCents\",\"direction\":\"asc\"}\n$selectedFareIds = []\nfirstComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nsecondComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-1opc18h\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-05\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nthirdComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-10j0qr8\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-10\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nfirstFares = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"project\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"],\"orderBy\":[{\"field\":$sort.field,\"direction\":$sort.direction}],\"limit\":100})\nsequence = CitySequence(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Barcelona → Prague → Paris → Prague\")\nroute = RouteMap(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\")\nhero = TravelHero(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Train versus bus · October 3–10, 2026\", null, [sequence, route])\nnotice = CoverageNotice(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Loaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\")\nmatrixOne = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, firstComparison)\nmatrixTwo = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, secondComparison)\nmatrixThree = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, thirdComparison)\nemptyTwo = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"No train or bus fares in the loaded demo resource\")\nemptyThree = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"No train or bus fares in the loaded demo resource\")\nlegOne = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"October 3 · Barcelona → Prague\", null, [matrixOne])\nlegTwo = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"October 5 · Prague → Paris · after 2 nights\", null, [matrixTwo, emptyTwo])\nlegThree = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"October 10 · Paris → Prague · after 5 nights\", null, [matrixThree, emptyThree])\ncomparison = ResponsiveGrid(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Compare the three legs\", null, [legOne, legTwo, legThree])\nsorting = SortSelect(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Sort available fares\", null, null, $sort, \"sort\")\nplot = DurationPricePlot(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Barcelona → Prague · price versus duration\", null, null, null, null, firstFares)\npicker = FarePicker(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Choose a Barcelona → Prague fare\", null, null, $selectedFareIds, \"selectedFareIds\", firstFares)\nchoices = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Explore available demo fares\", null, [sorting, plot, picker])\nselected = SelectedItinerary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Selected fares · not a complete trip quotation\")\nsummary = StickySummary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Your selection\", null, [selected])\ndetails = SplitPane(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Fare details and selection\", null, [choices, summary])\nroot = TravelSurface(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Three-leg train and bus comparison\", null, [hero, notice, comparison, details])"
+      }
+    ],
+    "manifests": [
+      {
+        "datasetId": "dataset-14rfd0v",
+        "rowCount": 268,
+        "coverage": {
+          "originIds": [
+            "barcelona",
+            "prague",
+            "paris"
+          ],
+          "destinationIds": [
+            "prague",
+            "paris"
+          ],
+          "dateWindow": {
+            "from": "2026-10-03",
+            "to": "2026-10-10"
+          },
+          "modes": [
+            "train",
+            "bus"
+          ],
+          "passengers": 1,
+          "complete": true,
+          "truncated": false
+        },
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+        "compactSummary": {
+          "minPriceCents": 4848,
+          "maxPriceCents": 11446,
+          "minDurationMinutes": 375,
+          "maxDurationMinutes": 441,
+          "modeCounts": {
+            "train": 268
+          }
+        }
+      },
+      {
+        "datasetId": "dataset-1opc18h",
+        "rowCount": 0,
+        "coverage": {
+          "originIds": [
+            "prague"
+          ],
+          "destinationIds": [
+            "paris"
+          ],
+          "dateWindow": {
+            "from": "2026-10-05",
+            "to": "2026-10-12"
+          },
+          "modes": [
+            "train",
+            "bus"
+          ],
+          "passengers": 1,
+          "complete": true,
+          "truncated": false
+        },
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+        "compactSummary": {
+          "modeCounts": {}
+        }
+      },
+      {
+        "datasetId": "dataset-10j0qr8",
+        "rowCount": 0,
+        "coverage": {
+          "originIds": [
+            "paris"
+          ],
+          "destinationIds": [
+            "prague"
+          ],
+          "dateWindow": {
+            "from": "2026-10-10",
+            "to": "2026-10-17"
+          },
+          "modes": [
+            "train",
+            "bus"
+          ],
+          "passengers": 1,
+          "complete": true,
+          "truncated": false
+        },
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+        "compactSummary": {
+          "modeCounts": {}
+        }
+      }
+    ],
+    "persisted": {
+      "recordRevision": 5,
+      "schemaVersion": "1.0.0",
+      "catalogVersion": "1.0.0",
+      "activeArtifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+      "parserVersion": "openui-0.3.0",
+      "queryVersion": "1",
+      "messages": [
+        {
+          "id": "isolated-itinerary-context",
+          "role": "user",
+          "parts": [
+            {
+              "type": "text",
+              "text": "Compare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights."
+            }
+          ]
+        },
+        {
+          "id": "captured-repaired-assistant",
+          "role": "assistant",
+          "parts": [
+            {
+              "type": "tool-compose_reactive_scene",
+              "toolCallId": "ba0dbf46-f26a-4def-95d7-4a3150fdf266",
+              "state": "output-error",
+              "input": {},
+              "errorText": "This scene could not be completed. One bounded repair is allowed."
+            },
+            {
+              "type": "tool-compose_reactive_scene",
+              "toolCallId": "08f3349c-f9a8-43e6-91b6-6b47e1dbd83a",
+              "state": "output-available",
+              "input": {
+                "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "programRevision": 5,
+                "program": "$sort = {\"field\":\"priceCents\",\"direction\":\"asc\"}\n$selectedFareIds = []\nfirstComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nsecondComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-1opc18h\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-05\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nthirdComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-10j0qr8\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-10\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nfirstFares = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"project\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"],\"orderBy\":[{\"field\":$sort.field,\"direction\":$sort.direction}],\"limit\":100})\nsequence = CitySequence(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Barcelona → Prague → Paris → Prague\")\nroute = RouteMap(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\")\nhero = TravelHero(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Train versus bus · October 3–10, 2026\", null, [sequence, route])\nnotice = CoverageNotice(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Loaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\")\nmatrixOne = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, firstComparison)\nmatrixTwo = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, secondComparison)\nmatrixThree = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, thirdComparison)\nemptyTwo = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"No train or bus fares in the loaded demo resource\")\nemptyThree = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"No train or bus fares in the loaded demo resource\")\nlegOne = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"October 3 · Barcelona → Prague\", null, [matrixOne])\nlegTwo = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"October 5 · Prague → Paris · after 2 nights\", null, [matrixTwo, emptyTwo])\nlegThree = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"October 10 · Paris → Prague · after 5 nights\", null, [matrixThree, emptyThree])\ncomparison = ResponsiveGrid(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Compare the three legs\", null, [legOne, legTwo, legThree])\nsorting = SortSelect(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Sort available fares\", null, null, $sort, \"sort\")\nplot = DurationPricePlot(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Barcelona → Prague · price versus duration\", null, null, null, null, firstFares)\npicker = FarePicker(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Choose a Barcelona → Prague fare\", null, null, $selectedFareIds, \"selectedFareIds\", firstFares)\nchoices = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Explore available demo fares\", null, [sorting, plot, picker])\nselected = SelectedItinerary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Selected fares · not a complete trip quotation\")\nsummary = StickySummary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Your selection\", null, [selected])\ndetails = SplitPane(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Fare details and selection\", null, [choices, summary])\nroot = TravelSurface(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Three-leg train and bus comparison\", null, [hero, notice, comparison, details])"
+              },
+              "output": {
+                "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "programRevision": 5,
+                "status": "accepted"
+              }
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "type": "text",
+              "text": "I will stay 5 days in Paris. Keep Barcelona to Prague on October 3, Prague to Paris on October 5, and Paris to Prague on October 10, 2026. Show train and bus only, with clear per-leg empty results if none exist in the loaded demo. Preserve my current sort."
+            }
+          ],
+          "metadata": {
+            "custom": {}
+          },
+          "id": "J0BkeQCs91olubW3"
+        },
+        {
+          "id": "CSQJlgrN6EsFjoZK",
+          "role": "assistant",
+          "parts": [
+            {
+              "type": "step-start"
+            },
+            {
+              "type": "text",
+              "text": "I’ll keep the three dates, five nights in Paris, your current sort, and the per-leg empty results, while restricting modes to train and bus.",
+              "state": "done"
+            },
+            {
+              "type": "tool-edit_artifact",
+              "toolCallId": "9c5150e7-1469-4b1d-9272-366b4978a629",
+              "state": "output-available",
+              "input": {
+                "artifactRef": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "expectedRevision": 6,
+                "commands": [
+                  {
+                    "kind": "filters",
+                    "filters": {
+                      "modes": [
+                        "train",
+                        "bus"
+                      ],
+                      "carrierIds": [],
+                      "directOnly": false
+                    }
+                  }
+                ]
+              },
+              "output": {
+                "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+                "status": "applied",
+                "revision": 7
+              }
+            },
+            {
+              "type": "step-start"
+            },
+            {
+              "type": "text",
+              "text": "Done—dates, Paris stay, and current sort preserved. Train and bus only, with clear per-leg empty results for missing demo fares.",
+              "state": "done"
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "variant": "b",
+          "source": "$sort = {\"field\":\"priceCents\",\"direction\":\"asc\"}\n$selectedFareIds = []\nfirstComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nsecondComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-1opc18h\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-05\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nthirdComparison = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-10j0qr8\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"paris\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-10\"}]},\"groupBy\":[\"mode\"],\"metrics\":[{\"as\":\"minimum\",\"op\":\"min\",\"field\":\"priceCents\"},{\"as\":\"fastest\",\"op\":\"min\",\"field\":\"durationMinutes\"},{\"as\":\"count\",\"op\":\"count\"}],\"limit\":4})\nfirstFares = Query(\"local_query\", {\"version\":1,\"sources\":[{\"datasetRef\":\"dataset-14rfd0v\",\"alias\":\"fares\"}],\"where\":{\"all\":[{\"field\":\"originId\",\"op\":\"eq\",\"value\":\"barcelona\"},{\"field\":\"destinationId\",\"op\":\"eq\",\"value\":\"prague\"},{\"field\":\"serviceDate\",\"op\":\"eq\",\"value\":\"2026-10-03\"}]},\"project\":[\"id\",\"originId\",\"destinationId\",\"serviceDate\",\"mode\",\"carrierId\",\"priceCents\",\"durationMinutes\",\"departureMinutes\",\"availableSeats\",\"currency\",\"synthetic\",\"priceBasis\",\"direct\"],\"orderBy\":[{\"field\":$sort.field,\"direction\":$sort.direction}],\"limit\":100})\nsequence = CitySequence(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Barcelona → Prague → Paris → Prague\")\nroute = RouteMap(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\")\nhero = TravelHero(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Train versus bus · October 3–10, 2026\", null, [sequence, route])\nnotice = CoverageNotice(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Loaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\")\nmatrixOne = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, firstComparison)\nmatrixTwo = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, secondComparison)\nmatrixThree = ComparisonMatrix(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"Price, duration and fare count by mode\", null, null, null, null, thirdComparison)\nemptyTwo = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"No train or bus fares in the loaded demo resource\")\nemptyThree = EmptyState(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"No train or bus fares in the loaded demo resource\")\nlegOne = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"October 3 · Barcelona → Prague\", null, [matrixOne])\nlegTwo = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-1opc18h\", null, null, \"October 5 · Prague → Paris · after 2 nights\", null, [matrixTwo, emptyTwo])\nlegThree = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-10j0qr8\", null, null, \"October 10 · Paris → Prague · after 5 nights\", null, [matrixThree, emptyThree])\ncomparison = ResponsiveGrid(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Compare the three legs\", null, [legOne, legTwo, legThree])\nsorting = SortSelect(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Sort available fares\", null, null, $sort, \"sort\")\nplot = DurationPricePlot(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Barcelona → Prague · price versus duration\", null, null, null, null, firstFares)\npicker = FarePicker(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Choose a Barcelona → Prague fare\", null, null, $selectedFareIds, \"selectedFareIds\", firstFares)\nchoices = Section(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", \"dataset-14rfd0v\", null, null, \"Explore available demo fares\", null, [sorting, plot, picker])\nselected = SelectedItinerary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Selected fares · not a complete trip quotation\")\nsummary = StickySummary(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Your selection\", null, [selected])\ndetails = SplitPane(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Fare details and selection\", null, [choices, summary])\nroot = TravelSurface(\"artifact-393d7d99-1239-4aec-a13b-ddf28875374e\", null, null, null, \"Three-leg train and bus comparison\", null, [hero, notice, comparison, details])",
+          "state": {
+            "artifactId": "artifact-393d7d99-1239-4aec-a13b-ddf28875374e",
+            "revision": 7,
+            "runtimeVariables": {},
+            "datasetRefs": [
+              "dataset-14rfd0v",
+              "dataset-1opc18h",
+              "dataset-10j0qr8"
+            ],
+            "filters": {
+              "modes": [
+                "train",
+                "bus"
+              ],
+              "carrierIds": [],
+              "directOnly": false
+            },
+            "dates": {
+              "start": "2026-10-03",
+              "end": "2026-10-10"
+            },
+            "stays": [
+              {
+                "cityId": "barcelona",
+                "nights": 0
+              },
+              {
+                "cityId": "prague",
+                "nights": 2
+              },
+              {
+                "cityId": "paris",
+                "nights": 5
+              },
+              {
+                "cityId": "prague",
+                "nights": 0
+              }
+            ],
+            "modesByLeg": {},
+            "sort": {
+              "field": "priceCents",
+              "direction": "desc"
+            },
+            "selectedFareIds": [],
+            "pending": [],
+            "lastInteractionAt": "2026-10-02T23:08:30.410Z"
+          }
+        }
+      ],
+      "descriptors": [
+        {
+          "datasetId": "dataset-14rfd0v",
+          "request": {
+            "originIds": [
+              "barcelona",
+              "prague",
+              "paris"
+            ],
+            "destinationIds": [
+              "prague",
+              "paris"
+            ],
+            "dateWindow": {
+              "from": "2026-10-03",
+              "to": "2026-10-10"
+            },
+            "modes": [
+              "train",
+              "bus"
+            ],
+            "passengers": 1
+          },
+          "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+          "complete": true
+        },
+        {
+          "datasetId": "dataset-1opc18h",
+          "request": {
+            "originIds": [
+              "prague"
+            ],
+            "destinationIds": [
+              "paris"
+            ],
+            "dateWindow": {
+              "from": "2026-10-05",
+              "to": "2026-10-12"
+            },
+            "modes": [
+              "train",
+              "bus"
+            ],
+            "passengers": 1
+          },
+          "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+          "complete": true
+        },
+        {
+          "datasetId": "dataset-10j0qr8",
+          "request": {
+            "originIds": [
+              "paris"
+            ],
+            "destinationIds": [
+              "prague"
+            ],
+            "dateWindow": {
+              "from": "2026-10-10",
+              "to": "2026-10-17"
+            },
+            "modes": [
+              "train",
+              "bus"
+            ],
+            "passengers": 1
+          },
+          "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+          "complete": true
+        }
+      ]
+    }
+  },
+  "visibleText": "Compare interfacesClassic searchVersion B · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nCompare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights.\n\nThree-leg train and bus comparison\nTrain versus bus · October 3–10, 2026\nBarcelona → Prague → Paris → Prague\nBarcelona\nPrague\n2 nights\nParis\n5 nights\nPrague\nYour route\nBarcelona\nPrague\nParis\nPrague\nSchematic route, not a geographic map.\nLoaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\nCompare the three legs\nOctober 3 · Barcelona → Prague\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nOctober 5 · Prague → Paris · after 2 nights\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nNo train or bus fares in the loaded demo resource\nOctober 10 · Paris → Prague · after 5 nights\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nNo train or bus fares in the loaded demo resource\nFare details and selection\nExplore available demo fares\nSort available fares\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nBarcelona → Prague · price versus duration\n\nLeft is faster · lower is cheaper · choose a point to select\n\nJourney duration\nChoose a Barcelona → Prague fare\n\nNo options match. Try another mode, date, or price limit.\n\nSynthetic fares per passenger\nYour selection\nSelected fares · not a complete trip quotation\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nRetry\n\nI will stay 5 days in Paris. Keep Barcelona to Prague on October 3, Prague to Paris on October 5, and Paris to Prague on October 10, 2026. Show train and bus only, with clear per-leg empty results if none exist in the loaded demo. Preserve my current sort.\n\nI’ll keep the three dates, five nights in Paris, your current sort, and the per-leg empty results, while restricting modes to train and bus.\n\nTravel data updated locally.\n\nDone—dates, Paris stay, and current sort preserved. Train and bus only, with clear per-leg empty results for missing demo fares.\n\nRetry\nActive travel view · artifact-393d7d99-1239-4aec-a13b-ddf28875374e\nSynthetic fares\nSend\nStop\nDeveloper conversation diagnostics"
+}
