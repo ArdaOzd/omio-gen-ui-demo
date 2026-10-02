@@ -25,14 +25,14 @@ export function parseChatRequest(input:unknown):ChatRequest {
    if(part.type.startsWith('tool-')||part.type==='dynamic-tool'){
     const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5);
     if(!name||!TOOL_NAMES.some(tool=>tool===name)||!part.toolCallId)throw new Error('Invalid tool identity');
-    if(part.input!==undefined && part.state!=='input-streaming')parseToolInput(name,part.input);
+    if(part.input!==undefined && part.state!=='input-streaming' && part.state!=='output-error')parseToolInput(name,part.input);
     if(part.output!==undefined)parseToolOutput(name,part.output);
    }
   }
  }
  if(!request.messages.some(message=>message.role==='user'))throw new Error('Missing visible user turn');
  if(JSON.stringify(request.messages).length>40_000)throw new Error('History exceeds byte budget');
- const messages=request.messages.map(message=>({...message,parts:message.parts.filter(part=>part.state!=='input-streaming')}));
+ const messages=request.messages.map(message=>({...message,parts:message.parts.filter(part=>part.state!=='input-streaming' && part.state!=='output-error')}));
  return {...request,messages,currentContext:context};
 }
 
