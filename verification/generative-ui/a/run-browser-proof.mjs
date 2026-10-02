@@ -14,12 +14,12 @@ try{
   const bus=page.getByRole('button',{name:'Bus',exact:true});await bus.waitFor();await bus.focus();await page.keyboard.press('Enter');await bus.waitFor()
   assert.equal(await bus.getAttribute('aria-pressed'),'true')
   assert.equal(await page.getByText('After the view. Your changes are current.').count(),0,'partial controls must work before completion')
-  if(test.scene===0){await page.getByText('Flixbus',{exact:true}).waitFor();assert.equal(await page.getByText('Eurostar',{exact:true}).count(),0)}
+  if(test.scene===0){await page.getByText('Flixbus',{exact:true}).waitFor();await page.getByText('Eurostar',{exact:true}).waitFor({state:'hidden'})}
   await page.screenshot({path:`${output}/${test.scene}-${test.width}-${test.theme}-partial.png`,fullPage:true})
   await page.getByRole('button',{name:'Resume stream'}).evaluate(button=>button.click());await page.getByText('After the view. Your changes are current.').waitFor()
   assert.equal(await bus.getAttribute('aria-pressed'),'true','stream completion must preserve newer action');assert.equal(await bus.evaluate(button=>button===document.activeElement),true,'stream completion must preserve focus')
   await page.getByRole('button',{name:'Inspect evidence'}).click();const evidence=JSON.parse(await page.locator('#evidence').textContent())
-  assert.equal(evidence.requests.length,2);assert.deepEqual(evidence.requests[1].currentContext.artifacts[0].filters.modes,['bus'])
+  assert.equal(evidence.requests.length,2);assert.deepEqual(evidence.requests[1].currentContext.artifacts[0].modesByLeg['london:paris'],['bus'])
   const serialized=JSON.stringify(evidence.requests);assert.ok(!serialized.includes('private-fare-sentinel-4c917d'));assert.ok(!serialized.includes('"rows":'));assert.ok(!serialized.includes('"fares":'))
   assert.equal(errors.length,0);const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);assert.equal(overflow,false)
   await page.screenshot({path:`${output}/${test.scene}-${test.width}-${test.theme}.png`,fullPage:true})
