@@ -16,7 +16,8 @@
     "test:browser": "playwright test",
     "test:leakage": "vitest run src/generative/contracts/privacy.test.ts",
     "check:catalog": "tsx src/generative/catalog/generate.ts --check",
-    "generate:catalog": "tsx src/generative/catalog/generate.ts"
+    "generate:catalog": "tsx src/generative/catalog/generate.ts",
+    "agent:dev": "tsx agent/server.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "4.0.87",

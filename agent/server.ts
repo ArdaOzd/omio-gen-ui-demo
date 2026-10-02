@@ -3,10 +3,13 @@ import { parseChatRequest } from './request-schema';
 import { handleChat } from './chat-route';
 import { CODEX_MODEL } from './codex-provider';
 const port=Number(process.env.AGENT_PORT??8010);
+const allowedOrigin='http://127.0.0.1:'+String(process.env.WEB_PORT??5173);
 export const server=createServer(async(request,response)=>{
- response.setHeader('Access-Control-Allow-Origin','http://127.0.0.1:'+String(process.env.WEB_PORT??5173));
+ if(request.headers.origin && request.headers.origin!==allowedOrigin){response.writeHead(403);response.end();return;}
+ response.setHeader('Access-Control-Allow-Origin',allowedOrigin);
  if(request.url==='/api/agent/health'){response.setHeader('Content-Type','application/json');response.end(JSON.stringify({status:'ok',service:'omio-generative-agent',model:CODEX_MODEL,provider:'signed-in-codex',schemaVersion:'1.0.0',pid:process.pid}));return;}
  if(request.method!=='POST'||request.url!=='/api/chat'){response.writeHead(404);response.end();return;}
+ if(!request.headers['content-type']?.startsWith('application/json')){response.writeHead(415);response.end();return;}
  const controller=new AbortController();response.on('close',()=>controller.abort());
  try{
   let body='';for await(const chunk of request){body+=chunk.toString();if(Buffer.byteLength(body)>120_000)throw new Error('Request exceeds byte budget');}

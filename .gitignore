@@ -15,3 +15,7 @@ npm-debug.log*
 artifacts/
 test-results/
 playwright-report/
+
+# Local credentials and dev configuration
+.env
+.env.*

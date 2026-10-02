@@ -366,6 +366,8 @@ def _search_leg(
             },
             "price": round(row["price_cents"] / 100, 2),
             "price_cents": row["price_cents"],
+            "price_basis": "per-passenger-including-demo-fees",
+            "synthetic": True,
             "currency": "EUR",
             "available_seats": row["available_seats"],
             "source_kind": row["source_kind"],
@@ -443,7 +445,7 @@ def dispatch(
     if path == "/api/health":
         with closing(_connect(database)) as connection:
             fare_count = connection.execute("SELECT COUNT(*) FROM fares").fetchone()[0]
-        return HTTPStatus.OK, {"status": "ok", "fare_count": fare_count}
+        return HTTPStatus.OK, {"status": "ok", "fare_count": fare_count, "service": "omio-fare-api", "pid": os.getpid()}
     if path == "/api/locations":
         return HTTPStatus.OK, get_locations(database)
     if path == "/api/metadata":
