@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { DatasetRevisionSchema, type DatasetId, type QueryIR } from '../contracts'
 import type { QueryResource } from './query-engine'
-export type WorkerRequest = {kind:'register';id:string;datasetId:DatasetId;resource:QueryResource}|{kind:'release';id:string;datasetId:DatasetId}|{kind:'query';id:string;query:QueryIR}|{kind:'cancel';id:string}
+export type WorkerRequest = {kind:'register';id:string;datasetId:DatasetId;resource:QueryResource}|{kind:'release';id:string;datasetId:DatasetId}|{kind:'append';id:string;datasetId:DatasetId;rows:QueryResource['rows'];revision:QueryResource['revision']}|{kind:'query';id:string;query:QueryIR}|{kind:'cancel';id:string}
 const scalar=z.union([z.string(),z.number().finite(),z.boolean()])
 export const WorkerResponseSchema=z.discriminatedUnion('kind',[
  z.strictObject({kind:z.literal('ready'),id:z.string()}),

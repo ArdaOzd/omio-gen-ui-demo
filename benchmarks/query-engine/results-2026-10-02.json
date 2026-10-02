@@ -1,0 +1,2831 @@
+{
+  "timestamp": "2026-10-02T19:46:30.772Z",
+  "thresholds": {
+    "declaredAt": "2026-10-02T19:39:00Z",
+    "rowCounts": [
+      50000,
+      200000
+    ],
+    "samplesPerWorkload": 10,
+    "warmQueryP95Ms": 1500,
+    "coldLoadMs": 15000,
+    "resultBytes": 65536,
+    "visibleCancelMs": 100,
+    "workerCancelAckMs": 500,
+    "normalQueryMainThreadLongTasks": 0,
+    "memory": {
+      "measurement": "Chromium JSHeapUsedSize plus worker CDP heap where supported",
+      "limitBytes": 536870912
+    }
+  },
+  "metrics": [
+    {
+      "engine": "typescript-worker",
+      "rows": 50000,
+      "startupMs": 1.0999999046325684,
+      "ingestMs": 228,
+      "workloads": [
+        {
+          "name": "topK",
+          "p50Ms": 72.60000002384186,
+          "p95Ms": 103.90000009536743,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "filter",
+          "p50Ms": 38,
+          "p95Ms": 47.60000002384186,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "group",
+          "p50Ms": 48.5,
+          "p95Ms": 56.299999952316284,
+          "resultBytes": 188,
+          "correct": true
+        },
+        {
+          "name": "join",
+          "p50Ms": 70.69999992847443,
+          "p95Ms": 91.70000004768372,
+          "resultBytes": 236,
+          "correct": true
+        }
+      ],
+      "mainThreadLongTasks": 0,
+      "visibleCancelMs": 1.399999976158142,
+      "workerCancelAckMs": 2.200000047683716,
+      "incrementalAppendMs": 12.100000023841858,
+      "appendCorrect": true
+    },
+    {
+      "engine": "duckdb-wasm",
+      "rows": 50000,
+      "startupMs": 990.0999999046326,
+      "ingestMs": 381.2000000476837,
+      "workloads": [
+        {
+          "name": "topK",
+          "p50Ms": 6.600000023841858,
+          "p95Ms": 43,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "filter",
+          "p50Ms": 12.200000047683716,
+          "p95Ms": 78.29999995231628,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "group",
+          "p50Ms": 9.300000071525574,
+          "p95Ms": 42.5,
+          "resultBytes": 188,
+          "correct": true
+        },
+        {
+          "name": "join",
+          "p50Ms": 21.299999952316284,
+          "p95Ms": 43.10000002384186,
+          "resultBytes": 236,
+          "correct": true
+        }
+      ],
+      "mainThreadLongTasks": 0,
+      "incrementalAppendMs": 65.20000004768372,
+      "appendCorrect": true
+    },
+    {
+      "engine": "typescript-worker",
+      "rows": 200000,
+      "startupMs": 1.2999999523162842,
+      "ingestMs": 710.9000000953674,
+      "workloads": [
+        {
+          "name": "topK",
+          "p50Ms": 321,
+          "p95Ms": 353,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "filter",
+          "p50Ms": 245.80000007152557,
+          "p95Ms": 260.60000002384186,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "group",
+          "p50Ms": 294.2999999523163,
+          "p95Ms": 313.2999999523163,
+          "resultBytes": 188,
+          "correct": true
+        },
+        {
+          "name": "join",
+          "p50Ms": 358.2000000476837,
+          "p95Ms": 375.2999999523163,
+          "resultBytes": 236,
+          "correct": true
+        }
+      ],
+      "mainThreadLongTasks": 0,
+      "visibleCancelMs": 0,
+      "workerCancelAckMs": 5.5,
+      "incrementalAppendMs": 49.799999952316284,
+      "appendCorrect": true
+    },
+    {
+      "engine": "duckdb-wasm",
+      "rows": 200000,
+      "startupMs": 676.2999999523163,
+      "ingestMs": 441.3000000715256,
+      "workloads": [
+        {
+          "name": "topK",
+          "p50Ms": 7.200000047683716,
+          "p95Ms": 27.5,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "filter",
+          "p50Ms": 13.899999976158142,
+          "p95Ms": 45.5,
+          "resultBytes": 236,
+          "correct": true
+        },
+        {
+          "name": "group",
+          "p50Ms": 8.899999976158142,
+          "p95Ms": 21.199999928474426,
+          "resultBytes": 188,
+          "correct": true
+        },
+        {
+          "name": "join",
+          "p50Ms": 34.89999997615814,
+          "p95Ms": 44.799999952316284,
+          "resultBytes": 236,
+          "correct": true
+        }
+      ],
+      "mainThreadLongTasks": 0,
+      "incrementalAppendMs": 35.800000071525574,
+      "appendCorrect": true
+    }
+  ],
+  "done": true,
+  "browser": "154.0.8037.97",
+  "runtime": "v24.7.0",
+  "hardware": {
+    "cpu": "Apple M2",
+    "cores": 8,
+    "memoryBytes": 25769803776,
+    "platform": "darwin",
+    "release": "25.6.0"
+  },
+  "ports": {
+    "vite": 5312
+  },
+  "errors": [],
+  "memorySamples": [
+    {
+      "timestamp": 1790970351920,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1807168,
+      "totalBytes": 3293184
+    },
+    {
+      "timestamp": 1790970352131,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2390572,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970352335,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2390884,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970352544,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391088,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970352752,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391196,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970352957,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391304,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970353165,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391412,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970353375,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391508,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970353584,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391616,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970353786,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391724,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970353990,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391820,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970354195,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2391940,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970354400,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392036,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970354605,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392156,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970354811,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392276,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970355017,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392396,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970355221,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392516,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970355429,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392648,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970355635,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392780,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970355841,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2392912,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970356048,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393068,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970356255,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393212,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970356462,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393368,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970356668,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393512,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970356877,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393668,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970357084,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393812,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970357292,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2393956,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970357499,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2394112,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970357705,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2394256,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970357911,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2394412,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970358118,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2394556,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970358324,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2394700,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970358530,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2394856,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970358738,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2395000,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970358945,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2395156,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970359150,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2396228,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970359356,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2396372,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970359562,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2396528,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970359766,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2396660,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970359972,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2396780,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970360178,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2396936,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970360385,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2397068,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970360593,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2397200,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970360798,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2398720,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970361004,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2398828,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970361211,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2398948,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970361418,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399068,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970361623,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399188,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970361827,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399284,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970362034,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399380,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970362241,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399476,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970362448,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399596,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970362654,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399716,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970362861,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399824,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970363068,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2399932,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970363276,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400052,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970363482,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400196,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970363686,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400328,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970363893,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400460,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970364097,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400604,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970364301,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400748,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970364504,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2400892,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970364710,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401048,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970364913,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401192,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970365117,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401336,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970365320,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401480,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970365523,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401624,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970365729,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401780,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970365935,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2401924,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970366144,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402080,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970366350,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402224,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970366559,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402368,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970366766,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402524,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970366973,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402668,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970367177,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402824,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970367382,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2402968,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970367586,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403112,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970367789,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403256,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970367993,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403400,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970368196,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403544,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970368402,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403688,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970368610,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403832,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970368816,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2403964,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970369021,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404084,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970369227,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404204,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970369432,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404300,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970369641,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404408,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970369847,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404516,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970370051,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404612,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970370258,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404720,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970370463,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404816,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970370668,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2404912,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970370875,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405008,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970371079,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405140,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970371283,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405260,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970371487,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405380,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970371695,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405512,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970371901,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405656,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970372105,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405788,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970372309,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2405944,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970372515,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406088,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970372721,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406232,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970372926,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406388,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970373132,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406532,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970373338,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406676,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970373545,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406832,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970373752,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2406976,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970373958,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2407120,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970374166,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2407276,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970374371,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2407420,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970374576,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2407576,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970374782,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2407720,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970374988,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2407864,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970375194,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408020,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970375400,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408164,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970375604,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408308,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970375810,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408464,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970376015,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408608,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970376221,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408728,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970376427,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2408884,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970376632,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409028,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970376840,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409172,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970377046,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409304,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970377252,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409412,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970377457,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409532,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970377664,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409664,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970377870,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409760,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970378075,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409880,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970378280,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2409988,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970378485,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410096,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970378692,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410192,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970378897,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410312,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970379105,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410420,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970379312,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410552,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970379520,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410660,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970379726,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410792,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970379935,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2410924,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970380141,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411032,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970380346,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411152,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970380551,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411284,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970380757,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411416,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970380963,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411572,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970381172,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411716,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970381380,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2411872,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970381586,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2412016,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970381793,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 2412172,
+      "totalBytes": 3620864
+    },
+    {
+      "timestamp": 1790970381999,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670996,
+      "totalBytes": 3096576
+    },
+    {
+      "timestamp": 1790970382205,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671140,
+      "totalBytes": 3096576
+    },
+    {
+      "timestamp": 1790970382412,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671296,
+      "totalBytes": 3096576
+    },
+    {
+      "timestamp": 1790970382618,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1668740,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970382826,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1668896,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970383033,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669040,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970383244,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669196,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970383450,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669340,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970383658,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669484,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970383864,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669640,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970384071,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669784,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970384277,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1669940,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970384483,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670084,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970384690,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670228,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970384896,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670384,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970385102,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670528,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970385310,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670684,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970385516,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670804,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970385722,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1670924,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970385929,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671032,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970386136,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671140,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970386344,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671260,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970386551,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671368,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970386755,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671464,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970386961,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671572,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970387167,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671668,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970387371,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671800,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970387577,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1671932,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970387785,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672040,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970387991,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672148,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970388198,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672304,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970388404,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672424,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970388612,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672556,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970388818,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672688,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970389025,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672832,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970389231,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1672976,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970389439,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1673120,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970389646,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1673276,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970389854,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1673420,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970390060,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1673576,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970390267,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1673720,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970390470,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 1673864,
+      "totalBytes": 2834432
+    },
+    {
+      "timestamp": 1790970390727,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 5121488,
+      "totalBytes": 6160384
+    },
+    {
+      "timestamp": 1790970391043,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 17397956,
+      "totalBytes": 33472512
+    },
+    {
+      "timestamp": 1790970391048,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 17266744,
+      "totalBytes": 27148288
+    },
+    {
+      "timestamp": 1790970391257,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 30893740,
+      "totalBytes": 42516480
+    },
+    {
+      "timestamp": 1790970391260,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 17430728,
+      "totalBytes": 27410432
+    },
+    {
+      "timestamp": 1790970391465,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 29377472,
+      "totalBytes": 52281344
+    },
+    {
+      "timestamp": 1790970391468,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 17503192,
+      "totalBytes": 27410432
+    },
+    {
+      "timestamp": 1790970391690,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 27405220,
+      "totalBytes": 55902208
+    },
+    {
+      "timestamp": 1790970391693,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14703364,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970391900,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 31734412,
+      "totalBytes": 57950208
+    },
+    {
+      "timestamp": 1790970391903,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14776252,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970392109,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 27481080,
+      "totalBytes": 58474496
+    },
+    {
+      "timestamp": 1790970392111,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14824928,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970392316,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 37052568,
+      "totalBytes": 59621376
+    },
+    {
+      "timestamp": 1790970392318,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14879184,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970392522,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 24511184,
+      "totalBytes": 59047936
+    },
+    {
+      "timestamp": 1790970392525,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14921596,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970392729,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 37251776,
+      "totalBytes": 60309504
+    },
+    {
+      "timestamp": 1790970392731,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14966804,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970393003,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 49287816,
+      "totalBytes": 67911680
+    },
+    {
+      "timestamp": 1790970393007,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 14997980,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970393212,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 46331004,
+      "totalBytes": 79708160
+    },
+    {
+      "timestamp": 1790970393214,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 15027260,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970393418,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 46345604,
+      "totalBytes": 89407488
+    },
+    {
+      "timestamp": 1790970393420,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 15056504,
+      "totalBytes": 27672576
+    },
+    {
+      "timestamp": 1790970393623,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 51257932,
+      "totalBytes": 92192768
+    },
+    {
+      "timestamp": 1790970393627,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 22864420,
+      "totalBytes": 43876352
+    },
+    {
+      "timestamp": 1790970393854,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 2761124,
+      "totalBytes": 4915200
+    },
+    {
+      "timestamp": 1790970393859,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 22880560,
+      "totalBytes": 43876352
+    },
+    {
+      "timestamp": 1790970394146,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 23537556,
+      "totalBytes": 26427392
+    },
+    {
+      "timestamp": 1790970394148,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 23016104,
+      "totalBytes": 43876352
+    },
+    {
+      "timestamp": 1790970394448,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 54020520,
+      "totalBytes": 77611008
+    },
+    {
+      "timestamp": 1790970394450,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 23018224,
+      "totalBytes": 43876352
+    },
+    {
+      "timestamp": 1790970394661,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 55312552,
+      "totalBytes": 77611008
+    },
+    {
+      "timestamp": 1790970394693,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 33540180,
+      "totalBytes": 49446912
+    },
+    {
+      "timestamp": 1790970395001,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 35766260,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970395008,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 33679116,
+      "totalBytes": 49446912
+    },
+    {
+      "timestamp": 1790970395247,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 36240864,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970395273,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 34255624,
+      "totalBytes": 49709056
+    },
+    {
+      "timestamp": 1790970395502,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 36686288,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970395514,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 34617028,
+      "totalBytes": 50233344
+    },
+    {
+      "timestamp": 1790970395729,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 36809644,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970395733,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 33614856,
+      "totalBytes": 62865408
+    },
+    {
+      "timestamp": 1790970396176,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 80911872,
+      "totalBytes": 115834880
+    },
+    {
+      "timestamp": 1790970396660,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 61244364,
+      "totalBytes": 74842112
+    },
+    {
+      "timestamp": 1790970396665,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41911712,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970396871,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 64413892,
+      "totalBytes": 78381056
+    },
+    {
+      "timestamp": 1790970396874,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41911820,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970397077,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 69991704,
+      "totalBytes": 109690880
+    },
+    {
+      "timestamp": 1790970397078,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41921756,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970397282,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 94163332,
+      "totalBytes": 119685120
+    },
+    {
+      "timestamp": 1790970397283,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41921876,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970397486,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 97111828,
+      "totalBytes": 123863040
+    },
+    {
+      "timestamp": 1790970397487,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41931380,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970397690,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 84444208,
+      "totalBytes": 151519232
+    },
+    {
+      "timestamp": 1790970397691,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41940872,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970397895,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 101740136,
+      "totalBytes": 154501120
+    },
+    {
+      "timestamp": 1790970397896,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41941016,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970398100,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 98949572,
+      "totalBytes": 160038912
+    },
+    {
+      "timestamp": 1790970398101,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41950508,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970398304,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 109876920,
+      "totalBytes": 168574976
+    },
+    {
+      "timestamp": 1790970398305,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41960012,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970398509,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 112566472,
+      "totalBytes": 172081152
+    },
+    {
+      "timestamp": 1790970398511,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41960168,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970398715,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 123326772,
+      "totalBytes": 176914432
+    },
+    {
+      "timestamp": 1790970398716,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41969684,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970398919,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 134011776,
+      "totalBytes": 180797440
+    },
+    {
+      "timestamp": 1790970398920,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41969828,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970399124,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 115315584,
+      "totalBytes": 186482688
+    },
+    {
+      "timestamp": 1790970399126,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41979356,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970399329,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 127907756,
+      "totalBytes": 193167360
+    },
+    {
+      "timestamp": 1790970399330,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41996432,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970399534,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 133817800,
+      "totalBytes": 196214784
+    },
+    {
+      "timestamp": 1790970399536,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41996576,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970399740,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 141263044,
+      "totalBytes": 200671232
+    },
+    {
+      "timestamp": 1790970399742,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42005784,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970399945,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 155513624,
+      "totalBytes": 204292096
+    },
+    {
+      "timestamp": 1790970399946,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42019424,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970400149,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 154334748,
+      "totalBytes": 207224832
+    },
+    {
+      "timestamp": 1790970400150,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42028764,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970400354,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 141869884,
+      "totalBytes": 209846272
+    },
+    {
+      "timestamp": 1790970400357,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42028908,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970400563,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 156704968,
+      "totalBytes": 209846272
+    },
+    {
+      "timestamp": 1790970400565,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42038116,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970400771,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 143613100,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970400774,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42047312,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970400978,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 158444544,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970400981,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42056520,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970401185,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 146080060,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970401187,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42065716,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970401390,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 160974556,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970401391,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42074912,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970401594,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 145394304,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970401596,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42075068,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970401801,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 160216696,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970401803,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42084240,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970402008,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 147271376,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970402011,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42105208,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970402217,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 161803384,
+      "totalBytes": 210370560
+    },
+    {
+      "timestamp": 1790970402219,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42114032,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970402423,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 146467764,
+      "totalBytes": 211550208
+    },
+    {
+      "timestamp": 1790970402424,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42125992,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970402627,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 167451896,
+      "totalBytes": 217071616
+    },
+    {
+      "timestamp": 1790970402629,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42126148,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970402834,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 139044312,
+      "totalBytes": 213336064
+    },
+    {
+      "timestamp": 1790970402836,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42137040,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970403040,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 161270272,
+      "totalBytes": 220971008
+    },
+    {
+      "timestamp": 1790970403041,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42146940,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970403244,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 136608924,
+      "totalBytes": 210731008
+    },
+    {
+      "timestamp": 1790970403245,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42156852,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970403450,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 141578484,
+      "totalBytes": 213221376
+    },
+    {
+      "timestamp": 1790970403452,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42156960,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970403657,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 157314988,
+      "totalBytes": 218890240
+    },
+    {
+      "timestamp": 1790970403659,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42166848,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970403863,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 175871056,
+      "totalBytes": 226869248
+    },
+    {
+      "timestamp": 1790970403864,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42176736,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970404067,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 140201992,
+      "totalBytes": 212844544
+    },
+    {
+      "timestamp": 1790970404068,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42176832,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970404275,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 147198512,
+      "totalBytes": 216956928
+    },
+    {
+      "timestamp": 1790970404277,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42186720,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970404481,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 165697900,
+      "totalBytes": 222855168
+    },
+    {
+      "timestamp": 1790970404483,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42196628,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970404686,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 182879908,
+      "totalBytes": 230899712
+    },
+    {
+      "timestamp": 1790970404688,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42196724,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970404893,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 140653192,
+      "totalBytes": 214843392
+    },
+    {
+      "timestamp": 1790970404895,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42206600,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970405100,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 158209744,
+      "totalBytes": 219709440
+    },
+    {
+      "timestamp": 1790970405101,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42216488,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970405304,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 178690212,
+      "totalBytes": 225165312
+    },
+    {
+      "timestamp": 1790970405306,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42233424,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970405510,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 140848840,
+      "totalBytes": 215367680
+    },
+    {
+      "timestamp": 1790970405511,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42233824,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970405716,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 156854828,
+      "totalBytes": 220577792
+    },
+    {
+      "timestamp": 1790970405718,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42243168,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970405921,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 172019828,
+      "totalBytes": 223559680
+    },
+    {
+      "timestamp": 1790970405922,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42243264,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970406126,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 178248092,
+      "totalBytes": 227852288
+    },
+    {
+      "timestamp": 1790970406127,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42252476,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970406331,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 184918104,
+      "totalBytes": 230064128
+    },
+    {
+      "timestamp": 1790970406332,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42252620,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970406535,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 167509432,
+      "totalBytes": 238092288
+    },
+    {
+      "timestamp": 1790970406537,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42261832,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970406742,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 175676724,
+      "totalBytes": 239714304
+    },
+    {
+      "timestamp": 1790970406743,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42261988,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970406948,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 181260452,
+      "totalBytes": 245579776
+    },
+    {
+      "timestamp": 1790970406950,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42271176,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970407153,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 192595704,
+      "totalBytes": 250036224
+    },
+    {
+      "timestamp": 1790970407155,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42280388,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970407359,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 196993508,
+      "totalBytes": 253706240
+    },
+    {
+      "timestamp": 1790970407361,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42280544,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970407565,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 206027144,
+      "totalBytes": 257736704
+    },
+    {
+      "timestamp": 1790970407566,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42289756,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970407769,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 212057908,
+      "totalBytes": 258097152
+    },
+    {
+      "timestamp": 1790970407771,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42289900,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970407975,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 197174344,
+      "totalBytes": 267485184
+    },
+    {
+      "timestamp": 1790970407976,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42299124,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970408179,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 205150828,
+      "totalBytes": 269303808
+    },
+    {
+      "timestamp": 1790970408181,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42299268,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970408385,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 210740736,
+      "totalBytes": 275169280
+    },
+    {
+      "timestamp": 1790970408387,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42308480,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970408590,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 222106848,
+      "totalBytes": 280150016
+    },
+    {
+      "timestamp": 1790970408591,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42317704,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970408796,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 231093336,
+      "totalBytes": 283820032
+    },
+    {
+      "timestamp": 1790970408797,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42317848,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970409000,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 231735916,
+      "totalBytes": 283443200
+    },
+    {
+      "timestamp": 1790970409002,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42333416,
+      "totalBytes": 101974016
+    },
+    {
+      "timestamp": 1790970409204,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 241186936,
+      "totalBytes": 292913152
+    },
+    {
+      "timestamp": 1790970409205,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41948004,
+      "totalBytes": 115867648
+    },
+    {
+      "timestamp": 1790970409409,
+      "target": "http://127.0.0.1:5312/src/generative/query/worker.ts?worker_file&type=module",
+      "type": "worker",
+      "usedBytes": 253747908,
+      "totalBytes": 296452096
+    },
+    {
+      "timestamp": 1790970409411,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 41948160,
+      "totalBytes": 115867648
+    },
+    {
+      "timestamp": 1790970409619,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 3125672,
+      "totalBytes": 5177344
+    },
+    {
+      "timestamp": 1790970409621,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42075472,
+      "totalBytes": 115867648
+    },
+    {
+      "timestamp": 1790970409840,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 41019492,
+      "totalBytes": 53100544
+    },
+    {
+      "timestamp": 1790970409842,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42086220,
+      "totalBytes": 115867648
+    },
+    {
+      "timestamp": 1790970410045,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 54795448,
+      "totalBytes": 78135296
+    },
+    {
+      "timestamp": 1790970410046,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 42087700,
+      "totalBytes": 115867648
+    },
+    {
+      "timestamp": 1790970410255,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 35423796,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970410257,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 51743068,
+      "totalBytes": 125501440
+    },
+    {
+      "timestamp": 1790970410548,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 36237704,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970410549,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 51761544,
+      "totalBytes": 125501440
+    },
+    {
+      "timestamp": 1790970410753,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 36978296,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970410754,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 52101828,
+      "totalBytes": 125501440
+    },
+    {
+      "timestamp": 1790970410958,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 37290828,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970410959,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 52445600,
+      "totalBytes": 125763584
+    },
+    {
+      "timestamp": 1790970411163,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 37369556,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970411165,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 52555956,
+      "totalBytes": 125763584
+    },
+    {
+      "timestamp": 1790970411368,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js",
+      "type": "worker",
+      "usedBytes": 37428660,
+      "totalBytes": 64159744
+    },
+    {
+      "timestamp": 1790970411369,
+      "target": "http://127.0.0.1:5312/benchmarks/query-engine/index.html",
+      "type": "page",
+      "usedBytes": 89436104,
+      "totalBytes": 142819328
+    }
+  ]
+}

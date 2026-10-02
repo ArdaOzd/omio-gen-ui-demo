@@ -4,6 +4,7 @@ import { executeQuery,type QueryResource } from './query-engine'
 import { WorkerResponseSchema,type WorkerRequest } from './protocol'
 export interface LocalQueryEngine {
  register(id:DatasetId,resource:QueryResource):Promise<void>
+ append(id:DatasetId,rows:QueryResource['rows'],revision:QueryResource['revision']):Promise<void>
  execute(query:QueryIR,signal:AbortSignal):Promise<BoundedQueryResult>
  release(id:DatasetId):void
  dispose():void
@@ -35,6 +36,7 @@ export function createWorkerQueryEngine(worker:QueryWorker):LocalQueryEngine{
  }
  return {
   async register(datasetId,resource){await request({kind:'register',id:crypto.randomUUID(),datasetId,resource});revisions.set(datasetId,resource.revision)},
+  async append(datasetId,rows,revision){await request({kind:'append',id:crypto.randomUUID(),datasetId,rows,revision});revisions.set(datasetId,revision)},
   async execute(query,signal){const captured=query.sources.map(source=>({id:source.datasetRef,revision:revisions.get(source.datasetRef)}));const result=await request({kind:'query',id:crypto.randomUUID(),query},signal);if(!result)throw new Error('Invalid worker result');if(captured.some(item=>item.revision===undefined||revisions.get(item.id)!==item.revision))throw new Error('Stale query result');return result},
   release(datasetId){revisions.delete(datasetId);worker.postMessage({kind:'release',id:crypto.randomUUID(),datasetId})},
   dispose(){worker.removeEventListener('message',receive);worker.terminate();for(const item of pending.values()){item.cleanup();item.reject(abortError())}pending.clear();revisions.clear()},
@@ -43,5 +45,5 @@ export function createWorkerQueryEngine(worker:QueryWorker):LocalQueryEngine{
 export function createLocalQueryEngine():LocalQueryEngine{
  if(typeof Worker==='function')return createWorkerQueryEngine(new Worker(new URL('./worker.ts',import.meta.url),{type:'module'}))
  const resources=new Map<DatasetId,QueryResource>()
- return {async register(id,resource){resources.set(id,resource)},async execute(query,signal){const revisions=query.sources.map(source=>resources.get(source.datasetRef)?.revision);const result=await executeQuery(query,resources,signal);if(query.sources.some((source,index)=>resources.get(source.datasetRef)?.revision!==revisions[index]))throw new Error('Stale query result');return result},release(id){resources.delete(id)},dispose(){resources.clear()}}
+ return {async register(id,resource){resources.set(id,resource)},async append(id,rows,revision){const existing=resources.get(id);if(!existing||revision<=existing.revision)throw new Error('Stale append');const ids=new Set(existing.rows.map(row=>row.id));if(rows.some(row=>ids.has(row.id)))throw new Error('Conflicting append identity');resources.set(id,{...existing,rows:[...existing.rows,...rows],revision})},async execute(query,signal){const revisions=query.sources.map(source=>resources.get(source.datasetRef)?.revision);const result=await executeQuery(query,resources,signal);if(query.sources.some((source,index)=>resources.get(source.datasetRef)?.revision!==revisions[index]))throw new Error('Stale query result');return result},release(id){resources.delete(id)},dispose(){resources.clear()}}
 }
