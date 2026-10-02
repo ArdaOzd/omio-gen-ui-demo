@@ -18,7 +18,7 @@ it('never leaves a captured terminal failed compose input as a preparing skeleto
 
 it('only supersedes a failed tool with a later accepted compose in the same message',()=>{
  const failed={type:'tool-call',toolCallId:'failed',toolName:'compose_reactive_scene'}
- const accepted={type:'tool-call',toolCallId:'repair',toolName:'compose_reactive_scene',result:{status:'accepted'}}
+ const accepted={type:'tool-call',toolCallId:'repair',toolName:'compose_reactive_scene',args:{artifactRef:'art',programRevision:5,program:'root = TravelSurface("art")'},result:{status:'accepted'}}
  expect(hasAcceptedRepairAfter([failed,accepted],'failed')).toBe(true)
  expect(hasAcceptedRepairAfter([accepted,failed],'failed')).toBe(false)
  expect(hasAcceptedRepairAfter([failed,{...accepted,result:{status:'error'}}],'failed')).toBe(false)
@@ -51,13 +51,14 @@ it('keeps the accepted scene and removes its earlier failed tool through the nat
  expect(screen.queryByText(/This generated view could not be completed/)).toBeNull()
 })
 
-it.each(['accepted','pending','error','different','older-turn'])('preserves scene ownership for native %s tool ordering',async scenario=>{
+it.each(['accepted','pending','error','invalid','different','older-turn'])('preserves scene ownership for native %s tool ordering',async scenario=>{
  Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}})
  vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
  const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{});state.initializeMissing(ArtifactIdSchema.parse('other'),{})
  const services={state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}
  const scene=(artifactRef:string,title:string,toolCallId:string)=>({type:'tool-compose_reactive_scene' as const,toolCallId,state:'output-available' as const,input:{artifactRef,programRevision:5,program:`root = TravelSurface("${artifactRef}", null, null, null, "${title}")`},output:{artifactId:artifactRef,programRevision:5,status:'accepted'}})
  const first=scene('art','First usable scene','first'),second=scene(scenario==='different'?'other':'art','New accepted scene','second')
+ if(scenario==='invalid')second.input.program+='\nunknown()'
  const messages: UIMessage[]=scenario==='older-turn'?[{id:'first-turn',role:'assistant',parts:[first]},{id:'later-user',role:'user',parts:[{type:'text',text:'Update this view'}]},{id:'later-turn',role:'assistant',parts:[second]}]:[{id:'same-turn',role:'assistant',parts:[first,scenario==='pending'?{type:'tool-compose_reactive_scene',toolCallId:'pending',state:'input-streaming',input:{artifactRef:'art'}}:scenario==='error'?{type:'tool-compose_reactive_scene',toolCallId:'error',state:'output-error',input:{},errorText:'Repair was not accepted'}:second]}]
  render(<GenerativeChat variant="b" services={services} sceneToolkit={bToolkit} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
  if(scenario==='accepted'){await screen.findByText('New accepted scene');expect(screen.queryByText('First usable scene')).toBeNull()}
