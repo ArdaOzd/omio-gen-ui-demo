@@ -13,15 +13,15 @@ import { createThreadPersistence } from './state/persistence';
 import { assertNoBulkData } from './contracts/privacy';
 import { GenerativeChat } from './chat/runtime-provider';
 import type { TravelServices } from './catalog/context';
-function createServices(){
+function createServices(onCoverageStatus:(message:string)=>void){
  const bridge=createFareDataBridge();const state=createUIStateStore();const artifacts=createArtifactStore();
  const createArtifact=()=>{if(artifacts.getIds().length>=8)throw new Error('Eight-artifact limit reached');const id=ArtifactIdSchema.parse(`artifact-${crypto.randomUUID()}`);artifacts.register(id);state.initializeMissing(id,{});artifacts.activate(id);return id;};
- const router=createActionRouter(state,{bridge,activate:id=>artifacts.activate(id)});
- const services:TravelServices={bridge,state,activeId:artifacts.getActiveId,subscribeActive:artifacts.subscribe,activate:id=>artifacts.activate(ArtifactIdSchema.parse(id)),dispatch:router,createArtifact};
+ const router=createActionRouter(state,{bridge,activate:id=>artifacts.activate(id),onCoverageStatus:status=>onCoverageStatus(status.status==='loading'?'Loading the requested travel dates…':status.status==='error'?status.message??'Coverage could not be loaded. Try the date again.':'')});
+ const services:TravelServices={bridge,state,activeId:artifacts.getActiveId,subscribeActive:artifacts.subscribe,activate:id=>artifacts.activate(ArtifactIdSchema.parse(id)),dispatch:router,whenIdle:router.whenIdle,createArtifact};
  return {services,artifacts,createArtifact,router};
 }
 export function GenerativeRoute({variant}:{variant:'a'|'b'}){
- const [runtime]=useState(createServices);const [registryRevision,setRegistryRevision]=useState(0);const [ready,setReady]=useState(false);const [messages,setMessages]=useState<UIMessage[]>([]);const [notice,setNotice]=useState('');
+ const [notice,setNotice]=useState('');const [runtime]=useState(()=>createServices(setNotice));const [registryRevision,setRegistryRevision]=useState(0);const [ready,setReady]=useState(false);const [messages,setMessages]=useState<UIMessage[]>([]);
  const persistence=useMemo(()=>createThreadPersistence(),[]);const key=`travel-${variant}`;
  useEffect(()=>{const controller=new AbortController();persistence.load(key).then(async record=>{
   if(record){await persistence.restore(record,runtime.services.bridge,runtime.services.state,controller.signal);for(const artifact of record.artifacts)runtime.artifacts.register(artifact.state.artifactId);if(record.activeArtifactId)runtime.artifacts.activate(record.activeArtifactId);const valid=record.messages.filter((message):message is UIMessage=>typeof message==='object'&&message!==null&&'id' in message&&'role' in message&&'parts' in message);setMessages(valid);}

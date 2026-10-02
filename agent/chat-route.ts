@@ -8,12 +8,14 @@ import { codexDecision, type Decision } from './codex-provider';
 import { parseToolInput } from './request-schema';
 import type { ChatRequest } from './request-schema';
 import { validatePresentPrefix } from './present-prefix';
+import { loadLocationCatalog } from './location-catalog';
 import { aPrompt } from '../src/generative/variants/a/prompt';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { acceptTurn,spendTool } from './turn-budget';
 export async function handleChat(request:ChatRequest,response:ServerResponse,signal:AbortSignal):Promise<void>{
  const key=acceptTurn(request);const tools=request.tools??{};
- const prompt=JSON.stringify({variant:request.variant,catalogVersion,catalogHash,components:catalogDescriptors,policy:'Browser owns rows. Only supplied scalar refs and bounded summaries can enter tools. Local edits do not need model requests. Native present uses $type plus scalar props and children. B uses valid OpenUI v0.5 program with registered components.',frontendInstructions:(request.variant==='a'?aPrompt+'\n':'')+(request.system??''),tools,context:request.currentContext,history:request.messages.slice(-20)});
+ const locations=await loadLocationCatalog(request.messages);
+ const prompt=JSON.stringify({locations,locationPolicy:'Coverage originIds/destinationIds use these actual location IDs. Translate natural city names to their IDs; do not invent dataset refs. Load coverage before composing a view.',variant:request.variant,catalogVersion,catalogHash,components:catalogDescriptors,policy:'Browser owns rows. Only supplied scalar refs and bounded summaries can enter tools. Local edits do not need model requests. Native present uses $type plus scalar props and children. B uses valid OpenUI v0.5 program with registered components.',frontendInstructions:(request.variant==='a'?aPrompt+'\n':'')+(request.system??''),tools,context:request.currentContext,history:request.messages.slice(-20)});
  const stream=createUIMessageStream({execute:async({writer})=>{
   writer.write({type:'start',messageId:randomUUID()});writer.write({type:'start-step'});
   const callId=randomUUID();let toolStarted=false;let toolPrefix='';const textStarted=new Set<string>();

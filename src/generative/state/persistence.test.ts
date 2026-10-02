@@ -2,6 +2,7 @@ import { describe,expect,it } from 'vitest'
 import { createThreadPersistence,type PersistedThread,type ThreadStorage } from './persistence'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from './ui-state-store'
+import { createArtifactStore } from './artifact-store'
 import { exportAgentContext } from './snapshot-exporter'
 import { ArtifactIdSchema,FareIdSchema,type CoverageRequest,type FareRow } from '../contracts'
 const request:CoverageRequest={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['train'],passengers:1}
@@ -12,6 +13,9 @@ describe('descriptor-only thread persistence',()=>{
  it.each([false,true])('restores messages, compact state, and coverage by reloading descriptors (partial=%s)',async partial=>{
   const item=await fixture(partial);const io=memory();const persistence=createThreadPersistence(io.storage);await persistence.save('thread',item.record);const serialized=JSON.stringify(io.values.get('thread'));expect(serialized).not.toContain('"priceCents":');expect(serialized).not.toContain('availableSeats');expect(serialized).not.toContain('rows')
   const loaded=await persistence.load('thread');if(!loaded)throw new Error('Record not saved');const next=await fixture(partial);const restoredStore=createUIStateStore();const manifests=await persistence.restore(loaded,next.bridge,restoredStore,new AbortController().signal);expect(manifests[0]?.coverage.complete).toBe(!partial);expect(restoredStore.get(item.id).selectedFareIds).toEqual([row.id]);expect(loaded.messages).toEqual(item.record.messages)
+ })
+ it('restores the last active artifact independently from first registration',async()=>{
+  const item=await fixture();const second=ArtifactIdSchema.parse('second');item.store.initializeMissing(second,{filters:{modes:['bus'],carrierIds:[],directOnly:false}});const record={...item.record,activeArtifactId:second,artifacts:[...item.record.artifacts,{variant:'b' as const,source:'root = Summary("Second")',state:item.store.get(second)}]};const io=memory();const persistence=createThreadPersistence(io.storage);await persistence.save('two',record);const loaded=await persistence.load('two');if(!loaded)throw new Error('Missing thread');const store=createUIStateStore();await persistence.restore(loaded,item.bridge,store,new AbortController().signal);const artifacts=createArtifactStore();for(const artifact of loaded.artifacts)artifacts.register(artifact.state.artifactId);if(loaded.activeArtifactId)artifacts.activate(loaded.activeArtifactId);expect(artifacts.getActiveId()).toBe(second);expect(store.get(second).filters.modes).toEqual(['bus']);expect(store.get(item.id).filters.modes).toEqual([]);
  })
  it('rejects nested transport leakage, unsafe records, and incompatible versions without restoring rows',async()=>{
   const io=memory();const persistence=createThreadPersistence(io.storage);const item=await fixture();await expect(persistence.save('unsafe',{...item.record,messages:[{tool:{result:{nested:{rows:[row]}}}}]})).rejects.toThrow(/bulk-data/i)
