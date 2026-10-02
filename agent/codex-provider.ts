@@ -57,7 +57,7 @@ export async function codexDecision(options:{prompt:string;toolNames:string[];si
     const delta=z.object({delta:z.string()}).safeParse(message.data.params);if(!delta.success)continue;
     output+=delta.data.delta;if(output.length>40_000){fail(new Error('Model decision exceeds byte budget'));child.kill();continue;}
     name=readString(output,'toolName')??name;
-    for(const field of ['intro','toolInput','outro'] satisfies Array<keyof typeof sent>){const value=readString(output,field);if(value!==undefined && value.startsWith(sent[field]) && value.length>sent[field].length){const added=value.slice(sent[field].length);sent[field]=value;options.onDelta(field,added,name);}}
+    for(const field of ['intro','toolInput','outro'] satisfies Array<keyof typeof sent>){const value=readString(output,field);if(value!==undefined && value.startsWith(sent[field]) && value.length>sent[field].length){const added=value.slice(sent[field].length);sent[field]=value;try{options.onDelta(field,added,name)}catch{fail(new Error('Model emitted an invalid partial scene'));child.kill('SIGTERM');}}}
    }
    if(message.data.method==='turn/completed'){
     try{complete(DecisionSchema.parse(JSON.parse(output)))}catch{fail(new Error('Model returned an invalid decision'))}

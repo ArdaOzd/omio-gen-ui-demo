@@ -4,7 +4,7 @@ import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { validateReactiveProgram } from '../src/generative/variants/b/query/validate-program';
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
 export const TOOL_NAMES=['load_fares','summarize_fares','get_top_fares','get_fare','get_route','find_carriers','present','compose_reactive_scene','edit_artifact','create_artifact'] as const;
-const ToolSchema=z.strictObject({description:z.string().max(3000).optional(),parameters:z.record(z.string(),z.unknown()),providerOptions:z.record(z.string(),z.unknown()).optional()});
+const ToolSchema=z.strictObject({description:z.string().max(30000).optional(),parameters:z.record(z.string(),z.unknown()),providerOptions:z.record(z.string(),z.unknown()).optional()});
 const PartSchema=z.object({type:z.string().max(80),text:z.string().max(5000).optional(),state:z.string().max(40).optional(),toolCallId:z.string().max(128).optional(),toolName:z.string().max(80).optional(),input:z.unknown().optional(),output:z.unknown().optional(),errorText:z.string().max(200).optional()});
 const MessageSchema=z.object({id:z.string().min(1).max(128),role:z.enum(['user','assistant','system']),parts:z.array(PartSchema).max(40)});
 const RequestSchema=z.strictObject({id:z.string().max(128),messages:z.array(MessageSchema).max(60),currentContext:z.unknown(),variant:z.enum(['a','b']),provider:z.enum(['codex','fixture']).optional(),tools:z.record(z.string(),ToolSchema).optional(),system:z.string().max(30000).optional(),trigger:z.string().optional(),messageId:z.string().optional(),metadata:z.unknown().optional(),callSettings:z.unknown().optional(),config:z.unknown().optional()});
