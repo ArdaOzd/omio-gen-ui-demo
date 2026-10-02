@@ -220,5 +220,11 @@
     "seen": 1790900212.688134,
     "ast_hash": "40b0ffd87f6a502f8b57deae6afb229e",
     "semantic_hash": "40b0ffd87f6a502f8b57deae6afb229e"
+  },
+  "docs/research/generative-ui-resources.md": {
+    "mtime": 1790928575.9514499,
+    "seen": 1790928815.329391,
+    "ast_hash": "ee766a34ba7d44a9ba75c2b7330bacf0",
+    "semantic_hash": "ee766a34ba7d44a9ba75c2b7330bacf0"
   }
 }
