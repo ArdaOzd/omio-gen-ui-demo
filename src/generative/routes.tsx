@@ -20,7 +20,7 @@ function createServices(onCoverageStatus:(message:string)=>void){
  const services:TravelServices={bridge,state,activeId:artifacts.getActiveId,subscribeActive:artifacts.subscribe,activate:id=>artifacts.activate(ArtifactIdSchema.parse(id)),dispatch:router,whenIdle:router.whenIdle,createArtifact};
  return {services,artifacts,createArtifact,router};
 }
-export function GenerativeRoute({variant}:{variant:'a'|'b'}){
+export function GenerativeRoute({variant,blinded=false}:{variant:'a'|'b';blinded?:boolean}){
  const [notice,setNotice]=useState('');const [runtime]=useState(()=>createServices(setNotice));const [registryRevision,setRegistryRevision]=useState(0);const [ready,setReady]=useState(false);const [messages,setMessages]=useState<UIMessage[]>([]);
  const persistence=useMemo(()=>createThreadPersistence(),[]);const key=`travel-${variant}`;
  useEffect(()=>{const controller=new AbortController();persistence.load(key).then(async record=>{
@@ -39,6 +39,6 @@ export function GenerativeRoute({variant}:{variant:'a'|'b'}){
  useEffect(()=>{if(!ready)return;let timer:ReturnType<typeof setTimeout>;const changed=()=>{clearTimeout(timer);timer=setTimeout(()=>void save(messages).catch(()=>setNotice('Local history could not be saved.')),30)};const unsub=runtime.artifacts.getIds().map(id=>runtime.services.state.subscribe(id,changed));return()=>{clearTimeout(timer);unsub.forEach(stop=>stop())}},[runtime,ready,messages,registryRevision]);
  if(!ready)return <div className="travel-app"><p role="status">Restoring travel conversation…</p></div>;
  
- return <><nav className="travel-variant-nav"><a href="/generative">Compare interfaces</a><a href="/">Classic search</a><span>Version {variant.toUpperCase()} · Signed-in Codex</span></nav>{notice&&<p role="status">{notice}</p>}<GenerativeChat sceneToolkit={variant==='b'?bToolkit:undefined} variant={variant} services={runtime.services} capture={capture} initialMessages={messages} onMessages={next=>void save(next).catch(()=>setNotice('Local history could not be saved.'))}/></>;
+ return <>{!blinded&&<nav className="travel-variant-nav"><a href="/generative">Compare interfaces</a><a href="/">Classic search</a><span>Version {variant.toUpperCase()} · Signed-in Codex</span></nav>}{notice&&<p role="status">{notice}</p>}<GenerativeChat sceneToolkit={variant==='b'?bToolkit:undefined} variant={variant} services={runtime.services} capture={capture} initialMessages={messages} onMessages={next=>void save(next).catch(()=>setNotice('Local history could not be saved.'))}/></>;
 }
 export function GenerativeChooser(){return <main className="travel-app"><div className="travel-welcome"><h1>Choose your travel conversation</h1><p>Both interfaces share the same synthetic fares, local controls, and signed-in Codex model.</p><a href="/a">Component composition</a><a href="/b">Reactive program</a><a href="/">Classic travel search</a></div></main>}
