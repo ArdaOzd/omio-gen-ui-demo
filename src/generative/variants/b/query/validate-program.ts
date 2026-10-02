@@ -4,7 +4,7 @@ import { ArtifactUIStateSchema } from '../../../contracts'
 import { assertNoBulkData } from '../../../contracts/privacy'
 import { bSchemaLibrary,BindingSchema,type Binding } from './schema'
 export type ProgramBinding={variable:string;field:Binding;artifactRef:string}
-const names=new Set([...catalogDescriptors.map(d=>d.name),'Query','Mutation','Action','@Set','@Reset','@Run'])
+const names=new Set([...catalogDescriptors.map(d=>d.name),'Query','Mutation','Action','Set','Reset','Run'])
 export function validateReactiveProgram(program:string,options:{complete?:boolean}={}) {
  if(typeof program!=='string'||program.length>60000)throw new Error('PROGRAM_SIZE')
  const closed=autoClose(program);if(options.complete!==false&&closed.wasIncomplete)throw new Error('PROGRAM_INCOMPLETE')
@@ -15,7 +15,7 @@ export function validateReactiveProgram(program:string,options:{complete?:boolea
  if(tokens.filter(t=>t.t!==0&&t.t!==13).length!==statements.reduce((n,s)=>n+s.tokens.filter(t=>t.t!==0&&t.t!==13).length+2,0))throw new Error('PROGRAM_SYNTAX')
  const bindings:ProgramBinding[]=[];const assignments:ASTNode[]=[];let nodes=0
  for(const statement of statements){const ast=parseExpression(statement.tokens)
-  walkAST(ast,node=>{if(++nodes>4000)throw new Error('PROGRAM_BUDGET');inspect(node);if(node.k==='Comp'&&['@Set','@Reset'].includes(node.name))assignments.push(node)
+  walkAST(ast,node=>{if(++nodes>4000)throw new Error('PROGRAM_BUDGET');inspect(node);if(node.k==='Comp'&&['Set','Reset'].includes(node.name))assignments.push(node)
    if(node.k==='Comp'&&catalogDescriptors.some(d=>d.name===node.name)){
     const artifact=node.args[0],binding=node.args[8],variable=node.args[7]
     if(binding&&binding.k!=='Null'){
@@ -37,7 +37,7 @@ export function validateReactiveProgram(program:string,options:{complete?:boolea
   if(binding){if(!ArtifactUIStateSchema.shape[binding.field].safeParse(value).success)throw new Error('VARIABLE_BINDING_TYPE')}
   else if(!(value===null||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)||typeof value==='string'&&value.length<=160))throw new Error('VARIABLE_TYPE')
  }
- for(const assignment of assignments){if(assignment.k!=='Comp')continue;const target=assignment.args[0];if(target?.k!=='StateRef'||!variables.includes(target.n))throw new Error('UNKNOWN_VARIABLE');if(assignment.name==='@Set'&&assignment.args[1])walkAST(assignment.args[1],node=>{if(node.k==='Ref'||node.k==='RuntimeRef'||node.k==='Comp'||node.k==='Member'&&node.field==='rows')throw new Error('VARIABLE_QUERY_CAPTURE')})}
+ for(const assignment of assignments){if(assignment.k!=='Comp')continue;const target=assignment.args[0];if(target?.k!=='StateRef'||!variables.includes(target.n))throw new Error('UNKNOWN_VARIABLE');if(assignment.name==='Set'&&assignment.args[1])walkAST(assignment.args[1],node=>{if(node.k==='Ref'||node.k==='RuntimeRef'||node.k==='Comp'||node.k==='Member'&&node.field==='rows')throw new Error('VARIABLE_QUERY_CAPTURE')})}
  assertNoBulkData(parsed.stateDeclarations)
  return {parsed,bindings,variables:Object.keys(parsed.stateDeclarations),dependencies:parsed.queryStatements.map(q=>({id:q.statementId,deps:q.deps}))}
 }
