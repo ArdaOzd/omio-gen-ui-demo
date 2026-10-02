@@ -5,30 +5,34 @@ data is synthetic and deterministic; route and provider names are inspired by th
 public [Omio landing page](https://www.omio.com/), while prices, schedules, seat
 availability, and supplementary routes are generated demo data.
 
-The catalog preserves all 36 connection pairs from the supplied landing-page text,
-adds the pasted popular route lists as synthetic supplementary corridors, and
-includes every pasted company on at least one geographically sensible route where
-possible. Routes that represent broad search corridors rather than the initial 36
-are marked `source_kind: "supplementary"` in API results.
+The catalog preserves all 36 connection pairs from the supplied landing-page text
+and uses the pasted popular-route lists as a starting point for synthetic
+supplementary corridors. US locations and providers are excluded, and ferry,
+flight, and microstate links are limited to geographically sensible gateways. The
+result covers 50 European and trans-European capitals. Routes beyond the initial
+36 are marked `source_kind: "supplementary"` in API results.
 
 ## Generate the database
 
 Run from the repository root:
 
 ```sh
-python3 -m backend.generate_db --output data/omio.sqlite3 --rows 1000000
+python3 -m backend.generate_db --output data/omio.sqlite3 --rows 10000000
 ```
 
-The default seed always produces exactly 1,000,000 fares from 2026-01-01 through
-2027-12-31. Every directional route has service on every day in that range. The
-generator writes to a temporary database, verifies row count, route/day coverage,
-and SQLite integrity, then atomically replaces the output.
+The default seed always produces exactly 10,000,000 synthetic fares from 2026-01-01
+through 2027-12-31. Every directional route has service on every day in that range.
+Weighted, seeded allocation varies service frequency, operators, departure times,
+prices, durations, and availability while remaining reproducible. These are generated
+examples, not live schedules or bookable fares. The generator writes to a temporary
+database, verifies row count, route/day coverage, and SQLite integrity, then atomically
+replaces the output.
 
 Verify the saved artifact, including the pasted route/provider/location manifest
 and required query indexes:
 
 ```sh
-python3 -m backend.verify_db data/omio.sqlite3 --expected-rows 1000000
+python3 -m backend.verify_db data/omio.sqlite3 --expected-rows 10000000
 ```
 
 ## Run the API

@@ -12,10 +12,10 @@
     "semantic_hash": "21d58246eabc17941c2a4059119950fd"
   },
   "README.md": {
-    "mtime": 1790899563.4516313,
-    "seen": 1790899751.994406,
-    "ast_hash": "4b3e398c844032f98984a5325e1ecb4b",
-    "semantic_hash": "4b3e398c844032f98984a5325e1ecb4b"
+    "mtime": 1790978219.0685062,
+    "seen": 1790978930.458667,
+    "ast_hash": "b64729ab23972bd5d2c72f1c6faa0482",
+    "semantic_hash": "b64729ab23972bd5d2c72f1c6faa0482"
   },
   "backend/__init__.py": {
     "mtime": 1790899278.987306,
@@ -30,16 +30,16 @@
     "semantic_hash": "77b0188f6ff8f562dd295e7699aeca2a"
   },
   "backend/generate_db.py": {
-    "mtime": 1790899279.0070593,
-    "seen": 1790899751.994391,
-    "ast_hash": "45983e126c661e8bcf40eb885af7134c",
-    "semantic_hash": "45983e126c661e8bcf40eb885af7134c"
+    "mtime": 1790978391.6047294,
+    "seen": 1790979034.46271,
+    "ast_hash": "0281e972884cd06e15f5f2359c18b513",
+    "semantic_hash": "0281e972884cd06e15f5f2359c18b513"
   },
   "backend/seeds.py": {
-    "mtime": 1790899098.1805801,
-    "seen": 1790899751.9943922,
-    "ast_hash": "a864cb55331d6164bf917463fb8b8f48",
-    "semantic_hash": "a864cb55331d6164bf917463fb8b8f48"
+    "mtime": 1790978175.5362327,
+    "seen": 1790979034.4627142,
+    "ast_hash": "f9966a79817d85f893b6ec6a9546edb6",
+    "semantic_hash": "f9966a79817d85f893b6ec6a9546edb6"
   },
   "backend/tests/__init__.py": {
     "mtime": 1790899279.0247853,
@@ -48,28 +48,28 @@
     "semantic_hash": "54c89b35ea1952a7144963d15c584660"
   },
   "backend/tests/test_backend.py": {
-    "mtime": 1790899204.707259,
-    "seen": 1790899751.994393,
-    "ast_hash": "2a66f62d7faf6f9bebdf19bdbb88f89c",
-    "semantic_hash": "2a66f62d7faf6f9bebdf19bdbb88f89c"
+    "mtime": 1790978391.662473,
+    "seen": 1790979034.4627159,
+    "ast_hash": "beb83843963da826fc996d0a18e89562",
+    "semantic_hash": "beb83843963da826fc996d0a18e89562"
   },
   "backend/verify_db.py": {
-    "mtime": 1790899279.0423875,
-    "seen": 1790899751.994394,
-    "ast_hash": "e7f83ad0ac2fa1caff898731839af42b",
-    "semantic_hash": "e7f83ad0ac2fa1caff898731839af42b"
+    "mtime": 1790978391.6338232,
+    "seen": 1790979034.4627168,
+    "ast_hash": "370d45ed3359dfee737fdc61d0c5e7eb",
+    "semantic_hash": "370d45ed3359dfee737fdc61d0c5e7eb"
   },
   "package.json": {
-    "mtime": 1790899022.2850244,
-    "seen": 1790899751.9943948,
-    "ast_hash": "a865bb2071d489ce79578cc966fdeca1",
-    "semantic_hash": "a865bb2071d489ce79578cc966fdeca1"
+    "mtime": 1790978219.0104914,
+    "seen": 1790979034.462718,
+    "ast_hash": "c1061c4de8315ec06bf8e677345724a8",
+    "semantic_hash": "c1061c4de8315ec06bf8e677345724a8"
   },
   "scripts/run.mjs": {
-    "mtime": 1790899649.2159402,
-    "seen": 1790899751.9943948,
-    "ast_hash": "95a55848930210a011860d55a1e104f8",
-    "semantic_hash": "95a55848930210a011860d55a1e104f8"
+    "mtime": 1790978219.0399907,
+    "seen": 1790979034.46272,
+    "ast_hash": "3daf2b05e6bdd9182f69e796c9be6764",
+    "semantic_hash": "3daf2b05e6bdd9182f69e796c9be6764"
   },
   "src/App.jsx": {
     "mtime": 1790898687.5332847,
@@ -138,10 +138,10 @@
     "semantic_hash": "4d065aec36d9cb1c63d16c07dc4eb323"
   },
   "backend/README.md": {
-    "mtime": 1790899204.7302954,
-    "seen": 1790899751.994406,
-    "ast_hash": "9dd02b8fe7fa1b352330689ca3918f96",
-    "semantic_hash": "9dd02b8fe7fa1b352330689ca3918f96"
+    "mtime": 1790978631.0948586,
+    "seen": 1790978930.458672,
+    "ast_hash": "cae1eaf8b5a534b022d3911ed5934ce6",
+    "semantic_hash": "d2ae288bbc0d0b29d55734b817ef8afe"
   },
   "index.html": {
     "mtime": 1790899128.819223,
@@ -228,20 +228,20 @@
     "semantic_hash": "ee766a34ba7d44a9ba75c2b7330bacf0"
   },
   "docs/research/interactive-travel-ui-evaluation.md": {
-    "mtime": 1790959007.7877192,
-    "seen": 1790959608.0444732,
+    "mtime": 1790967793.5549083,
+    "seen": 1790978546.502044,
     "ast_hash": "1391d96e640a5a4abf5929925e60cb2e",
     "semantic_hash": "1391d96e640a5a4abf5929925e60cb2e"
   },
   "docs/research/browser-local-generative-ui-decision.md": {
-    "mtime": 1790965750.2246902,
-    "seen": 1790966685.963756,
+    "mtime": 1790967793.5541735,
+    "seen": 1790978546.502042,
     "ast_hash": "9b72e4353c1702bab6cf8d6b6772591f",
     "semantic_hash": "9b72e4353c1702bab6cf8d6b6772591f"
   },
   "docs/plans/generative-ui-ab-implementation-plan.md": {
-    "mtime": 1790966427.3836858,
-    "seen": 1790966685.963756,
+    "mtime": 1790967793.5535827,
+    "seen": 1790978546.502041,
     "ast_hash": "f6ec6dccba336a32bff5a90c05d13807",
     "semantic_hash": "f6ec6dccba336a32bff5a90c05d13807"
   }

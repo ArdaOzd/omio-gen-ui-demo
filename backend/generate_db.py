@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import sqlite3
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -15,9 +15,9 @@ from backend.seeds import LOCATIONS, ROUTES, SOURCE_URL, RouteSeed, company_mode
 
 DEFAULT_START_DATE = date(2026, 1, 1)
 DEFAULT_END_DATE = date(2027, 12, 31)
-DEFAULT_ROW_COUNT = 1_000_000
+DEFAULT_ROW_COUNT = 10_000_000
 DEFAULT_SEED = 20261002
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "2"
 
 
 SCHEMA = """
@@ -159,6 +159,35 @@ def _mix64(value: int) -> int:
     return (value ^ (value >> 31)) & 0xFFFFFFFFFFFFFFFF
 
 
+def _cell_weight(
+    route: DirectionalRoute, service_day: date, day_index: int, seed: int
+) -> int:
+    """Return a stable service-frequency weight for one route and day."""
+    mode_weight = {"train": 10, "bus": 8, "flight": 6, "ferry": 3}[route.mode]
+    weekday_weight = {
+        "train": 10 if service_day.weekday() < 5 else 8,
+        "bus": 9 if service_day.weekday() < 5 else 11,
+        "flight": 10 if service_day.weekday() not in (1, 2) else 8,
+        "ferry": 11 if service_day.weekday() in (4, 5, 6) else 9,
+    }[route.mode]
+    season_weight = 13 if route.mode in {"flight", "ferry"} and service_day.month in range(5, 10) else 10
+    stable_noise = _mix64(seed ^ (route.id * 0x9E3779B97F4A7C15) ^ day_index)
+    return mode_weight * weekday_weight * season_weight * (80 + stable_noise % 41)
+
+
+def _fare_noise(
+    seed: int, route_id: int, day_index: int, sequence: int, stream: int
+) -> int:
+    value = (
+        seed
+        ^ (route_id * 0x9E3779B97F4A7C15)
+        ^ ((day_index + 1) * 0xBF58476D1CE4E5B9)
+        ^ ((sequence + 1) * 0x94D049BB133111EB)
+        ^ (stream * 0xD6E8FEB86659FD93)
+    )
+    return _mix64(value)
+
+
 def _dates(start_date: date, end_date: date) -> tuple[date, ...]:
     if end_date < start_date:
         raise ValueError("end_date must be on or after start_date")
@@ -179,28 +208,47 @@ def _fare_rows(
         raise ValueError(
             f"row_count must be at least {cells:,} to cover every route on every date"
         )
-    per_cell, extra_cells = divmod(row_count, cells)
+    remaining_rows = row_count - cells
+    total_weight = sum(
+        _cell_weight(route, service_day, day_index, seed)
+        for day_index, service_day in enumerate(service_dates)
+        for route in routes
+    )
     fare_id = 1
     capacities = {"train": 160, "bus": 52, "flight": 180, "ferry": 260}
     jitter_percent = {"train": 7, "bus": 12, "flight": 6, "ferry": 10}
+    service_windows = {
+        "train": (5 * 60, 23 * 60 + 30),
+        "bus": (4 * 60, 23 * 60 + 45),
+        "flight": (5 * 60, 23 * 60 + 30),
+        "ferry": (5 * 60, 23 * 60),
+    }
+    cumulative_weight = 0
+    allocated_rows = 0
 
     for day_index, service_day in enumerate(service_dates):
-        for route_index, route in enumerate(routes):
-            cell_index = day_index * len(routes) + route_index
-            departures = per_cell + (1 if cell_index < extra_cells else 0)
-            step_minutes = 1440 / departures
+        for route in routes:
+            previous_allocated = allocated_rows
+            cumulative_weight += _cell_weight(route, service_day, day_index, seed)
+            allocated_rows = cumulative_weight * remaining_rows // total_weight
+            departures = 1 + allocated_rows - previous_allocated
+            start_minute, end_minute = service_windows[route.mode]
+            service_span = end_minute - start_minute + 1
             for sequence in range(departures):
-                noise = _mix64(seed ^ (fare_id * 0x9E3779B97F4A7C15))
-                company_name = route.companies[
-                    (sequence + day_index + route.id) % len(route.companies)
-                ]
-                minute = int(sequence * step_minutes + route.id * 13 + day_index * 3)
-                minute = (minute + int(noise % max(8, int(step_minutes / 2)))) % 1440
+                company_noise = _fare_noise(seed, route.id, day_index, sequence, 1)
+                departure_noise = _fare_noise(seed, route.id, day_index, sequence, 2)
+                duration_noise = _fare_noise(seed, route.id, day_index, sequence, 3)
+                price_noise = _fare_noise(seed, route.id, day_index, sequence, 4)
+                seat_noise = _fare_noise(seed, route.id, day_index, sequence, 5)
+                company_name = route.companies[company_noise % len(route.companies)]
+                slot_start = start_minute + sequence * service_span // departures
+                slot_end = start_minute + (sequence + 1) * service_span // departures
+                minute = slot_start + departure_noise % max(1, slot_end - slot_start)
                 departure = datetime.combine(service_day, datetime.min.time()) + timedelta(
                     minutes=minute
                 )
                 max_jitter = max(3, route.duration_minutes * jitter_percent[route.mode] // 100)
-                duration_delta = int((noise >> 8) % (2 * max_jitter + 1)) - max_jitter
+                duration_delta = int(duration_noise % (2 * max_jitter + 1)) - max_jitter
                 company_delta = (
                     route.companies.index(company_name) - (len(route.companies) - 1) / 2
                 )
@@ -212,7 +260,7 @@ def _fare_rows(
                 )
                 arrival = departure + timedelta(minutes=duration)
 
-                demand_percent = 75 + int((noise >> 20) % 71)
+                demand_percent = 75 + int(price_noise % 71)
                 weekday_percent = 110 if service_day.weekday() in (4, 5, 6) else 100
                 sequence_percent = 108 if minute in range(390, 600) or minute in range(960, 1170) else 96
                 price = max(
@@ -224,8 +272,8 @@ def _fare_rows(
                     // 1_000_000,
                 )
                 capacity = capacities[route.mode]
-                seats = int((noise >> 36) % (capacity + 1))
-                if (noise >> 60) == 0:
+                seats = int(seat_noise % (capacity + 1))
+                if seat_noise >> 60 == 0:
                     seats = 0
 
                 yield (
@@ -260,6 +308,7 @@ def generate_database(
     start_date: date = DEFAULT_START_DATE,
     end_date: date = DEFAULT_END_DATE,
     seed: int = DEFAULT_SEED,
+    progress: Callable[[int], None] | None = None,
 ) -> dict[str, int | str]:
     """Generate an atomically replaced SQLite database and return summary data."""
     if row_count <= 0:
@@ -335,6 +384,8 @@ def generate_database(
             "end_date": end_date.isoformat(),
             "source_url": SOURCE_URL,
             "currency": "EUR",
+            "dataset_type": "synthetic_demo",
+            "schedule_disclaimer": "Generated examples; not live schedules or bookable fares",
             "timestamp_semantics": "local scheduled time at each origin/destination",
         }
         connection.executemany(
@@ -353,8 +404,14 @@ def generate_database(
                 arrival_time, duration_minutes, price_cents, available_seats
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
+        inserted_count = 0
+        next_progress = 2_000_000
         for batch in _batched(rows, 10_000):
             connection.executemany(insert_sql, batch)
+            inserted_count += len(batch)
+            if progress is not None and inserted_count >= next_progress:
+                progress(inserted_count)
+                next_progress += 2_000_000
         connection.executescript(INDEXES)
         connection.execute("ANALYZE")
         connection.commit()
@@ -410,6 +467,7 @@ def main() -> None:
         start_date=arguments.start_date,
         end_date=arguments.end_date,
         seed=arguments.seed,
+        progress=lambda count: print(f"inserted fares: {count:,}", flush=True),
     )
     for key, value in summary.items():
         print(f"{key}: {value}")

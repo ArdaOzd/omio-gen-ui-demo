@@ -1,38 +1,36 @@
 {
-  "created_at": "2026-10-02T20:58:00+02:00",
-  "strategy": "compose the verified e6f718d graph with a fresh local semantic extraction of the A/B implementation plan, preserve canonical IDs and edge directions, and shift the decision cross-link source locations",
+  "created_at": "2026-10-03T00:09:02+02:00",
+  "strategy": "refresh the working-tree code graph locally, then replace the semantic tier for the two changed README files with isolated Codex extraction",
   "strictly_local": true,
   "external_provider_calls": 0,
   "baseline": {
-    "commit": "e6f718d",
-    "nodes": 362,
-    "edges": 569,
-    "hyperedges": 12,
-    "health": {
-      "dangling_endpoint_edges": 0,
-      "missing_endpoint_edges": 0,
-      "collapsed_directed_edges": 0,
-      "collapsed_undirected_edges": 0
-    }
+    "commit": "dc14f22f06ea",
+    "nodes": 422,
+    "edges": 603,
+    "hyperedges": 8,
+    "communities": 29
   },
   "addition": {
     "source_files": [
-      "docs/plans/generative-ui-ab-implementation-plan.md",
-      "docs/research/browser-local-generative-ui-decision.md"
+      "README.md",
+      "backend/README.md"
     ],
-    "nodes": 27,
-    "edges": 53,
-    "hyperedges": 3
+    "extracted_nodes": 14,
+    "extracted_edges": 13,
+    "extracted_hyperedges": 1,
+    "replaced_prior_semantic_nodes": 11
   },
   "final_graph": {
-    "nodes": 389,
-    "edges": 622,
-    "hyperedges": 15,
-    "communities": 26
+    "nodes": 425,
+    "edges": 606,
+    "hyperedges": 8,
+    "communities": 34
   },
   "health": {
     "dangling_endpoint_edges": 0,
     "missing_endpoint_edges": 0,
+    "self_loop_edges": 0,
+    "exact_duplicate_edges": 0,
     "collapsed_directed_edges": 0,
     "collapsed_undirected_edges": 0
   }

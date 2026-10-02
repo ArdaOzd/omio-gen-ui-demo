@@ -39,14 +39,14 @@ function stop(exitCode = 0) {
 }
 
 if (!existsSync(databasePath)) {
-  console.log('No timetable database found. Generating 1,000,000 synthetic fares...')
+  console.log('No timetable database found. Generating 10,000,000 synthetic fares...')
   runChecked('python3', [
     '-m',
     'backend.generate_db',
     '--output',
     databasePath,
     '--rows',
-    '1000000',
+    '10000000',
   ])
 }
 

@@ -3,7 +3,8 @@
 This local demo recreates Omio's landing page through its mobile-app section and
 adds a working connection-results page for trains, buses, flights, and ferries.
 Schedules, prices, and seat counts are deterministic synthetic data. The SQLite
-database contains exactly 1,000,000 fares.
+database contains exactly 10,000,000 fares across a broad European-capital network.
+All schedules and fares are generated examples and are not live or bookable inventory.
 
 ## Run locally
 
@@ -34,7 +35,7 @@ http://127.0.0.1:4173/.
 ## Useful commands
 
 ```sh
-npm run seed       # regenerate data/omio.sqlite3 with 1,000,000 fares
+npm run seed       # regenerate data/omio.sqlite3 with 10,000,000 fares
 npm run build      # build the React frontend
 python3 -m unittest discover -s backend/tests -v
 ```

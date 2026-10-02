@@ -8,6 +8,7 @@ from contextlib import closing
 from datetime import date
 from pathlib import Path
 
+from backend.generate_db import DEFAULT_ROW_COUNT
 from backend.seeds import (
     SOURCE_COMPANIES,
     SOURCE_COMPANY_ALIASES,
@@ -118,7 +119,7 @@ def verify_database(database: Path, *, expected_rows: int) -> dict[str, int | st
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path, nargs="?", default=Path("data/omio.sqlite3"))
-    parser.add_argument("--expected-rows", type=int, default=1_000_000)
+    parser.add_argument("--expected-rows", type=int, default=DEFAULT_ROW_COUNT)
     arguments = parser.parse_args()
     summary = verify_database(arguments.database, expected_rows=arguments.expected_rows)
     for key, value in summary.items():
