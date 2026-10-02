@@ -12,6 +12,7 @@ import { loadLocationCatalog } from './location-catalog';
 import { aPrompt } from '../src/generative/variants/a/prompt';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { withOneRepair } from './repair';
+import { validationReason } from './validation-reason';
 import { acceptTurn,spendTool } from './turn-budget';
 export async function handleChat(request:ChatRequest,response:ServerResponse,signal:AbortSignal):Promise<void>{
  const key=acceptTurn(request);const tools=request.tools??{};
@@ -34,7 +35,7 @@ export async function handleChat(request:ChatRequest,response:ServerResponse,sig
   let decision:Decision;
   if(request.provider==='fixture'){
    decision={intro:'Fixture response. This deterministic message is not a live model result.',toolName:'none',toolInput:'{}',outro:''};delta('intro',decision.intro,'none');
-  }else decision=await withOneRepair({prompt,signal,run:async(repairPrompt,index)=>{attempt=index;callId=randomUUID();toolStarted=false;toolPrefix='';return codexDecision({prompt:repairPrompt,toolNames:Object.keys(tools),signal,onDelta:delta});},validate:value=>{if(value.toolName==='none')return;const tool=tools[value.toolName];if(!tool)throw new Error('Unregistered tool');const input=parseToolInput(value.toolName,JSON.parse(value.toolInput));z.fromJSONSchema(tool.parameters).parse(input);if(value.toolName==='present')validatePresentTree(input,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});},failed:()=>{for(const id of textStarted)writer.write({type:'text-end',id});textStarted.clear();if(toolStarted)writer.write({type:'tool-input-error',toolCallId:callId,toolName:currentTool,input:{},errorText:'This scene could not be completed. One bounded repair is allowed.'});}});
+  }else decision=await withOneRepair({prompt,signal,run:async(repairPrompt,index)=>{attempt=index;callId=randomUUID();toolStarted=false;toolPrefix='';return codexDecision({prompt:repairPrompt,toolNames:Object.keys(tools),signal,onDelta:delta});},validate:value=>{if(value.toolName==='none')return;const tool=tools[value.toolName];if(!tool)throw new Error('Unregistered tool');const input=parseToolInput(value.toolName,JSON.parse(value.toolInput));z.fromJSONSchema(tool.parameters).parse(input);if(value.toolName==='present')validatePresentTree(input,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});},failed:(_attempt,error)=>{for(const id of textStarted)writer.write({type:'text-end',id});textStarted.clear();if(toolStarted)writer.write({type:'tool-input-error',toolCallId:callId,toolName:currentTool,input:{},errorText:validationReason(error)});}});
   for(const field of textStarted)writer.write({type:'text-end',id:field});
   if(decision.toolName!=='none'){
    const tool=tools[decision.toolName];if(!tool)throw new Error('Model selected an unregistered tool');
