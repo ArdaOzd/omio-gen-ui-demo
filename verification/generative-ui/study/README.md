@@ -1,6 +1,6 @@
 # Automated twelve-family matrix
 
-The plan's minimum machine matrix has96cells: twelve shared task families × A/B × cold/warm × fixed/withheld wording. Each pair runs in counterbalanced order, with at most three independent browser contexts active. There are no extra statistical repetitions beyond the two required wordings.
+The plan's minimum machine matrix has96cells: twelve shared task families × A/B × cold/warm × fixed/withheld wording. Budgets are declared before the first live run:180seconds per HTTP model call,600seconds per visible turn with tool continuations, and1800seconds per complete cell including prerequisites, cancellation and retry. These are recording safety limits, not claims about good latency. Each pair runs in counterbalanced order, with at most three independent browser contexts active. There are no extra statistical repetitions beyond the two required wordings.
 
 Dry-run preparation makes no model calls:
 
