@@ -40,3 +40,11 @@ it('moves tab focus with arrow keys and keeps roving focus in the selected tab',
  expect(tabs[1]).toHaveFocus();expect(tabs[1]).toHaveAttribute('aria-selected','true')
  fireEvent.keyDown(tabs[1]!,{key:'Home'});expect(tabs[0]).toHaveFocus()
 })
+
+it('keeps explicit leg mode controls separate from the global mode filter',async()=>{
+ const{services,state,manifest}=await setup()
+ render(<TravelProvider services={services}><CatalogNode kind="ModeChips" artifactRef={artifactId} datasetRef={manifest.datasetId}/><CatalogNode kind="FareCards" artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
+ fireEvent.click(screen.getByRole('button',{name:'Bus'}))
+ await screen.findByText('Flixbus');await waitFor(()=>expect(screen.queryByText('Eurostar')).not.toBeInTheDocument())
+ expect(state.get(artifactId).filters.modes).toEqual([]);expect(state.get(artifactId).modesByLeg['london:paris']).toEqual(['bus'])
+})
