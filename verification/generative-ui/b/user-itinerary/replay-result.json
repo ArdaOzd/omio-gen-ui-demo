@@ -1,7 +1,10 @@
 {
-  "timestamp": "2026-10-02T22:13:26.814Z",
+  "timestamp": "2026-10-02T22:49:14.234Z",
   "classification": "Exact accepted user source and failed part restored in isolated browser context; reconstructed itinerary user prompt; real Python fare API and browser query worker. Descending host sort intentionally seeded to check current-state preservation.",
   "passed": true,
+  "restoredUIRevision": 6,
+  "capturedProgramRevision": 5,
+  "restoredSourceCharacters": 5409,
   "capturedAggregateRows": [
     23,
     0,
@@ -17,6 +20,7 @@
       {
         "datasetId": "dataset-14rfd0v",
         "rowCount": 268,
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
         "compactSummary": {
           "minPriceCents": 4848,
           "maxPriceCents": 11446,
@@ -30,6 +34,7 @@
       {
         "datasetId": "dataset-1opc18h",
         "rowCount": 0,
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
         "compactSummary": {
           "modeCounts": {}
         }
@@ -37,6 +42,7 @@
       {
         "datasetId": "dataset-10j0qr8",
         "rowCount": 0,
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
         "compactSummary": {
           "modeCounts": {}
         }
@@ -50,5 +56,5 @@
   },
   "requests": 0,
   "errors": [],
-  "visibleText": "Compare interfacesClassic searchVersion B · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nCompare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights.\n\nThree-leg train and bus comparison\nTrain versus bus · October 3–10, 2026\nBarcelona → Prague → Paris → Prague\nBarcelona\nPrague\nParis\nPrague\nSchematic route, not a geographic map.\nYour route\nBarcelona\nPrague\nParis\nPrague\nSchematic route, not a geographic map.\nLoaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\nCompare the three legs\nOctober 3 · Barcelona → Prague\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nOctober 5 · Prague → Paris · after 2 nights\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nNo train or bus fares in the loaded demo resource\nOctober 10 · Paris → Prague · after 5 nights\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nNo train or bus fares in the loaded demo resource\nFare details and selection\nExplore available demo fares\nSort available fares\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nBarcelona → Prague · price versus duration\n\nLeft is faster · lower is cheaper · choose a point to select\n\nJourney duration\nChoose a Barcelona → Prague fare\n\n0 matches · Synthetic fares per passenger\n\nNo options match. Try another mode, date, or price limit.\n\nYour selection\nSelected fares · not a complete trip quotation\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nRetry\nActive travel view · artifact-393d7d99-1239-4aec-a13b-ddf28875374e\nSynthetic fares\nSend\nStop\nDeveloper conversation diagnostics"
+  "visibleText": "Compare interfacesClassic searchVersion B · Signed-in Codex\n\nSynthetic fare data changed. Coverage was refreshed; your conversation and travel preferences are preserved.\n\nwayfinder\nTravel ideas, made yours\n\nCompare train and bus for Barcelona to Prague on October 3, 2026, Prague to Paris on October 5 after two nights, and Paris to Prague on October 10 after five nights.\n\nThree-leg train and bus comparison\nTrain versus bus · October 3–10, 2026\nBarcelona → Prague → Paris → Prague\nBarcelona\nPrague\nParis\nPrague\nSchematic route, not a geographic map.\nYour route\nBarcelona\nPrague\nParis\nPrague\nSchematic route, not a geographic map.\nLoaded demo data contains no bus fares. Both Prague–Paris and Paris–Prague resources are empty; this does not establish real-world availability.\nCompare the three legs\nOctober 3 · Barcelona → Prague\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nOctober 5 · Prague → Paris · after 2 nights\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nNo train or bus fares in the loaded demo resource\nOctober 10 · Paris → Prague · after 5 nights\nPrice, duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\n\nNo options match. Try another mode, date, or price limit.\n\nNo train or bus fares in the loaded demo resource\nFare details and selection\nExplore available demo fares\nSort available fares\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nBarcelona → Prague · price versus duration\n\nLeft is faster · lower is cheaper · choose a point to select\n\nJourney duration\nChoose a Barcelona → Prague fare\n\n0 matches · Synthetic fares per passenger\n\nNo options match. Try another mode, date, or price limit.\n\nYour selection\nSelected fares · not a complete trip quotation\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nRetry\nActive travel view · artifact-393d7d99-1239-4aec-a13b-ddf28875374e\nSynthetic fares\nSend\nStop\nDeveloper conversation diagnostics"
 }
