@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId } from '../contracts';
+import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId } from '../contracts';
 import { assertNoBulkData } from '../contracts/privacy';
-export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateStore;activeArtifactId:()=>ArtifactId;signal?:()=>AbortSignal}) {
+export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal}) {
  const signal=()=>options.signal?.()??new AbortController().signal;
  const wrap=<T>(schema:z.ZodType<T>,description:string,execute:(input:T)=>Promise<unknown>)=>({
   description, parameters:schema,
@@ -9,9 +9,19 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
  });
  const dataset=z.strictObject({datasetRef:DatasetIdSchema});
  return {
-  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema}),'Load or reuse a bounded browser resource; return only its manifest',async({coverage})=>{
+  create_artifact:wrap(z.strictObject({}),'Create and activate a separate empty artifact with a host-owned ID',async()=>{if(!options.createArtifact)throw new Error('Artifact creation unavailable');const artifactId=options.createArtifact();options.store.initializeMissing(artifactId,{});return {artifactId,revision:options.store.get(artifactId).revision};}),
+  edit_artifact:wrap(EditArtifactInputSchema,'Apply a bounded typed state patch only at the observed revision',async({artifactRef,expectedRevision,commands})=>{
+   for(const command of commands)if(command.kind==='select')await options.bridge.lookupFare(command.fareId,['id']);
+   let current=options.store.get(artifactRef);if(current.revision!==expectedRevision)return {artifactId:artifactRef,status:'stale',revision:current.revision};
+   for(const command of commands){const result=options.store.dispatch({...command,artifactId:artifactRef,expectedRevision:current.revision});if(result.status==='stale')return {artifactId:artifactRef,...result};current=options.store.get(artifactRef);}
+   return {artifactId:artifactRef,status:'applied',revision:current.revision};
+  }),
+  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest',async({coverage,artifactRef})=>{
+   const artifactId=artifactRef??options.activeArtifactId();const before=options.store.get(artifactId);
    const manifest=DatasetManifestSchema.parse(await options.bridge.load(coverage,signal()));
-   const artifactId=options.activeArtifactId();const state=options.store.get(artifactId);
+   const current=options.store.get(artifactId);
+   if(before.datasetRefs.length===0 && current.revision===before.revision)options.store.dispatch({artifactId,expectedRevision:before.revision,kind:'dates',dates:{start:coverage.dateWindow.from}});
+   const state=options.store.get(artifactId);
    options.store.dispatch({artifactId,kind:'datasets',datasetRefs:[...new Set([...state.datasetRefs,manifest.datasetId])].slice(0,8)});
    return manifest;
   }),

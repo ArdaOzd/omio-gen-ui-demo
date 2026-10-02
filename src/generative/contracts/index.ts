@@ -86,7 +86,7 @@ export const CompactArtifactSnapshotSchema = z.strictObject({ artifactId: Artifa
   layoutSummary: z.string().max(600), catalogVersion: z.literal(CATALOG_VERSION) });
 export type CompactArtifactSnapshot = z.infer<typeof CompactArtifactSnapshotSchema>;
 export const AgentContextEnvelopeSchema = z.strictObject({ schemaVersion: z.literal(CONTRACT_VERSION), turnId: ref,
-  activeArtifactId: ArtifactIdSchema.optional(), artifacts: z.array(CompactArtifactSnapshotSchema).max(4),
+  activeArtifactId: ArtifactIdSchema.optional(), artifacts: z.array(CompactArtifactSnapshotSchema).max(8),
   datasets: z.array(DatasetManifestSchema).max(8), selectedFareFacts: z.array(BoundedFareFactSchema).max(LIMITS.selectedFacts) });
 export type AgentContextEnvelope = z.infer<typeof AgentContextEnvelopeSchema>;
 export function parseAgentContext(input: unknown): AgentContextEnvelope {
@@ -122,7 +122,7 @@ export type BoundedQueryResult = { rows: Array<Record<string, JsonScalar>>; tota
 export type UICommand = { artifactId: ArtifactId; expectedRevision?: UIStateRevision } & (
   { kind: 'filters'; filters: TravelFilters } | { kind: 'dates'; dates: ArtifactUIState['dates'] } |
   { kind: 'sort'; sort: SortSpec } | { kind: 'select'; fareId: FareId; selected: boolean } |
-  { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
+  { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
 export type DispatchResult = { status: 'applied'; revision: UIStateRevision } | { status: 'stale'; revision: UIStateRevision };
 export interface FareDataBridge {
   load(request: CoverageRequest, signal: AbortSignal): Promise<DatasetManifest>;
@@ -182,3 +182,13 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   });
   return query;
 }
+
+export const UICommandPatchSchema = z.discriminatedUnion('kind', [
+ z.strictObject({kind:z.literal('filters'),filters:TravelFiltersSchema}),
+ z.strictObject({kind:z.literal('dates'),dates:ArtifactUIStateSchema.shape.dates}),
+ z.strictObject({kind:z.literal('sort'),sort:SortSpecSchema}),
+ z.strictObject({kind:z.literal('stays'),stays:ArtifactUIStateSchema.shape.stays}),
+ z.strictObject({kind:z.literal('modesByLeg'),modesByLeg:ArtifactUIStateSchema.shape.modesByLeg}),
+ z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.boolean()}),
+]);
+export const EditArtifactInputSchema=z.strictObject({artifactRef:ArtifactIdSchema,expectedRevision:UIStateRevisionSchema,commands:z.array(UICommandPatchSchema).min(1).max(8)});

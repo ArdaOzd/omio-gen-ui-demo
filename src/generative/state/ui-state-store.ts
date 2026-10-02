@@ -24,6 +24,7 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
       case 'dates': patch={dates:command.dates};break
       case 'sort': patch={sort:command.sort};break
       case 'stays': patch={stays:command.stays};break
+      case 'modesByLeg': patch={modesByLeg:command.modesByLeg};break
       case 'datasets': patch={datasetRefs:command.datasetRefs};break
       case 'select': patch={selectedFareIds:command.selected ? [...new Set([...current.selectedFareIds,command.fareId])] : current.selectedFareIds.filter(id => id !== command.fareId)};break
       default: {const unreachable: never=command;throw new Error(`Unknown command ${String(unreachable)}`)}
