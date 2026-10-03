@@ -8,7 +8,7 @@ Dry-run preparation makes no model calls:
 
 ```sh
 npm run experiment:live -- --dry-run
-node --test verification/generative-ui/study/matrix.test.mjs
+node --import tsx --test verification/generative-ui/study/*.test.mjs
 ```
 
 For a later authorized study, first rebase this branch onto the verified integration revision, read `docs/status/generative-ui-ab-handoff.md`, check both health endpoints and pin the served app revision and fixture identity. Then run against the stable local demo:
@@ -17,7 +17,7 @@ For a later authorized study, first rebase this branch onto the verified integra
 OMIO_APP_REVISION=<frozen-preview-commit> OMIO_SOURCE_VERSION=sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6 OMIO_FIXTURE_ROWS=10000000 OMIO_DEMO_URL=http://127.0.0.1:5194 OMIO_SCENARIOS=all OMIO_CONCURRENCY=3 npm run experiment:live
 ```
 
-`OMIO_EXPERIMENT_OUTPUT` selects an evidence directory; `OMIO_SCENARIOS` selects a comma-separated subset for a targeted verification. Each cell retains its source/tool events, request sizes and compact snapshots, worker timings and result sizes, screenshot, trace, state, outcome and failure reason. The result index is updated after every cell. The frozen preview commit is required before live calls. Existing completed cell records from that same commit and matrix are resumed, including failures, so a targeted first batch and subsequent full run do not create extra model repetitions. Use a new output directory when changing the tested app or rerunning a failed cell; preserve the previous corpus.
+`OMIO_EXPERIMENT_OUTPUT` selects an evidence directory; `OMIO_SCENARIOS` selects a comma-separated subset for a targeted verification. Each cell retains its source/tool events, request sizes and compact snapshots, worker timings and result sizes, screenshot, trace, state, outcome and failure reason. The result index is updated after every cell. The frozen preview commit is required before live calls. Authoritative agent health must match that revision, signed-in Codex, gpt-6.1-sol and high reasoning; recorded provider fields come from that verified response. Add `-- --preflight` to the npm command for a health-only check with zero model calls and no browser contexts. If the tsx CLI socket is restricted, use `node --import tsx verification/generative-ui/run-experiment.ts --preflight` or `--dry-run`. Existing completed cell records from that same commit and matrix are resumed, including failures, so a targeted first batch and subsequent full run do not create extra model repetitions. Use a new output directory when changing the tested app or rerunning a failed cell; preserve the previous corpus.
 
 Cold means a fresh browser and worker with no restored coverage descriptors. Warm means the same normalized London–Paris coverage is actually loaded and restored before the task; it does not replay a scene or use a separate layout model. The SQLite source and signed-in provider process are shared. Later-turn task prerequisites are recorded separately; their follow-up context is naturally warm in both conditions.
 
@@ -27,4 +27,4 @@ Families7–12 exercise actual controls, a delayed older fare response, editing 
 
 No human ratings are collected or fabricated by this runner. A missing control, unsupported scene, timeout, model failure or state mismatch is retained as a failed cell. Screenshots and traces may be large; all evidence stays in the repository workflow without external analytics.
 
-Pin source identity and row count from the authoritative `/api/health` response. The runner verifies them before starting, before and after each cell, and every five seconds while running. Drift stops new cells and aborts active browser contexts; affected samples are retained as failures and explicitly excluded from comparison. Resume accepts only records from the same frozen source generation and app commit. Three independent browser contexts run against one unchanged preview, SQLite fixture and signed-in provider, with no competing model calls, builds or graph refreshes.
+Pin source identity and row count from the authoritative `/api/health` response. The runner verifies fixture and runtime identity before starting, before and after each cell, before forwarding every chat HTTP request, and every five seconds while running. Drift stops new cells and aborts active browser contexts; affected samples are retained as failures and explicitly excluded from comparison. Resume accepts only records from the same verified runtime configuration, frozen source generation and app commit. Three independent browser contexts run against one unchanged preview, SQLite fixture and signed-in provider, with no competing model calls, builds or graph refreshes.

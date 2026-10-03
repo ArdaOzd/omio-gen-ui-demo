@@ -25,10 +25,18 @@ export const withheld=[
  'Compose London→Paris October 9–15, 2026 with modes, dates, sorting and fares. I may stop and retry a replacement; keep the existing artifact usable and recover from one invalid scene without losing my choices.'
 ]
 
-export function canResume(previous,cell,appRevision,fixture){
- return previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.appRevision===appRevision&&previous?.model==='gpt-6.1-sol'&&previous?.reasoning==='high'&&previous?.provider==='signed-in-codex'&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
+export function canResume(previous,cell,runtime,fixture){
+ return previous?.excludedFromComparison!==true&&previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.runtimeValid===true&&['appRevision','model','provider','reasoningEffort'].every(key=>previous?.runtime?.[key]===runtime[key])&&previous?.appRevision===runtime.appRevision&&previous?.model===runtime.model&&previous?.reasoning===runtime.reasoningEffort&&previous?.provider===runtime.provider&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
 }
 
 export function assertFixture(actual,expected){
  if(!actual?.sourceVersion||!Number.isSafeInteger(actual?.rowCount)||actual.rowCount<1||actual.sourceVersion!==expected.sourceVersion||actual.rowCount!==expected.rowCount)throw new Error(`Fixture identity changed or could not be verified: expected ${JSON.stringify(expected)}, observed ${JSON.stringify(actual)}`)
+}
+
+export function assertRuntime(actual,expected){
+ const keys=['appRevision','provider','model','reasoningEffort']
+ if(actual?.status!=='ok'||actual?.service!=='omio-generative-agent'||keys.some(key=>typeof actual?.[key]!=='string'||!actual[key]||actual[key]==='unknown'))throw new Error('Runtime identity could not be verified from authoritative agent health')
+ const observed=Object.fromEntries(keys.map(key=>[key,actual[key]]))
+ if(keys.some(key=>observed[key]!==expected[key]))throw new Error(`Runtime identity changed: expected ${JSON.stringify(expected)}, observed ${JSON.stringify(observed)}`)
+ return observed
 }
