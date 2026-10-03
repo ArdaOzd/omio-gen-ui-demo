@@ -5,7 +5,7 @@ import { ArtifactIdSchema, DatasetIdSchema } from '../contracts'
 import { Layout, type WidgetProps } from './layout'
 import { Control } from './controls'
 import { Status } from './status'
-import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, Total, Coverage, Route, Timeline, Plot, CheapestFastest, SelectedFareCount } from './views'
+import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, ComparisonTable, ModeBreakdown, SelectedItinerary, Total, Coverage, Route, Timeline, Plot, CheapestFastest, SelectedFareCount } from './views'
 const layouts=new Set(['TravelSurface','TravelHero','Section','Stack','Inline','ResponsiveGrid','SplitPane','StickySummary','Tabs','Carousel','Callout'])
 const controls=new Set(['ModeChips','CarrierFilter','PriceRange','DurationRange','DirectToggle','SortSelect','DateStrip','DateWindow','StayAllocation'])
 const statuses=new Set(['ArtifactSkeleton','CoverageNotice','EmptyState','InlineError','StaleBadge','RetryAction'])
@@ -27,9 +27,11 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  case 'FareCards':content=<FareCards {...props}/>;break
  case 'FarePicker':content=<FarePicker {...props}/>;break
  case 'PriceCalendar':content=<PriceCalendar {...props}/>;break
- case 'ComparisonTable':case 'ComparisonMatrix':case 'ModeBreakdown':content=<Comparison {...props}/>;break
+ case 'ComparisonTable':content=<ComparisonTable {...props}/>;break
+ case 'ComparisonMatrix':content=<Comparison {...props}/>;break
+ case 'ModeBreakdown':content=<ModeBreakdown {...props}/>;break
  case 'SyntheticTotal':content=<Total {...props}/>;break
- case 'SelectedItinerary':content=<Total {...props} detail/>;break
+ case 'SelectedItinerary':content=<SelectedItinerary {...props}/>;break
  case 'CoverageSummary':content=<Coverage {...props}/>;break
  case 'RouteMap':content=<Route {...props}/>;break
  case 'CitySequence':content=<CitySequence {...props}/>;break

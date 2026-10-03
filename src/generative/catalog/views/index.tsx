@@ -30,11 +30,29 @@ function useSelectedFacts(ref:string){
  useEffect(()=>{let active=true;Promise.all(state.selectedFareIds.map(id=>services.bridge.lookupFare(id,[]))).then(items=>{if(active)setFacts(items)}).catch(()=>{if(active)setFacts([])});return()=>{active=false}},[services.bridge,selected])
  return{services,state,facts}
 }
-export function Total(props:WidgetProps&{detail?:boolean}) {
+export function Total(props:WidgetProps) {
  const {services,state,facts}=useSelectedFacts(props.artifactRef)
  const passengers=state.datasetRefs[0]?services.bridge.getManifest(state.datasetRefs[0]).coverage.passengers:1
- return <section className="travel-total"><span>{props.title??'Your selected trip'}</span><strong>{money(facts.reduce((sum,f)=>sum+f.priceCents,0)*passengers)}</strong><p>{facts.length} selected leg{facts.length===1?'':'s'} · {passengers} passenger{passengers===1?'':'s'}</p><small>Synthetic total, including demo fees. No booking is available.</small>{props.detail&&<ol className="travel-timeline">{facts.map(fact=><li key={fact.id}><strong>{cityLabel(fact.originId)} → {cityLabel(fact.destinationId)}</strong><span>{fact.serviceDate} · {cityLabel(fact.mode)} · {money(fact.priceCents)} per passenger</span></li>)}</ol>}</section>
+ return <section className="travel-total"><span>{props.title??'Synthetic total'}</span><strong>{money(facts.reduce((sum,f)=>sum+f.priceCents,0)*passengers)}</strong><p>{passengers} passenger{passengers===1?'':'s'}</p><small>Synthetic total, including demo fees. No booking is available.</small></section>
 }
+export function SelectedItinerary(props:WidgetProps) {
+ const {state,facts}=useSelectedFacts(props.artifactRef)
+ return <section className="travel-panel" aria-label="Selected itinerary"><h3>{props.title??'Selected fares'}</h3>{facts.length?<ol className="travel-timeline">{facts.map(fact=><li key={fact.id}><strong>{cityLabel(fact.originId)} → {cityLabel(fact.destinationId)}</strong><span>{fact.serviceDate} · {cityLabel(fact.mode)} · {money(fact.priceCents)} per passenger</span></li>)}</ol>:<p role="status">{state.selectedFareIds.length?'Loading selected fares…':'Choose a fare to see your itinerary.'}</p>}</section>
+}
+export function ComparisonTable(props:WidgetProps) {
+ const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),project:['id','mode','carrierId','serviceDate','departureMinutes','durationMinutes','priceCents'],orderBy:[state.sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:20}))
+ const rows=result.data?.rows??[]
+ const first=rows[0]
+ const columns=first&&'priceCents' in first?['mode','carrierId','serviceDate','departureMinutes','durationMinutes','priceCents']:Object.keys(first??{}).filter(field=>field!=='id')
+ const labels:Record<string,string>={mode:'Mode',carrierId:'Carrier',serviceDate:'Date',departureMinutes:'Departure',durationMinutes:'Duration',priceCents:'Fare',minimum:'From',fastest:'Fastest',count:'Options'}
+ const display=(field:string,value:unknown)=>typeof value==='number'?['priceCents','minimum'].includes(field)?money(value):['durationMinutes','fastest'].includes(field)?duration(value):field==='departureMinutes'?departure(value):String(value):typeof value==='string'?['mode','carrierId'].includes(field)?cityLabel(value):value:'–'
+ return <section className="travel-panel"><h3>{props.title??'Compare fares'}</h3><div className="travel-table-wrap"><table aria-label="Compare fares"><caption>Synthetic fares per passenger</caption><thead><tr>{columns.map(field=><th scope="col" key={field}>{labels[field]??cityLabel(field)}</th>)}</tr></thead><tbody>{rows.map((row,index)=><tr key={typeof row.id==='string'?row.id:index}>{columns.map((field,column)=>column===0?<th key={field} scope="row">{display(field,row[field])}</th>:<td key={field}>{display(field,row[field])}</td>)}</tr>)}</tbody></table></div>{result.status==='loading'&&<p role="status">Comparing fares…</p>}{result.status==='ready'&&!rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
+}
+export function ModeBreakdown(props:WidgetProps) {
+ const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),groupBy:['mode'],metrics:[{as:'count',op:'count'}],limit:4}))
+ return <section className="travel-panel"><h3>{props.title??'Options by mode'}</h3><div className="travel-table-wrap"><table aria-label="Options by mode"><thead><tr><th scope="col">Mode</th><th scope="col">Options</th></tr></thead><tbody>{result.data?.rows.map(row=><tr key={String(row.mode)}><th scope="row">{cityLabel(String(row.mode))}</th><td>{row.count}</td></tr>)}</tbody></table></div>{result.status==='loading'&&<p role="status">Counting options…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
+}
+
 export function Coverage(props:WidgetProps) {
  const {services,state}=useArtifact(props.artifactRef); const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
  return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>

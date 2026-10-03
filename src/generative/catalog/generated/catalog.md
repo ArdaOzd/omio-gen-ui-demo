@@ -1,6 +1,6 @@
 # Shared catalog 1.0.0
 
-Manifest hash: b3686bc3f74c1511d62c66c9acf6536e61ab1fe7e715b7be7d474551893d1710
+Manifest hash: 2ead8273848e1c7dd33f52b018c54697df5bf98dfcfded68beaf4e1ad8e09b99
 
 Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
@@ -30,14 +30,14 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - ComparisonTable: Locally resolved ranked fare comparison.
 - ComparisonMatrix: Locally grouped mode comparison.
 - PriceCalendar: Locally grouped price-by-day view.
-- ModeBreakdown: Locally grouped transport totals.
-- SyntheticTotal: Selected synthetic per-passenger EUR total.
+- ModeBreakdown: Locally grouped option counts by transport mode.
+- SyntheticTotal: Selected synthetic EUR total for all passengers.
 - CoverageSummary: Resource completeness and bounds.
 - CitySequence: Ordered stop strip with stay nights.
 - RouteMap: Schematic connection chart.
 - ItineraryTimeline: Selected adjacent-leg chronology.
 - DurationPricePlot: Local duration and price comparison.
-- SelectedItinerary: Selected leg facts and total.
+- SelectedItinerary: Selected fare route, date, mode and per-passenger facts; pair with SyntheticTotal for price summary.
 - ArtifactSkeleton: Loading artifact placeholder.
 - CoverageNotice: Partial resource notice.
 - EmptyState: No matching fares.
