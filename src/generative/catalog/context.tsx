@@ -1,4 +1,4 @@
-import { legState, resolveBoundDatasetId } from '../state/leg-bindings'
+import { legState, legRequest, resolveBoundDatasetId } from '../state/leg-bindings'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type PredicateTree, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
@@ -33,12 +33,16 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
   const { services, state } = useArtifact(ref)
   const requestedId = datasetRef ? DatasetIdSchema.parse(datasetRef) : state.datasetRefs[0]
   const datasetId=requestedId?resolveBoundDatasetId(state,services.bridge,requestedId):undefined
+  const manifest=datasetId?services.bridge.getManifest(datasetId):undefined
+  const requested=manifest?legRequest(state,manifest.coverage):undefined
+  const covered=!!manifest&&!!requested&&requested.passengers===manifest.coverage.passengers&&requested.dateWindow.from>=manifest.coverage.dateWindow.from&&requested.dateWindow.to<=manifest.coverage.dateWindow.to&&requested.modes.every(mode=>manifest.coverage.modes.includes(mode))
   const [resourceRevision, refresh] = useState(0)
   useEffect(() => datasetId ? services.bridge.subscribe(datasetId, () => refresh(n => n + 1)) : undefined, [services.bridge, datasetId])
   const encoded = datasetId ? JSON.stringify(make(legState(state,services.bridge.getManifest(datasetId).coverage), datasetId)) : ''
   const [result, setResult] = useState<{status:'loading'|'ready'|'error'; data?:BoundedQueryResult}>({status:'loading'})
   useEffect(() => {
     if (!datasetId) { setResult({status:'error'}); return }
+    if (!covered) { setResult({status:'loading'}); return }
     const controller = new AbortController()
     setResult({status:'loading'})
     try {
@@ -49,7 +53,7 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
       }).catch(() => { if (!controller.signal.aborted) setResult({status:'error'}) })
     } catch { setResult({status:'error'}) }
     return () => controller.abort()
-  }, [services, datasetId, encoded, state.artifactId, resourceRevision])
+  }, [services, datasetId, encoded, state.artifactId, resourceRevision, covered])
   return { ...result, state, services, datasetId }
 }
 export function useFareRows(ref: string, datasetRef?: string) {

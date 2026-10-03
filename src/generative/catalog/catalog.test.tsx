@@ -7,8 +7,8 @@ import { TravelProvider, useTravelQuery, filterPredicate } from './context'
 import { CatalogNode } from './component'
 const artifactId=ArtifactIdSchema.parse('artifact-1')
 const fare=(id:string,mode:'train'|'bus',price:number):FareRow=>FareRowSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'eurostar':'flixbus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
-async function setup(){
- const bridge=createFareDataBridge({pageSource:async()=>({rows:[fare('f1','train',5500),fare('f2','bus',2300)],total:2,page:1,pages:1,sourceVersion:'fixture-v1'})})
+async function setup(options:Parameters<typeof createFareDataBridge>[0]={}){
+ const bridge=createFareDataBridge({pageSource:async()=>({rows:[fare('f1','train',5500),fare('f2','bus',2300)],total:2,page:1,pages:1,sourceVersion:'fixture-v1'}),...options})
  const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train','bus'],passengers:2},new AbortController().signal)
  const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-09'}})
  const services={bridge,state,activate:()=>{},activeId:()=>artifactId}
@@ -122,4 +122,17 @@ it('filters inclusive date windows while single dates and date-free summaries re
  state.dispatch({kind:'dates',artifactId,dates:{start:'2026-10-09',end:'2026-10-15'}})
  expect(filterPredicate(state.get(artifactId))).toEqual({all:[{field:'serviceDate',op:'between',value:['2026-10-09','2026-10-15']}]})
  expect(filterPredicate(state.get(artifactId),false)).toBeUndefined()
+})
+
+
+it('keeps an outside-cache date loading until real coverage arrives rather than claiming no fares',async()=>{
+ const{services,state,manifest}=await setup({pageSource:async input=>({rows:input.date==='2026-10-09'?[fare('f2','bus',2300)]:[],total:input.date==='2026-10-09'?1:0,page:1,pages:1,sourceVersion:'fixture-v1'})})
+ render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
+ await screen.findByText('Flixbus')
+ act(()=>{state.dispatch({kind:'dates',artifactId,dates:{start:'2026-10-10'}})})
+ expect(await screen.findByRole('status')).toHaveTextContent('Finding your options')
+ expect(screen.queryByText('No options match. Try another mode, date, or price limit.')).not.toBeInTheDocument()
+ const fresh=await services.bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-10',to:'2026-10-10'},modes:['train','bus'],passengers:2},new AbortController().signal)
+ act(()=>{state.dispatch({kind:'datasets',artifactId,datasetRefs:[manifest.datasetId,fresh.datasetId]})})
+ await screen.findByText('No options match. Try another mode, date, or price limit.')
 })
