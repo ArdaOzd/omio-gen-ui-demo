@@ -1,0 +1,588 @@
+{
+  "recordedAt": "2026-10-03T10:32:33.521Z",
+  "appRevision": "a1c3f8f72eb617747ce458259b77b0da5285d05a",
+  "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+  "fixtureRows": 10000000,
+  "browser": "154.0.8037.97",
+  "liveModelCalls": 0,
+  "classification": "Exact authored structure replay via native assistant-ui/OpenUI adapters, current real fare API and browser worker; DOM accessible-name/role checks, keyboard/focus/responsive/reduced-motion checks; no axe package installed and no hands-on screen-reader claim.",
+  "results": [
+    {
+      "variant": "a",
+      "index": 0,
+      "width": 360,
+      "sourcePath": "verification/generative-ui/a/live/case-0.json",
+      "sourceHash": "4926f91cfc8c2cc398a5b129ee552ef7ec33240901ca3b0db5b9b261620c8990",
+      "seeded": {
+        "artifact": "artifact-acceptance-replay",
+        "datasetId": "dataset-1hq3nnw",
+        "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+        "rowCount": 586,
+        "record": {
+          "schemaVersion": "1.0.0",
+          "catalogVersion": "1.0.0",
+          "parserVersion": "openui-0.3.0",
+          "queryVersion": "1",
+          "activeArtifactId": "artifact-acceptance-replay",
+          "messages": [
+            {
+              "id": "replay-user",
+              "role": "user",
+              "parts": [
+                {
+                  "type": "text",
+                  "text": "Replay the recorded London to Paris artifact."
+                }
+              ]
+            },
+            {
+              "id": "replay-assistant",
+              "role": "assistant",
+              "parts": [
+                {
+                  "type": "tool-present",
+                  "toolCallId": "replay-scene",
+                  "state": "output-available",
+                  "input": {
+                    "artifactRef": "artifact-acceptance-replay",
+                    "datasetRef": "dataset-1hq3nnw",
+                    "title": "London–Paris · Synthetic fares",
+                    "$type": "TravelSurface",
+                    "$key": "london-paris-surface",
+                    "children": [
+                      {
+                        "artifactRef": "artifact-acceptance-replay",
+                        "$type": "SplitPane",
+                        "$key": "comparison-split",
+                        "children": [
+                          {
+                            "artifactRef": "artifact-acceptance-replay",
+                            "datasetRef": "dataset-1hq3nnw",
+                            "title": "Dates, transport and offers",
+                            "$type": "Section",
+                            "$key": "fare-section",
+                            "children": [
+                              {
+                                "artifactRef": "artifact-acceptance-replay",
+                                "datasetRef": "dataset-1hq3nnw",
+                                "$type": "DateStrip",
+                                "$key": "dates"
+                              },
+                              {
+                                "artifactRef": "artifact-acceptance-replay",
+                                "datasetRef": "dataset-1hq3nnw",
+                                "$type": "ModeChips",
+                                "$key": "modes"
+                              },
+                              {
+                                "artifactRef": "artifact-acceptance-replay",
+                                "datasetRef": "dataset-1hq3nnw",
+                                "$type": "SortSelect",
+                                "$key": "sort"
+                              },
+                              {
+                                "artifactRef": "artifact-acceptance-replay",
+                                "datasetRef": "dataset-1hq3nnw",
+                                "title": "Synthetic fare choices",
+                                "$type": "FareCards",
+                                "$key": "offers"
+                              }
+                            ]
+                          },
+                          {
+                            "artifactRef": "artifact-acceptance-replay",
+                            "datasetRef": "dataset-1hq3nnw",
+                            "title": "Price versus journey time",
+                            "$type": "StickySummary",
+                            "$key": "trip-summary",
+                            "children": [
+                              {
+                                "artifactRef": "artifact-acceptance-replay",
+                                "datasetRef": "dataset-1hq3nnw",
+                                "$type": "CheapestFastest",
+                                "$key": "cheapest-fastest"
+                              },
+                              {
+                                "artifactRef": "artifact-acceptance-replay",
+                                "datasetRef": "dataset-1hq3nnw",
+                                "title": "Synthetic total per passenger",
+                                "$type": "SyntheticTotal",
+                                "$key": "synthetic-total"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "output": {}
+                }
+              ]
+            }
+          ],
+          "artifacts": [
+            {
+              "variant": "a",
+              "source": "{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"London–Paris · Synthetic fares\",\"$type\":\"TravelSurface\",\"$key\":\"london-paris-surface\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"$type\":\"SplitPane\",\"$key\":\"comparison-split\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Dates, transport and offers\",\"$type\":\"Section\",\"$key\":\"fare-section\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"DateStrip\",\"$key\":\"dates\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"ModeChips\",\"$key\":\"modes\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"SortSelect\",\"$key\":\"sort\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Synthetic fare choices\",\"$type\":\"FareCards\",\"$key\":\"offers\"}]},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Price versus journey time\",\"$type\":\"StickySummary\",\"$key\":\"trip-summary\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"CheapestFastest\",\"$key\":\"cheapest-fastest\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Synthetic total per passenger\",\"$type\":\"SyntheticTotal\",\"$key\":\"synthetic-total\"}]}]}]}",
+              "state": {
+                "artifactId": "artifact-acceptance-replay",
+                "revision": 0,
+                "runtimeVariables": {},
+                "datasetRefs": [
+                  "dataset-1hq3nnw"
+                ],
+                "filters": {
+                  "modes": [],
+                  "carrierIds": [],
+                  "directOnly": false
+                },
+                "dates": {
+                  "start": "2026-10-09"
+                },
+                "stays": [],
+                "modesByLeg": {},
+                "sort": {
+                  "field": "priceCents",
+                  "direction": "asc"
+                },
+                "selectedFareIds": [],
+                "pending": [],
+                "lastInteractionAt": "2026-10-03T10:32:32.195Z"
+              }
+            }
+          ],
+          "descriptors": [
+            {
+              "datasetId": "dataset-1hq3nnw",
+              "request": {
+                "originIds": [
+                  "london"
+                ],
+                "destinationIds": [
+                  "paris"
+                ],
+                "dateWindow": {
+                  "from": "2026-10-09",
+                  "to": "2026-10-15"
+                },
+                "modes": [
+                  "train",
+                  "bus",
+                  "flight"
+                ],
+                "passengers": 1
+              },
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+              "complete": true
+            }
+          ]
+        }
+      },
+      "scan": {
+        "overflow": false,
+        "unnamed": [],
+        "motion": [],
+        "controls": 30,
+        "reducedMotion": true,
+        "focusedName": "Select Bus Carrier 1kmj2pr 12:16 €19.72"
+      },
+      "keyboardFareSelection": true,
+      "keyboardBusAction": true,
+      "keyboardDependencyAction": false,
+      "focusRetained": true,
+      "total": "Synthetic total per passenger\n€19.72\n\n1 passenger\n\nSynthetic total, including demo fees. No booking is available.",
+      "localActionChatDelta": 0,
+      "nextSnapshot": {
+        "schemaVersion": "1.0.0",
+        "turnId": "turn-333f7f9a-4307-4c10-8f35-a30bce94eebe",
+        "activeArtifactId": "artifact-acceptance-replay",
+        "artifacts": [
+          {
+            "artifactId": "artifact-acceptance-replay",
+            "revision": 2,
+            "runtimeVariables": {},
+            "datasetRefs": [
+              "dataset-1hq3nnw"
+            ],
+            "selectedFareIds": [
+              "fare_003889090"
+            ],
+            "filters": {
+              "modes": [],
+              "carrierIds": [],
+              "directOnly": false
+            },
+            "dates": {
+              "start": "2026-10-09"
+            },
+            "stays": [],
+            "sort": {
+              "field": "priceCents",
+              "direction": "asc"
+            },
+            "modesByLeg": {
+              "london:paris": [
+                "bus"
+              ]
+            },
+            "pending": [],
+            "layoutSummary": "TravelSurface(SplitPane(Section(DateStrip,ModeChips,SortSelect,FareCards),StickySummary(CheapestFastest,SyntheticTotal)))",
+            "catalogVersion": "1.0.0"
+          }
+        ],
+        "datasets": [
+          {
+            "datasetId": "dataset-1hq3nnw",
+            "revision": 1,
+            "schemaVersion": "1.0.0",
+            "coverage": {
+              "originIds": [
+                "london"
+              ],
+              "destinationIds": [
+                "paris"
+              ],
+              "dateWindow": {
+                "from": "2026-10-09",
+                "to": "2026-10-15"
+              },
+              "modes": [
+                "train",
+                "bus",
+                "flight"
+              ],
+              "passengers": 1,
+              "complete": true,
+              "truncated": false
+            },
+            "rowCount": 586,
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "originId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "destinationId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "serviceDate",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "mode",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "carrierId",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": true
+              },
+              {
+                "name": "priceCents",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "durationMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "departureMinutes",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "availableSeats",
+                "type": "number",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "synthetic",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "priceBasis",
+                "type": "string",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              },
+              {
+                "name": "direct",
+                "type": "boolean",
+                "nullable": false,
+                "filterable": true,
+                "groupable": true,
+                "joinKey": false
+              }
+            ],
+            "compactSummary": {
+              "minPriceCents": 1792,
+              "maxPriceCents": 8595,
+              "minDurationMinutes": 74,
+              "maxDurationMinutes": 625,
+              "modeCounts": {
+                "bus": 210,
+                "flight": 138,
+                "train": 238
+              }
+            },
+            "source": {
+              "kind": "search",
+              "descriptorId": "resource-1hq3nnw",
+              "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6"
+            }
+          }
+        ],
+        "selectedFareFacts": []
+      },
+      "persisted": {
+        "recordRevision": 4,
+        "schemaVersion": "1.0.0",
+        "catalogVersion": "1.0.0",
+        "activeArtifactId": "artifact-acceptance-replay",
+        "parserVersion": "openui-0.3.0",
+        "queryVersion": "1",
+        "messages": [
+          {
+            "id": "replay-user",
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "text": "Replay the recorded London to Paris artifact."
+              }
+            ]
+          },
+          {
+            "id": "replay-assistant",
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "tool-present",
+                "toolCallId": "replay-scene",
+                "state": "output-available",
+                "input": {
+                  "artifactRef": "artifact-acceptance-replay",
+                  "datasetRef": "dataset-1hq3nnw",
+                  "title": "London–Paris · Synthetic fares",
+                  "$type": "TravelSurface",
+                  "$key": "london-paris-surface",
+                  "children": [
+                    {
+                      "artifactRef": "artifact-acceptance-replay",
+                      "$type": "SplitPane",
+                      "$key": "comparison-split",
+                      "children": [
+                        {
+                          "artifactRef": "artifact-acceptance-replay",
+                          "datasetRef": "dataset-1hq3nnw",
+                          "title": "Dates, transport and offers",
+                          "$type": "Section",
+                          "$key": "fare-section",
+                          "children": [
+                            {
+                              "artifactRef": "artifact-acceptance-replay",
+                              "datasetRef": "dataset-1hq3nnw",
+                              "$type": "DateStrip",
+                              "$key": "dates"
+                            },
+                            {
+                              "artifactRef": "artifact-acceptance-replay",
+                              "datasetRef": "dataset-1hq3nnw",
+                              "$type": "ModeChips",
+                              "$key": "modes"
+                            },
+                            {
+                              "artifactRef": "artifact-acceptance-replay",
+                              "datasetRef": "dataset-1hq3nnw",
+                              "$type": "SortSelect",
+                              "$key": "sort"
+                            },
+                            {
+                              "artifactRef": "artifact-acceptance-replay",
+                              "datasetRef": "dataset-1hq3nnw",
+                              "title": "Synthetic fare choices",
+                              "$type": "FareCards",
+                              "$key": "offers"
+                            }
+                          ]
+                        },
+                        {
+                          "artifactRef": "artifact-acceptance-replay",
+                          "datasetRef": "dataset-1hq3nnw",
+                          "title": "Price versus journey time",
+                          "$type": "StickySummary",
+                          "$key": "trip-summary",
+                          "children": [
+                            {
+                              "artifactRef": "artifact-acceptance-replay",
+                              "datasetRef": "dataset-1hq3nnw",
+                              "$type": "CheapestFastest",
+                              "$key": "cheapest-fastest"
+                            },
+                            {
+                              "artifactRef": "artifact-acceptance-replay",
+                              "datasetRef": "dataset-1hq3nnw",
+                              "title": "Synthetic total per passenger",
+                              "$type": "SyntheticTotal",
+                              "$key": "synthetic-total"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "output": {}
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "text": "Report the current state only."
+              }
+            ],
+            "metadata": {
+              "custom": {}
+            },
+            "id": "5uayrlLvVZrp0BgO"
+          },
+          {
+            "id": "snapshot-probe-answer",
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "text",
+                "text": "Snapshot inspected locally.",
+                "state": "done"
+              }
+            ]
+          }
+        ],
+        "artifacts": [
+          {
+            "variant": "a",
+            "source": "{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"London–Paris · Synthetic fares\",\"$type\":\"TravelSurface\",\"$key\":\"london-paris-surface\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"$type\":\"SplitPane\",\"$key\":\"comparison-split\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Dates, transport and offers\",\"$type\":\"Section\",\"$key\":\"fare-section\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"DateStrip\",\"$key\":\"dates\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"ModeChips\",\"$key\":\"modes\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"SortSelect\",\"$key\":\"sort\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Synthetic fare choices\",\"$type\":\"FareCards\",\"$key\":\"offers\"}]},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Price versus journey time\",\"$type\":\"StickySummary\",\"$key\":\"trip-summary\",\"children\":[{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"$type\":\"CheapestFastest\",\"$key\":\"cheapest-fastest\"},{\"artifactRef\":\"artifact-acceptance-replay\",\"datasetRef\":\"dataset-1hq3nnw\",\"title\":\"Synthetic total per passenger\",\"$type\":\"SyntheticTotal\",\"$key\":\"synthetic-total\"}]}]}]}",
+            "state": {
+              "artifactId": "artifact-acceptance-replay",
+              "revision": 2,
+              "runtimeVariables": {},
+              "datasetRefs": [
+                "dataset-1hq3nnw"
+              ],
+              "filters": {
+                "modes": [],
+                "carrierIds": [],
+                "directOnly": false
+              },
+              "dates": {
+                "start": "2026-10-09"
+              },
+              "stays": [],
+              "modesByLeg": {
+                "london:paris": [
+                  "bus"
+                ]
+              },
+              "sort": {
+                "field": "priceCents",
+                "direction": "asc"
+              },
+              "selectedFareIds": [
+                "fare_003889090"
+              ],
+              "pending": [],
+              "lastInteractionAt": "2026-10-03T10:32:33.215Z"
+            }
+          }
+        ],
+        "descriptors": [
+          {
+            "datasetId": "dataset-1hq3nnw",
+            "request": {
+              "originIds": [
+                "london"
+              ],
+              "destinationIds": [
+                "paris"
+              ],
+              "dateWindow": {
+                "from": "2026-10-09",
+                "to": "2026-10-15"
+              },
+              "modes": [
+                "train",
+                "bus",
+                "flight"
+              ],
+              "passengers": 1
+            },
+            "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+            "complete": true
+          }
+        ]
+      },
+      "requestBytes": 18896,
+      "pageErrors": [],
+      "passed": true
+    }
+  ]
+}
