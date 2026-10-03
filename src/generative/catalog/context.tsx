@@ -39,17 +39,17 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
   const [result, setResult] = useState<{status:'loading'|'ready'|'error'; data?:BoundedQueryResult}>({status:'loading'})
   useEffect(() => {
     if (!datasetId) { setResult({status:'error'}); return }
-    const controller = new AbortController(); const requestedRevision = state.revision
+    const controller = new AbortController()
     setResult({status:'loading'})
     try {
       const manifest = services.bridge.getManifest(datasetId)
       const query = parseQuery(JSON.parse(encoded), [manifest])
       services.bridge.query(query, controller.signal).then(data => {
-        if (!controller.signal.aborted && services.state.get(state.artifactId).revision === requestedRevision) setResult({status:'ready',data})
+        if (!controller.signal.aborted) setResult({status:'ready',data})
       }).catch(() => { if (!controller.signal.aborted) setResult({status:'error'}) })
     } catch { setResult({status:'error'}) }
     return () => controller.abort()
-  }, [services, datasetId, encoded, state.artifactId, state.revision, resourceRevision])
+  }, [services, datasetId, encoded, state.artifactId, resourceRevision])
   return { ...result, state, services, datasetId }
 }
 export function useFareRows(ref: string, datasetRef?: string) {
