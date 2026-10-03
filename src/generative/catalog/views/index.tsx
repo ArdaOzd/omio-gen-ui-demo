@@ -8,6 +8,15 @@ export function FareCards(props:WidgetProps) {
  if(result.status==='error')return <div role="alert" className="travel-notice">These options could not load. Try refreshing the view.</div>
  return <section className="travel-panel"><h3>{props.title??'Your options'}</h3><p className="travel-caption">{result.data?.total??0} matches · Synthetic fares per passenger</p>{result.rows.length?<div className="travel-fares">{result.rows.slice(0,20).map(row=><article className={`travel-fare ${result.state.selectedFareIds.includes(row.id)?'is-selected':''}`} key={row.id}><div><span className={`travel-mode travel-mode-${row.mode}`}>{cityLabel(row.mode)}</span><strong>{cityLabel(row.carrierId)}</strong><p>{departure(row.departureMinutes)} · {duration(row.durationMinutes)}</p><small>{cityLabel(row.originId)} → {cityLabel(row.destinationId)} · {row.serviceDate}</small></div><div><strong className="travel-price">{money(row.priceCents)}</strong><button type="button" aria-pressed={result.state.selectedFareIds.includes(row.id)} aria-label={`Select ${cityLabel(row.mode)} ${cityLabel(row.carrierId)} ${departure(row.departureMinutes)} ${money(row.priceCents)}`} onClick={()=>dispatch({kind:'select',artifactId:result.state.artifactId,fareId:row.id,selected:!result.state.selectedFareIds.includes(row.id)})}>{result.state.selectedFareIds.includes(row.id)?'Selected':'Select'}</button></div></article>)}</div>:<p role="status">No options match. Try another mode, date, or price limit.</p>}{(result.data?.total??0)>20&&<p className="travel-caption">Showing the first 20. Narrow your filters to compare more closely.</p>}</section>
 }
+export function FarePicker(props:WidgetProps) {
+ const result=useFareRows(props.artifactRef,props.datasetRef);const dispatch=useTravelAction(props.artifactRef)
+ const selected=result.rows.find(row=>result.state.selectedFareIds.includes(row.id))?.id??''
+ return <section className="travel-panel"><h3>{props.title??'Choose a fare'}</h3>{result.status==='loading'?<p role="status">Finding your options…</p>:result.status==='error'?<p role="alert">These options could not load. Try refreshing the view.</p>:result.rows.length?<label className="travel-field">Choose a synthetic fare<select aria-label="Choose a synthetic fare" value={selected} onChange={event=>{
+  const row=result.rows.find(item=>item.id===event.target.value)
+  if(row)dispatch({kind:'select',artifactId:result.state.artifactId,fareId:row.id,selected:true})
+  else if(selected)dispatch({kind:'select',artifactId:result.state.artifactId,fareId:selected,selected:false})
+ }}><option value="">No fare selected</option>{result.rows.map(row=><option key={row.id} value={row.id}>{cityLabel(row.mode)} · {cityLabel(row.carrierId)} · {departure(row.departureMinutes)} · {duration(row.durationMinutes)} · {money(row.priceCents)}</option>)}</select></label>:<p role="status">No options match. Try another mode, date, or price limit.</p>}<small>Synthetic fares per passenger</small></section>
+}
 export function PriceCalendar(props:WidgetProps) {
  const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state,false),groupBy:['serviceDate'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'count',op:'count'}],orderBy:[{field:'serviceDate',direction:'asc'}],limit:30}));const dispatch=useTravelAction(props.artifactRef)
  return <section className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-calendar">{result.data?.rows.map(row=>typeof row.serviceDate==='string'&&typeof row.minimum==='number'?<button key={row.serviceDate} type="button" aria-pressed={result.state.dates.start===row.serviceDate} onClick={()=>{if(typeof row.serviceDate==='string')dispatch({kind:'dates',artifactId:result.state.artifactId,dates:{...result.state.dates,start:row.serviceDate}})}}><span>{new Date(`${row.serviceDate}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{money(row.minimum)}</strong><small>{row.count} options</small></button>:null)}</div>{result.status==='loading'&&<p role="status">Comparing dates…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
@@ -30,8 +39,20 @@ export function Coverage(props:WidgetProps) {
  const {services,state}=useArtifact(props.artifactRef); const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
  return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
 }
+function useRouteStops(ref:string) {
+ const {services,state}=useArtifact(ref)
+ if(state.stays.length)return state.stays
+ const legs=state.datasetRefs.map(id=>services.bridge.getManifest(id).coverage)
+ const distinct=legs.filter((leg,index)=>legs.findIndex(other=>other.originIds[0]===leg.originIds[0]&&other.destinationIds[0]===leg.destinationIds[0])===index)
+ const cities=distinct.length?[distinct[0].originIds[0],...distinct.map(leg=>leg.destinationIds[0])].filter((city):city is string=>typeof city==='string'):[]
+ return cities.map(cityId=>({cityId,nights:0}))
+}
+export function CitySequence(props:WidgetProps) {
+ const stops=useRouteStops(props.artifactRef)
+ return <section className="travel-panel"><h3>{props.title??'Your stops'}</h3><ol className="travel-timeline" aria-label="Travel stops">{stops.map((stop,index)=><li key={`${stop.cityId}-${index}`}><strong>{cityLabel(stop.cityId)}</strong>{stop.nights>0&&<span>{stop.nights} night{stop.nights===1?'':'s'}</span>}</li>)}</ol></section>
+}
 export function Route(props:WidgetProps) {
- const {services,state}=useArtifact(props.artifactRef);const legs=state.datasetRefs.map(id=>services.bridge.getManifest(id).coverage);const distinct=legs.filter((leg,index)=>legs.findIndex(other=>other.originIds[0]===leg.originIds[0]&&other.destinationIds[0]===leg.destinationIds[0])===index);const cities=distinct.length?[distinct[0].originIds[0],...distinct.map(l=>l.destinationIds[0])].filter((c):c is string=>typeof c==='string'):[]
+ const cities=useRouteStops(props.artifactRef).map(stop=>stop.cityId)
  return <section className="travel-panel"><h3>{props.title??'Your route'}</h3><svg viewBox="0 0 600 135" role="img" aria-label={`Schematic route: ${cities.map(cityLabel).join(' to ')}`}><path d="M45 55H555" stroke="var(--travel-blue)" strokeWidth="3" fill="none"/>{cities.map((city,i)=>{const x=45+i*510/Math.max(1,cities.length-1);return <g key={`${city}-${i}`}><circle cx={x} cy="55" r="9" fill="var(--travel-blue)"/><text x={x} y="92" textAnchor="middle">{cityLabel(city)}</text></g>})}</svg><small>Schematic route, not a geographic map.</small></section>
 }
 export function Timeline(props:WidgetProps) {

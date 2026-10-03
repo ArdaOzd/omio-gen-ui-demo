@@ -1,13 +1,13 @@
 # Shared catalog 1.0.0
 
-Manifest hash: ed1b21ba3b552484f68ee9421068207149725ac2357f513f7620c9affbc48246
+Manifest hash: b5d83d1bac5a901a22d2d67141ba8e095453aa1293559251f1cc1bcf7cc6d2e7
 
-Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
+Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
 - TravelHero: Travel artifact headline and introduction. May contain catalog children.
 - Carousel: Accessible horizontal panels. May contain catalog children.
 - DateWindow: Bounded local date window.
-- FarePicker: Direct local fare selection.
+- FarePicker: Compact direct fare selector for one leg.
 - CheapestFastest: Local cheapest and fastest comparison.
 - TravelSurface: Root travel artifact with subscribed local state. May contain catalog children.
 - Section: Named story section. May contain catalog children.
@@ -17,7 +17,7 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - SplitPane: Responsive primary and supporting sections. May contain catalog children.
 - StickySummary: Persistent selected-trip summary. May contain catalog children.
 - Tabs: Accessible tabbed sections. May contain catalog children.
-- Callout: Bounded explanatory content. May contain catalog children.
+- Callout: Short heading and explanatory body text up to600 characters. May contain catalog children.
 - DateStrip: Direct local date selection.
 - ModeChips: Direct local transport mode filtering.
 - CarrierFilter: Direct local carrier selection.
@@ -26,15 +26,15 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - DirectToggle: Direct-only local filter.
 - SortSelect: Price duration or departure sorting.
 - StayAllocation: Multi-city stay nights allocation.
-- FareCards: Locally resolved fare choices.
+- FareCards: Expanded fare detail cards for one leg.
 - ComparisonTable: Locally resolved ranked fare comparison.
 - ComparisonMatrix: Locally grouped mode comparison.
 - PriceCalendar: Locally grouped price-by-day view.
 - ModeBreakdown: Locally grouped transport totals.
 - SyntheticTotal: Selected synthetic per-passenger EUR total.
 - CoverageSummary: Resource completeness and bounds.
-- CitySequence: Ordered stops and adjacent legs.
-- RouteMap: Schematic local route visualization.
+- CitySequence: Ordered stop strip with stay nights.
+- RouteMap: Schematic connection chart.
 - ItineraryTimeline: Selected adjacent-leg chronology.
 - DurationPricePlot: Local duration and price comparison.
 - SelectedItinerary: Selected leg facts and total.

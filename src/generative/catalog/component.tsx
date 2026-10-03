@@ -5,7 +5,7 @@ import { ArtifactIdSchema, DatasetIdSchema } from '../contracts'
 import { Layout, type WidgetProps } from './layout'
 import { Control } from './controls'
 import { Status } from './status'
-import { FareCards, PriceCalendar, Comparison, Total, Coverage, Route, Timeline, Plot, CheapestFastest } from './views'
+import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, Total, Coverage, Route, Timeline, Plot, CheapestFastest } from './views'
 const layouts=new Set(['TravelSurface','TravelHero','Section','Stack','Inline','ResponsiveGrid','SplitPane','StickySummary','Tabs','Carousel','Callout'])
 const controls=new Set(['ModeChips','CarrierFilter','PriceRange','DurationRange','DirectToggle','SortSelect','DateStrip','DateWindow','StayAllocation'])
 const statuses=new Set(['ArtifactSkeleton','CoverageNotice','EmptyState','InlineError','StaleBadge','RetryAction'])
@@ -24,13 +24,15 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  else if(controls.has(kind))content=<Control kind={kind} {...props}/>
  else if(statuses.has(kind))content=<Status kind={kind} {...props}/>
  else switch(kind){
- case 'FareCards':case 'FarePicker':content=<FareCards {...props}/>;break
+ case 'FareCards':content=<FareCards {...props}/>;break
+ case 'FarePicker':content=<FarePicker {...props}/>;break
  case 'PriceCalendar':content=<PriceCalendar {...props}/>;break
  case 'ComparisonTable':case 'ComparisonMatrix':case 'ModeBreakdown':content=<Comparison {...props}/>;break
  case 'SyntheticTotal':content=<Total {...props}/>;break
  case 'SelectedItinerary':content=<Total {...props} detail/>;break
  case 'CoverageSummary':content=<Coverage {...props}/>;break
- case 'RouteMap':case 'CitySequence':content=<Route {...props}/>;break
+ case 'RouteMap':content=<Route {...props}/>;break
+ case 'CitySequence':content=<CitySequence {...props}/>;break
  case 'ItineraryTimeline':content=<Timeline {...props}/>;break
  case 'DurationPricePlot':content=<Plot {...props}/>;break
  case 'CheapestFastest':content=<CheapestFastest {...props}/>;break

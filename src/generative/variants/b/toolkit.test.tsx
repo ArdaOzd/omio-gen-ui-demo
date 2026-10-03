@@ -18,7 +18,7 @@ it('never leaves a captured terminal failed compose input as a preparing skeleto
 
 it('only supersedes a failed tool with a later accepted compose in the same message',()=>{
  const failed={type:'tool-call',toolCallId:'failed',toolName:'compose_reactive_scene'}
- const accepted={type:'tool-call',toolCallId:'repair',toolName:'compose_reactive_scene',result:{status:'accepted'}}
+ const accepted={type:'tool-call',toolCallId:'repair',toolName:'compose_reactive_scene',args:{artifactRef:'art',programRevision:5,program:'root = TravelSurface("art")'},result:{status:'accepted'}}
  expect(hasAcceptedRepairAfter([failed,accepted],'failed')).toBe(true)
  expect(hasAcceptedRepairAfter([accepted,failed],'failed')).toBe(false)
  expect(hasAcceptedRepairAfter([failed,{...accepted,result:{status:'error'}}],'failed')).toBe(false)
@@ -49,4 +49,31 @@ it('keeps the accepted scene and removes its earlier failed tool through the nat
  await screen.findByText('Accepted travel view')
  expect(screen.queryByText('Preparing reactive view…')).toBeNull()
  expect(screen.queryByText(/This generated view could not be completed/)).toBeNull()
+})
+
+it.each(['accepted','pending','error','invalid','different','older-turn'])('preserves scene ownership for native %s tool ordering',async scenario=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}})
+ vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{});state.initializeMissing(ArtifactIdSchema.parse('other'),{})
+ const services={state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}
+ const scene=(artifactRef:string,title:string,toolCallId:string)=>({type:'tool-compose_reactive_scene' as const,toolCallId,state:'output-available' as const,input:{artifactRef,programRevision:5,program:`root = TravelSurface("${artifactRef}", null, null, null, "${title}")`},output:{artifactId:artifactRef,programRevision:5,status:'accepted'}})
+ const first=scene('art','First usable scene','first'),second=scene(scenario==='different'?'other':'art','New accepted scene','second')
+ if(scenario==='invalid')second.input.program+='\nunknown()'
+ const messages: UIMessage[]=scenario==='older-turn'?[{id:'first-turn',role:'assistant',parts:[first]},{id:'later-user',role:'user',parts:[{type:'text',text:'Update this view'}]},{id:'later-turn',role:'assistant',parts:[second]}]:[{id:'same-turn',role:'assistant',parts:[first,scenario==='pending'?{type:'tool-compose_reactive_scene',toolCallId:'pending',state:'input-streaming',input:{artifactRef:'art'}}:scenario==='error'?{type:'tool-compose_reactive_scene',toolCallId:'error',state:'output-error',input:{},errorText:'Repair was not accepted'}:second]}]
+ render(<GenerativeChat variant="b" services={services} sceneToolkit={bToolkit} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ if(scenario==='accepted'){await screen.findByText('New accepted scene');expect(screen.queryByText('First usable scene')).toBeNull()}
+ else{await screen.findByText('First usable scene');if(scenario==='different'||scenario==='older-turn')await screen.findByText('New accepted scene')}
+})
+
+it.each(['legacy-title','body'])('renders captured explanatory Callout text through native %s history',async shape=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}})
+ vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{})
+ const services={state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}
+ const explanation='Demo fares cover October 2–8. Choose dates allowing two nights in Paris, then four in Barcelona. No return leg or accommodation is included. Ferry fares are absent from this synthetic coverage.'
+ const notice=shape==='legacy-title'?`note = Callout("art", null, null, null, ${JSON.stringify(explanation)})`:`note = Callout("art", null, null, null, "Coverage notes", null, null, null, null, null, null, ${JSON.stringify(explanation)})`
+ const messages:UIMessage[]=[{id:'explanatory-scene',role:'assistant',parts:[{type:'tool-compose_reactive_scene',toolCallId:'callout-scene',state:'output-available',input:{artifactRef:'art',programRevision:1,program:`root = TravelSurface("art", null, null, null, "Travel options", null, [note])\n${notice}`},output:{artifactId:'art',programRevision:1,status:'accepted'}}]}]
+ render(<GenerativeChat variant="b" services={services} sceneToolkit={bToolkit} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ expect(await screen.findByText(explanation)).toHaveProperty('tagName','P')
+ expect(screen.queryByRole('alert')).toBeNull()
 })
