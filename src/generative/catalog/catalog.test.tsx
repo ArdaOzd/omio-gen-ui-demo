@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from '../state/ui-state-store'
-import { ArtifactIdSchema, FareRowSchema, type FareRow } from '../contracts'
-import { TravelProvider } from './context'
+import { ArtifactIdSchema, FareRowSchema, type FareRow, type BoundedQueryResult } from '../contracts'
+import { TravelProvider, useTravelQuery } from './context'
 import { CatalogNode } from './component'
 const artifactId=ArtifactIdSchema.parse('artifact-1')
 const fare=(id:string,mode:'train'|'bus',price:number):FareRow=>FareRowSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'eurostar':'flixbus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
@@ -76,4 +76,41 @@ it('renders granular route and fare surfaces while retaining the selected fare a
  expect(state.get(artifactId).filters.modes).toEqual(['bus'])
  fireEvent.change(await screen.findByRole('combobox',{name:'Choose a synthetic fare'}),{target:{value:'f2'}})
  await waitFor(()=>expect(state.get(artifactId).selectedFareIds).toEqual(['f2']))
+})
+
+it('keeps the selected fare button mounted and focused when only selection changes',async()=>{
+ const{services}=await setup()
+ render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId}/><CatalogNode kind="SyntheticTotal" artifactRef={artifactId}/></TravelProvider>)
+ const button=await screen.findByRole('button',{name:/Select Bus Flixbus/})
+ button.focus();fireEvent.click(button)
+ await screen.findByText('€46.00')
+ expect(button).toBeInTheDocument();expect(button).toHaveFocus();expect(button).toHaveAttribute('aria-pressed','true')
+})
+
+
+function PendingQueryProbe(){
+ const result=useTravelQuery(artifactId,undefined,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:state.filters.modes.length?{field:'mode',op:'in',value:state.filters.modes}:undefined,limit:1}))
+ return <p data-testid="pending-query">{result.status}:{String(result.data?.rows[0]?.mode??'')}</p>
+}
+
+it('accepts an in-flight unchanged query after a selection revision without restarting it',async()=>{
+ const{services,state,manifest}=await setup();let complete:(value:BoundedQueryResult)=>void=()=>{}
+ const query=vi.spyOn(services.bridge,'query').mockImplementation(()=>new Promise(resolve=>{complete=resolve}))
+ render(<TravelProvider services={services}><PendingQueryProbe/></TravelProvider>)
+ await waitFor(()=>expect(query).toHaveBeenCalledTimes(1))
+ act(()=>{state.dispatch({kind:'select',artifactId,fareId:fare('f2','bus',2300).id,selected:true})})
+ await act(async()=>{complete({rows:[{mode:'bus'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'same-query'})})
+ expect(query).toHaveBeenCalledTimes(1);expect(screen.getByTestId('pending-query')).toHaveTextContent('ready:bus')
+})
+
+it('aborts a changed query and rejects its late result after a newer filtered result',async()=>{
+ const{services,state,manifest}=await setup();const pending:Array<{signal:AbortSignal;complete:(value:BoundedQueryResult)=>void}>=[]
+ vi.spyOn(services.bridge,'query').mockImplementation((_query,signal)=>new Promise(resolve=>{pending.push({signal,complete:resolve})}))
+ render(<TravelProvider services={services}><PendingQueryProbe/></TravelProvider>)
+ await waitFor(()=>expect(pending).toHaveLength(1))
+ act(()=>{state.dispatch({kind:'filters',artifactId,filters:{...state.get(artifactId).filters,modes:['bus']}})})
+ await waitFor(()=>expect(pending).toHaveLength(2));expect(pending[0]?.signal.aborted).toBe(true)
+ await act(async()=>{pending[1]?.complete({rows:[{mode:'bus'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'new-query'})})
+ await act(async()=>{pending[0]?.complete({rows:[{mode:'train'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'old-query'})})
+ expect(screen.getByTestId('pending-query')).toHaveTextContent('ready:bus')
 })
