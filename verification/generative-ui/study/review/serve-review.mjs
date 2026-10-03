@@ -8,7 +8,7 @@ import{restoreRecordedThread}from'../../resume-artifacts/replay-artifact.mjs';
 const[packageDirectory,upstream='http://127.0.0.1:5194']=process.argv.slice(2);
 if(!packageDirectory)throw new Error('Usage: node --import tsx serve-review.mjs <review-package-directory> [frozen-demo-url]');
 const root=resolve(packageDirectory),toolsDirectory=fileURLToPath(new URL('.',import.meta.url)),packet=JSON.parse(await readFile(join(root,'public','manifest.json'),'utf8')),identity=JSON.parse(await readFile(join(root,'private','identity-map.json'),'utf8'));
-const browser=await chromium.launch({channel:'chrome',headless:false}),context=await browser.newContext();
+const browser=await chromium.launch({channel:'chrome',headless:process.env.OMIO_REVIEW_HEADLESS==='1'}),context=await browser.newContext();
 let activeToken,preparing=false;
 async function prepareItem(token){const item=identity.items[token],page=await context.newPage();try{activeToken=token;await page.goto(`http://127.0.0.1:${server.address().port}/interactive/${token}`);await restoreRecordedThread(page,{variant:item.variant,record:item.record.persisted,expectedSourceVersion:packet.sourceFreeze.fixture.sourceVersion});await page.locator('.travel-travelsurface').first().waitFor({state:'visible',timeout:30000});await page.screenshot({path:join(root,'public','captures',`${token}.png`),fullPage:true});}finally{await page.close();}}
 async function verifyFreeze(){
