@@ -1,4 +1,4 @@
-import { useEffect,useMemo } from 'react'
+import { useEffect,useMemo,useRef } from 'react'
 import { createLibrary,defineComponent,useStateField,useTriggerAction,type ComponentRenderProps } from '@openuidev/react-lang'
 import { z } from 'zod'
 import { catalogDescriptors } from '../../../catalog/generated/catalog'
@@ -14,9 +14,10 @@ function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Pr
  const host=useTravelServices(),{state}=useArtifact(props.artifactRef),trigger=useTriggerAction(),scene=useSceneQuery()
  const generatedQuery=scene?.bindings.find(binding=>binding.kind===name&&binding.artifactRef===props.artifactRef&&binding.datasetRef===(props.datasetRef??undefined)&&binding.title===(props.title??undefined))
  const field=useStateField(`${props.artifactRef}:${props.binding??name}`,props.value)
+ const fieldRef=useRef(field);fieldRef.current=field
  const hostValue=props.binding?state[props.binding]:undefined
  const encoded=JSON.stringify(field.value),desired=JSON.stringify(hostValue)
- useEffect(()=>{if(props.binding&&encoded!==desired)field.setValue(hostValue)},[props.binding,encoded,desired,hostValue,field])
+ useEffect(()=>{if(props.binding){const current=host.state.get(state.artifactId)[props.binding];if(JSON.stringify(fieldRef.current.value)!==JSON.stringify(current))fieldRef.current.setValue(current)}},[props.binding,encoded,desired,host.state,state.artifactId])
  const queryEncoded=JSON.stringify(props.query)
  const services=useMemo(()=>{
   const validated=WorkerResponseSchema.safeParse({kind:'result',id:'view',result:props.query})
@@ -27,10 +28,10 @@ function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Pr
    return host.bridge.query(input,signal)
   }},dispatch:(command:Parameters<typeof host.state.dispatch>[0])=>{
    const result=(host.dispatch??host.state.dispatch)(command)
-   if(result.status==='applied'&&props.binding)field.setValue(host.state.get(command.artifactId)[props.binding])
+   if(result.status==='applied'&&props.binding)fieldRef.current.setValue(host.state.get(command.artifactId)[props.binding])
    return result
   }}
- },[host,queryEncoded,props.binding,field,state.revision,props.artifactRef,generatedQuery?.queryId,scene?.execute])
+ },[host,queryEncoded,props.binding,props.artifactRef,generatedQuery?.queryId,scene?.execute])
  const {children,value,binding,query,action,...common}=props
  const scalar=Object.fromEntries(Object.entries(common).filter(([,value])=>value!==null&&value!==undefined))
  const normalized=name==='Callout'&&typeof scalar.title==='string'&&scalar.title.length>160?{...scalar,title:undefined,body:scalar.body??scalar.title}:scalar
