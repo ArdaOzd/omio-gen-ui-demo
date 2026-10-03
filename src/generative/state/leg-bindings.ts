@@ -11,7 +11,7 @@ export function legRequest(state:ArtifactUIState,coverage:Coverage):CoverageRequ
 }
 export function legState(state:ArtifactUIState,coverage:Coverage):ArtifactUIState{
  const key=legKey(coverage)
- return {...state,dates:{...state.dates,start:legDate(state,coverage.originIds[0]??'')},filters:{...state.filters,modes:key&&state.modesByLeg[key]!==undefined?state.modesByLeg[key]??[]:state.filters.modes}}
+ return {...state,dates:{start:legDate(state,coverage.originIds[0]??''),...(state.dates.end?{end:legDate(state,coverage.originIds[0]??'',state.dates.end)}:{})},filters:{...state.filters,modes:key&&state.modesByLeg[key]!==undefined?state.modesByLeg[key]??[]:state.filters.modes}}
 }
 
 export function resolveBoundDatasetId(state:ArtifactUIState,bridge:FareDataBridge,seedRef:DatasetId):DatasetId{

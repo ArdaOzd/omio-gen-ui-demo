@@ -31,29 +31,34 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
    selections.set(command.artifactId,{token,promise});if(command.kind==='select')return result
   }
   if(!['dates','filters','stays','modesByLeg'].includes(command.kind))return result
-  requests.get(command.artifactId)?.controller.abort();requests.delete(command.artifactId)
-  const state=store.get(command.artifactId);const plans=requestsFor(state,bridge)
+  void retry(command.artifactId)
+  return result
+ }
+ const retry=(artifactId:ArtifactId):Promise<void>=>{
+  const bridge=options.bridge;if(!bridge)return Promise.resolve()
+  requests.get(artifactId)?.controller.abort();requests.delete(artifactId)
+  const state=store.get(artifactId);const plans=requestsFor(state,bridge)
   const manifests=state.datasetRefs.map(ref=>bridge.getManifest(ref));const missing=plans.filter(plan=>!manifests.some(manifest=>covers(manifest,plan)))
-  if(!missing.length){options.onCoverageStatus?.({artifactId:command.artifactId,status:'ready'});return result}
+  if(!missing.length){options.onCoverageStatus?.({artifactId,status:'ready'});return Promise.resolve()}
   const controller=new AbortController();const captured=signature(state);const loaded:DatasetManifest[]=[]
-  options.onCoverageStatus?.({artifactId:command.artifactId,status:'loading'})
+  options.onCoverageStatus?.({artifactId,status:'loading'})
   const promise=(async()=>{
    try{
     for(const coverage of missing){const manifest=await bridge.load(coverage,controller.signal);loaded.push(manifest);if(controller.signal.aborted)throw new Error('Canceled coverage')}
-    if(controller.signal.aborted||requests.get(command.artifactId)?.controller!==controller||signature(store.get(command.artifactId))!==captured)throw new Error('Superseded coverage')
+    if(controller.signal.aborted||requests.get(artifactId)?.controller!==controller||signature(store.get(artifactId))!==captured)throw new Error('Superseded coverage')
     if(loaded.some(manifest=>manifest.source.sourceVersion!==manifests[0]?.source.sourceVersion))throw new Error('SOURCE_VERSION_CHANGED')
-    const current=store.get(command.artifactId);const refs=[...new Set([...current.datasetRefs,...loaded.map(manifest=>manifest.datasetId)])]
+    const current=store.get(artifactId);const refs=[...new Set([...current.datasetRefs,...loaded.map(manifest=>manifest.datasetId)])]
     if(refs.length>8)throw new Error('Eight cached resource limit reached; start another travel view')
-    store.dispatch({kind:'datasets',artifactId:command.artifactId,datasetRefs:refs,expectedRevision:current.revision})
-    options.onCoverageStatus?.({artifactId:command.artifactId,status:'ready'})
+    store.dispatch({kind:'datasets',artifactId,datasetRefs:refs,expectedRevision:current.revision})
+    options.onCoverageStatus?.({artifactId,status:'ready'})
    }catch(error){for(const manifest of loaded)bridge.release(manifest.datasetId);if(!controller.signal.aborted){
      const changed=error instanceof Error&&error.message==='SOURCE_VERSION_CHANGED'
-     if(changed)for(const fareId of store.get(command.artifactId).selectedFareIds){const current=store.get(command.artifactId);store.dispatch({kind:'select',artifactId:command.artifactId,fareId,selected:false,expectedRevision:current.revision})}
-     options.onCoverageStatus?.({artifactId:command.artifactId,status:'error',message:changed?'The travel source changed. Old selections were cleared; start a new travel view.':'Could not load this synthetic coverage. Retry or start another travel view.'})
+     if(changed)for(const fareId of store.get(artifactId).selectedFareIds){const current=store.get(artifactId);store.dispatch({kind:'select',artifactId,fareId,selected:false,expectedRevision:current.revision})}
+     options.onCoverageStatus?.({artifactId,status:'error',message:changed?'The travel source changed. Old selections were cleared; start a new travel view.':'Could not load this synthetic coverage. Retry or start another travel view.'})
     }}
-   finally{if(requests.get(command.artifactId)?.controller===controller)requests.delete(command.artifactId)}
+   finally{if(requests.get(artifactId)?.controller===controller)requests.delete(artifactId)}
   })()
-  requests.set(command.artifactId,{controller,promise});return result
+  requests.set(artifactId,{controller,promise});return promise
  }
- return Object.assign(route,{whenIdle:async(id:ArtifactId)=>{await Promise.all([requests.get(id)?.promise,selections.get(id)?.promise])},dispose:()=>{for(const request of requests.values())request.controller.abort();requests.clear();selections.clear()}})
+ return Object.assign(route,{retry,whenIdle:async(id:ArtifactId)=>{await Promise.all([requests.get(id)?.promise,selections.get(id)?.promise])},dispose:()=>{for(const request of requests.values())request.controller.abort();requests.clear();selections.clear()}})
 }
