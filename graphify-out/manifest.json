@@ -1296,10 +1296,10 @@
     "semantic_hash": "552d8dd0e1566db11e27c311359473b6"
   },
   "docs/status/generative-ui-ab-handoff.md": {
-    "mtime": 1790983230.2113957,
-    "seen": 1791025545.539544,
-    "ast_hash": "77a02b1bea2965fdc3de35abaacfe504",
-    "semantic_hash": "77a02b1bea2965fdc3de35abaacfe504"
+    "mtime": 1791025651.078251,
+    "seen": 1791027557.557626,
+    "ast_hash": "92b77e63c6a9fd0ac029140cfa12d5ce",
+    "semantic_hash": ""
   },
   "verification/generative-ui/b/live/README.md": {
     "mtime": 1790983071.9006817,
@@ -1521,6 +1521,24 @@
     "mtime": 1791022483.7880018,
     "seen": 1791025545.539566,
     "ast_hash": "19c80d85f99bf0f5b80c1d234e61b456",
+    "semantic_hash": ""
+  },
+  "scripts/install-graphify-hooks.sh": {
+    "mtime": 1791027516.5726073,
+    "seen": 1791027557.552544,
+    "ast_hash": "cbb890b51504726ade4eea9f47132043",
+    "semantic_hash": ""
+  },
+  "scripts/test-graphify-hooks.sh": {
+    "mtime": 1791027565.376135,
+    "seen": 1791027654.5014458,
+    "ast_hash": "e219c42617641cd0618749d938bdd042",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/root-saved-chat-proof-2026-10-03.json": {
+    "mtime": 1791025651.0786068,
+    "seen": 1791027557.55694,
+    "ast_hash": "85b006d1c9c3bcf4e6e50a59a8c79edd",
     "semantic_hash": ""
   }
 }
