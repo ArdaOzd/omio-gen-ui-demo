@@ -47,3 +47,18 @@ it('actually retries failed coverage, preserving selections and filters without 
  expect(bridge.getManifest(state.get(id).datasetRefs[1]!)).toMatchObject({coverage:{complete:true,modes:['bus']},rowCount:1})
  router.dispose()
 })
+it('extends DateWindow beyond cached coverage through local loading of new dates', async () => {
+ const requestedDates:string[]=[]
+ const bridge=createFareDataBridge({pageSource:async input=>{requestedDates.push(input.date);return {rows:[row(input.date)],total:1,page:1,pages:1,sourceVersion:'v1'}}})
+ const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train'],passengers:1},new AbortController().signal)
+ const state=createUIStateStore();state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-09'}})
+ const router=createActionRouter(state,{bridge})
+ render(<TravelProvider services={{state,bridge,dispatch:router,activate:()=>{},activeId:()=>id}}><CatalogNode kind="DateWindow" artifactRef={id}/><CatalogNode kind="FareCards" artifactRef={id}/></TravelProvider>)
+ await screen.findByRole('button',{name:/Select Train/})
+ await act(async()=>{fireEvent.change(screen.getByLabelText('Window ends'),{target:{value:'2026-10-11'}});await router.whenIdle(id)})
+ await waitFor(()=>expect(screen.getAllByRole('button',{name:/Select Train/})).toHaveLength(3))
+ expect(requestedDates).toContain('2026-10-10');expect(requestedDates).toContain('2026-10-11')
+ expect(state.get(id).datasetRefs).toHaveLength(2)
+ expect(state.get(id).dates).toEqual({start:'2026-10-09',end:'2026-10-11'})
+ router.dispose()
+})
