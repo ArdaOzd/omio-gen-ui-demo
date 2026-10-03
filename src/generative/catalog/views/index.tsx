@@ -67,3 +67,9 @@ export function CheapestFastest(props:WidgetProps) {
  const cheapest=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),orderBy:[{field:'priceCents',direction:'asc'}],limit:1}));const fastest=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),orderBy:[{field:'durationMinutes',direction:'asc'}],limit:1}))
  return <section className="travel-panel"><h3>{props.title??'Cheapest and fastest'}</h3><div className="travel-responsivegrid">{[{name:'Lowest fare',row:cheapest.data?.rows[0]},{name:'Fastest journey',row:fastest.data?.rows[0]}].map(({name,row})=><div className="travel-insight" key={name}><span>{name}</span><strong>{row&&typeof row.priceCents==='number'?money(row.priceCents):'No match'}</strong><p>{row&&typeof row.durationMinutes==='number'?duration(row.durationMinutes):''} {row?cityLabel(String(row.mode)):''}</p></div>)}</div></section>
 }
+
+export function SelectedFareCount(props:WidgetProps) {
+ const {state}=useArtifact(props.artifactRef)
+ const count=state.selectedFareIds.length
+ return <p className="travel-caption" role="status" aria-label="Selected fares" aria-atomic="true">{count} selected fare{count===1?'':'s'}</p>
+}
