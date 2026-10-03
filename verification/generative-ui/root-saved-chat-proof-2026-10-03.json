@@ -1,0 +1,97 @@
+{
+  "recordedDate": "2026-10-03",
+  "observer": "root orchestrator, actual in-app browser at the user origin",
+  "classification": "Read-only UI verification and exact serialization comparison reported by the root orchestrator; not a worker replay or study cell",
+  "origin": "http://127.0.0.1:5194",
+  "frontendProductRevision": "d540b4d7c9dbaa7895dc993641f906e55d647f4b",
+  "storage": {
+    "database": "omio-generative-state",
+    "store": "threads"
+  },
+  "baseline": "Fresh current user records captured immediately before the canonical same-origin reload; older captures were not restored",
+  "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+  "fixtureRows": 10000000,
+  "verificationActions": [
+    "Reload both actual saved conversations after the completed-status disclosure fix",
+    "Compare JSON.stringify(messages) and JSON.stringify(artifactRecords) against the fresh pre-reload values",
+    "Close diagnostics and inspect final text, visible local statuses, alerts and actual fare controls"
+  ],
+  "liveModelCalls": 0,
+  "chatRequests": 0,
+  "controlOrSelectionEdits": 0,
+  "storageReset": false,
+  "variants": {
+    "a": {
+      "threadKey": "travel-a",
+      "messageIds": [
+        "Pw3pJQ5pgo1nOP0O",
+        "hRKWORyRqS730H0V"
+      ],
+      "artifactId": "artifact-b1ab4aca-b3e1-4e3c-8b34-e282e6550669",
+      "artifactRevision": 66,
+      "dates": {
+        "start": "2026-10-02"
+      },
+      "modes": [
+        "train",
+        "bus",
+        "flight"
+      ],
+      "selectedFareIds": [
+        "fare_003796061"
+      ],
+      "datasetRefs": [
+        "dataset-1pwyfix",
+        "dataset-1a9uwjz",
+        "dataset-oqzy5y"
+      ],
+      "lastInteractionAt": "2026-10-03T10:44:37.327Z",
+      "messagesSerializationEqual": true,
+      "artifactRecordsSerializationEqual": true,
+      "visibleLocalUpdateStatusCount": 0,
+      "finalText": "Your route is set.",
+      "finalTextVisibleCount": 1,
+      "roleAlerts": [],
+      "visibleSelectedFare": {
+        "mode": "Bus",
+        "carrierLabel": "Carrier 1ixeerp",
+        "departure": "07:03",
+        "price": "€28.10"
+      }
+    },
+    "b": {
+      "threadKey": "travel-b",
+      "messageIds": [
+        "ZIYSTKeS7udRK28N",
+        "3hAQarty9rnZu47T"
+      ],
+      "artifactId": "artifact-372a6384-6768-42e0-850e-519a230e35ff",
+      "artifactRevision": 17,
+      "dates": {
+        "start": "2026-10-02"
+      },
+      "selectedFareIds": [],
+      "datasetRefs": [
+        "dataset-9ehhb5"
+      ],
+      "lastInteractionAt": "2026-10-03T10:40:04.554Z",
+      "messagesSerializationEqual": true,
+      "artifactRecordsSerializationEqual": true,
+      "visibleLocalUpdateStatusCount": 0,
+      "finalText": "Your planner is ready.",
+      "finalTextVisibleCount": 1,
+      "roleAlerts": [],
+      "farePickerOptionCounts": [
+        101,
+        101
+      ],
+      "optionsPerPicker": "100 bounded actual fares plus No fare",
+      "falseEmptyState": false
+    }
+  },
+  "limitations": [
+    "Raw user messages and authored source were compared in the root browser session; this file records comparison outcomes without copying the full records",
+    "Carrier labels currently fall back to IDs; original dirty carrier changes are preserved separately",
+    "DOM checks do not claim human UX ratings, a screen-reader review, new model authorship or a completed 96-cell matrix"
+  ]
+}
