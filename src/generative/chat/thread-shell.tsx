@@ -1,11 +1,13 @@
 import { ActionBarPrimitive, ComposerPrimitive, MessagePrimitive, ThreadPrimitive,MessagePartPrimitive,useAuiState } from '@assistant-ui/react'
 import { useSyncExternalStore,useContext } from 'react'
 import { useTravelServices } from '../catalog/context'
-import {CanonicalMessagesContext,completedNarrativeIndices} from './narrative-disclosure'
+import {CanonicalMessagesContext,completedNarrativeIndices,completedLocalToolIndices} from './narrative-disclosure'
 const partComponents={Text:()=><p style={{whiteSpace:'pre-line'}}><MessagePartPrimitive.Text/><MessagePartPrimitive.InProgress><span> ●</span></MessagePartPrimitive.InProgress></p>,Image:()=><MessagePartPrimitive.Image/>}
 function AssistantNarrative(){
  const message=useAuiState(state=>state.message),canonical=useContext(CanonicalMessagesContext).find(raw=>raw.id===message.id)
- const hidden=completedNarrativeIndices(canonical,message.parts,message.status?.type==='complete')
+ const complete=message.status?.type==='complete'
+ const hidden=completedNarrativeIndices(canonical,message.parts,complete)
+ for(const index of completedLocalToolIndices(canonical,message.parts,complete))hidden.add(index)
  return <>{hidden.size>0&&<details><summary>Completed steps</summary>{message.parts.map((_,index)=>hidden.has(index)?<MessagePrimitive.PartByIndex key={index} index={index} components={partComponents}/>:null)}</details>}{message.parts.map((_,index)=>hidden.has(index)?null:<MessagePrimitive.PartByIndex key={index} index={index} components={partComponents}/>)}</>
 }
 const suggestions=['Show the cheapest and fastest London to Paris options next week.','Compare train and bus visually.','Plan London, Paris, and Barcelona with two and four-night stays.','Show the same options as a timeline.']

@@ -33,3 +33,19 @@ it('leaves tool-step and pending final narrative visible',async()=>{
  await screen.findByText('Usable travel view')
  expect(screen.getByText('Planning still in progress.')).toBeVisible();expect(screen.getByText('Pending final narrative.')).toBeVisible();expect(screen.queryByText('Completed steps')).toBeNull()
 })
+
+it('folds two genuine completed frontend tool results without duplicating status in the visible answer',async()=>{
+ const parts:UIMessage['parts']=[{type:'step-start'},
+  {type:'tool-edit_artifact',toolCallId:'edit-first',state:'output-available',input:{artifactRef:'art',expectedRevision:0,commands:[]},output:{artifactId:'art',status:'applied',revision:1}},
+  {type:'tool-edit_artifact',toolCallId:'edit-second',state:'output-available',input:{artifactRef:'art',expectedRevision:1,commands:[]},output:{artifactId:'art',status:'applied',revision:2}},
+  scene,{type:'step-start'},{type:'text',text:'Your travel view is ready.'}]
+ const {messages,before}=setup(parts)
+ await screen.findByText('Usable travel view')
+ expect(screen.getByText('Your travel view is ready.')).toBeVisible()
+ expect(screen.getAllByText('Travel data updated locally.')).toHaveLength(2)
+ for(const status of screen.getAllByText('Travel data updated locally.'))expect(status).not.toBeVisible()
+ await userEvent.click(screen.getByText('Completed steps'))
+ for(const status of screen.getAllByText('Travel data updated locally.'))expect(status).toBeVisible()
+ expect(messages[0]?.parts.filter(part=>part.type==='tool-edit_artifact')).toHaveLength(2)
+ expect(JSON.stringify(messages)).toBe(before)
+})
