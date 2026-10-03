@@ -5,7 +5,7 @@ import { ArtifactIdSchema, DatasetIdSchema } from '../contracts'
 import { Layout, type WidgetProps } from './layout'
 import { Control } from './controls'
 import { Status } from './status'
-import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, Total, Coverage, Route, Timeline, Plot, CheapestFastest } from './views'
+import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, Total, Coverage, Route, Timeline, Plot, CheapestFastest, SelectedFareCount } from './views'
 const layouts=new Set(['TravelSurface','TravelHero','Section','Stack','Inline','ResponsiveGrid','SplitPane','StickySummary','Tabs','Carousel','Callout'])
 const controls=new Set(['ModeChips','CarrierFilter','PriceRange','DurationRange','DirectToggle','SortSelect','DateStrip','DateWindow','StayAllocation'])
 const statuses=new Set(['ArtifactSkeleton','CoverageNotice','EmptyState','InlineError','StaleBadge','RetryAction'])
@@ -36,6 +36,7 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  case 'ItineraryTimeline':content=<Timeline {...props}/>;break
  case 'DurationPricePlot':content=<Plot {...props}/>;break
  case 'CheapestFastest':content=<CheapestFastest {...props}/>;break
+ case 'SelectedFareCount':content=<SelectedFareCount {...props}/>;break
  default:content=<div role="alert">Unknown travel component.</div>
  }
  return <ArtifactErrorBoundary>{content}</ArtifactErrorBoundary>

@@ -1,6 +1,6 @@
 # Shared catalog 1.0.0
 
-Manifest hash: b5d83d1bac5a901a22d2d67141ba8e095453aa1293559251f1cc1bcf7cc6d2e7
+Manifest hash: b3686bc3f74c1511d62c66c9acf6536e61ab1fe7e715b7be7d474551893d1710
 
 Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
@@ -44,3 +44,4 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - InlineError: Sanitized local failure.
 - StaleBadge: Revision mismatch notice.
 - RetryAction: Retry local resource operation.
+- SelectedFareCount: Current artifact selected fare count, without claiming legs or price.

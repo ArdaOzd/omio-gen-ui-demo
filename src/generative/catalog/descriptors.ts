@@ -46,4 +46,5 @@ export const descriptors: ReadonlyArray<ComponentDescriptor> = [
   descriptor('InlineError','status','Sanitized local failure'),
   descriptor('StaleBadge','status','Revision mismatch notice'),
   descriptor('RetryAction','status','Retry local resource operation'),
+  descriptor('SelectedFareCount','view','Current artifact selected fare count, without claiming legs or price'),
 ];
