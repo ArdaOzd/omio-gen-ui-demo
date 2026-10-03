@@ -1,0 +1,115 @@
+{
+  "recordedAt": "2026-10-03T10:11:20.888Z",
+  "appRevision": "721a0e5a4f3b73815ae6d7c816ebe6705c26284b",
+  "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+  "fixtureRows": 10000000,
+  "browser": "154.0.8037.97",
+  "liveModelCalls": 0,
+  "classification": "Exact authored structure replay via native assistant-ui/OpenUI adapters, current real fare API and browser worker; DOM accessible-name/role checks, keyboard/focus/responsive/reduced-motion checks; no axe package installed and no hands-on screen-reader claim.",
+  "results": [
+    {
+      "variant": "a",
+      "index": 0,
+      "width": 360,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 0,
+      "width": 800,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 0,
+      "width": 1280,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 1,
+      "width": 360,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 1,
+      "width": 800,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 1,
+      "width": 1280,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 2,
+      "width": 360,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 2,
+      "width": 800,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "a",
+      "index": 2,
+      "width": 1280,
+      "passed": false,
+      "error": "Error: expect(locator).toBeFocused() failed\n\nLocator:  locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"toBeFocused\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n    14 × locator resolved to <button type=\"button\" aria-pressed=\"true\" aria-label=\"Select Bus Carrier 1kmj2pr 12:16 €19.72\">Selected</button>\n       - unexpected value \"inactive\"\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "b",
+      "index": 0,
+      "width": 360,
+      "passed": false,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 30000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "b",
+      "index": 0,
+      "width": 800,
+      "passed": false,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 30000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "b",
+      "index": 0,
+      "width": 1280,
+      "passed": false,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\nExpected: visible\nTimeout: 30000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first() with timeout 30000ms\n  - waiting for locator('.travel-travelsurface').first().getByRole('button', { name: /^Select / }).first()\n",
+      "pageErrors": []
+    },
+    {
+      "variant": "b",
+      "index": 1,
+      "width": 360,
+      "passed": false,
+      "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.travel-travelsurface').first()\nExpected: visible\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.travel-travelsurface').first() with timeout 5000ms\n  - waiting for locator('.travel-travelsurface').first()\n  - Target page, context or browser has been closed\n",
+      "pageErrors": []
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { TravelProvider } from '../../catalog/context'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { createFareDataBridge } from '../../data/fare-data-bridge'
-import { ArtifactIdSchema,FareIdSchema } from '../../contracts'
+import { ArtifactIdSchema,FareIdSchema,FareRowSchema } from '../../contracts'
 import { createSyntheticRows } from '../../data/synthetic-source'
 import { ReactiveScene } from './renderer'
 const id=ArtifactIdSchema.parse('art')
@@ -62,4 +62,21 @@ comparison = ModeBreakdown("art", "${manifest.datasetId}", null, null, "Generate
   services.state.dispatch({kind:'datasets',artifactId:id,datasetRefs:[manifest.datasetId,fresh.datasetId]})
   await waitFor(()=>expect(screen.getByRole('row',{name:/Bus/})).toHaveTextContent('36'))
  })
+})
+
+it('keeps an authored fare selection in host state and retains the focused native selector',async()=>{
+ const services=setup(),rows=createSyntheticRows(2).map(row=>({...row,serviceDate:'2026-10-02'}))
+ const bridge=createFareDataBridge({pageSource:async()=>({rows,total:rows.length,pages:1,page:1,sourceVersion:'selection-proof'})})
+ const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},passengers:1,modes:['bus','train','flight','ferry']},new AbortController().signal)
+ services.state.dispatch({kind:'datasets',artifactId:id,datasetRefs:[manifest.datasetId]})
+ const program=`$selectedFareIds = []
+q = Query("local_query", {version:1,sources:[{datasetRef:"${manifest.datasetId}",alias:"f"}],project:${JSON.stringify(FareRowSchema.keyof().options)},limit:100})
+picker = FarePicker("art", "${manifest.datasetId}", null, null, "Choose fare", null, null, $selectedFareIds, "selectedFareIds", q)
+root = TravelSurface("art", null, null, null, "Trip", null, [picker])`
+ render(<TravelProvider services={{...services,bridge}}><ReactiveScene artifactRef={id} program={program}/></TravelProvider>)
+ await waitFor(()=>expect(screen.getAllByRole('option')).toHaveLength(3))
+ const picker=screen.getByRole('combobox',{name:'Choose a synthetic fare'})
+ picker.focus();await userEvent.selectOptions(picker,rows[0]!.id)
+ await waitFor(()=>expect(services.state.get(id).selectedFareIds).toEqual([rows[0]!.id]))
+ expect(picker).toBeInTheDocument();expect(picker).toHaveFocus();expect(picker).toHaveValue(rows[0]!.id)
 })
