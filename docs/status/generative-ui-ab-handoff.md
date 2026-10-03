@@ -8,7 +8,7 @@ The user asked to fix A's duplicated output and B's errors, ensure the fixes wor
 
 Use `feature/gen-ui-ab-integration` in `/Users/ardaozdogru/.codex/worktrees/generative-spine/omio-gen-ui-demo` for the verified implementation. Product freeze: `d540b4d7c9dbaa7895dc993641f906e55d647f4b`; native acceptance evidence: `454a7fe3ca7c81d72a9ea9dc3de74d2b9c307652`, exercising product `4e7031003c2a8c11658161ca122caaf2378526fb`. Later status/graph commits do not imply another product change; read current Git and service health rather than treating this document's commit as the branch tip.
 
-The original `/Users/ardaozdogru/projects/omio-gen-ui-demo` is preserved on `feature/gen-ui-ab-demo` at `a1c3f8f72eb617747ce458259b77b0da5285d05a`. It currently has **18 modified paths**, including the original carrier-related changes. Do not reset, clean, overwrite, stage or commit those changes as part of resuming this work:
+The original `/Users/ardaozdogru/projects/omio-gen-ui-demo` is preserved on `feature/gen-ui-ab-demo` at `a1c3f8f72eb617747ce458259b77b0da5285d05a`. It has **18 preserved external source/test modifications**, including the original carrier-related changes. Generated graph output changes are additional; inspect current Git status and preserve them separately. Do not reset, clean, overwrite, stage or commit those changes as part of resuming this work:
 
 ```text
 agent/request-schema.test.ts
