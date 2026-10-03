@@ -1,6 +1,8 @@
 import { useEffect,useMemo,useRef } from 'react'
 import { createLibrary,defineComponent,useStateField,useTriggerAction,type ComponentRenderProps } from '@openuidev/react-lang'
 import { z } from 'zod'
+import { FareIdSchema,FareRowSchema } from '../../../contracts'
+import type { QueryFareSelectionScope } from '../../../state/action-router'
 import { catalogDescriptors } from '../../../catalog/generated/catalog'
 import { CatalogNode } from '../../../catalog/component'
 import { TravelProvider,useArtifact,useTravelServices } from '../../../catalog/context'
@@ -19,19 +21,27 @@ function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Pr
  const encoded=JSON.stringify(field.value),desired=JSON.stringify(hostValue)
  useEffect(()=>{if(props.binding){const current=host.state.get(state.artifactId)[props.binding];if(JSON.stringify(fieldRef.current.value)!==JSON.stringify(current))fieldRef.current.setValue(current)}},[props.binding,encoded,desired,host.state,state.artifactId])
  const queryEncoded=JSON.stringify(props.query)
+ const selectionScope=useRef<QueryFareSelectionScope|undefined>(undefined)
  const services=useMemo(()=>{
   const validated=WorkerResponseSchema.safeParse({kind:'result',id:'view',result:props.query})
-  return {...host,bridge:{...host.bridge,query:async(input:Parameters<typeof host.bridge.query>[0],signal:AbortSignal)=>{
-   if(generatedQuery&&scene)return scene.execute(generatedQuery.queryId,signal,name)
+  return {...host,queryForView:generatedQuery&&scene?()=>scene.currentQuery(generatedQuery.queryId):undefined,bridge:{...host.bridge,query:async(input:Parameters<typeof host.bridge.query>[0],signal:AbortSignal)=>{
+   if(generatedQuery&&scene){
+    const query=input
+    const sources=query.sources.map(source=>{const manifest=host.bridge.getManifest(source.datasetRef);return{datasetId:manifest.datasetId,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion}})
+    const result=await scene.execute(generatedQuery.queryId,signal,name,query)
+    if(['FareCards','FarePicker','Timeline','Plot'].includes(name)&&result.rows.some(row=>!FareRowSchema.safeParse(row).success))throw new Error('QUERY_VIEW_SHAPE_MISMATCH')
+    if(!signal.aborted)selectionScope.current={kind:'query-result',fareIds:result.rows.flatMap(row=>{const id=FareIdSchema.safeParse(row.id);return id.success?[id.data]:[]}),query,currentQuery:()=>scene.currentQuery(generatedQuery.queryId),sources}
+    return result
+   }
    if(validated.success&&validated.data.kind==='result')return runBoundQueryResult(validated.data.result,props.artifactRef,signal)
    if(props.query!==undefined&&props.query!==null)throw new Error('GENERATED_QUERY_PENDING')
    return host.bridge.query(input,signal)
-  }},dispatch:(command:Parameters<typeof host.state.dispatch>[0])=>{
-   const result=(host.dispatch??host.state.dispatch)(command)
+  }},dispatch:Object.assign((command:Parameters<typeof host.state.dispatch>[0])=>{
+   const result=command.kind==='select'&&command.selected&&generatedQuery&&host.dispatch?.selectFromQuery&&selectionScope.current?host.dispatch.selectFromQuery(command,selectionScope.current):(host.dispatch??host.state.dispatch)(command)
    if(result.status==='applied'&&props.binding)fieldRef.current.setValue(host.state.get(command.artifactId)[props.binding])
    return result
-  }}
- },[host,queryEncoded,props.binding,props.artifactRef,generatedQuery?.queryId,scene?.execute])
+  },{retry:host.dispatch?.retry,selectFromQuery:host.dispatch?.selectFromQuery})}
+ },[host,queryEncoded,props.binding,props.artifactRef,generatedQuery?.queryId,scene?.execute,scene?.currentQuery])
  const {children,value,binding,query,action,...common}=props
  const scalar=Object.fromEntries(Object.entries(common).filter(([,value])=>value!==null&&value!==undefined))
  const normalized=name==='Callout'&&typeof scalar.title==='string'&&scalar.title.length>160?{...scalar,title:undefined,body:scalar.body??scalar.title}:scalar

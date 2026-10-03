@@ -1,9 +1,10 @@
+import type { QueryFareSelectionScope } from '../state/action-router'
 import { legState, legRequest, resolveBoundDatasetId } from '../state/leg-bindings'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type PredicateTree, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
-export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>}; record?: (input: unknown) => void; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
+export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>;selectFromQuery?:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>DispatchResult}; record?: (input: unknown) => void; queryForView?:()=>QueryIR; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
 export function TravelProvider({ services, children }: { services: TravelServices; children: ReactNode }) { return <TravelContext.Provider value={services}>{children}</TravelContext.Provider> }
 export function useTravelServices() { const services = useContext(TravelContext); if (!services) throw new Error('Travel provider missing'); return services }
@@ -38,7 +39,8 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
   const covered=!!manifest&&!!requested&&requested.passengers===manifest.coverage.passengers&&requested.dateWindow.from>=manifest.coverage.dateWindow.from&&requested.dateWindow.to<=manifest.coverage.dateWindow.to&&requested.modes.every(mode=>manifest.coverage.modes.includes(mode))
   const [resourceRevision, refresh] = useState(0)
   useEffect(() => datasetId ? services.bridge.subscribe(datasetId, () => refresh(n => n + 1)) : undefined, [services.bridge, datasetId])
-  const encoded = datasetId ? JSON.stringify(make(legState(state,services.bridge.getManifest(datasetId).coverage), datasetId)) : ''
+  let encoded=''
+  try{if(datasetId)encoded=JSON.stringify(services.queryForView?.()??make(legState(state,services.bridge.getManifest(datasetId).coverage), datasetId))}catch{/* The effect exposes a bounded query error. */}
   const [result, setResult] = useState<{status:'loading'|'ready'|'error'; data?:BoundedQueryResult}>({status:'loading'})
   useEffect(() => {
     if (!datasetId) { setResult({status:'error'}); return }
@@ -46,10 +48,15 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
     const controller = new AbortController()
     setResult({status:'loading'})
     try {
-      const manifest = services.bridge.getManifest(datasetId)
-      const query = parseQuery(JSON.parse(encoded), [manifest])
+      const raw=JSON.parse(encoded)
+      const query = parseQuery(raw, raw.sources.map((source:{datasetRef:string})=>services.bridge.getManifest(DatasetIdSchema.parse(source.datasetRef))))
+      const generations=query.sources.map(source=>{const current=services.bridge.getManifest(source.datasetRef);return{datasetId:source.datasetRef,revision:current.revision,sourceVersion:current.source.sourceVersion}})
       services.bridge.query(query, controller.signal).then(data => {
-        if (!controller.signal.aborted) setResult({status:'ready',data})
+        if(controller.signal.aborted)return
+        const latest=services.state.get(state.artifactId)
+        const current=services.queryForView?.()??make(legState(latest,services.bridge.getManifest(datasetId).coverage),datasetId)
+        if(JSON.stringify(current)!==encoded||generations.some(source=>{const manifest=services.bridge.getManifest(source.datasetId);return manifest.revision!==source.revision||manifest.source.sourceVersion!==source.sourceVersion}))return
+        setResult({status:'ready',data})
       }).catch(() => { if (!controller.signal.aborted) setResult({status:'error'}) })
     } catch { setResult({status:'error'}) }
     return () => controller.abort()

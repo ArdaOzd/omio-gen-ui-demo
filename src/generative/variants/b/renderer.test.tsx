@@ -1,11 +1,12 @@
 import { describe,it,expect,vi,afterEach } from 'vitest'
-import { render,screen,waitFor,cleanup } from '@testing-library/react'
+import { render,screen,waitFor,cleanup,act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TravelProvider } from '../../catalog/context'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { createFareDataBridge } from '../../data/fare-data-bridge'
 import { ArtifactIdSchema,FareIdSchema,FareRowSchema } from '../../contracts'
 import { createSyntheticRows } from '../../data/synthetic-source'
+import { createActionRouter } from '../../state/action-router'
 import { ReactiveScene } from './renderer'
 const id=ArtifactIdSchema.parse('art')
 const source=`root = TravelSurface("art", null, null, null, "Trips", null, [mode])
@@ -79,4 +80,57 @@ root = TravelSurface("art", null, null, null, "Trip", null, [picker])`
  picker.focus();await userEvent.selectOptions(picker,rows[0]!.id)
  await waitFor(()=>expect(services.state.get(id).selectedFareIds).toEqual([rows[0]!.id]))
  expect(picker).toBeInTheDocument();expect(picker).toHaveFocus();expect(picker).toHaveValue(rows[0]!.id)
+})
+
+async function wideQueryFixture(){
+ const services=setup()
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:createSyntheticRows(2).map(row=>({...row,id:FareIdSchema.parse(`${row.id}:${input.date}`),serviceDate:input.date})),total:2,pages:1,page:1,sourceVersion:'wide-query-proof'})})
+ const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-03'},passengers:1,modes:['bus','train','flight','ferry']},new AbortController().signal)
+ services.state.dispatch({kind:'datasets',artifactId:id,datasetRefs:[manifest.datasetId]})
+ const dispatch=createActionRouter(services.state,{bridge})
+ const program=`$selectedFareIds = []
+$filters = {modes: [], carrierIds: [], directOnly: false}
+mode = ModeChips("art", null, null, null, "Modes", null, null, $filters, "filters")
+q = Query("local_query", $filters.modes.length > 0 ? {version:1,sources:[{datasetRef:"${manifest.datasetId}",alias:"f"}],where:{field:"mode",op:"in",value:$filters.modes},project:${JSON.stringify(FareRowSchema.keyof().options)},limit:100} : {version:1,sources:[{datasetRef:"${manifest.datasetId}",alias:"f"}],project:${JSON.stringify(FareRowSchema.keyof().options)},limit:100})
+picker = FarePicker("art", "${manifest.datasetId}", null, null, "Choose fare", null, null, $selectedFareIds, "selectedFareIds", q)
+root = TravelSurface("art", null, null, null, "Trip", null, [mode, picker])`
+ return {services:{...services,bridge,dispatch,whenIdle:dispatch.whenIdle},program,later:FareIdSchema.parse('synthetic-000000001:2026-10-03')}
+}
+it('aligns an authored wide-query choice to its fare date while retaining the actual native picker and focus',async()=>{
+ const {services,program,later}=await wideQueryFixture()
+ render(<TravelProvider services={services}><ReactiveScene artifactRef={id} program={program}/></TravelProvider>)
+ await waitFor(()=>expect(screen.getAllByRole('option')).toHaveLength(5))
+ const picker=screen.getByRole('combobox',{name:'Choose a synthetic fare'});picker.focus()
+ await userEvent.selectOptions(picker,later);await act(()=>services.whenIdle(id))
+ expect(services.state.exportSnapshot(id)).toMatchObject({dates:{start:'2026-10-03'},selectedFareIds:[later]})
+ expect(screen.getByRole('combobox',{name:'Choose a synthetic fare'})).toBe(picker);expect(picker).toHaveFocus();expect(picker).toHaveValue(later)
+ services.dispatch.dispose()
+})
+it('rejects a deferred older authored query after a filter change and preserves the new selection',async()=>{
+ const {services,program,later}=await wideQueryFixture(),query=services.bridge.query
+ const pending:Array<()=>void>=[]
+ vi.spyOn(services.bridge,'query').mockImplementation(async(input,signal)=>{
+  const result=await query(input,signal)
+  if(!input.where)await new Promise<void>(resolve=>pending.push(resolve))
+  return result
+ })
+ render(<TravelProvider services={services}><ReactiveScene artifactRef={id} program={program}/></TravelProvider>)
+ await waitFor(()=>expect(pending.length).toBeGreaterThan(0))
+ await userEvent.click(screen.getByRole('button',{name:'Bus'}))
+ await waitFor(()=>expect(screen.getAllByRole('option')).toHaveLength(3))
+ const picker=screen.getByRole('combobox',{name:'Choose a synthetic fare'});picker.focus();await userEvent.selectOptions(picker,later)
+ await act(()=>services.whenIdle(id));await act(async()=>{pending.forEach(resolve=>resolve());await Promise.resolve()})
+ expect(services.state.exportSnapshot(id)).toMatchObject({dates:{start:'2026-10-03'},filters:{modes:['bus']},selectedFareIds:[later]})
+ expect(screen.getAllByRole('option')).toHaveLength(3);expect(picker).toHaveFocus();expect(picker).toHaveValue(later)
+ services.dispatch.dispose()
+})
+
+it('exposes an authored query/view shape mismatch as a bounded repairable error',async()=>{
+ const {services,program}=await wideQueryFixture()
+ const incompatible=program.replaceAll(JSON.stringify(FareRowSchema.keyof().options),'["mode"]')
+ render(<TravelProvider services={services}><ReactiveScene artifactRef={id} program={incompatible}/></TravelProvider>)
+ await screen.findByRole('alert')
+ expect(screen.getByRole('alert')).toHaveTextContent('These options could not load. Try refreshing the view.')
+ expect(screen.queryByText(/No options match/)).toBeNull();expect(services.state.get(id).selectedFareIds).toEqual([])
+ services.dispatch.dispose()
 })

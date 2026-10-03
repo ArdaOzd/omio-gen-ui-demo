@@ -1,7 +1,7 @@
 import { useMemo,useRef,useEffect } from 'react'
 import { Renderer } from '@openuidev/react-lang'
 import { useTravelServices } from '../../catalog/context'
-import { ArtifactIdSchema,RuntimeVariablesSchema,QueryIRSchema,UICommandPatchSchema,parseQuery } from '../../contracts'
+import { ArtifactIdSchema,RuntimeVariablesSchema,QueryIRSchema,UICommandPatchSchema,parseQuery,type ValidatedQueryIR } from '../../contracts'
 import { bLibrary } from './components/library'
 import { validateReactiveProgram } from './query/validate-program'
 import { resolveBoundDatasetId } from '../../state/leg-bindings'
@@ -20,12 +20,16 @@ export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{p
  latest.current={...hydrated,...latest.current}
  for(const binding of bindings)latest.current[binding.variable]=hydrated[binding.variable]
  for(const [key,value]of Object.entries(host.state.get(id).runtimeVariables))if(validation.result?.variables.includes(key))latest.current[key]=value
- const executeSceneQuery=useMemo(()=>async(statementId:string,signal:AbortSignal,kind?:string)=>{
+ const currentSceneQuery=useMemo(()=>(statementId:string)=>{
   const program=analysis.current;if(!program)throw new Error('QUERY_PENDING')
   const state=host.state.get(id),original=evaluateQueryArguments(program,statementId,state,latest.current)
   const query={...original,sources:original.sources.map(source=>({...source,datasetRef:resolveBoundDatasetId(state,host.bridge,source.datasetRef)}))}
-  return adaptQueryResult(await host.bridge.query(parseQuery(query,query.sources.map(source=>host.bridge.getManifest(source.datasetRef))),signal),query,kind)
+  return parseQuery(query,query.sources.map(source=>host.bridge.getManifest(source.datasetRef)))
  },[host,id])
+ const executeSceneQuery=useMemo(()=>async(statementId:string,signal:AbortSignal,kind?:string,validatedQuery?:ValidatedQueryIR)=>{
+  const query=validatedQuery??currentSceneQuery(statementId)
+  return adaptQueryResult(await host.bridge.query(query,signal),query,kind)
+ },[host,currentSceneQuery])
  const provider=useMemo(()=>({
   local_query:async(input:Record<string,unknown>)=>{
    const program=analysis.current;if(!program)throw new Error('QUERY_PENDING')
@@ -39,7 +43,7 @@ export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{p
  }),[host,id,executeSceneQuery,artifactRef])
  useEffect(()=>()=>{controllers.current.forEach(c=>c.abort())},[])
  useEffect(()=>{if(validation.error)onError?.(validation.error)},[validation.error,onError])
- return <SceneQueryProvider value={{bindings:analysis.current?.queryBindings??[],execute:executeSceneQuery}}><Renderer library={bLibrary} response={validation.result?program:lastValid.current} isStreaming={isStreaming} initialState={latest.current} toolProvider={provider} publishObservability={false} onStateUpdate={raw=>{
+ return <SceneQueryProvider value={{bindings:analysis.current?.queryBindings??[],currentQuery:currentSceneQuery,execute:executeSceneQuery}}><Renderer library={bLibrary} response={validation.result?program:lastValid.current} isStreaming={isStreaming} initialState={latest.current} toolProvider={provider} publishObservability={false} onStateUpdate={raw=>{
   const compact:Record<string,unknown>={};for(const variable of validation.result?.variables??[]){if(variable in raw)compact[variable]=raw[variable]}
   latest.current=compact;applyBindingState(compact,bindings,host.state,host.dispatch??host.state.dispatch)
   const primitive=Object.fromEntries(Object.entries(compact).filter(([key,value])=>!bindings.some(b=>b.variable===key)&&(value===null||typeof value==='string'||typeof value==='number'||typeof value==='boolean')))
