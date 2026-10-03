@@ -7,7 +7,7 @@ import { TravelProvider } from './context'
 import { CatalogNode } from './component'
 const id = ArtifactIdSchema.parse('trip')
 async function setup() {
- const rows = ['train', 'bus'].map((mode, index) => FareRowSchema.parse({id: `fare-${index}`, originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode, carrierId: index === 0 ? 'eurostar' : 'flixbus', priceCents: index === 0 ? 5500 : 2300, durationMinutes: index === 0 ? 140 : 470, departureMinutes: 600, availableSeats: 10, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true}))
+ const rows = ['train', 'bus'].map((mode, index) => FareRowSchema.parse({id: `fare-${index}`, originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode, carrierId: index === 0 ? 'eurostar' : 'flixbus', carrierName: index === 0 ? 'Eurostar' : 'FlixBus', priceCents: index === 0 ? 5500 : 2300, durationMinutes: index === 0 ? 140 : 470, departureMinutes: 600, availableSeats: 10, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true}))
  const bridge = createFareDataBridge({pageSource: async () => ({rows, total: 2, page: 1, pages: 1, sourceVersion: 'fixture-v1'})})
  const manifest = await bridge.load({originIds: ['london'], destinationIds: ['paris'], dateWindow: {from: '2026-10-09', to: '2026-10-09'}, modes: ['train', 'bus'], passengers: 2}, new AbortController().signal)
  const state = createUIStateStore()
@@ -28,7 +28,7 @@ it('ranks individual fares in ComparisonTable and limits ModeBreakdown to mode c
  const services = await setup()
  render(<TravelProvider services={services}><CatalogNode kind="ComparisonTable" artifactRef={id}/><CatalogNode kind="ModeBreakdown" artifactRef={id}/></TravelProvider>)
  const ranked = await screen.findByRole('table', {name: 'Compare fares'})
- expect(within(ranked).getAllByRole('row')[1]).toHaveTextContent('BusFlixbus')
+ expect(within(ranked).getAllByRole('row')[1]).toHaveTextContent('BusFlixBus')
  expect(within(ranked).getByRole('columnheader', {name: 'Carrier'})).toBeInTheDocument()
  const counts = await screen.findByRole('table', {name: 'Options by mode'})
  expect(within(counts).getAllByRole('columnheader').map(header => header.textContent)).toEqual(['Mode', 'Options'])

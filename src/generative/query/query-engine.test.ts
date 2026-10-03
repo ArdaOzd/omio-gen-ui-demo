@@ -5,9 +5,9 @@ import { parseQuery } from '../contracts'
 import { DatasetIdSchema, DatasetRevisionSchema, FareIdSchema, type FareRow, type QueryIR } from '../contracts'
 const datasetId=DatasetIdSchema.parse('fixture')
 const rows:FareRow[]=[
-{id:FareIdSchema.parse('c'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
-{id:FareIdSchema.parse('a'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',priceCents:1000,durationMinutes:400,departureMinutes:900,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
-{id:FareIdSchema.parse('b'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',priceCents:1000,durationMinutes:380,departureMinutes:800,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}]
+{id:FareIdSchema.parse('c'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',carrierName:'Eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
+{id:FareIdSchema.parse('a'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',carrierName:'FlixBus',priceCents:1000,durationMinutes:400,departureMinutes:900,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
+{id:FareIdSchema.parse('b'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',carrierName:'FlixBus',priceCents:1000,durationMinutes:380,departureMinutes:800,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}]
 const query=(extra:Partial<QueryIR>):QueryIR=>({version:1,sources:[{datasetRef:datasetId,alias:'fares'}],limit:10,...extra})
 const resources=new Map([[datasetId,{rows,revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]])
 describe('bounded local queries',()=>{

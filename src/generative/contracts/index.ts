@@ -28,7 +28,7 @@ export const CoverageSchema = CoverageRequestSchema.extend({ complete: z.boolean
 export type Coverage = z.infer<typeof CoverageSchema>;
 export const FareRowSchema = z.strictObject({
   id: FareIdSchema, originId: ref, destinationId: ref, serviceDate: DateSchema, mode: TransportModeSchema,
-  carrierId: ref, priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(),
+  carrierId: ref, carrierName: z.string().trim().min(1).max(120), priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(),
   departureMinutes: z.number().int().min(0).max(1439), availableSeats: z.number().int().nonnegative(),
   currency: z.literal('EUR'), synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees'),
   direct: z.boolean(),
@@ -75,7 +75,7 @@ export type ArtifactUIState = z.infer<typeof ArtifactUIStateSchema>;
 export const ExecutionGuardSchema = z.strictObject({ turnId: ref, artifactId: ArtifactIdSchema, uiStateRevision: UIStateRevisionSchema,
   requestId: ref, datasetId: DatasetIdSchema.optional(), datasetRevision: DatasetRevisionSchema.optional() });
 export type ExecutionGuard = z.infer<typeof ExecutionGuardSchema>;
-export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: TransportModeSchema, carrierId: ref,
+export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: TransportModeSchema, carrierId: ref, carrierName: z.string().trim().min(1).max(120),
   priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(), serviceDate: DateSchema,
   departureMinutes: z.number().int().min(0).max(1439), originId: ref, destinationId: ref, currency: z.literal('EUR'),
   synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees') });

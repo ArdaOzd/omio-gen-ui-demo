@@ -42,9 +42,9 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
   get_route:wrap(dataset,'Return compact route and mode coverage',async({datasetRef})=>{
    const manifest=options.bridge.getManifest(datasetRef);return {datasetId:datasetRef,originIds:manifest.coverage.originIds,destinationIds:manifest.coverage.destinationIds,modes:manifest.coverage.modes};
   }),
-  find_carriers:wrap(dataset,'Return at most20 carrier IDs',async({datasetRef})=>{
-   const manifest=options.bridge.getManifest(datasetRef);const query=parseQuery({version:1,sources:[{datasetRef,alias:'d'}],groupBy:['carrierId'],metrics:[{as:'count',op:'count'}],limit:20},[manifest]);
-   const result=await options.bridge.query(query,signal());return {datasetId:datasetRef,carrierIds:result.rows.map(row=>String(row.carrierId)).slice(0,20),truncated:result.truncated};
+  find_carriers:wrap(dataset,'Return at most20 carrier IDs with readable names',async({datasetRef})=>{
+   const manifest=options.bridge.getManifest(datasetRef);const query=parseQuery({version:1,sources:[{datasetRef,alias:'d'}],groupBy:['carrierId','carrierName'],metrics:[{as:'count',op:'count'}],limit:20},[manifest]);
+   const result=await options.bridge.query(query,signal());return {datasetId:datasetRef,carriers:result.rows.map(row=>({id:String(row.carrierId),name:String(row.carrierName)})).slice(0,20),truncated:result.truncated};
   }),
  };
 }

@@ -1,5 +1,5 @@
 import { describe,expect,it } from 'vitest';
-import { parseChatRequest } from './request-schema';
+import { parseChatRequest,parseToolOutput } from './request-schema';
 import { acceptTurn,spendTool } from './turn-budget';
 const request={id:'chat-1',variant:'a',messages:[{id:'user-1',role:'user',parts:[{type:'text',text:'Compare trains'}]}],currentContext:{schemaVersion:'1.0.0',turnId:'turn-1',artifacts:[],datasets:[],selectedFareFacts:[]}};
 describe('host request boundary',()=>{
@@ -23,6 +23,10 @@ describe('host request boundary',()=>{
   const parsed=parseChatRequest({...request,id:'budget-test'});const first=acceptTurn(parsed);spendTool(first,'get_top_fares');spendTool(acceptTurn(parsed),'get_top_fares');
   expect(()=>spendTool(acceptTurn(parsed),'get_top_fares')).toThrow('budget');
  });
+});
+it('preserves readable carrier names in bounded tool output',()=>{
+ expect(parseToolOutput('find_carriers',{datasetId:'dataset-1',carriers:[{id:'carrier-1772yvd',name:'ÖBB'}],truncated:false})).toMatchObject({carriers:[{id:'carrier-1772yvd',name:'ÖBB'}]});
+ expect(parseToolOutput('find_carriers',{datasetId:'dataset-1',carrierIds:['carrier-1772yvd'],truncated:false})).toMatchObject({carrierIds:['carrier-1772yvd']});
 });
 it('rejects camelCase row arrays hidden behind an arbitrary tool-input alias',()=>{
  const row={id:'fare1',originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true};

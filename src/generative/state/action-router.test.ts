@@ -5,7 +5,7 @@ import { createUIStateStore } from './ui-state-store'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { ArtifactIdSchema,FareIdSchema,type FareRow,type CoverageRequest } from '../contracts'
 const request:CoverageRequest={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-08'},modes:['train'],passengers:1}
-const row:FareRow={id:FareIdSchema.parse('fare-1'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'test',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:4,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}
+const row:FareRow={id:FareIdSchema.parse('fare-1'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'test',carrierName:'Test Rail',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:4,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}
 describe('direct action coverage routing',()=>{
  it('uses cached dates locally and loads a bounded outside date without a model request',async()=>{
   const dates:string[]=[];const bridge=createFareDataBridge({pageSource:async input=>{dates.push(input.date);return{rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'}}});const manifest=await bridge.load(request,new AbortController().signal);const store=createUIStateStore();const id=ArtifactIdSchema.parse('a');store.initializeMissing(id,{dates:{start:'2026-10-02'},datasetRefs:[manifest.datasetId]});const router=createActionRouter(store,{bridge})

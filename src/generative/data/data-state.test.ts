@@ -4,7 +4,7 @@ import { createUIStateStore } from '../state/ui-state-store'
 import { ArtifactIdSchema, FareIdSchema, UIStateRevisionSchema, type CoverageRequest, type FareRow } from '../contracts'
 
 const request: CoverageRequest = { originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-02', to: '2026-10-02' }, modes: ['train', 'bus'], passengers: 2 }
-const fare = (id: string, mode: 'train'|'bus', priceCents: number): FareRow => ({ id: FareIdSchema.parse(id),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode,carrierId:'test',priceCents,durationMinutes:120,departureMinutes:600,availableSeats:4,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true })
+const fare = (id: string, mode: 'train'|'bus', priceCents: number): FareRow => ({ id: FareIdSchema.parse(id),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode,carrierId:'test',carrierName:'Test Rail',priceCents,durationMinutes:120,departureMinutes:600,availableSeats:4,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true })
 const first = fare('fare-1','train',3000)
 const second = fare('fare-2','bus',1000)
 
