@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from '../state/ui-state-store'
 import { ArtifactIdSchema, FareRowSchema, type FareRow, type BoundedQueryResult } from '../contracts'
-import { TravelProvider, useTravelQuery } from './context'
+import { TravelProvider, useTravelQuery, filterPredicate } from './context'
 import { CatalogNode } from './component'
 const artifactId=ArtifactIdSchema.parse('artifact-1')
 const fare=(id:string,mode:'train'|'bus',price:number):FareRow=>FareRowSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'eurostar':'flixbus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
@@ -113,4 +113,13 @@ it('aborts a changed query and rejects its late result after a newer filtered re
  await act(async()=>{pending[1]?.complete({rows:[{mode:'bus'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'new-query'})})
  await act(async()=>{pending[0]?.complete({rows:[{mode:'train'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'old-query'})})
  expect(screen.getByTestId('pending-query')).toHaveTextContent('ready:bus')
+})
+
+
+it('filters inclusive date windows while single dates and date-free summaries retain their contracts',async()=>{
+ const{state}=await setup()
+ expect(filterPredicate(state.get(artifactId))).toEqual({all:[{field:'serviceDate',op:'eq',value:'2026-10-09'}]})
+ state.dispatch({kind:'dates',artifactId,dates:{start:'2026-10-09',end:'2026-10-15'}})
+ expect(filterPredicate(state.get(artifactId))).toEqual({all:[{field:'serviceDate',op:'between',value:['2026-10-09','2026-10-15']}]})
+ expect(filterPredicate(state.get(artifactId),false)).toBeUndefined()
 })

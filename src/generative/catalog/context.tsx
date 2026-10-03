@@ -3,7 +3,7 @@ export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type PredicateTree, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
-export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: (command:UICommand)=>DispatchResult; record?: (input: unknown) => void; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
+export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>}; record?: (input: unknown) => void; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
 export function TravelProvider({ services, children }: { services: TravelServices; children: ReactNode }) { return <TravelContext.Provider value={services}>{children}</TravelContext.Provider> }
 export function useTravelServices() { const services = useContext(TravelContext); if (!services) throw new Error('Travel provider missing'); return services }
@@ -26,7 +26,7 @@ export function filterPredicate(state: ArtifactUIState, includeDate = true): Pre
   if (state.filters.maxPriceCents !== undefined) all.push({ field: 'priceCents', op: 'lte', value: state.filters.maxPriceCents })
   if (state.filters.maxDurationMinutes !== undefined) all.push({ field: 'durationMinutes', op: 'lte', value: state.filters.maxDurationMinutes })
   if (state.filters.directOnly) all.push({ field: 'direct', op: 'eq', value: true })
-  if (includeDate) all.push({ field: 'serviceDate', op: 'eq', value: state.dates.start })
+  if (includeDate) all.push(state.dates.end ? { field: 'serviceDate', op: 'between', value: [state.dates.start,state.dates.end] } : { field: 'serviceDate', op: 'eq', value: state.dates.start })
   return all.length ? { all } : undefined
 }
 export function useTravelQuery(ref: string, datasetRef: string | undefined, make: (state: ArtifactUIState, datasetId: ReturnType<typeof DatasetIdSchema.parse>) => QueryIR) {
