@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AgentContextEnvelopeSchema, CoverageSchema, DatasetIdSchema, QueryIRSchema, parseAgentContext } from './index';
+import { AgentContextEnvelopeSchema, CoverageSchema, DatasetIdSchema, QueryIRSchema, parseAgentContext, CoverageRequestSchema } from './index';
 import { assertNoBulkData, LEAKAGE_SENTINEL } from './privacy';
 describe('model and persistence boundaries', () => {
   it('rejects unknown keys at every snapshot level', () => {
@@ -23,3 +23,7 @@ describe('model and persistence boundaries', () => {
     expect(QueryIRSchema.safeParse({...query,sql:'select *'}).success).toBe(false);
   });
 });
+
+it('rejects nine passengers at the browser contract before a backend request',()=>{
+ expect(()=>CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-03'},modes:['train'],passengers:9})).toThrow()
+})
