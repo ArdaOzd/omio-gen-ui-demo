@@ -21,7 +21,7 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
   load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest. Coverage originIds/destinationIds use actual city slugs from the host location catalog (for example london, paris, barcelona), never dataset IDs.',async({coverage,artifactRef},signal)=>{
    const artifactId=artifactRef??options.activeArtifactId();const before=options.store.get(artifactId);
    if(before.datasetRefs.length>=LIMITS.artifactDatasets&&!before.datasetRefs.some(id=>{const {complete:_complete,truncated:_truncated,...request}=options.bridge.getManifest(id).coverage;return coverageKey(request)===coverageKey(coverage)}))throw new LocalToolError('DATASET_CAPACITY_EXCEEDED');
-   const manifest=DatasetManifestSchema.parse(await options.bridge.load(coverage,signal));signal.throwIfAborted();
+   const manifest=DatasetManifestSchema.parse(await options.bridge.load(coverage,signal));if(signal.aborted){options.bridge.release(manifest.datasetId);signal.throwIfAborted()}
    const current=options.store.get(artifactId);
    if(!current.datasetRefs.includes(manifest.datasetId)&&current.datasetRefs.length>=LIMITS.artifactDatasets){options.bridge.release(manifest.datasetId);throw new LocalToolError('DATASET_CAPACITY_EXCEEDED')}
    if(before.datasetRefs.length===0 && current.revision===before.revision)options.store.dispatch({artifactId,expectedRevision:before.revision,kind:'dates',dates:{start:coverage.dateWindow.from}});
