@@ -33,3 +33,20 @@ test('worker evidence maps only acknowledged physical generations and rejects ca
   assert.ok(!JSON.stringify(metrics).includes('PRIVATE_ROW_SENTINEL'));
  }finally{dom.window.close();Object.assign(globalThis,original)}
 });
+test('fragmented transient attempt metadata survives an aborted SSE stream without storing payloads',async()=>{
+ const dom=new JSDOM('<!doctype html><body></body>'),original={window:globalThis.window,document:globalThis.document,MutationObserver:globalThis.MutationObserver,Element:globalThis.Element,requestAnimationFrame:globalThis.requestAnimationFrame};
+ Object.assign(globalThis,{window:dom.window,document:dom.window.document,MutationObserver:dom.window.MutationObserver,Element:dom.window.Element,requestAnimationFrame:callback=>callback(performance.now())});
+ class FakeWorker extends dom.window.EventTarget{postMessage(){}}dom.window.Worker=FakeWorker;
+ let wire;const stream=new ReadableStream({start(controller){wire=controller}});dom.window.fetch=async()=>new Response(stream,{headers:{'content-type':'text/event-stream'}});
+ try{
+  instrument();const response=await dom.window.fetch('/api/chat'),reader=response.body.getReader(),encoder=new TextEncoder(),decoder=new TextDecoder();
+  const first='data: {"type":"data-model-attempt","transient":true,"data":{"attempt":0,"status":"start",';
+  const second='"reason":"initial","elapsedMs":0}}\n\n';
+  wire.enqueue(encoder.encode(first));assert.equal(decoder.decode((await reader.read()).value),first);assert.equal(dom.window.__studyMetrics.modelAttempts.length,0);
+  wire.enqueue(encoder.encode(second));assert.equal(decoder.decode((await reader.read()).value),second);
+  assert.deepEqual(dom.window.__studyMetrics.modelAttempts,[{requestIndex:0,attempt:0,status:'start',reason:'initial',elapsedMs:0}]);
+  const invalid='data: {"type":"data-model-attempt","transient":true,"data":{"attempt":0,"status":"end","reason":"accepted","elapsedMs":1,"source":"PRIVATE_SOURCE_SENTINEL"}}\n\n';
+  wire.enqueue(encoder.encode(invalid));await reader.read();assert.equal(dom.window.__studyMetrics.modelAttempts.length,1);assert.ok(!JSON.stringify(dom.window.__studyMetrics).includes('PRIVATE_SOURCE_SENTINEL'));
+  wire.error(new Error('HTTP response aborted'));await assert.rejects(reader.read(),/aborted/);assert.equal(dom.window.__studyMetrics.modelAttempts.length,1);
+ }finally{dom.window.close();Object.assign(globalThis,original)}
+});
