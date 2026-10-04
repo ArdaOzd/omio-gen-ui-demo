@@ -4,6 +4,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
 export const CODEX_MODEL = 'gpt-6.1-sol';
+export const CODEX_REASONING_EFFORT = 'high';
 export const DecisionSchema = z.strictObject({intro:z.string().max(4000),toolName:z.string().max(80),toolInput:z.string().max(24000),outro:z.string().max(4000)});
 export type Decision = z.infer<typeof DecisionSchema>;
 export type DecisionDelta = (field:'intro'|'toolInput'|'outro', delta:string, toolName:string) => void;
@@ -70,7 +71,7 @@ export async function codexDecision(options:{prompt:string;toolNames:string[];si
   await rpc('initialize',{clientInfo:{name:'omio-generative-model',version:'1.0.0'},capabilities:{experimentalApi:true}});
   child.stdin.write(JSON.stringify({method:'initialized',params:{}})+'\n');
   const started=z.object({thread:z.object({id:z.string()})}).parse(await rpc('thread/start',{model:CODEX_MODEL,modelProvider:'openai',cwd,sandbox:'read-only',approvalPolicy:'never',ephemeral:true,baseInstructions:'You are a travel UI model. Use only the supplied host tool names and compact context. No shell, files, web, plugins, apps, MCP, network, or background work. Return the strict decision JSON. The host executes every tool.',developerInstructions:CODEX_DEVELOPER_INSTRUCTIONS}));
-  await rpc('turn/start',{threadId:started.thread.id,input:[{type:'text',text:options.prompt}],effort:'high',approvalPolicy:'never',sandboxPolicy:{type:'readOnly',networkAccess:false},outputSchema:{type:'object',additionalProperties:false,required:['intro','toolName','toolInput','outro'],properties:{intro:{type:'string'},toolName:{type:'string',enum:['none',...options.toolNames]},toolInput:{type:'string'},outro:{type:'string'}}}});
+  await rpc('turn/start',{threadId:started.thread.id,input:[{type:'text',text:options.prompt}],effort:CODEX_REASONING_EFFORT,approvalPolicy:'never',sandboxPolicy:{type:'readOnly',networkAccess:false},outputSchema:{type:'object',additionalProperties:false,required:['intro','toolName','toolInput','outro'],properties:{intro:{type:'string'},toolName:{type:'string',enum:['none',...options.toolNames]},toolInput:{type:'string'},outro:{type:'string'}}}});
   return await done;
  }finally{ clearTimeout(timeout);options.signal.removeEventListener('abort',stop);child.kill('SIGTERM');await rm(cwd,{recursive:true,force:true}); }
 }

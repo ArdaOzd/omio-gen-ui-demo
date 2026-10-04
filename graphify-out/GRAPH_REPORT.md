@@ -1,130 +1,145 @@
 # Graph Report - omio-gen-ui-demo  (2026-10-03)
 
 ## Corpus Check
-- 237 files · ~485,913 words
+- 230 files · ~965,408 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1183 nodes · 2070 edges · 100 communities (85 shown, 15 thin omitted)
+- 1277 nodes · 2515 edges · 112 communities (92 shown, 20 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 90 edges (avg confidence: 0.89)
 - Token cost: 0 input · 0 output
 
+## Graph Freshness
+- Built from commit: `a4248aa6`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
+
 ## Community Hubs (Navigation)
-- src · api.js
-- Travel catalog
-- Travel state
-- package.json
-- backend · app.py
-- docs · research · generative-ui-resources.md
-- docs · research · interactive-travel-ui-evaluation.md
-- Travel contracts
-- backend · generate_db.py
-- package.json
-- tsconfig.json
-- Evidence run-state-proof.mjs
-- Travel data
-- Travel state
-- Travel variants
-- docs · research · browser-local-generative-ui-decision.md
-- Evidence a
-- verification · acceptance.md
-- Travel contracts
-- Travel data
-- Evidence b
-- Model agent · request-schema.ts
-- Model agent · turn-budget.ts
-- Evidence a
-- Travel query
-- Evidence b
-- Travel variants
-- Travel query
-- Travel variants
-- Model agent · codex-provider.ts
-- benchmarks · query-engine · browser.ts
-- tests · compatibility · openui-runtime.test.tsx
-- Travel chat
-- Travel contracts
-- verification · verify_pasted_coverage.py
-- CONTRIBUTING.md
-- docs · plans · generative-ui-ab-implementation-plan.md
-- Travel query
-- scripts · run.mjs
-- Travel catalog
-- Travel variants
-- Travel data
-- Travel query
-- Model agent · validation-reason.ts
-- docs · plans · generative-ui-ab-implementation-plan.md
-- Travel variants
-- benchmarks · query-engine · package.json
-- docs · plans · generative-ui-ab-implementation-plan.md
-- Travel chat
-- Travel variants
-- Travel variants
-- Evidence a
-- AGENTS.md
-- benchmarks · query-engine · run.ts
-- docs · plans · generative-ui-ab-implementation-plan.md
-- public · assets · omio
-- public · assets · omio
-- Travel catalog
-- Evidence a
-- Model agent · location-catalog.ts
-- docs · plans · generative-ui-ab-implementation-plan.md
-- docs · plans · generative-ui-ab-implementation-plan.md
-- docs · plans · generative-ui-ab-implementation-plan.md
-- docs · plans · generative-ui-ab-implementation-plan.md
-- public · assets · omio
-- README.md
-- scripts · run-query-benchmark.mjs
-- Travel state
-- Evidence a
-- Evidence openui-compatibility-2026-10-02.md
-- Evidence query-engine-2026-10-02.md
-- public · assets · omio
-- public · assets · omio
-- public · assets · omio
-- Evidence a
-- public · assets · omio
-- public · assets · omio
-- public · assets · omio
-- public · assets · omio
-- Evidence b
-- Evidence b
-- backend · __init__.py
+- ResultsPage.jsx
+- component.tsx
+- routes.tsx
+- dependencies
+- app.py
+- Repository details
+- TravelPlan
+- index.ts
+- scripts
+- devDependencies
+- compilerOptions
+- run-matrix.mjs
+- ui-state-store.ts
+- context.tsx
+- tree.ts
+- Browser-local generative travel UI decision
+- a/toolkit.tsx
+- Acceptance Evidence
+- assertNoBulkData
+- fare-data-bridge.ts
+- b/toolkit.tsx
+- request-schema.ts
+- scene-completion.test.ts
+- a/spike/main.tsx
+- worker-client.ts
+- resume-followup.mjs
+- catalog-extension/spike/main.tsx
+- Generative UI Feature Fit Rubric
+- renderer.tsx
+- codex-provider.ts
+- browser.ts
+- openui-runtime.test.tsx
+- thread-shell.tsx
+- Interactive Conversational Travel UI Evaluation
+- verify_pasted_coverage.py
+- Contributing Guide
+- Generative travel UI A/B implementation plan
+- query-engine.ts
+- scripts/run.mjs
+- validate-program.ts
+- createFareDataBridge
+- selected-fare-count.test.tsx
+- createWorkerQueryEngine
+- chat-route.ts
+- Phased implementation DAG
+- run-multicity-proof.mts
+- query-engine/package.json
+- Shared architecture
+- runtime-provider.tsx
+- present-boundary.tsx
+- Alternatives and tradeoffs
+- run-completion.mjs
+- Repository Workflow
+- run.ts
+- Version B: agent-authored reactive wiring
+- Urban Travel Scene
+- Transportation Landscape Hero
+- Selected fare count catalog extension
+- Native A compatibility evidence
+- location-catalog.ts
+- A/B comparison protocol
+- Verification strategy
+- Swarm, worktree, commit, and PR protocol
+- Version A: assistant-ui component composition
+- Download on the Apple App Store Badge
+- Omio Generative UI Demo
+- run-query-benchmark.mjs
+- ArtifactIdSchema
+- spike/toolkit.tsx
+- Published OpenUI runtime compatibility
+- Browser query engine decision
+- Huawei AppGallery Download Badge
+- Machine-Readable Link
+- Compass Icon
+- a/run-live.mjs
+- Google Play
+- Mobile Ticketing
+- Visual Scan Target
+- Update and Refresh
+- b/run-live.mjs
+- verify-availability.py
+- backend/__init__.py
 - playwright.config.ts
-- Travel catalog
-- Evidence a
-- Evidence a
-- Evidence b
-- Evidence codex-provider.md
+- catalog.md
+- live/README.md
+- run-browser-proof.mjs
+- replay-live.mjs
+- codex-provider.md
 - vite.config.js
-- Shared travel support
-- Shared travel support
+- Generative UI implementation ledger
+- Current Omio Demo Baseline
+- package.json
+- Ownership and data flow
+- Distinct travel catalog primitives
+- @assistant-ui/vite
+- @testing-library/react
+- vitest
+- catalog-extension/README.md
+- run-browser.mjs
+- resume-artifacts/README.md
+- study/README.md
 
 ## God Nodes (most connected - your core abstractions)
-1. `createUIStateStore()` - 20 edges
-2. `Generative travel UI A/B implementation plan` - 18 edges
-3. `assertNoBulkData()` - 17 edges
-4. `scripts` - 17 edges
-5. `search()` - 16 edges
-6. `dispatch()` - 15 edges
-7. `createActionRouter()` - 14 edges
-8. `compilerOptions` - 14 edges
-9. `Repository details` - 14 edges
-10. `Generative UI Feature Fit Rubric` - 14 edges
+1. `createFareDataBridge()` - 36 edges
+2. `createUIStateStore()` - 34 edges
+3. `ArtifactIdSchema` - 32 edges
+4. `assertNoBulkData()` - 21 edges
+5. `createActionRouter()` - 21 edges
+6. `Generative travel UI A/B implementation plan` - 18 edges
+7. `scripts` - 17 edges
+8. `useTravelQuery()` - 17 edges
+9. `cityLabel()` - 17 edges
+10. `handleChat()` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Pull Request Template` --semantically_similar_to--> `Contributing Guide`  [INFERRED] [semantically similar]
   .github/pull_request_template.md → CONTRIBUTING.md
 - `capture()` --calls--> `exportAgentContext()`  [EXTRACTED]
   verification/generative-ui/a/spike/main.tsx → src/generative/state/snapshot-exporter.ts
-- `run()` --calls--> `createSyntheticRows()`  [EXTRACTED]
-  benchmarks/query-engine/browser.ts → src/generative/data/synthetic-source.ts
-- `parseToolInput()` --calls--> `validatePresentTree()`  [EXTRACTED]
-  agent/request-schema.ts → src/generative/variants/a/tree.ts
-- `parseChatRequest()` --calls--> `parseAgentContext()`  [EXTRACTED]
-  agent/request-schema.ts → src/generative/contracts/index.ts
+- `capture()` --calls--> `exportAgentContext()`  [EXTRACTED]
+  verification/generative-ui/catalog-extension/spike/main.tsx → src/generative/state/snapshot-exporter.ts
+- `handleChat()` --calls--> `assertNoBulkData()`  [EXTRACTED]
+  agent/chat-route.ts → src/generative/contracts/privacy.ts
+- `handleChat()` --calls--> `validatePresentTree()`  [EXTRACTED]
+  agent/chat-route.ts → src/generative/variants/a/tree.ts
 
 ## Import Cycles
 - None detected.
@@ -139,331 +154,351 @@
 - **Semantic Travel Component Catalog** — docs_research_interactive_travel_ui_evaluation_semantic_vocabulary, docs_research_interactive_travel_ui_evaluation_travelplan, docs_research_interactive_travel_ui_evaluation_travelleg, docs_research_interactive_travel_ui_evaluation_pricequote [INFERRED 0.95]
 - **Synthetic Multimodal Search Demo** — backend_readme_synthetic_timetable_backend, backend_readme_deterministic_synthetic_timetable, backend_readme_timetable_search_api, index_omio_travel_search_demo, index_multimodal_travel_search [INFERRED 0.95]
 
-## Communities (100 total, 15 thin omitted)
+## Communities (112 total, 20 thin omitted)
 
-### Community 0 - "src · api.js"
+### Community 0 - "ResultsPage.jsx"
 Cohesion: 0.07
 Nodes (41): buildSearchUrl(), displayLocation(), getJson(), locationValue(), minutesFromDuration(), MODE_ORDER, modes, normalizeLocations() (+33 more)
 
-### Community 1 - "Travel catalog"
-Cohesion: 0.09
-Nodes (40): artifactId, fare(), setup(), ArtifactErrorBoundary, CatalogNode(), controls, layouts, statuses (+32 more)
+### Community 1 - "component.tsx"
+Cohesion: 0.15
+Nodes (37): PendingQueryProbe(), ArtifactErrorBoundary, controls, layouts, statuses, cityLabel(), departure(), duration() (+29 more)
 
-### Community 2 - "Travel state"
+### Community 2 - "routes.tsx"
 Cohesion: 0.06
-Nodes (31): Implemented comparison demo and evidence matrix, Paused demo continuation handoff, Signed-in Codex local travel comparison, Forty shared granular travel descriptors, assignment(), ratingDimensions, scenarios, withheldPrompt() (+23 more)
+Nodes (32): Implemented comparison demo and evidence matrix, Paused demo continuation handoff, Signed-in Codex local travel comparison, TravelServices, descriptors, refs, hash, Forty shared granular travel descriptors (+24 more)
 
-### Community 3 - "package.json"
-Cohesion: 0.04
-Nodes (44): ai, @ai-sdk/react, assistant-stream, @assistant-ui/ai-sdk, @assistant-ui/react, @assistant-ui/react-generative-ui, @openuidev/lang-core, @openuidev/react-lang (+36 more)
+### Community 3 - "dependencies"
+Cohesion: 0.09
+Nodes (23): ai, @ai-sdk/react, assistant-stream, @assistant-ui/ai-sdk, @assistant-ui/react, @assistant-ui/react-generative-ui, @openuidev/lang-core, @openuidev/react-lang (+15 more)
 
-### Community 4 - "backend · app.py"
-Cohesion: 0.13
-Nodes (30): ApiError, _connect(), _date_value(), dispatch(), _fail(), get_locations(), get_metadata(), _integer() (+22 more)
+### Community 4 - "app.py"
+Cohesion: 0.07
+Nodes (58): ApiError, _connect(), _date_value(), dispatch(), _fail(), get_locations(), get_metadata(), _integer() (+50 more)
 
-### Community 5 - "docs · research · generative-ui-resources.md"
+### Community 5 - "Repository details"
 Cohesion: 0.05
 Nodes (38): Atomic Database Generation, Deterministic Synthetic Timetable, Generate the database, Location, Metadata, and Search Endpoints, Run the API, Search Result Eligibility, Synthetic Timetable Backend, Test (+30 more)
 
-### Community 6 - "docs · research · interactive-travel-ui-evaluation.md"
-Cohesion: 0.06
-Nodes (39): Interactive Conversational Travel UI Evaluation, A2UI Feature Evaluation, Travel Planner Acceptance Gates, AG-UI Feature Evaluation, LangChain Agent Chat UI Feature Evaluation, Ant Design X Feature Evaluation, assistant-ui Feature Evaluation, Chainlit Feature Evaluation (+31 more)
+### Community 6 - "TravelPlan"
+Cohesion: 0.16
+Nodes (14): assistant-ui Feature Evaluation, ConversationArtifact, Assistant UI Native Composition Decision, Direct Plan Command and Requote Flow, PlanPatch, Recommended assistant-ui Travel Planner Architecture, Semantic Travel Component Vocabulary, Complete Generative Travel UI Solution Options (+6 more)
 
-### Community 7 - "Travel contracts"
-Cohesion: 0.09
-Nodes (31): BoundedFareFact, BoundedFareFactSchema, CompactArtifactSnapshot, CompactSummarySchema, ComponentDescriptor, CONTRACT_VERSION, CoverageRequestSchema, DatasetFieldManifest (+23 more)
-
-### Community 8 - "backend · generate_db.py"
-Cohesion: 0.12
-Nodes (28): _batched(), _dates(), _direction(), directional_routes(), DirectionalRoute, _fare_rows(), generate_database(), main() (+20 more)
-
-### Community 9 - "package.json"
+### Community 7 - "index.ts"
 Cohesion: 0.07
-Nodes (30): @assistant-ui/vite, jsdom, devDependencies, @assistant-ui/vite, jsdom, @playwright/test, @testing-library/dom, @testing-library/jest-dom (+22 more)
+Nodes (26): AllowedFareField, BoundedFareFact, CompactArtifactSnapshot, CompactSummarySchema, Coverage, DatasetFieldManifestSchema, DatasetRevision, DateSchema (+18 more)
 
-### Community 10 - "tsconfig.json"
+### Community 8 - "scripts"
+Cohesion: 0.12
+Nodes (17): scripts, agent:dev, benchmark:query, build, check:catalog, dev, experiment:live, frontend:dev (+9 more)
+
+### Community 9 - "devDependencies"
+Cohesion: 0.08
+Nodes (25): jsdom, devDependencies, jsdom, @playwright/test, @testing-library/dom, @testing-library/jest-dom, @testing-library/user-event, tsx (+17 more)
+
+### Community 10 - "compilerOptions"
 Cohesion: 0.07
 Nodes (28): agent, benchmarks/query-engine, *.config.ts, DOM, DOM.Iterable, ES2022, node, src (+20 more)
 
-### Community 11 - "Evidence run-state-proof.mjs"
-Cohesion: 0.08
-Nodes (23): /src/generative/data/fare-data-bridge.ts, /src/generative/contracts/index.ts, /src/generative/state/persistence.ts, /src/generative/state/ui-state-store.ts, captured, diagnostics, errors, failed (+15 more)
+### Community 11 - "run-matrix.mjs"
+Cohesion: 0.05
+Nodes (53): /src/generative/data/fare-data-bridge.ts, /src/generative/contracts/index.ts, /src/generative/state/persistence.ts, /src/generative/contracts/privacy.ts, /src/generative/state/ui-state-store.ts, captured, diagnostics, errors (+45 more)
 
-### Community 12 - "Travel data"
-Cohesion: 0.12
-Nodes (20): FareIdSchema, FareRow, UIStateRevisionSchema, first, request, second, createFareDataBridge(), createSyntheticRows() (+12 more)
+### Community 12 - "ui-state-store.ts"
+Cohesion: 0.13
+Nodes (11): CompactArtifactSnapshotSchema, parseQuery(), UIStateRevisionSchema, UIStateStore, first, request, second, createBrowserTools() (+3 more)
 
-### Community 13 - "Travel state"
-Cohesion: 0.16
-Nodes (17): ArtifactUIState, Coverage, CoverageRequest, DatasetManifest, FareDataBridge, CoverageLoadStatus, covers(), createActionRouter() (+9 more)
+### Community 13 - "context.tsx"
+Cohesion: 0.14
+Nodes (21): TravelContext, id, ArtifactUIState, CoverageRequest, DispatchResult, FareDataBridge, FareRow, UICommand (+13 more)
 
-### Community 14 - "Travel variants"
-Cohesion: 0.12
-Nodes (16): keys, names, scope, validatePresentPrefix(), LIMITS, getSceneMetadata(), layouts, names (+8 more)
+### Community 14 - "tree.ts"
+Cohesion: 0.15
+Nodes (14): keys, names, scope, validatePresentPrefix(), LIMITS, getSceneMetadata(), layouts, names (+6 more)
 
-### Community 15 - "docs · research · browser-local-generative-ui-decision.md"
-Cohesion: 0.09
-Nodes (22): Agent context and tool contracts, AI SDK plus json-render, Alternatives and tradeoffs, assistant-ui shell with json-render, Browser `FareStore`, Browser-local generative travel UI decision, Component catalog versus generated HTML or React, CopilotKit with Dynamic A2UI (+14 more)
+### Community 15 - "Browser-local generative travel UI decision"
+Cohesion: 0.17
+Nodes (12): Agent context and tool contracts, Browser-local generative travel UI decision, Component catalog versus generated HTML or React, Current application and data boundary, Decision to make, Demo moments the catalog must support, Evaluation rubric, Experience and acceptance scenarios (+4 more)
 
-### Community 16 - "Evidence a"
+### Community 16 - "a/toolkit.tsx"
 Cohesion: 0.09
 Nodes (21): generative, library, Travel UI evidence capture: 0-1280-blue-partial, Travel UI evidence capture: 0-1280-blue, Travel UI evidence capture: 0-360-blue-partial, Travel UI evidence capture: 0-360-blue, Travel UI evidence capture: 0-360-sand-partial, Travel UI evidence capture: 0-360-sand (+13 more)
 
-### Community 17 - "verification · acceptance.md"
+### Community 17 - "Acceptance Evidence"
 Cohesion: 0.11
 Nodes (20): Acceptance Evidence, API Pagination, Backend Commit b1c8912, Backend Test Suite, Browser Captures, Browser flow, Browser Flow Acceptance, Coverage Parser (+12 more)
 
-### Community 18 - "Travel contracts"
-Cohesion: 0.19
-Nodes (12): createSnapshotTransport(), snapshotRequest(), messages, AgentContextEnvelopeSchema, CoverageSchema, parseAgentContext(), assertNoBulkData(), forbidden (+4 more)
-
-### Community 19 - "Travel data"
-Cohesion: 0.16
-Nodes (16): load(), cancel(), finish(), abortError(), coverageKey(), FarePage, LoadedResource, loadResource() (+8 more)
-
-### Community 20 - "Evidence b"
-Cohesion: 0.12
-Nodes (15): bInstructions, ComposeSceneInputSchema, semanticSchema, Travel UI evidence capture: case-0, Travel UI evidence capture: case-1, B authored-program evidence, 2026-10-02, Travel UI evidence capture: replay-0, Travel UI evidence capture: replay-1 (+7 more)
-
-### Community 21 - "Model agent · request-schema.ts"
+### Community 18 - "assertNoBulkData"
 Cohesion: 0.15
-Nodes (13): {decision}, servers, ErrorOutput, id, MessageSchema, parseChatRequest(), parseToolOutput(), PartSchema (+5 more)
+Nodes (12): {decision}, servers, request(), AgentContextEnvelope, AgentContextEnvelopeSchema, CoverageSchema, parseAgentContext(), assertNoBulkData() (+4 more)
 
-### Community 22 - "Model agent · turn-budget.ts"
-Cohesion: 0.23
-Nodes (11): ChatRequest, request, ack(), artifact, other, acceptTurn(), getAcceptedScenes(), ledger (+3 more)
+### Community 19 - "fare-data-bridge.ts"
+Cohesion: 0.15
+Nodes (20): DatasetFieldManifest, DatasetManifest, load(), cancel(), finish(), abortError(), coverageKey(), FarePage (+12 more)
 
-### Community 23 - "Evidence a"
+### Community 20 - "b/toolkit.tsx"
+Cohesion: 0.10
+Nodes (17): bInstructions, ComposeSceneInputSchema, hasAcceptedRepairAfter(), SceneToolFrame(), semanticSchema, Travel UI evidence capture: case-0, Travel UI evidence capture: case-1, B authored-program evidence, 2026-10-02 (+9 more)
+
+### Community 21 - "request-schema.ts"
+Cohesion: 0.15
+Nodes (12): ErrorOutput, id, MessageSchema, PartSchema, RequestSchema, revision, TOOL_NAMES, ToolSchema (+4 more)
+
+### Community 22 - "scene-completion.test.ts"
+Cohesion: 0.26
+Nodes (12): handleChat(), ChatRequest, request, ack(), artifact, other, acceptTurn(), getAcceptedScenes() (+4 more)
+
+### Community 23 - "a/spike/main.tsx"
+Cohesion: 0.15
+Nodes (12): App(), artifactId, bridge, capture(), input, requests, resume(), root (+4 more)
+
+### Community 24 - "worker-client.ts"
 Cohesion: 0.14
-Nodes (13): FareRowSchema, App(), artifactId, bridge, capture(), input, requests, resume() (+5 more)
+Nodes (15): index, BoundedQueryResult, DatasetId, QueryIR, scalar, WorkerRequest, WorkerResponse, WorkerResponseSchema (+7 more)
 
-### Community 24 - "Travel query"
-Cohesion: 0.23
-Nodes (7): index, BoundedQueryResult, DatasetId, QueryIR, QueryResource, LocalQueryEngine, Measured TypeScript versus DuckDB engine decision
-
-### Community 25 - "Evidence b"
+### Community 25 - "resume-followup.mjs"
 Cohesion: 0.14
 Nodes (13): /verification/generative-ui/b/user-itinerary/resume-client.jsx, accepted, captured, errors, last, newAccepted, oldIds, prior (+5 more)
 
-### Community 26 - "Travel variants"
-Cohesion: 0.27
-Nodes (11): useTravelServices(), QueryIRSchema, RuntimeVariablesSchema, evaluateQueryArguments(), findQueryStatement(), Program, rememberQueryResult(), adaptQueryResult() (+3 more)
+### Community 26 - "catalog-extension/spike/main.tsx"
+Cohesion: 0.14
+Nodes (12): App(), artifactId, bridge, capture(), input, requests, resume(), root (+4 more)
 
-### Community 27 - "Travel query"
-Cohesion: 0.20
-Nodes (9): DatasetRevisionSchema, scalar, WorkerRequest, WorkerResponse, WorkerResponseSchema, id, query, requests (+1 more)
+### Community 27 - "Generative UI Feature Fit Rubric"
+Cohesion: 0.15
+Nodes (13): A2UI Feature Evaluation, AG-UI Feature Evaluation, LangChain Agent Chat UI Feature Evaluation, Ant Design X Feature Evaluation, Chainlit Feature Evaluation, CopilotKit Feature Evaluation, CopilotKit Generative UI Guide Evaluation, Generative UI Feature Fit Rubric (+5 more)
 
-### Community 28 - "Travel variants"
-Cohesion: 0.18
-Nodes (9): Props, Binding, context, SceneQueryProvider, useSceneQuery(), parseAction(), Owner, owners (+1 more)
+### Community 28 - "renderer.tsx"
+Cohesion: 0.10
+Nodes (26): ArtifactUIStateSchema, QueryIRSchema, RuntimeVariablesSchema, UICommandPatchSchema, ValidatedQueryIR, bLibrary, BoundNode(), Props (+18 more)
 
-### Community 29 - "Model agent · codex-provider.ts"
-Cohesion: 0.21
-Nodes (11): handleChat(), CODEX_DEVELOPER_INSTRUCTIONS, CODEX_MODEL, codexDecision(), Decision, DecisionDelta, DecisionSchema, readString() (+3 more)
+### Community 29 - "codex-provider.ts"
+Cohesion: 0.17
+Nodes (13): CODEX_DEVELOPER_INSTRUCTIONS, CODEX_MODEL, CODEX_REASONING_EFFORT, codexDecision(), Decision, DecisionDelta, DecisionSchema, readString() (+5 more)
 
-### Community 30 - "benchmarks · query-engine · browser.ts"
+### Community 30 - "browser.ts"
 Cohesion: 0.18
 Nodes (12): base, expected(), id, longTasks, Metric, percentile(), Report, rightId (+4 more)
 
-### Community 31 - "tests · compatibility · openui-runtime.test.tsx"
+### Community 31 - "openui-runtime.test.tsx"
 Cohesion: 0.19
 Nodes (11): CompactState, CompactValue, HostStateRenderer(), HostStateRendererProps, projectState(), Command, library, Mode (+3 more)
 
-### Community 32 - "Travel chat"
+### Community 32 - "thread-shell.tsx"
 Cohesion: 0.23
-Nodes (8): TravelServices, CanonicalMessagesContext, completedNarrativeIndices(), GenerativeChatProps, AssistantNarrative(), partComponents, suggestions, ThreadShell()
+Nodes (9): useTravelServices(), CanonicalMessagesContext, completedLocalToolIndices(), completedNarrativeIndices(), localToolNames, AssistantNarrative(), partComponents, suggestions (+1 more)
 
-### Community 33 - "Travel contracts"
-Cohesion: 0.18
-Nodes (8): ArtifactUIStateSchema, CATALOG_VERSION, CompactArtifactSnapshotSchema, DispatchResult, UICommand, UICommandPatchSchema, UIStateStore, ProgramBinding
+### Community 33 - "Interactive Conversational Travel UI Evaluation"
+Cohesion: 0.33
+Nodes (7): Interactive Conversational Travel UI Evaluation, Travel Planner Acceptance Gates, Explicit Requirement Completion Audit, Travel Duration and Stay Semantics, Proposed Evidence Plan, Interactive Conversational Travel Planner, Incremental TypeScript Boundary Migration
 
-### Community 34 - "verification · verify_pasted_coverage.py"
+### Community 34 - "verify_pasted_coverage.py"
 Cohesion: 0.44
 Nodes (11): check_database(), main(), normalized(), pair(), parse_dash_line(), parse_manifest(), parse_to_line(), Path (+3 more)
 
-### Community 35 - "CONTRIBUTING.md"
+### Community 35 - "Contributing Guide"
 Cohesion: 0.31
 Nodes (11): Pull Request Template, Pull Request Branch Target, Pull Request Verification, Contributing Guide, Branch Naming Convention, dev Branch, Focused Pull Requests, Hotfix Branch (+3 more)
 
-### Community 36 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 36 - "Generative travel UI A/B implementation plan"
 Cohesion: 0.18
 Nodes (11): Completion audit, Current repository baseline, Decisions, risks, and fallback order, End-state experience, Exact repository change map, Fresh-context startup checklist, Fresh implementation starter prompt, Generative travel UI A/B implementation plan (+3 more)
 
-### Community 37 - "Travel query"
-Cohesion: 0.25
-Nodes (10): AllowedFareField, DatasetRevision, PredicateTree, compare(), defaults, executeQuery(), matches(), QueryLimits (+2 more)
+### Community 37 - "query-engine.ts"
+Cohesion: 0.21
+Nodes (11): DatasetRevisionSchema, compare(), defaults, executeQuery(), matches(), QueryLimits, QueryResources, datasetId (+3 more)
 
-### Community 38 - "scripts · run.mjs"
+### Community 38 - "scripts/run.mjs"
 Cohesion: 0.22
 Nodes (7): agentPort, apiPort, children, env, start(), stop(), webPort
 
-### Community 39 - "Travel catalog"
-Cohesion: 0.22
-Nodes (8): bDefinitions, catalogDescriptors, catalogHash, catalogVersion, componentNames, orderedPropertyNames, sharedPropsSchema, aPrompt
+### Community 39 - "validate-program.ts"
+Cohesion: 0.15
+Nodes (16): bDefinitions, catalogDescriptors, catalogHash, catalogVersion, componentNames, orderedPropertyNames, sharedPropsSchema, bComponentPropsSchema() (+8 more)
 
-### Community 40 - "Travel variants"
-Cohesion: 0.20
-Nodes (4): scene, bToolkit, hasAcceptedRepairAfter(), SceneToolFrame()
+### Community 40 - "createFareDataBridge"
+Cohesion: 0.14
+Nodes (22): artifactId, fare(), setup(), CatalogNode(), id, setup(), scene, setup() (+14 more)
 
-### Community 41 - "Travel data"
-Cohesion: 0.24
-Nodes (7): PageSource, createSearchPageSource(), responseSchema, rowSchema, input, outbound, server
+### Community 41 - "selected-fare-count.test.tsx"
+Cohesion: 0.31
+Nodes (6): TravelProvider(), artifactId, otherId, FareIdSchema, createSyntheticRows(), id
 
-### Community 42 - "Travel query"
+### Community 42 - "createWorkerQueryEngine"
 Cohesion: 0.31
 Nodes (6): createLocalQueryEngine(), createWorkerQueryEngine(), receive(), request(), cancel(), QueryWorker
 
-### Community 43 - "Model agent · validation-reason.ts"
-Cohesion: 0.50
-Nodes (4): withOneRepair(), parseToolInput(), knownMessages, validationReason()
+### Community 43 - "chat-route.ts"
+Cohesion: 0.38
+Nodes (5): withOneRepair(), parseToolInput(), knownMessages, validationReason(), aPrompt
 
-### Community 44 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 44 - "Phased implementation DAG"
 Cohesion: 0.25
 Nodes (8): Package ownership index, Phase 0: compatibility and shared contracts, Phase 1: browser-local application spine, Phase 2: shared experience and chat, Phase 3: Version A vertical slice, Phase 4: Version B parity and genuine reactivity, Phase 5: comparison and decision, Phased implementation DAG
 
-### Community 45 - "Travel variants"
-Cohesion: 0.29
-Nodes (7): bLibrary, bComponentPropsSchema(), Binding, BindingSchema, bPropsSchema, bSchemaLibrary, value
+### Community 45 - "run-multicity-proof.mts"
+Cohesion: 0.22
+Nodes (7): CoverageRequestSchema, PersistedThreadSchema, errors, record, requests, scene, state
 
-### Community 46 - "benchmarks · query-engine · package.json"
+### Community 46 - "query-engine/package.json"
 Cohesion: 0.29
 Nodes (6): dependencies, @duckdb/duckdb-wasm, name, private, type, @duckdb/duckdb-wasm
 
-### Community 47 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 47 - "Shared architecture"
 Cohesion: 0.29
 Nodes (7): Bounded agent tools, Browser data and state, Chat, artifacts, and persistence, Realistic data volume and query engine, Shared architecture, Shared contracts, Synthetic price and itinerary rules
 
-### Community 49 - "Travel variants"
-Cohesion: 0.43
-Nodes (4): hasLaterAcceptedScene(), ScenePart, PresentBoundary(), Props
+### Community 48 - "runtime-provider.tsx"
+Cohesion: 0.21
+Nodes (6): normalizeToolContinuations(), GenerativeChat(), GenerativeChatProps, createSnapshotTransport(), snapshotRequest(), messages
 
-### Community 50 - "Travel variants"
-Cohesion: 0.48
-Nodes (4): inspect(), names, validateReactiveProgram(), programs
+### Community 49 - "present-boundary.tsx"
+Cohesion: 0.39
+Nodes (5): hasLaterAcceptedScene(), ScenePart, PresentBoundary(), Props, prunePresentTree()
 
-### Community 51 - "Evidence a"
+### Community 50 - "Alternatives and tradeoffs"
+Cohesion: 0.33
+Nodes (6): AI SDK plus json-render, Alternatives and tradeoffs, assistant-ui shell with json-render, CopilotKit with Dynamic A2UI, OpenUI reactive program, Tambo composite or interactable components
+
+### Community 51 - "run-completion.mjs"
 Cohesion: 0.29
 Nodes (6): errors, last, requests, responses, started, timers
 
-### Community 52 - "AGENTS.md"
+### Community 52 - "Repository Workflow"
 Cohesion: 0.40
 Nodes (5): Code Review Graph, Graph-Guided Source Verification, Graphify Knowledge Graph, Knowledge graphs, Repository Workflow
 
-### Community 53 - "benchmarks · query-engine · run.ts"
+### Community 53 - "run.ts"
 Cohesion: 0.33
 Nodes (4): awaiting, completion, errors, measurements
 
-### Community 54 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 54 - "Version B: agent-authored reactive wiring"
 Cohesion: 0.33
 Nodes (6): Guidance and repair, Program and artifact contract, QueryIR, Static and runtime limits, Version B: agent-authored reactive wiring, Version B proof
 
-### Community 55 - "public · assets · omio"
+### Community 55 - "Urban Travel Scene"
 Cohesion: 0.40
 Nodes (6): App Call-to-Action Background Illustration, Bus, Cityscape, Intermodal Mobility, Train, Urban Travel Scene
 
-### Community 56 - "public · assets · omio"
+### Community 56 - "Transportation Landscape Hero"
 Cohesion: 0.33
 Nodes (6): Air Travel, Bus Travel, Ferry Travel, Multimodal Travel, Rail Travel, Transportation Landscape Hero
 
-### Community 57 - "Travel catalog"
+### Community 57 - "Selected fare count catalog extension"
 Cohesion: 0.40
-Nodes (3): descriptors, refs, hash
+Nodes (4): Contract and ownership, Cost and boundary proof, Generator and compatibility, Selected fare count catalog extension
 
-### Community 58 - "Evidence a"
+### Community 58 - "Native A compatibility evidence"
 Cohesion: 0.33
 Nodes (5): Commands, Native A compatibility evidence, Observed API boundaries, Provider probe, Shared catalog and paused-stream proof
 
-### Community 59 - "Model agent · location-catalog.ts"
+### Community 59 - "location-catalog.ts"
 Cohesion: 0.60
 Nodes (3): loadLocationCatalog(), locationsSchema, selectLocations()
 
-### Community 60 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 60 - "A/B comparison protocol"
 Cohesion: 0.40
 Nodes (5): A/B comparison protocol, Controlled conditions, Hard gates, Measures and decision record, Task suite
 
-### Community 61 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 61 - "Verification strategy"
 Cohesion: 0.40
 Nodes (5): Contract and privacy-boundary tests, Data, query, and state tests, Repeatable commands, Stream and component tests, Verification strategy
 
-### Community 62 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 62 - "Swarm, worktree, commit, and PR protocol"
 Cohesion: 0.40
 Nodes (5): Graph ownership, Integration topology, Ports, processes, and generated artifacts, Swarm, worktree, commit, and PR protocol, Worker packet and ownership
 
-### Community 63 - "docs · plans · generative-ui-ab-implementation-plan.md"
+### Community 63 - "Version A: assistant-ui component composition"
 Cohesion: 0.40
 Nodes (5): Local bindings and actions, Runtime choice, Tree contract, Version A: assistant-ui component composition, Version A proof
 
-### Community 64 - "public · assets · omio"
+### Community 64 - "Download on the Apple App Store Badge"
 Cohesion: 0.40
 Nodes (5): Apple App Store, Download on the Apple App Store Badge, Apple Logo, iOS App Download, Trusted Platform Acquisition
 
-### Community 65 - "README.md"
+### Community 65 - "Omio Generative UI Demo"
 Cohesion: 0.40
 Nodes (5): Backend API Contract, Deterministic Synthetic Fares, One Million Fare SQLite Database, Omio Generative UI Demo, Original Visual Asset Sources
 
-### Community 67 - "Travel state"
-Cohesion: 0.60
-Nodes (3): ArtifactId, ArtifactIdSchema, createArtifactStore()
+### Community 67 - "ArtifactIdSchema"
+Cohesion: 0.29
+Nodes (6): ArtifactId, ArtifactIdSchema, createArtifactStore(), fixture(), request, row
 
-### Community 68 - "Evidence a"
+### Community 68 - "spike/toolkit.tsx"
 Cohesion: 0.60
 Nodes (3): SpikeCard(), SpikeSurface(), generative
 
-### Community 69 - "Evidence openui-compatibility-2026-10-02.md"
+### Community 69 - "Published OpenUI runtime compatibility"
 Cohesion: 0.40
 Nodes (4): Commands and outcomes, Continuation and outstanding gates, Published OpenUI runtime compatibility, Verified public interfaces
 
-### Community 70 - "Evidence query-engine-2026-10-02.md"
+### Community 70 - "Browser query engine decision"
 Cohesion: 0.40
 Nodes (4): Browser query engine decision, Domain verification, Measurement, Reproduce
 
-### Community 71 - "public · assets · omio"
+### Community 71 - "Huawei AppGallery Download Badge"
 Cohesion: 0.50
 Nodes (4): Huawei AppGallery Download Badge, Huawei AppGallery, Mobile App Download, Platform Distribution Call to Action
 
-### Community 72 - "public · assets · omio"
+### Community 72 - "Machine-Readable Link"
 Cohesion: 0.50
 Nodes (4): Cross-Device Handoff, Machine-Readable Link, Mobile App Acquisition, Mobile App QR Code
 
-### Community 73 - "public · assets · omio"
+### Community 73 - "Compass Icon"
 Cohesion: 0.50
 Nodes (4): Compass Icon, Directional Navigation, Explore Destinations, Travel Discovery
 
-### Community 75 - "public · assets · omio"
+### Community 75 - "Google Play"
 Cohesion: 0.67
 Nodes (3): Android App Distribution, Google Play Download Badge, Google Play
 
-### Community 76 - "public · assets · omio"
+### Community 76 - "Mobile Ticketing"
 Cohesion: 1.00
 Nodes (3): Mobile Ticketing, QR Code, Mobile Ticket QR Code Icon
 
-### Community 77 - "public · assets · omio"
+### Community 77 - "Visual Scan Target"
 Cohesion: 0.67
 Nodes (3): QR Code Scanning, Scanner Frame, Visual Scan Target
 
-### Community 78 - "public · assets · omio"
+### Community 78 - "Update and Refresh"
 Cohesion: 0.67
 Nodes (3): Synchronization, Update and Refresh, Updates Icon
 
+### Community 90 - "Generative UI implementation ledger"
+Cohesion: 0.40
+Nodes (4): Every package, Generative UI implementation ledger, Owners, worktrees and publication, Verification scope and remaining work
+
+### Community 91 - "Current Omio Demo Baseline"
+Cohesion: 0.40
+Nodes (5): Current Omio Demo Baseline, Direct Filter Transfer Gap, Undefined Fare Unit and Monetary Total, PriceQuote, Single Route Search Limitation
+
+### Community 100 - "package.json"
+Cohesion: 0.40
+Nodes (4): name, private, type, version
+
+### Community 101 - "Ownership and data flow"
+Cohesion: 0.50
+Nodes (4): Browser `FareStore`, Ownership and data flow, Per-artifact `UIStateStore`, Trusted selectors, bindings, and actions
+
 ## Knowledge Gaps
-- **476 isolated node(s):** `CoverageLoadStatus`, `FarePage`, `LoadedResource`, `PageInput`, `SceneCompletion` (+471 more)
+- **504 isolated node(s):** `{decision}`, `servers`, `DecisionSchema`, `DecisionDelta`, `locationsSchema` (+499 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createUIStateStore()` connect `Travel data` to `Travel catalog`, `Travel state`, `Travel contracts`, `Travel variants`, `Travel state`, `Travel contracts`, `Model agent · request-schema.ts`, `Model agent · turn-budget.ts`, `Evidence a`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `validateReactiveProgram()` connect `validate-program.ts` to `selected-fare-count.test.tsx`, `chat-route.ts`, `run-matrix.mjs`, `assertNoBulkData`, `b/toolkit.tsx`, `request-schema.ts`, `renderer.tsx`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `assertNoBulkData()` connect `assertNoBulkData` to `routes.tsx`, `validate-program.ts`, `chat-route.ts`, `ui-state-store.ts`, `tree.ts`, `runtime-provider.tsx`, `request-schema.ts`, `scene-completion.test.ts`, `codex-provider.ts`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `ArtifactIdSchema` connect `ArtifactIdSchema` to `component.tsx`, `routes.tsx`, `index.ts`, `createFareDataBridge`, `selected-fare-count.test.tsx`, `ui-state-store.ts`, `context.tsx`, `runtime-provider.tsx`, `present-boundary.tsx`, `assertNoBulkData`, `b/toolkit.tsx`, `request-schema.ts`, `scene-completion.test.ts`, `a/spike/main.tsx`, `catalog-extension/spike/main.tsx`, `renderer.tsx`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `createUIStateStore()` (e.g. with `dispatch()` and `get()`) actually correct?**
   _`createUIStateStore()` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `CoverageLoadStatus`, `FarePage`, `LoadedResource` to the rest of the system?**
-  _476 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `src · api.js` be split into smaller, more focused modules?**
+- **Are the 6 inferred relationships involving `createActionRouter()` (e.g. with `.getManifest()` and `.load()`) actually correct?**
+  _`createActionRouter()` has 6 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `{decision}`, `servers`, `DecisionSchema` to the rest of the system?**
+  _504 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `ResultsPage.jsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06892230576441102 - nodes in this community are weakly interconnected._
-- **Should `Travel catalog` be split into smaller, more focused modules?**
-  _Cohesion score 0.08521870286576169 - nodes in this community are weakly interconnected._
-- **Should `Travel state` be split into smaller, more focused modules?**
-  _Cohesion score 0.06471631205673758 - nodes in this community are weakly interconnected._
-- **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.044444444444444446 - nodes in this community are weakly interconnected._
