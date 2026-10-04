@@ -1,0 +1,98 @@
+{
+  "index": 0,
+  "prompt": "Load London to Paris fares for 2026-10-09 through 2026-10-15, all train bus flight modes, one passenger. Make a SplitPane with a Section of DateStrip, ModeChips, SortSelect and FareCards on the left, and StickySummary with CheapestFastest and SyntheticTotal on the right. Explain the tradeoffs after the view. Use the active artifact.",
+  "liveModelAuthorship": true,
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "browser": "154.0.8037.97",
+  "requests": 3,
+  "localClickChatDelta": 0,
+  "elapsedMs": 69192,
+  "errors": [],
+  "completed": true,
+  "tree": {
+    "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+    "datasetRef": "dataset-1hq3nnw",
+    "title": "London–Paris · Synthetic fares",
+    "$type": "TravelSurface",
+    "$key": "london-paris-surface",
+    "children": [
+      {
+        "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+        "$type": "SplitPane",
+        "$key": "comparison-split",
+        "children": [
+          {
+            "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+            "datasetRef": "dataset-1hq3nnw",
+            "title": "Dates, transport and offers",
+            "$type": "Section",
+            "$key": "fare-section",
+            "children": [
+              {
+                "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "DateStrip",
+                "$key": "dates"
+              },
+              {
+                "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "ModeChips",
+                "$key": "modes"
+              },
+              {
+                "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "SortSelect",
+                "$key": "sort"
+              },
+              {
+                "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+                "datasetRef": "dataset-1hq3nnw",
+                "title": "Synthetic fare choices",
+                "$type": "FareCards",
+                "$key": "offers"
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+            "datasetRef": "dataset-1hq3nnw",
+            "title": "Price versus journey time",
+            "$type": "StickySummary",
+            "$key": "trip-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+                "datasetRef": "dataset-1hq3nnw",
+                "$type": "CheapestFastest",
+                "$key": "cheapest-fastest"
+              },
+              {
+                "artifactRef": "artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47",
+                "datasetRef": "dataset-1hq3nnw",
+                "title": "Synthetic total per passenger",
+                "$type": "SyntheticTotal",
+                "$key": "synthetic-total"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "componentTypes": [
+    "TravelSurface",
+    "SplitPane",
+    "Section",
+    "DateStrip",
+    "ModeChips",
+    "SortSelect",
+    "FareCards",
+    "StickySummary",
+    "CheapestFastest",
+    "SyntheticTotal"
+  ],
+  "visibleText": "Compare interfacesClassic searchVersion A · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nLoad London to Paris fares for 2026-10-09 through 2026-10-15, all train bus flight modes, one passenger. Make a SplitPane with a Section of DateStrip, ModeChips, SortSelect and FareCards on the left, and StickySummary with CheapestFastest and SyntheticTotal on the right. Explain the tradeoffs after the view. Use the active artifact.\n\nI’ll load synthetic London–Paris fares for one passenger across train, bus, and flight.\n\nTravel data updated locally.\n\nI’ll load synthetic London–Paris fares for one passenger across train, bus, and flight.\n\nHere’s the London–Paris comparison in the active artifact.\n\nLondon–Paris · Synthetic fares\nDates, transport and offers\nDeparture date\nTransport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nSort options\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nSynthetic fare choices\n\n7 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelect\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nFLIGHT\nCarrier X6trm8\n\n01:58 · 1h 23m\n\nLondon → Paris · 2026-10-09\n€42.19\nSelect\nFLIGHT\nCarrier 1pameyy\n\n09:08 · 1h 26m\n\nLondon → Paris · 2026-10-09\n€61.34\nSelect\nTRAIN\nCarrier Oc85vc\n\n01:02 · 2h 12m\n\nLondon → Paris · 2026-10-09\n€64.28\nSelect\nTRAIN\nCarrier Oc85vc\n\n10:54 · 2h 26m\n\nLondon → Paris · 2026-10-09\n€68.50\nSelect\nPrice versus journey time\nCheapest and fastest\nLowest fare\n€25.43\n\n8h 45m Bus\n\nFastest journey\n€42.19\n\n1h 23m Flight\n\nSynthetic total per passenger\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\n\nAcross the loaded week, synthetic fares span €20.79–€85.95 and journey times span 1h16–10h10. Compare cheapest versus fastest to weigh savings against time; date and mode controls update the view locally. These are demo fares, not live quotes.\n\nI’ll load synthetic London–Paris fares for one passenger across train, bus, and flight.\n\nHere’s the London–Paris comparison in the active artifact.\n\nAcross the loaded week, synthetic fares span €20.79–€85.95 and journey times span 1h16–10h10. Compare cheapest versus fastest to weigh savings against time; date and mode controls update the view locally. These are demo fares, not live quotes.\n\nAcross the loaded week, synthetic fares span €20.79–€85.95 and journey times span 1h16–10h10. Use CheapestFastest to compare savings against time; date, mode and sorting controls update locally. These are demo fares, not live quotes.\n\nRetry\nActive travel view · artifact-ddb0cf90-8f7f-4b27-bf2b-be14a2dd2d47\nSynthetic fares\nSend\nStop"
+}

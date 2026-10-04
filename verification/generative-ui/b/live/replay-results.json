@@ -1,0 +1,83 @@
+{
+  "timestamp": "2026-10-02T21:05:58.447Z",
+  "results": [
+    {
+      "index": 0,
+      "classification": "deterministic replay of genuinely model-authored SSE; real Python fare API and browser query worker; follow-up snapshot inspection",
+      "passed": true,
+      "localClickChatDelta": 0,
+      "snapshot": {
+        "artifactId": "artifact-b72fdc22-64ef-4324-a1d2-a49ff3f69a99",
+        "revision": 6,
+        "runtimeVariables": {
+          "$show": true
+        },
+        "datasetRefs": [
+          "dataset-1hq3nnw"
+        ],
+        "selectedFareIds": [],
+        "filters": {
+          "modes": [
+            "bus"
+          ],
+          "carrierIds": [],
+          "directOnly": false
+        },
+        "dates": {
+          "start": "2026-10-09"
+        },
+        "stays": [],
+        "sort": {
+          "field": "priceCents",
+          "direction": "asc"
+        },
+        "modesByLeg": {},
+        "pending": [],
+        "layoutSummary": "TravelHero / FarePicker / TravelSurface / Stack / SplitPane / StickySummary / ModeChips / ComparisonTable / SyntheticTotal / CoverageSummary / SelectedItinerary / RetryAction",
+        "catalogVersion": "1.0.0"
+      },
+      "errors": [],
+      "visibleText": "Compare interfacesClassic searchVersion B · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nLoad London to Paris for 2026-10-09 through 2026-10-15, one passenger, train bus flight. Compare the modes with minimum prices, fastest durations and counts using your own reactive local query. Give me local mode filters and a Show details action that reveals coverage information, plus a selected-trip summary. Choose a clear arrangement and an actual state/query/conditional-action graph. Finish with a brief explanation.\n\nIâ€™ll load Londonâ€“Paris coverage for 9â€“15 October 2026, for one passenger across train, bus and flight.\n\nTravel data updated locally.\n\nIâ€™ll load Londonâ€“Paris coverage for 9â€“15 October 2026, for one passenger across train, bus and flight.\n\nIâ€™ll arrange the mode comparison and fare picker beside a persistent selected-trip summary, with coverage details hidden until requested.\n\nLondonâ€“Paris comparison\nLondon to Paris Â· 9â€“15 October 2026 Â· 1 passenger\nFilter transport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nMinimum price, fastest duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\nBus\t€20.79\t7h 36m\t19\nChoose a fare\n\n19 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1ixeerp\n\n01:30 · 8h 21m\n\nLondon → Paris · 2026-10-12\n€20.79\nSelect\nBUS\nCarrier 1kmj2pr\n\n01:23 · 9h 54m\n\nLondon → Paris · 2026-10-11\n€22.87\nSelect\nBUS\nCarrier 1ixeerp\n\n01:50 · 9h 6m\n\nLondon → Paris · 2026-10-15\n€23.90\nSelect\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelect\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1hc5s74\n\n22:03 · 9h 40m\n\nLondon → Paris · 2026-10-10\n€27.60\nSelect\nBUS\nCarrier 1hc5s74\n\n22:16 · 8h 40m\n\nLondon → Paris · 2026-10-13\n€28.44\nSelect\nBUS\nCarrier 1kmj2pr\n\n15:31 · 8h 41m\n\nLondon → Paris · 2026-10-15\n€29.16\nSelect\nBUS\nCarrier 1kmj2pr\n\n14:49 · 9h 28m\n\nLondon → Paris · 2026-10-12\n€31.07\nSelect\nBUS\nCarrier 1kmj2pr\n\n09:43 · 7h 57m\n\nLondon → Paris · 2026-10-10\n€31.35\nSelect\nBUS\nCarrier 1kmj2pr\n\n01:31 · 9h 4m\n\nLondon → Paris · 2026-10-14\n€32.74\nSelect\nBUS\nCarrier 1ixeerp\n\n17:06 · 10h 10m\n\nLondon → Paris · 2026-10-10\n€32.83\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nBUS\nCarrier 1hc5s74\n\n08:52 · 7h 36m\n\nLondon → Paris · 2026-10-15\n€34.95\nSelect\nBUS\nCarrier 1hc5s74\n\n16:53 · 8h 0m\n\nLondon → Paris · 2026-10-14\n€36.30\nSelect\nBUS\nCarrier 1hc5s74\n\n08:57 · 8h 44m\n\nLondon → Paris · 2026-10-12\n€36.57\nSelect\nBUS\nCarrier 1ixeerp\n\n09:03 · 8h 17m\n\nLondon → Paris · 2026-10-11\n€37.86\nSelect\nBUS\nCarrier 1ixeerp\n\n06:47 · 9h 24m\n\nLondon → Paris · 2026-10-14\n€37.91\nSelect\nBUS\nCarrier 1hc5s74\n\n16:26 · 9h 32m\n\nLondon → Paris · 2026-10-11\n€39.04\nSelect\nShow details\nLoaded coverage\n\nComplete · London → Paris · 2026-10-09 to 2026-10-15 · 57 synthetic fares\n\nYour selection\nSelected trip\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nSynthetic total Â· EUR per passenger\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\n\nMode filters recompute both local queries across the full week. Show details reveals coverage; choosing a fare updates the summary. Prices are synthetic demo fares.\n\nIâ€™ll load Londonâ€“Paris coverage for 9â€“15 October 2026, for one passenger across train, bus and flight.\n\nIâ€™ll arrange the mode comparison and fare picker beside a persistent selected-trip summary, with coverage details hidden until requested.\n\nMode filters recompute both local queries across the full week. Show details reveals coverage; choosing a fare updates the summary. Prices are synthetic demo fares.\n\nMode filters update minimum prices, fastest durations and counts across the full week. Show details reveals coverage; selecting a fare updates the persistent trip summary. Prices are synthetic demo fares.\n\nRetry\nActive travel view · artifact-b72fdc22-64ef-4324-a1d2-a49ff3f69a99\nSynthetic fares\nSend\nStop",
+      "tableRows": 1,
+      "fareChoices": 19
+    },
+    {
+      "index": 1,
+      "classification": "deterministic replay of genuinely model-authored SSE; real Python fare API and browser query worker; follow-up snapshot inspection",
+      "passed": true,
+      "localClickChatDelta": 0,
+      "snapshot": {
+        "artifactId": "artifact-e462442a-987a-415a-8f44-5eb84b826a27",
+        "revision": 7,
+        "runtimeVariables": {
+          "$showTimeline": true
+        },
+        "datasetRefs": [
+          "dataset-1hq3nnw"
+        ],
+        "selectedFareIds": [],
+        "filters": {
+          "modes": [],
+          "carrierIds": [],
+          "directOnly": false
+        },
+        "dates": {
+          "start": "2026-10-10"
+        },
+        "stays": [],
+        "sort": {
+          "field": "durationMinutes",
+          "direction": "asc"
+        },
+        "modesByLeg": {},
+        "pending": [],
+        "layoutSummary": "TravelHero / FarePicker / TravelSurface / Section / Inline / SplitPane / StickySummary / DateStrip / SortSelect / PriceCalendar / ItineraryTimeline / SelectedItinerary / RetryAction",
+        "catalogVersion": "1.0.0"
+      },
+      "errors": [],
+      "visibleText": "Compare interfacesClassic searchVersion B · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nLoad London to Paris for 2026-10-09 through 2026-10-15, one passenger, train bus flight. Make the price calendar the main story: query minimum price and count grouped by serviceDate, let me change the selected date and sort locally, and show fare choices from a second query that depends on those variables. Add an action that toggles a journey timeline. Choose an arrangement materially different from a mode comparison table and finish with a brief explanation.\n\nIâ€™ll load the weekâ€™s fares first, then build a calendar-led view with local date and sort controls and a toggleable journey timeline.\n\nTravel data updated locally.\n\nIâ€™ll load the weekâ€™s fares first, then build a calendar-led view with local date and sort controls and a toggleable journey timeline.\n\nIâ€™ll make the weekly price calendar the focal point, with date-dependent fare choices and a timeline toggle.\n\nPreparing reactive view…\n\nThe calendar shows each dayâ€™s minimum price and fare count. Date and sort changes update fare choices locally; the button shows or hides the timeline.\n\nIâ€™ll use the loaded fares for a calendar-first view with local controls and a timeline toggle.\n\nCalendar-led journey planner\nLondon to Paris Â· 9â€“15 October 2026\nFind your travel day\nMinimum price and fare count by day\nFri 9 Oct\n€25.43\n7 options\nSat 10 Oct\n€27.60\n9 options\nSun 11 Oct\n€22.87\n9 options\nMon 12 Oct\n€20.79\n8 options\nTue 13 Oct\n€28.44\n6 options\nWed 14 Oct\n€32.74\n9 options\nThu 15 Oct\n€23.90\n9 options\nChoose your departure date\nSort fare choices\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nChoose a fare for the selected date\n\n9 matches · Synthetic fares per passenger\n\nFLIGHT\nCarrier X7t6z6\n\n09:21 · 1h 22m\n\nLondon → Paris · 2026-10-10\n€76.27\nSelect\nFLIGHT\nCarrier 1pameyy\n\n00:04 · 1h 22m\n\nLondon → Paris · 2026-10-10\n€50.73\nSelect\nFLIGHT\nCarrier X6trm8\n\n16:44 · 1h 24m\n\nLondon → Paris · 2026-10-10\n€62.40\nSelect\nTRAIN\nCarrier Oc85vc\n\n01:00 · 2h 12m\n\nLondon → Paris · 2026-10-10\n€57.96\nSelect\nTRAIN\nCarrier Oc85vc\n\n09:02 · 2h 12m\n\nLondon → Paris · 2026-10-10\n€50.38\nSelect\nTRAIN\nCarrier Oc85vc\n\n19:26 · 2h 18m\n\nLondon → Paris · 2026-10-10\n€50.38\nSelect\nBUS\nCarrier 1kmj2pr\n\n09:43 · 7h 57m\n\nLondon → Paris · 2026-10-10\n€31.35\nSelect\nBUS\nCarrier 1hc5s74\n\n22:03 · 9h 40m\n\nLondon → Paris · 2026-10-10\n€27.60\nSelect\nBUS\nCarrier 1ixeerp\n\n17:06 · 10h 10m\n\nLondon → Paris · 2026-10-10\n€32.83\nSelect\nYour selection\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nHide journey timeline\nJourney timeline\n2026-10-10 · 09:21\nLondon → Paris\n\nFlight · 1h 22m · €76.27\n\n2026-10-10 · 00:04\nLondon → Paris\n\nFlight · 1h 22m · €50.73\n\n2026-10-10 · 16:44\nLondon → Paris\n\nFlight · 1h 24m · €62.40\n\n2026-10-10 · 01:00\nLondon → Paris\n\nTrain · 2h 12m · €57.96\n\n2026-10-10 · 09:02\nLondon → Paris\n\nTrain · 2h 12m · €50.38\n\nThe calendar leads with daily minimum prices and counts. Date and sort changes update the fare query locally; the action shows or hides the journey timeline.\n\nIâ€™ll load the weekâ€™s fares first, then build a calendar-led view with local date and sort controls and a toggleable journey timeline.\n\nIâ€™ll make the weekly price calendar the focal point, with date-dependent fare choices and a timeline toggle.\n\nThe calendar shows each dayâ€™s minimum price and fare count. Date and sort changes update fare choices locally; the button shows or hides the timeline.\n\nIâ€™ll use the loaded fares for a calendar-first view with local controls and a timeline toggle.\n\nThe calendar leads with daily minimum prices and counts. Date and sort changes update the fare query locally; the action shows or hides the journey timeline.\n\nThe calendar leads with daily minimum prices and fare counts. Date and sort controls update fare choices locally; the timeline action shows or hides journey details.\n\nRetry\nActive travel view · artifact-e462442a-987a-415a-8f44-5eb84b826a27\nSynthetic fares\nSend\nStop",
+      "tableRows": 0,
+      "fareChoices": 9
+    }
+  ]
+}

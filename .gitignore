@@ -10,3 +10,12 @@ graphify-out/cache/
 node_modules/
 dist/
 npm-debug.log*
+
+# Worktree-local verification artifacts
+artifacts/
+test-results/
+playwright-report/
+
+# Local credentials and dev configuration
+.env
+.env.*

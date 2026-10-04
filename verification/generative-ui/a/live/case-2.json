@@ -1,0 +1,112 @@
+{
+  "index": 2,
+  "prompt": "Load London to Paris for 2026-10-09 through 2026-10-15, one passenger, all modes. Present a journey-story arrangement: RouteMap above, ItineraryTimeline in a Section below, then Inline local controls and a compact FareCards section. Retain a SyntheticTotal. Finish with a concise note that the schedules are synthetic.",
+  "liveModelAuthorship": true,
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "browser": "154.0.8037.97",
+  "requests": 3,
+  "localClickChatDelta": 0,
+  "elapsedMs": 53056,
+  "errors": [],
+  "completed": true,
+  "tree": {
+    "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+    "datasetRef": "dataset-17231j8",
+    "title": "London to Paris",
+    "$type": "TravelSurface",
+    "$key": "journey-story",
+    "children": [
+      {
+        "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+        "datasetRef": "dataset-17231j8",
+        "$type": "RouteMap",
+        "$key": "route-map"
+      },
+      {
+        "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+        "title": "Your journey timeline",
+        "$type": "Section",
+        "$key": "timeline-section",
+        "children": [
+          {
+            "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+            "datasetRef": "dataset-17231j8",
+            "$type": "ItineraryTimeline",
+            "$key": "timeline"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+        "$type": "Inline",
+        "$key": "local-controls",
+        "children": [
+          {
+            "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+            "datasetRef": "dataset-17231j8",
+            "$type": "DateStrip",
+            "$key": "date-control"
+          },
+          {
+            "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+            "datasetRef": "dataset-17231j8",
+            "$type": "ModeChips",
+            "$key": "mode-control"
+          },
+          {
+            "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+            "datasetRef": "dataset-17231j8",
+            "$type": "DirectToggle",
+            "$key": "direct-control"
+          },
+          {
+            "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+            "datasetRef": "dataset-17231j8",
+            "$type": "SortSelect",
+            "$key": "sort-control"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+        "title": "Synthetic fare choices",
+        "variant": "compact",
+        "$type": "Section",
+        "$key": "fares-section",
+        "children": [
+          {
+            "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+            "datasetRef": "dataset-17231j8",
+            "variant": "compact",
+            "$type": "FareCards",
+            "$key": "fare-cards"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66",
+        "datasetRef": "dataset-17231j8",
+        "title": "Synthetic total per passenger",
+        "variant": "compact",
+        "$type": "SyntheticTotal",
+        "$key": "synthetic-total"
+      }
+    ]
+  },
+  "componentTypes": [
+    "TravelSurface",
+    "RouteMap",
+    "Section",
+    "ItineraryTimeline",
+    "Inline",
+    "DateStrip",
+    "ModeChips",
+    "DirectToggle",
+    "SortSelect",
+    "Section",
+    "FareCards",
+    "SyntheticTotal"
+  ],
+  "visibleText": "Compare interfacesClassic searchVersion A · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nLoad London to Paris for 2026-10-09 through 2026-10-15, one passenger, all modes. Present a journey-story arrangement: RouteMap above, ItineraryTimeline in a Section below, then Inline local controls and a compact FareCards section. Retain a SyntheticTotal. Finish with a concise note that the schedules are synthetic.\n\nI’ll load all modes for one passenger, then arrange the journey story.\n\nTravel data updated locally.\n\nI’ll load all modes for one passenger, then arrange the journey story.\n\nHere’s the London–Paris journey story for October 9–15.\n\nLondon to Paris\nYour route\nLondon\nParis\nSchematic route, not a geographic map.\nYour journey timeline\nJourney timeline\n2026-10-09 · 17:16\nLondon → Paris\n\nBus · 8h 45m · €25.43\n\n2026-10-09 · 06:27\nLondon → Paris\n\nBus · 8h 40m · €26.55\n\n2026-10-09 · 00:11\nLondon → Paris\n\nBus · 9h 33m · €32.86\n\n2026-10-09 · 01:58\nLondon → Paris\n\nFlight · 1h 23m · €42.19\n\n2026-10-09 · 09:08\nLondon → Paris\n\nFlight · 1h 26m · €61.34\n\nDeparture date\nTransport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nDirect connections only\nSort options\nLowest price\nHighest price\nFastest first\nLongest first\nEarliest first\nSynthetic fare choices\nYour options\n\n7 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelect\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nFLIGHT\nCarrier X6trm8\n\n01:58 · 1h 23m\n\nLondon → Paris · 2026-10-09\n€42.19\nSelect\nFLIGHT\nCarrier 1pameyy\n\n09:08 · 1h 26m\n\nLondon → Paris · 2026-10-09\n€61.34\nSelect\nTRAIN\nCarrier Oc85vc\n\n01:02 · 2h 12m\n\nLondon → Paris · 2026-10-09\n€64.28\nSelect\nTRAIN\nCarrier Oc85vc\n\n10:54 · 2h 26m\n\nLondon → Paris · 2026-10-09\n€68.50\nSelect\nSynthetic total per passenger\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\n\nSchedules, fares and totals are synthetic.\n\nI’ll load all modes for one passenger, then arrange the journey story.\n\nHere’s the London–Paris journey story for October 9–15.\n\nSchedules, fares and totals are synthetic.\n\nSchedules, fares and totals are synthetic.\n\nRetry\nActive travel view · artifact-a21537c0-049e-41ab-bdd8-e095e9d7cc66\nSynthetic fares\nSend\nStop"
+}

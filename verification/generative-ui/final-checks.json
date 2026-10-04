@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-03",
+  "sourceRevision": "a36f4340bf66219ff7c6e1205cc216e7c71865b8",
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "typecheck": "pass",
+  "catalog": "pass; byte-exact generated check",
+  "vitest": {
+    "files": 29,
+    "tests": 108,
+    "status": "pass"
+  },
+  "playwright": {
+    "tests": 7,
+    "status": "pass",
+    "browser": "Chrome154.0.8037.97",
+    "viewports": [
+      360,
+      800,
+      1280
+    ],
+    "scope": "Generative welcome labels/focus/overflow; classic welcome controls. Test frontend uses default API8000 and emits connection-refused diagnostics; these shell tests do not prove real backend searches."
+  },
+  "pythonBackend": {
+    "tests": 8,
+    "status": "pass"
+  },
+  "fixture": {
+    "fares": 10000000,
+    "locations": 163,
+    "directionalRoutes": 472,
+    "companies": 91,
+    "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+    "sizeBytes": 1598590976,
+    "mtimeNs": 1790978499798379462,
+    "integrity": "ok",
+    "rowCountMetadataCoverageFareValidityIndexes": "pass",
+    "fullSourceManifest": "fails: preserved external generator_version2 fixture lacks newer source destinations/routes/providers; no regeneration"
+  },
+  "build": {
+    "status": "pass",
+    "classicEntryBytes": 253630,
+    "classicEntryGzipBytes": 79750,
+    "generativeRouteBytes": 881400,
+    "generativeRouteGzipBytes": 260110,
+    "advisory": "Generative route exceeds Vite500KB chunk advisory"
+  },
+  "liveNativeArrangements": 3,
+  "liveReactiveArrangements": 2,
+  "finalACompletion": {
+    "http200": 5,
+    "acceptedPresent": 1,
+    "finalTextOnly": true,
+    "errors": 0,
+    "evidence": "a/user-conversation/"
+  },
+  "finalBCompletion": {
+    "http200": 2,
+    "tools": [
+      "edit_artifact",
+      "none"
+    ],
+    "result": "stop",
+    "reusedCapturedSource": true,
+    "newGraphGenerated": false,
+    "errors": 0,
+    "evidence": "b/user-itinerary/post-completion-fix/"
+  },
+  "savedChatReload": "pass; root-saved-chat-reload.json",
+  "humanRatings": null,
+  "optionalOneMillionQueryStress": "not attempted",
+  "machineMatrix": "paused at explicit user request; zero96-cell study cells",
+  "latestUserConversationRegressions": "fixed; final root reload and representative genuine completion proofs pass"
+}
