@@ -5,7 +5,7 @@ import {createFareDataBridge} from '../../data/fare-data-bridge'
 import {ArtifactIdSchema} from '../../contracts'
 import {afterEach,expect,it,vi} from 'vitest'
 import {cleanup,render,screen,waitFor} from '@testing-library/react'
-import {bToolkit,hasAcceptedRepairAfter,SceneToolFrame} from './toolkit'
+import {bToolkit,createBToolkit,hasAcceptedRepairAfter,SceneToolFrame} from './toolkit'
 vi.mock('../a/toolkit-client',()=>({default:{}}))
 afterEach(()=>{cleanup();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
 it('never leaves a captured terminal failed compose input as a preparing skeleton',()=>{
@@ -76,4 +76,26 @@ it.each(['legacy-title','body'])('renders captured explanatory Callout text thro
  render(<GenerativeChat variant="b" services={services} sceneToolkit={bToolkit} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
  expect(await screen.findByText(explanation)).toHaveProperty('tagName','P')
  expect(screen.queryByRole('alert')).toBeNull()
+})
+
+it('acknowledges only host-owned artifacts and loaded datasets with native error metadata',async()=>{
+ const state=createUIStateStore(),id=ArtifactIdSchema.parse('art');state.initializeMissing(id,{})
+ const bridge=createFareDataBridge({pageSource:async()=>({rows:[],total:0,pages:1,page:1,sourceVersion:'scope-proof'})}),services={state,bridge,activeId:()=>id,activate:()=>{}}
+ const tool=createBToolkit(services).compose_reactive_scene
+ const input={artifactRef:id,programRevision:0,program:'root = TravelSurface("art", null, null, null, "Trip", null, [offers])\noffers = FareCards("art", "unregistered-dataset")'}
+ expect(await tool.execute(input)).toMatchObject({isError:true,result:{status:'error'}})
+ expect(await tool.execute({...input,artifactRef:'missing'})).toMatchObject({isError:true,result:{status:'error'}})
+ const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-03'},modes:['train'],passengers:1},new AbortController().signal)
+ state.dispatch({kind:'datasets',artifactId:id,datasetRefs:[manifest.datasetId]})
+ expect(await tool.execute({...input,program:input.program.replace('unregistered-dataset',manifest.datasetId)})).toMatchObject({isError:false,result:{status:'accepted'}})
+ expect(await tool.execute({...input,program:`root = TravelSurface("art")\nq = Query("local_query", {version:1,sources:[{datasetRef:"ghost",alias:"f"}],limit:5})`})).toMatchObject({isError:true,result:{status:'error'}})
+})
+it('keeps invalid saved acknowledgements as failure records instead of mounting unknown resources',async()=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{})
+ const messages:UIMessage[]=[{id:'invalid-historical-scene',role:'assistant',parts:[{type:'tool-compose_reactive_scene',toolCallId:'invalid-ref',state:'output-available',input:{artifactRef:'art',programRevision:0,program:'root = TravelSurface("art", null, null, null, "Trip", null, [offers])\noffers = FareCards("art", "unregistered-dataset")'},output:{artifactId:'art',programRevision:0,status:'accepted'}}]}]
+ const before=JSON.stringify(messages),services={state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}
+ render(<GenerativeChat variant="b" services={services} capture={()=>({schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ expect(await screen.findByText(/This generated view could not be completed/)).toBeVisible()
+ expect(screen.queryByText(/travel data is not available/)).toBeNull();expect(JSON.stringify(messages)).toBe(before)
 })
