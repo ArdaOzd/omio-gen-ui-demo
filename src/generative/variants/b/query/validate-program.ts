@@ -68,5 +68,5 @@ function inspect(node:ASTNode){
  if(node.k==='Arr'&&node.els.length>80)throw new Error('ARRAY_BUDGET')
  if(node.k==='Obj'&&node.entries.some(([key])=>['rows','fares','sql','url','javascript','__proto__','constructor','prototype'].includes(key)))throw new Error('FORBIDDEN_LITERAL')
  if(node.k==='Member'&&['__proto__','constructor','prototype'].includes(node.field))throw new Error('FORBIDDEN_MEMBER')
- if(node.k==='Str'&&(node.v.length>600||/^https?:|javascript:|SELECT\s/i.test(node.v)))throw new Error('FORBIDDEN_TEXT')
+ if(node.k==='Str'&&(node.v.length>600||/^https?:|javascript:/i.test(node.v)))throw new Error('FORBIDDEN_TEXT')
 }
