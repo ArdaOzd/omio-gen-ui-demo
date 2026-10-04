@@ -21,3 +21,12 @@ it('rejects copied complete fare literals outside state declarations',()=>{
  const row=createSyntheticRows(1)[0],literal=JSON.stringify(row).replace(/"([A-Za-z][A-Za-z0-9]*)":/g,'$1:')
  expect(()=>validateReactiveProgram(`copiedFare = ${literal}\nroot = TravelSurface("art")`)).toThrow()
 })
+
+
+it('rejects literal Set values that cannot enter the declared host field',()=>{
+ const primitive=(value:string)=>`$note = "Saved value"\nchange = RetryAction("art",null,null,null,"Change",null,null,null,null,null,Action([@Set($note,${value})]))\nroot = TravelSurface("art",null,null,null,"Trip",null,[change])`
+ expect(()=>validateReactiveProgram(primitive(JSON.stringify('x'.repeat(160))))).not.toThrow()
+ expect(()=>validateReactiveProgram(primitive(JSON.stringify('x'.repeat(161))))).toThrow('VARIABLE_ASSIGNMENT_TYPE')
+ expect(()=>validateReactiveProgram(primitive('[1,2]'))).toThrow('VARIABLE_ASSIGNMENT_TYPE')
+ expect(()=>validateReactiveProgram(source+'\nchange = RetryAction("art",null,null,null,"Change",null,null,null,null,null,Action([@Set($filters,"bus")]))')).toThrow('VARIABLE_ASSIGNMENT_TYPE')
+})

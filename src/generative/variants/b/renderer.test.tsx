@@ -174,3 +174,36 @@ timeline = Callout("art", null, null, null, "Authored timeline")`
  expect(services.state.get(id).runtimeVariables.$showTimeline).toBe(false);expect(screen.queryByText('Authored timeline')).toBeNull();expect(picker).toHaveFocus()
  services.dispatch.dispose()
 })
+
+it('commits a genuine ordered mutation and hidden primitive before subsequent fare selection',async()=>{
+ const {services,program,later}=await wideQueryFixture()
+ services.state.dispatch({kind:'runtimeVariables',artifactId:id,runtimeVariables:{$showTimeline:true}})
+ const withToggle=program.replace('[mode, picker])','[mode, picker, hide, $showTimeline ? timeline : null])')+`
+$showTimeline = false
+hide = RetryAction("art", null, null, null, "Hide timeline", null, null, null, null, null, Action([@Run(hideMutation), @Set($showTimeline, false)]))
+hideMutation = Mutation("patch_artifact_state", {kind:"runtimeVariables",runtimeVariables:{"$showTimeline":false}})
+timeline = Callout("art", null, null, null, "Authored timeline")`
+ render(<TravelProvider services={services}><ReactiveScene artifactRef={id} program={withToggle}/></TravelProvider>)
+ await screen.findByText('Authored timeline');await waitFor(()=>expect(screen.getAllByRole('option')).toHaveLength(5))
+ await userEvent.click(screen.getByRole('button',{name:'Hide timeline'}))
+ await waitFor(()=>expect(screen.queryByText('Authored timeline')).toBeNull());expect(services.state.get(id).runtimeVariables.$showTimeline).toBe(false)
+ const picker=screen.getByRole('combobox',{name:'Choose a synthetic fare'});picker.focus();await userEvent.selectOptions(picker,later);await act(()=>services.whenIdle(id))
+ expect(services.state.get(id).runtimeVariables.$showTimeline).toBe(false);expect(screen.queryByText('Authored timeline')).toBeNull();expect(picker).toHaveFocus()
+ services.dispatch.dispose()
+})
+
+
+it('bounds a computed invalid Set at the native state callback and keeps the last saved view',async()=>{
+ const services=setup();services.state.dispatch({kind:'runtimeVariables',artifactId:id,runtimeVariables:{$note:'Saved value',$left:'x'.repeat(80),$right:'y'.repeat(81)}})
+ const program=`$note = "Saved value"
+$left = "${'x'.repeat(80)}"
+$right = "${'y'.repeat(81)}"
+change = RetryAction("art",null,null,null,"Expand note",null,null,null,null,null,Action([@Set($note,$left + $right)]))
+note = Callout("art",null,null,null,$note)
+root = TravelSurface("art",null,null,null,"Trip",null,[change,note])`
+ const before=services.state.exportSnapshot(id)
+ render(<TravelProvider services={services}><ReactiveScene artifactRef={id} program={program}/></TravelProvider>)
+ await userEvent.click(screen.getByRole('button',{name:'Expand note'}))
+ expect(await screen.findByRole('alert')).toHaveTextContent('saved-state limits')
+ expect(services.state.exportSnapshot(id)).toEqual(before);expect(screen.getByText('Saved value')).toBeVisible();expect(screen.queryByText('x'.repeat(80)+'y'.repeat(81))).toBeNull()
+})
