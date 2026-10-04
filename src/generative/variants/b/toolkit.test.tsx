@@ -99,3 +99,28 @@ it('keeps invalid saved acknowledgements as failure records instead of mounting 
  expect(await screen.findByText(/This generated view could not be completed/)).toBeVisible()
  expect(screen.queryByText(/travel data is not available/)).toBeNull();expect(JSON.stringify(messages)).toBe(before)
 })
+
+
+it('persists ordered timeline mutation state through the native restored tool adapter',async()=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const {default:userEvent}=await import('@testing-library/user-event'),{createSyntheticRows}=await import('../../data/synthetic-source'),{FareRowSchema}=await import('../../contracts')
+ const id=ArtifactIdSchema.parse('native-timeline'),state=createUIStateStore(),rows=createSyntheticRows(2).map(row=>({...row,serviceDate:'2026-10-02'}))
+ const bridge=createFareDataBridge({pageSource:async()=>({rows,total:2,pages:1,page:1,sourceVersion:'native-timeline-proof'})}),manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['train','bus','flight','ferry'],passengers:1},new AbortController().signal)
+ state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-02'},runtimeVariables:{$showTimeline:true}})
+ const services={state,bridge,activeId:()=>id,activate:()=>{}}
+ const program=`$showTimeline = false
+$selectedFareIds = []
+hideMutation = Mutation("patch_artifact_state", {kind:"runtimeVariables",runtimeVariables:{"$showTimeline":false}})
+showMutation = Mutation("patch_artifact_state", {kind:"runtimeVariables",runtimeVariables:{"$showTimeline":true}})
+toggle = RetryAction("${id}",null,null,null,$showTimeline ? "Hide timeline" : "Show timeline",null,null,null,null,null,$showTimeline ? Action([@Run(hideMutation),@Set($showTimeline,false)]) : Action([@Run(showMutation),@Set($showTimeline,true)]))
+timeline = Callout("${id}",null,null,null,"Native timeline")
+q = Query("local_query",{version:1,sources:[{datasetRef:"${manifest.datasetId}",alias:"f"}],project:${JSON.stringify(FareRowSchema.keyof().options)},limit:100})
+picker = FarePicker("${id}","${manifest.datasetId}",null,null,"Choose",null,null,$selectedFareIds,"selectedFareIds",q)
+root = TravelSurface("${id}",null,null,null,"Trips",null,[toggle,picker,$showTimeline ? timeline : null])`
+ const messages:UIMessage[]=[{id:'native-timeline-message',role:'assistant',parts:[{type:'tool-compose_reactive_scene',toolCallId:'native-timeline-call',state:'output-available',input:{artifactRef:id,programRevision:1,program},output:{artifactId:id,programRevision:1,status:'accepted'}}]}]
+ render(<GenerativeChat variant="b" services={services} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ await screen.findByText('Native timeline');await userEvent.click(screen.getByRole('button',{name:'Hide timeline'}))
+ await waitFor(()=>expect(state.get(id).runtimeVariables.$showTimeline).toBe(false));expect(screen.queryByText('Native timeline')).toBeNull()
+ await waitFor(()=>expect(screen.getAllByRole('option')).toHaveLength(3));await userEvent.selectOptions(screen.getByRole('combobox',{name:'Choose a synthetic fare'}),rows[0]!.id)
+ expect(state.get(id).runtimeVariables.$showTimeline).toBe(false);expect(screen.queryByText('Native timeline')).toBeNull();expect(state.get(id).selectedFareIds).toEqual([rows[0]!.id])
+})

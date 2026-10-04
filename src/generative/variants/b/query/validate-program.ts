@@ -1,6 +1,6 @@
-import { autoClose,createParser,parseExpression,split,tokenize,walkAST,type ASTNode } from '@openuidev/lang-core'
+import { autoClose,createParser,evaluate,parseExpression,split,tokenize,walkAST,type ASTNode } from '@openuidev/lang-core'
 import { catalogDescriptors } from '../../../catalog/generated/catalog'
-import { ArtifactUIStateSchema } from '../../../contracts'
+import { ArtifactUIStateSchema,RuntimeVariablesSchema } from '../../../contracts'
 import { assertNoBulkData,hasFareRowFields } from '../../../contracts/privacy'
 import { bSchemaLibrary,BindingSchema,type Binding } from './schema'
 export type ProgramBinding={variable:string;field:Binding;artifactRef:string}
@@ -47,7 +47,18 @@ export function validateReactiveProgram(program:string,options:{complete?:boolea
   if(binding){if(!ArtifactUIStateSchema.shape[binding.field].safeParse(value).success)throw new Error('VARIABLE_BINDING_TYPE')}
   else if(!(value===null||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)||typeof value==='string'&&value.length<=160))throw new Error('VARIABLE_TYPE')
  }
- for(const assignment of assignments){if(assignment.k!=='Comp')continue;const target=assignment.args[0];if(target?.k!=='StateRef'||!variables.includes(target.n))throw new Error('UNKNOWN_VARIABLE');if(assignment.name==='Set'&&assignment.args[1])walkAST(assignment.args[1],node=>{if(node.k==='Ref'||node.k==='RuntimeRef'||node.k==='Comp'||node.k==='Member'&&node.field==='rows')throw new Error('VARIABLE_QUERY_CAPTURE')})}
+ for(const assignment of assignments){
+  if(assignment.k!=='Comp')continue
+  const target=assignment.args[0];if(target?.k!=='StateRef'||!variables.includes(target.n))throw new Error('UNKNOWN_VARIABLE')
+  if(assignment.name==='Set'&&assignment.args[1]){
+   const value=assignment.args[1];let dynamic=false
+   walkAST(value,node=>{if(node.k==='Ref'||node.k==='RuntimeRef'||node.k==='Comp'||node.k==='Member'&&node.field==='rows')throw new Error('VARIABLE_QUERY_CAPTURE');if(node.k==='StateRef')dynamic=true})
+   if(!dynamic){const literal=evaluate(value,{getState:()=>undefined,resolveRef:()=>undefined}),binding=bindings.find(binding=>binding.variable===target.n)
+    const valid=binding?ArtifactUIStateSchema.shape[binding.field].safeParse(literal).success:RuntimeVariablesSchema.safeParse({[target.n]:literal}).success
+    if(!valid)throw new Error('VARIABLE_ASSIGNMENT_TYPE')
+   }
+  }
+ }
  assertNoBulkData(parsed.stateDeclarations)
  return {parsed,bindings,expressions,queryBindings,variables:Object.keys(parsed.stateDeclarations),dependencies:parsed.queryStatements.map(q=>({id:q.statementId,deps:q.deps}))}
 }
