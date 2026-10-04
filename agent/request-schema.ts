@@ -48,7 +48,10 @@ export function parseToolOutput(name:string,input:unknown):unknown {
  if(name==='get_top_fares')return z.strictObject({datasetId:id,revision,facts:z.array(BoundedFareFactSchema).max(5)}).parse(input);
  if(name==='summarize_fares')return z.strictObject({datasetId:id,revision,groups:z.array(z.strictObject({label:z.string().max(160),count:z.number().int().nonnegative()})).max(30),truncated:z.boolean()}).parse(input);
  if(name==='get_route')return z.strictObject({datasetId:id,originIds:z.array(id).max(8),destinationIds:z.array(id).max(8),modes:z.array(z.enum(['train','bus','flight','ferry'])).max(4)}).parse(input);
- if(name==='find_carriers')return z.strictObject({datasetId:id,carrierIds:z.array(id).max(20),truncated:z.boolean()}).parse(input);
+ if(name==='find_carriers')return z.union([
+  z.strictObject({datasetId:id,carriers:z.array(z.strictObject({id,name:z.string().trim().min(1).max(120)})).max(20),truncated:z.boolean()}),
+  z.strictObject({datasetId:id,carrierIds:z.array(id).max(20),truncated:z.boolean()}),
+ ]).parse(input);
  if(name==='present')return z.strictObject({}).parse(input);
  if(name==='compose_reactive_scene')return z.strictObject({artifactId:id,programRevision:revision,status:z.enum(['ready','accepted','error'])}).parse(input);
  if(name==='edit_artifact')return z.strictObject({artifactId:id,revision,status:z.enum(['applied','stale'])}).parse(input);

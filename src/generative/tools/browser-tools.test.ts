@@ -2,7 +2,7 @@ import { describe,expect,it } from 'vitest';
 import { createBrowserTools } from './browser-tools';
 import { createFareDataBridge } from '../data/fare-data-bridge';
 import { createUIStateStore } from '../state/ui-state-store';
-import { ArtifactIdSchema,UIStateRevisionSchema } from '../contracts';
+import { ArtifactIdSchema,UIStateRevisionSchema,FareRowSchema,CoverageRequestSchema } from '../contracts';
 const artifactId=ArtifactIdSchema.parse('artifact-test');
 const coverage={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train'],passengers:1};
 function setup(){const store=createUIStateStore();store.initializeMissing(artifactId,{dates:{start:'2026-10-02'}});const bridge=createFareDataBridge({pageSource:async()=>({rows:[],total:0,pages:1,page:1,sourceVersion:'fixture'})});return {store,tools:createBrowserTools({store,bridge,activeArtifactId:()=>artifactId})};}
@@ -41,4 +41,27 @@ it('reports capacity instead of acknowledging an unretained ninth resource',asyn
  expect(await tools.load_fares.execute({coverage:{...coverage,dateWindow:{from:date,to:date}}})).toMatchObject({status:'error',code:'DATASET_CAPACITY_EXCEEDED'})
  expect(store.get(artifactId)).toEqual(before)
  expect(await tools.load_fares.execute({coverage:{...coverage,dateWindow:{from:'2026-10-01',to:'2026-10-01'}}})).toHaveProperty('datasetId')
+})
+
+
+it('returns bounded names from the requested resource without copying fare rows',async()=>{
+ const store=createUIStateStore();store.initializeMissing(artifactId,{})
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:Array.from({length:25},(_,index)=>FareRowSchema.parse({id:`fare-${input.date}-${index}`,originId:'london',destinationId:'paris',serviceDate:input.date,mode:'train',carrierId:`carrier-${index}`,carrierName:index===0?(input.date==='2026-10-09'?'ÖBB':'Other resource name'):index===1?undefined:`Named provider ${index}`,priceCents:2900,durationMinutes:120,departureMinutes:600,availableSeats:12,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})),total:25,page:1,pages:1,sourceVersion:'fixture'})})
+ const first=await bridge.load(CoverageRequestSchema.parse(coverage),new AbortController().signal)
+ const second=await bridge.load(CoverageRequestSchema.parse({...coverage,dateWindow:{from:'2026-10-10',to:'2026-10-10'}}),new AbortController().signal)
+ const tools=createBrowserTools({store,bridge,activeArtifactId:()=>artifactId})
+ const output=await tools.find_carriers.execute({datasetRef:first.datasetId})
+ expect(output).toMatchObject({datasetId:first.datasetId,carriers:expect.arrayContaining([{id:'carrier-0',name:'ÖBB'},{id:'carrier-1',name:'carrier-1'}]),truncated:true})
+ expect(output).toHaveProperty('carriers',expect.any(Array))
+ if(typeof output==='object'&&output!==null&&'carriers' in output&&Array.isArray(output.carriers))expect(output.carriers).toHaveLength(20)
+ else throw new Error('Expected bounded carrier metadata')
+ expect(JSON.stringify(output)).not.toMatch(/priceCents|durationMinutes|availableSeats|rows|Other resource name|undefined|null/)
+ expect(await tools.find_carriers.execute({datasetRef:second.datasetId})).toMatchObject({carriers:expect.arrayContaining([{id:'carrier-0',name:'Other resource name'}])})
+ bridge.release(first.datasetId)
+ expect(await tools.find_carriers.execute({datasetRef:first.datasetId})).toEqual({status:'error',code:'LOCAL_TOOL_FAILED'})
+})
+it('keeps cancellation and unsafe-input guards on carrier metadata',async()=>{
+ const{tools}=setup(),controller=new AbortController();controller.abort()
+ expect(await tools.find_carriers.execute({datasetRef:'dataset-1'},{abortSignal:controller.signal})).toEqual({status:'error',code:'LOCAL_TOOL_CANCELLED'})
+ expect(await tools.find_carriers.execute({datasetRef:'dataset-1',rows:[{id:'fare-1',priceCents:100}]})).toEqual({status:'error',code:'LOCAL_TOOL_FAILED'})
 })
