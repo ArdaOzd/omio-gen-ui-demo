@@ -38,15 +38,14 @@ export async function withOneRepair<T>(options:{prompt:string;signal:AbortSignal
    const elapsed=()=>Math.min(MODEL_REQUEST_TIMEOUT_MS,Math.max(0,Date.now()-started));
    options.onAttempt?.({attempt,status:'start',reason:attempt===0?'initial':'validation-repair',elapsedMs:0});
    let validationFailed=false;
+   let value:T;
    try{
     checkActive();
     const prompt=attempt===0?options.prompt:options.prompt+'\nRepair the previous invalid decision once. Use only the registered grammar, schemas and existing references. Do not include the invalid source. Return text only if no valid scene is possible. Validation feedback: '+feedback;
-    const value=await Promise.race([options.run(prompt,attempt,controller.signal),aborted]);
+    value=await Promise.race([options.run(prompt,attempt,controller.signal),aborted]);
     checkActive();
     try{options.validate(value);}catch(error){validationFailed=true;throw error;}
     checkActive();
-    options.onAttempt?.({attempt,status:'end',reason:'accepted',elapsedMs:elapsed()});
-    return value;
    }catch(error){
     const reason=options.signal.aborted?'cancelled':controller.signal.aborted?'timeout':validationFailed||error instanceof InvalidModelOutputError?'invalid-output':'provider-error';
     options.onAttempt?.({attempt,status:'end',reason,elapsedMs:elapsed()});
@@ -54,7 +53,11 @@ export async function withOneRepair<T>(options:{prompt:string;signal:AbortSignal
     checkActive();
     if(attempt===1 || (!validationFailed && !(error instanceof InvalidModelOutputError)))throw error;
     feedback=validationReason(error);
+    continue;
    }
+   options.onAttempt?.({attempt,status:'end',reason:'accepted',elapsedMs:elapsed()});
+   checkActive();
+   return value;
   }
   throw new Error('Repair budget exhausted');
  }finally{

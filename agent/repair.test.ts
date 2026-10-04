@@ -9,6 +9,16 @@ describe('one bounded model repair', () => {
   expect(observed).toEqual([{attempt:0,status:'start',reason:'initial',elapsedMs:0},{attempt:0,status:'end',reason:'invalid-output',elapsedMs:0},{attempt:1,status:'start',reason:'validation-repair',elapsedMs:0},{attempt:1,status:'end',reason:'accepted',elapsedMs:0}]);
   expect(JSON.stringify(observed)).not.toContain('private');
  });
+ it('rejects observer-triggered cancellation after validation without a second terminal event', async()=>{
+  const parent=new AbortController(),events:unknown[]=[],failed=vi.fn();
+  await expect(withOneRepair({prompt:'context',signal:parent.signal,onAttempt:event=>{events.push(event);if(event.status==='end'&&event.reason==='accepted')parent.abort()},run:async()=> 'valid',validate:()=>{},failed})).rejects.toThrow('cancelled');
+  expect(events).toMatchObject([{attempt:0,status:'start',reason:'initial'},{attempt:0,status:'end',reason:'accepted'}]);expect(events).toHaveLength(2);expect(failed).not.toHaveBeenCalled();
+ });
+ it('does not classify an observer error as a provider failure or start a repair', async()=>{
+  const events:unknown[]=[],failed=vi.fn(),run=vi.fn(async()=> 'valid');
+  await expect(withOneRepair({prompt:'context',signal:new AbortController().signal,onAttempt:event=>{events.push(event);if(event.status==='end')throw new Error('Observer failed')},run,validate:()=>{},failed})).rejects.toThrow('Observer failed');
+  expect(events).toHaveLength(2);expect(run).toHaveBeenCalledTimes(1);expect(failed).not.toHaveBeenCalled();
+ });
  it('observes a terminal provider failure without a repair attempt', async()=>{
   const observed:unknown[]=[];
   await expect(withOneRepair({prompt:'context',signal:new AbortController().signal,onAttempt:event=>observed.push(event),run:async()=>{throw new Error('private RPC payload')},validate:()=>{}})).rejects.toThrow('private RPC payload');
