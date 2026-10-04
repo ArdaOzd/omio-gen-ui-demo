@@ -85,10 +85,22 @@ export async function sourceGate(page,recorder,cell,date){
  },{timeout:30000}).toBe(true);
  return proof;
 }
-async function taskDOM(view){return view.evaluate(root=>{
- const visible=node=>Boolean(node&&node.getClientRects().length),find=selector=>[...root.querySelectorAll(selector)].filter(visible),before=(a,b)=>Boolean(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING)),calendar=find('.travel-calendar')[0],offers=find('.travel-fares,select[aria-label="Choose a synthetic fare"]')[0],comparison=find('table')[0],filters=find('.travel-chips,input[type=number],input[type=checkbox]'),route=find('svg[aria-label^="Schematic route"],ol[aria-label="Travel stops"]')[0],total=find('.travel-total')[0];
- const beside=(a,b)=>{if(!a||!b)return false;const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return(x.right<=y.left||y.right<=x.left)&&Math.min(x.bottom,y.bottom)>Math.max(x.top,y.top)};
- return{calendarDays:find('.travel-calendar button').length,plotPoints:find('.travel-dot').length,comparisonRows:find('table tbody tr').length,selectableFares:find('.travel-fares button,select[aria-label="Choose a synthetic fare"] option[value]:not([value=""])').length||find('select[aria-label="Choose a synthetic fare"]').reduce((n,select)=>n+[...select.options].filter(option=>option.value).length,0),filterControls:filters.length,modeSections:find('.travel-chips').length,dataPanels:new Set(find('.travel-insight,.travel-fares,table,.travel-dot').map(node=>node.classList.contains('travel-insight')?node:node.closest('section'))).size,comparisonBeforeCalendar:before(comparison,calendar),calendarBeforeOffers:before(calendar,offers),filtersBesideResults:filters.some(control=>beside(control.closest('fieldset')??control.closest('label'),comparison)),routeAndTotalBeforeOffers:before(route,offers)&&before(total,offers)};
+export async function taskDOM(view){return view.evaluate(root=>{
+ const visible=node=>Boolean(node&&node.getClientRects().length),find=selector=>[...root.querySelectorAll(selector)].filter(visible),before=(a,b)=>Boolean(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING)),calendar=find('.travel-calendar')[0],offers=find('.travel-fares,select[aria-label="Choose a synthetic fare"]')[0],comparison=find('table')[0],filters=find('.travel-chips,input[type=number],input[type=checkbox],input[type=date]'),route=find('svg[aria-label^="Schematic route"],ol[aria-label="Travel stops"]')[0],total=find('.travel-total')[0];
+ const rect=node=>{const{left,right,top,bottom}=node.getBoundingClientRect();return{left,right,top,bottom}};
+ const regions=(control,result)=>{
+  for(let parent=control.parentElement;parent&&root.contains(parent);parent=parent.parentElement){
+   if(!parent.contains(result))continue;
+   let filter=control,data=result;while(filter.parentElement!==parent)filter=filter.parentElement;while(data.parentElement!==parent)data=data.parentElement;
+   if(filter===data)return null;
+   const x=rect(filter),y=rect(data);return(x.right<=y.left||y.right<=x.left)&&Math.min(x.bottom,y.bottom)>Math.max(x.top,y.top)?{filter:x,results:y}:null;
+  }
+  return null;
+ };
+ const results=find('table,.travel-calendar,.travel-fares,select[aria-label="Choose a synthetic fare"]');
+ let filterResultRegions=null;for(const control of filters){for(const result of results){filterResultRegions=regions(control,result);if(filterResultRegions)break}if(filterResultRegions)break}
+
+ return{calendarDays:find('.travel-calendar button').length,plotPoints:find('.travel-dot').length,comparisonRows:find('table tbody tr').length,selectableFares:find('.travel-fares button,select[aria-label="Choose a synthetic fare"] option[value]:not([value=""])').length||find('select[aria-label="Choose a synthetic fare"]').reduce((n,select)=>n+[...select.options].filter(option=>option.value).length,0),filterControls:filters.length,modeSections:find('.travel-chips').length,dataPanels:new Set(find('.travel-insight,.travel-fares,table,.travel-dot').map(node=>node.classList.contains('travel-insight')?node:node.closest('section'))).size,comparisonBeforeCalendar:before(comparison,calendar),calendarBeforeOffers:before(calendar,offers),filtersBesideResults:Boolean(filterResultRegions),filterResultRegions,routeAndTotalBeforeOffers:before(route,offers)&&before(total,offers)};
 })}
 async function assertModeOutput(page,recorder,offset,mode){await expect.poll(async()=>{const queries=await page.evaluate(offset=>window.__studyMetrics.queries.slice(offset),offset);return queries.some(query=>query.status==='result'&&query.resultFareRows>0&&query.resultModes.length===1&&query.resultModes[0]===mode)},{timeout:30000}).toBe(true)}
 async function localFilter(page,recorder,cell,view){
