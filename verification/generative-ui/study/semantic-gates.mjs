@@ -1,7 +1,13 @@
 export function fareSearchDate(value){const url=new URL(value,'http://localhost');return url.pathname==='/api/search'?url.searchParams.get('departure_date'):null;}
 export function firstFareOption(options){const option=options.find(option=>option.value&&option.label.trim());if(!option)throw new Error('No selectable fare exists in the native control');return option;}
 export function oracleFacts(rows,filters){return rows.filter(row=>(!filters.modes?.length||filters.modes.includes(row.mode))&&(!filters.carrierIds?.length||filters.carrierIds.includes(row.carrierId))&&(filters.minPriceCents===undefined||row.priceCents>=filters.minPriceCents)&&(filters.maxPriceCents===undefined||row.priceCents<=filters.maxPriceCents)&&(filters.maxDurationMinutes===undefined||row.durationMinutes<=filters.maxDurationMinutes)&&(!filters.directOnly||row.direct!==false));}
-const datePredicate=(node,date)=>Boolean(node&&(String(node.field).split('.').at(-1)==='serviceDate'&&((node.op==='eq'&&node.value===date)||(node.op==='in'&&node.value?.includes(date)))||node.all?.some(child=>datePredicate(child,date))||node.any?.some(child=>datePredicate(child,date))));
+const datePredicate=(node,date)=>{
+ if(!node)return false;
+ if(node.all)return node.all.some(child=>datePredicate(child,date));
+ if(node.any)return node.any.length>0&&node.any.every(child=>datePredicate(child,date));
+ if(String(node.field).split('.').at(-1)!=='serviceDate')return false;
+ return node.op==='eq'&&node.value===date||node.op==='in'&&Array.isArray(node.value)&&node.value.length>0&&node.value.every(value=>value===date)||node.op==='between'&&Array.isArray(node.value)&&node.value.length===2&&node.value[0]===date&&node.value[1]===date;
+};
 export function assertSourceAvailability({state,descriptors,queries,availableCount,visibleDataCount,sourceVersion,expectedDate,origin='london',destination='paris',requireSingleDate=false}){
  if(state?.dates?.start!==expectedDate)throw new Error('Active artifact did not retain the requested departure date');
  const matching=descriptors.filter(item=>state.datasetRefs.includes(item.datasetId)&&item.sourceVersion===sourceVersion&&item.request.originIds.includes(origin)&&item.request.destinationIds.includes(destination)&&item.request.dateWindow.from<=expectedDate&&item.request.dateWindow.to>=expectedDate);
