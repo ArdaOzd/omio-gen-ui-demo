@@ -3,7 +3,7 @@ import{walkAST}from'@openuidev/lang-core';
 import{validatePresentTree}from'../../../src/generative/variants/a/tree.ts';
 import{validateReactiveProgram}from'../../../src/generative/variants/b/query/validate-program.ts';
 import{catalogDescriptors}from'../../../src/generative/catalog/generated/catalog.ts';
-const componentNames=new Set(catalogDescriptors.map(item=>item.name)),hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const componentNames=new Set(catalogDescriptors.map(item=>item.name)),layoutNames=new Set(catalogDescriptors.filter(item=>item.group==='layout').map(item=>item.name)),hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 export function analyzeSource(scene){
  try{
   if(scene.toolName==='present'){
@@ -25,7 +25,22 @@ export function analyzeSource(scene){
    return Object.fromEntries(Object.entries(node).map(([name,value])=>[name,Array.isArray(value)?value.map(item=>normalize(item,'',path)):value&&typeof value==='object'?normalize(value,'',path):name==='n'&&node.k==='Ref'?'<unresolved-reference>':value]));
   }
   const canonical=normalize(result.expressions.get('root')),components=[],queries=[],conditions=[],actions=[],dependencies=[];
-  function inspect(node){if(!node||typeof node!=='object')return;if(node.k==='Comp'&&componentNames.has(node.name))components.push(node.name);if(node.k==='Comp'&&node.name==='Query')queries.push({declarationRef:node.declarationRef??null,input:node.args[1]});if(node.k==='Ternary')conditions.push(node);if(node.k==='Comp'&&node.name==='Action')actions.push(node);if(node.k==='StateRef')dependencies.push(node.n);for(const value of Object.values(node))if(Array.isArray(value))value.forEach(inspect);else if(value&&typeof value==='object')inspect(value)}inspect(canonical);
+  // Conditional edges describe controlled capabilities, independently of layout wrappers/order.
+  const orderedSet=items=>[...new Map(items.map(item=>[JSON.stringify(item),item])).values()].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  function conditionalChildren(node){
+   if(!node||node.k==='Null')return[];
+   if(node.k==='Arr')return node.els.flatMap(conditionalChildren);
+   if(node.k==='Comp'&&layoutNames.has(node.name))return conditionalChildren(node.args[6]);
+   return[conditionalBranch(node)];
+  }
+  function conditionalBranch(node){
+   if(!node||typeof node!=='object')return node;
+   if(node.k==='Arr'||node.k==='Comp'&&layoutNames.has(node.name))return{k:'ControlledComponents',components:orderedSet(conditionalChildren(node))};
+   if(node.k==='Comp'&&componentNames.has(node.name))return{...node,args:node.args.map((arg,index)=>index===6?{k:'ControlledComponents',components:orderedSet(conditionalChildren(arg))}:arg)};
+   if(node.k==='Ternary')return{k:'Ternary',cond:node.cond,then:conditionalBranch(node.then),else:conditionalBranch(node.else)};
+   return node;
+  }
+  function inspect(node){if(!node||typeof node!=='object')return;if(node.k==='Comp'&&componentNames.has(node.name))components.push(node.name);if(node.k==='Comp'&&node.name==='Query')queries.push({declarationRef:node.declarationRef??null,input:node.args[1]});if(node.k==='Ternary')conditions.push(conditionalBranch(node));if(node.k==='Comp'&&node.name==='Action')actions.push(node);if(node.k==='StateRef')dependencies.push(node.n);for(const value of Object.values(node))if(Array.isArray(value))value.forEach(inspect);else if(value&&typeof value==='object')inspect(value)}inspect(canonical);
   const unique=items=>[...new Map(items.map(item=>[JSON.stringify(item),item])).values()].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
   const groupings=[];for(const query of queries){function groups(node){if(node?.k==='Obj')for(const[key,value]of node.entries){if(key==='groupBy')groupings.push(value);groups(value)}else if(node?.k==='Arr')node.els.forEach(groups);else if(node&&typeof node==='object')Object.values(node).forEach(value=>{if(value&&typeof value==='object')groups(value)})}groups(query)}
   const graph={declarationSharing:[...declarationUses].map(([role,names])=>({role,distinctDeclarations:names.size})).sort((a,b)=>a.role.localeCompare(b.role)),queries:unique(queries),dependencies:[...new Set(dependencies)].sort(),conditions:unique(conditions),actions:unique(actions)},axes={grouping:hash(unique(groupings)),dependency:hash({queries:graph.queries,dependencies:graph.dependencies}),conditionalAction:hash({conditions:graph.conditions,actions:graph.actions})};

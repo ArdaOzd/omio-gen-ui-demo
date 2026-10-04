@@ -13,3 +13,16 @@ test('timeline reveal controls are derived from authored state writes rather tha
 test('unreachable declarations cannot inflate genuine B graph novelty',()=>{const unused='$unused = false\nunused = Query("local_query", {"version":1,"sources":[{"datasetRef":"dataset-other","alias":"other"}],"metrics":[{"as":"unusedValue","op":"min","field":"priceCents"}],"limit":1})\n';assert.equal(b(unused+program).valid,true);assert.equal(b(unused+program).structuralHash,b(program).structuralHash)});
 
 test('B layout-only ordering changes remain observable without becoming a new typed graph',()=>{const first=b(program),reordered=b(program.replace('[hero, calendarStory, selectionPane, toggle,','[hero, selectionPane, calendarStory, toggle,'));assert.equal(reordered.valid,true);assert.notEqual(reordered.layoutHash,first.layoutHash);assert.equal(reordered.structuralHash,first.structuralHash)});
+
+
+test('conditional layout sibling order does not inflate typed B graphs or conditional actions',()=>{
+ const scene=children=>`$show = false\nfirst = Callout("art",null,null,null,"Explanation")\nsecond = EmptyState("art")\nbox = Stack("art",null,null,null,"Options",null,[${children}])\nroot = TravelSurface("art",null,null,null,"Trip",null,[$show ? box : null])`
+ const first=b(scene('first,second')),reordered=b(scene('second,first')),inverted=b(scene('first,second').replace('$show ? box','!$show ? box'))
+ assert.equal(first.valid,true);assert.equal(reordered.valid,true);assert.equal(inverted.valid,true)
+ assert.notEqual(first.layoutHash,reordered.layoutHash)
+ assert.equal(first.structuralHash,reordered.structuralHash);assert.equal(first.axes.conditionalAction,reordered.axes.conditionalAction)
+ assert.notEqual(first.structuralHash,inverted.structuralHash);assert.notEqual(first.axes.conditionalAction,inverted.axes.conditionalAction)
+ const record=analysis=>({variant:'b',liveModelAuthorship:true,runtimeValid:true,outcome:'pass',acceptedSourceAnalysis:[analysis]})
+ const corpus=analyzeAuthorshipCorpus([record(first),record(reordered)])
+ assert.equal(corpus.counts.bDistinctTypedGraphs,1);assert.equal(corpus.bAxes.conditionalAction,1)
+})
