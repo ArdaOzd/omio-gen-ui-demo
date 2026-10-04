@@ -149,3 +149,37 @@ root = TravelSurface("${id}",null,null,null,"Select your journey",null,[notice,p
  await waitFor(()=>expect(state.get(id).selectedFareIds).toEqual([rows[0]!.id]));expect(picker).toHaveFocus()
  expect(query).toHaveBeenCalled();expect(fetch).not.toHaveBeenCalled();expect(screen.queryByRole('alert')).toBeNull();expect(screen.queryByText(/This generated view could not be completed/)).toBeNull()
 })
+
+
+it.each(['terminal','success','historical'])('projects one terminal failed attempt without changing native history: %s',scenario=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const state=createUIStateStore(),id=ArtifactIdSchema.parse('art');state.initializeMissing(id,{})
+ const services={state,bridge:createFareDataBridge(),activeId:()=>id,activate:()=>{}}
+ const accepted:UIMessage['parts'][number]={type:'tool-compose_reactive_scene',toolCallId:'usable',state:'output-available',input:{artifactRef:id,programRevision:1,program:'root = TravelSurface("art",null,null,null,"Usable travel view")'},output:{artifactId:id,programRevision:1,status:'accepted'}}
+ const failures:UIMessage['parts']=['failed-one','failed-two'].map(toolCallId=>({type:'tool-compose_reactive_scene',toolCallId,state:'output-error',input:{},errorText:'Rejected generated program'}))
+ const success:UIMessage['parts'][number]={...accepted,toolCallId:'repair',input:{artifactRef:id,programRevision:2,program:'root = TravelSurface("art",null,null,null,"Repaired travel view")'},output:{artifactId:id,programRevision:2,status:'accepted'}}
+ const messages:UIMessage[]=scenario==='historical'?[{id:'failed-turn',role:'assistant',parts:failures},{id:'later-user',role:'user',parts:[{type:'text',text:'Repair the view'}]},{id:'later-success',role:'assistant',parts:[success]}]:[{id:'attempts',role:'assistant',parts:[accepted,...failures,...(scenario==='success'?[success]:[])]}]
+ const before=JSON.stringify(messages)
+ render(<GenerativeChat variant="b" services={services} capture={()=>({schemaVersion:'1.0.0',turnId:'projection',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ expect(screen.getAllByText(scenario==='terminal'?'Usable travel view':'Repaired travel view')).toHaveLength(1)
+ expect(screen.queryAllByText(/This generated view could not be completed/)).toHaveLength(scenario==='success'?0:1)
+ expect(JSON.stringify(messages)).toBe(before)
+})
+
+it('hides obsolete failures during an actual pending native repair and keeps the usable view',async()=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const {default:userEvent}=await import('@testing-library/user-event'),{act}=await import('@testing-library/react')
+ const state=createUIStateStore(),id=ArtifactIdSchema.parse('art');state.initializeMissing(id,{})
+ const services={state,bridge:createFareDataBridge(),activeId:()=>id,activate:()=>{}}
+ let write:((event:unknown)=>void)|undefined,close:(()=>void)|undefined
+ const stream=new ReadableStream<Uint8Array>({start(controller){write=event=>controller.enqueue(new TextEncoder().encode('data: '+JSON.stringify(event)+'\n\n'));close=()=>controller.close()}})
+ vi.stubGlobal('fetch',vi.fn(async()=>new Response(stream,{headers:{'content-type':'text/event-stream','x-vercel-ai-ui-message-stream':'v1'}})))
+ const messages:UIMessage[]=[{id:'prior-turn',role:'assistant',parts:[{type:'tool-compose_reactive_scene',toolCallId:'prior',state:'output-available',input:{artifactRef:id,programRevision:1,program:'root = TravelSurface("art",null,null,null,"Usable travel view")'},output:{artifactId:id,programRevision:1,status:'accepted'}}]}]
+ render(<GenerativeChat variant="b" services={services} capture={()=>({schemaVersion:'1.0.0',turnId:'pending',artifacts:[state.exportSnapshot(id)],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ await userEvent.type(screen.getByRole('textbox',{name:'Message'}),'Repair this view');await userEvent.click(screen.getByRole('button',{name:'Send message'}))
+ await act(async()=>{write?.({type:'start',messageId:'live-attempts'});write?.({type:'start-step'});for(const toolCallId of ['first','second']){write?.({type:'tool-input-start',toolCallId,toolName:'compose_reactive_scene'});write?.({type:'tool-input-error',toolCallId,toolName:'compose_reactive_scene',input:{},errorText:'Rejected generated program'})}})
+ await waitFor(()=>expect(screen.queryAllByText(/This generated view could not be completed/)).toHaveLength(1))
+ await act(async()=>{write?.({type:'tool-input-start',toolCallId:'pending',toolName:'compose_reactive_scene'});write?.({type:'tool-input-delta',toolCallId:'pending',inputTextDelta:'{"artifactRef":"art","programRevision":2,"program":"'})})
+ await waitFor(()=>expect(screen.queryAllByText(/This generated view could not be completed/)).toHaveLength(0));expect(screen.getByText('Usable travel view')).toBeVisible()
+ await act(async()=>{write?.({type:'finish-step'});write?.({type:'finish',finishReason:'stop'});close?.()})
+})

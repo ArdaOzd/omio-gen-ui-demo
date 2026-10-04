@@ -21,6 +21,10 @@ export function hasAcceptedRepairAfter(parts:readonly ScenePart[],toolCallId:str
   try{if(services)validateHostScene(input.data,services);else validateReactiveProgram(input.data.program);return true}catch{return false}
  })
 }
+function hasLaterComposeAttempt(parts:readonly ScenePart[],toolCallId:string){
+ const index=parts.findIndex(part=>part.type==='tool-call'&&part.toolCallId===toolCallId)
+ return index>=0&&parts.slice(index+1).some(part=>part.type==='tool-call'&&part.toolName==='compose_reactive_scene')
+}
 function validateHostScene(input:Pick<z.infer<typeof ComposeSceneInputSchema>,'artifactRef'|'program'>,services:TravelServices,complete=true){
  const state=services.state.get(input.artifactRef),datasetIds=new Set(state.datasetRefs.map(id=>services.bridge.getManifest(id).datasetId))
  return validateReactiveProgram(input.program,{complete,scope:{artifactId:state.artifactId,datasetIds,variables:state.runtimeVariables}})
@@ -30,12 +34,14 @@ export const bInstructions=`Write an OpenUI v0.5 program. Each newline separates
 export const bToolkit={compose_reactive_scene:{type:'frontend',description:bInstructions,parameters:ComposeSceneInputSchema,execute:async(input:unknown)=>{const parsed=ComposeSceneInputSchema.parse(input);return new ToolResponse({result:{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'error'},isError:true})},render:function SceneTool({args,status,addResult,result,toolCallId,isError}){
  const services=useTravelServices();const completed=useRef(false),{propStatus}=useToolArgsStatus(),streaming=propStatus.program==='streaming'
  const repaired=useAuiState(state=>hasAcceptedRepairAfter(state.message.parts,toolCallId,args.artifactRef,services))
+ const laterAttempt=useAuiState(state=>hasLaterComposeAttempt(state.message.parts,toolCallId))
  useEffect(()=>{if(streaming||completed.current||result)return;const parsed=ComposeSceneInputSchema.safeParse(args);if(!parsed.success)return;completed.current=true
   try{validateHostScene(parsed.data,services);addResult({artifactId:parsed.data.artifactRef,programRevision:parsed.data.programRevision,status:'accepted'})}catch{addResult(new ToolResponse({result:{artifactId:parsed.data.artifactRef,programRevision:parsed.data.programRevision,status:'error'},isError:true}))}
  },[args,streaming,result,addResult,services])
  let invalidReferences=false
  if(typeof args.program==='string'&&typeof args.artifactRef==='string'){try{validateHostScene({artifactRef:ArtifactIdSchema.parse(args.artifactRef),program:args.program},services,!streaming)}catch{invalidReferences=true}}
- return <SceneToolFrame args={args} isStreaming={streaming} failed={invalidReferences||isError===true||status.type==='incomplete'||typeof result==='object'&&result!==null&&'status' in result&&result.status==='error'} repaired={repaired}/>
+ const failed=invalidReferences||isError===true||status.type==='incomplete'||typeof result==='object'&&result!==null&&'status' in result&&result.status==='error'
+ return <SceneToolFrame args={args} isStreaming={streaming} failed={failed} repaired={repaired||failed&&laterAttempt}/>
 }}} satisfies Toolkit
 export function createBToolkit(services:TravelServices){return {...bToolkit,compose_reactive_scene:{...bToolkit.compose_reactive_scene,execute:async(input:unknown)=>{const parsed=ComposeSceneInputSchema.parse(input);try{validateHostScene(parsed,services);return new ToolResponse({result:{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'accepted'}})}catch{return new ToolResponse({result:{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'error'},isError:true})}}}} satisfies Toolkit}
 export default bToolkit
