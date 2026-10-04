@@ -36,7 +36,14 @@ try {
   const titles = timelineRevealActions(artifact).flatMap(action => action.titles);
   expect(titles).toContain('Show journey timeline');
   result.authoredRevealTitles = titles;
-  if (await timeline.count()) await view.getByRole('button', { name: 'Hide journey timeline', exact: true }).click();
+  // A pending timeline query may render no rows even when the saved reveal state is true.
+  result.hideClicked = false;
+  if (artifact.state.runtimeVariables?.['$showTimeline'] === true) {
+    const hide = view.getByRole('button', { name: 'Hide journey timeline', exact: true });
+    await expect(hide).toBeVisible();
+    await hide.click();
+    result.hideClicked = true;
+  }
   await expect(timeline).toHaveCount(0);
   // Read actual native host state as well as persistence; SDK-only hiding is insufficient.
   await page.getByText('Developer conversation diagnostics', { exact: true }).click();
