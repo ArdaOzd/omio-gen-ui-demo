@@ -38,7 +38,7 @@ export function parseChatRequest(input:unknown):ChatRequest {
 
 const id=z.string().min(1).max(96);
 const revision=z.number().int().nonnegative();
-const ErrorOutput=z.strictObject({status:z.literal('error'),code:z.literal('LOCAL_TOOL_FAILED')});
+const ErrorOutput=z.strictObject({status:z.literal('error'),code:z.enum(['LOCAL_TOOL_FAILED','LOCAL_TOOL_CANCELLED','DATASET_CAPACITY_EXCEEDED'])});
 export function parseToolOutput(name:string,input:unknown):unknown {
  if(ErrorOutput.safeParse(input).success)return ErrorOutput.parse(input);
  if(name==='load_fares')return DatasetManifestSchema.parse(input);

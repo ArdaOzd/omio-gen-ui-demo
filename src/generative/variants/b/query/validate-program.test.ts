@@ -1,4 +1,5 @@
 import { describe,it,expect } from 'vitest'
+import { createSyntheticRows } from '../../../data/synthetic-source'
 import { validateReactiveProgram } from './validate-program'
 const source=`root = TravelSurface("art", null, null, null, "Trips", null, [mode])
 $filters = {modes: [], carrierIds: [], directOnly: false}
@@ -14,4 +15,9 @@ describe('B program boundary',()=>{
   expect(()=>validateReactiveProgram(`root = Callout("art", null, null, null, ${JSON.stringify('x'.repeat(601))})`)).toThrow()
  })
  it('exposes partial frames but rejects incomplete final output',()=>{expect(()=>validateReactiveProgram('root = TravelSurface("art", null, null, null, "Trips", null, [',{complete:false})).not.toThrow();expect(()=>validateReactiveProgram('root = TravelSurface("art", null, null, null, "Trips", null, [')).toThrow()})
+})
+
+it('rejects copied complete fare literals outside state declarations',()=>{
+ const row=createSyntheticRows(1)[0],literal=JSON.stringify(row).replace(/"([A-Za-z][A-Za-z0-9]*)":/g,'$1:')
+ expect(()=>validateReactiveProgram(`copiedFare = ${literal}\nroot = TravelSurface("art")`)).toThrow()
 })

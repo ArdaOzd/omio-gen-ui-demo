@@ -13,7 +13,7 @@ function setup(parts:UIMessage['parts']){
  Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
  const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{filters:{modes:['bus'],carrierIds:[],directOnly:false}})
  const messages:UIMessage[]=[{id:'assistant-steps',role:'assistant',parts}],before=JSON.stringify(messages)
- render(<GenerativeChat variant="b" sceneToolkit={bToolkit} services={{state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ render(<GenerativeChat variant="b" sceneToolkit={bToolkit} services={{state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
  return {messages,before,state}
 }
 const scene:UIMessage['parts'][number]={type:'tool-compose_reactive_scene',toolCallId:'scene',state:'output-available',input:{artifactRef:'art',programRevision:1,program:'root = TravelSurface("art", null, null, null, "Usable travel view", null, [mode])\nmode = ModeChips("art")'},output:{artifactId:'art',programRevision:1,status:'accepted'}}
