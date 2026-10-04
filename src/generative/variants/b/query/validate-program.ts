@@ -1,7 +1,7 @@
 import { autoClose,createParser,parseExpression,split,tokenize,walkAST,type ASTNode } from '@openuidev/lang-core'
 import { catalogDescriptors } from '../../../catalog/generated/catalog'
 import { ArtifactUIStateSchema } from '../../../contracts'
-import { assertNoBulkData } from '../../../contracts/privacy'
+import { assertNoBulkData,hasFareRowFields } from '../../../contracts/privacy'
 import { bSchemaLibrary,BindingSchema,type Binding } from './schema'
 export type ProgramBinding={variable:string;field:Binding;artifactRef:string}
 const names=new Set([...catalogDescriptors.map(d=>d.name),'Query','Mutation','Action','Set','Reset','Run'])
@@ -44,6 +44,7 @@ export function validateReactiveProgram(program:string,options:{complete?:boolea
  return {parsed,bindings,expressions,queryBindings,variables:Object.keys(parsed.stateDeclarations),dependencies:parsed.queryStatements.map(q=>({id:q.statementId,deps:q.deps}))}
 }
 function inspect(node:ASTNode){
+ if(node.k==='Obj'&&hasFareRowFields(node.entries.map(([key])=>key)))throw new Error('FORBIDDEN_FARE_LITERAL')
  if(node.k==='Comp'&&!names.has(node.name))throw new Error('UNKNOWN_COMPONENT')
  if(node.k==='Arr'&&node.els.length>80)throw new Error('ARRAY_BUDGET')
  if(node.k==='Obj'&&node.entries.some(([key])=>['rows','fares','sql','url','javascript','__proto__','constructor','prototype'].includes(key)))throw new Error('FORBIDDEN_LITERAL')
