@@ -1,6 +1,48 @@
 # Generative UI A/B continuation handoff
 
-## Authoritative stop checkpoint — 2026-10-04
+## Original checkout LOCAL alignment — 2026-10-05
+
+This original checkout deliberately integrates original `967de22fc3878dc8895f24b13b7ef00c2b191da8` with actually merged public `dev` commit `3cec49f8b101d46049d633beaf032982d2439271` (tree equal to public integration `58c62e506675b676d82ea5c2066577d7c6243fbe`). PR1 is MERGED. The source and conflict checks for this LOCAL merge are recorded in ignored `artifacts/original-local-integration-2026-10-05/`. Read `git rev-parse HEAD` for the resulting local merge commit; never push this branch or its private ancestors.
+
+The original readable carrier fixtures, stable carrier-ID assertions, synthetic fixture names, private provenance, exact `.gitattributes`/Graphify installer/test scripts and shared hook configuration are preserved. The premerge graph/status/proof blobs are additionally retained in the ignored evidence directory and original967 parent. The external10M SQLite file and existing API/Vite/agent handles are not restarted, regenerated or changed by alignment. Canonical checkpoint `57105899c8d00af9d630487565d0e9be00df4f38` remains the authoritative full delivery/evidence checkout.
+
+Original LOCAL source verification passed280 Vitest tests/47files, strictTypeScript, catalog generation, production build and12 Python tests. The offline study/review checks run after the merge commit because their frozen-source guard rejects an uncommitted merge. Graphify uses hash-verified canonical571 reuse plus local AST/grounded local status; its semantic coverage for differing original sources is explicitly partial. Full semantic authority remains canonical571.
+
+The diagnostic96 baseline remains53 PASS/43 FAIL with no post-fix rerun; human comparative ratings and winner selection are optional and unperformed. No further mobile work or live model collection is part of delivery. Both variants remain retained and runnable.
+
+
+## Desktop engineering delivery — 2026-10-05
+
+Desktop engineering delivery is complete at canonical LOCAL source `66f7ef6a06614574b0f47ed04845ef5e39e76535`, with product/study/test trees equal to public source-only integration `58c62e506675b676d82ea5c2066577d7c6243fbe`. The latest user scope excludes further mobile work. Both A and B remain runnable; the classic search remains useful. Final delivery readbacks (agent pin, existing saved-user reload, PR1→dev and original LOCAL alignment) are recorded in ignored `artifacts/final-verification-2026-10-04/latest-readiness.json` after this checkpoint; they do not require publishing private checkpoint ancestry.
+
+Final checks actually executed at this source: **277 Vitest tests /47 files**, strict TypeScript, exact catalog generation, production build, **12 Python tests**, and **57 offline study/review tests**, all PASS. Build retains its existing large-chunk advisory. Independent Standards/Spec reviews and cross-author reviews accepted the nonempty source deltas, including each post-collection repair. No new live model calls, benchmarks or mobile work occurred after the diagnostic run.
+
+All screenshots, corpus, reviews, status, measured benchmarks and generated graphs remain LOCAL by the human's explicit policy. Never push canonical/original private ancestry. Source-only branches exclude private commits and evidence paths before publication. The stable ignored evidence root is the canonical `artifacts/final-verification-2026-10-04/`; `official-96-578ca99-integrity.json`, `official-96-completion.json`, `post-collection-derived-study-proof/`, `diagnostic-review-baseline-578/`, and post-fix final-check logs are preserved there. Historical graph/evidence claims below retain their original execution identity.
+
+The actual frozen96-case diagnostic baseline completed at578ca99: **53 runnerPASS /43 FAIL**, A39/48 and B14/48. All96 caseJSON/screenshots/traces were retained with a digest manifest; runtime/fixture drift and exclusions are0. There are346 recorded browser HTTP requests; actual provider-attempt count/token usage is unavailable for aborted historical streams. These counts remain literal and immutable. Validator/deadline/verifier defects prevent treating this corpus as qualified final method-selection evidence. There has been **no post-fix96 rerun** and no reclassification of raw failures.
+
+Post-collection repairs: ordinary Select UI copy passes B validation while executable SQL remains forbidden; latest repair notices preserve canonical history/prior usable scenes; one120s request deadline covers the original model attempt and validation-only repair; strict singleton-date/current-scene/geometry/sort/recovery evidence gates reject stale or wrong evidence; bounded transient attempt events are observed incrementally even if SSE later aborts. An accepted attempt event means generated output passed validation, separately from a browser scene ACK. Each unit passed independent regressions and review. Five genuine desktop derived native replays pass with model calls blocked; these are engineering replays, not new authorship or raw-case passes.
+
+The local diagnostic blinded24-item packet contains17 usable captures and7 honest unavailable cards, with identity-map404/modelPOST403 and all human fields unset. Human comparative ratings and method selection remain an **optional unperformed follow-up**, not a blocker for the user's current functional desktop delivery. Retain both variants; no winner is inferred or human score invented.
+
+## Saved chats, services and continuation
+
+The actual user A/B chats must be preserved: A artifactb1ab4aca revision66 selectedfare_003796061 Bus/Blablacar Bus07:03€28.10; B artifact372a6384 revision17 exact3339-character source/two101-option pickers/no selection. The root proved rawmessages,activeArtifactId,artifactRecords byte-identical on actual5194 reload at578ca99; final post-fix readback uses fresh before/after diagnostics and is retained in ignored latest-readiness. No storage reset or synthetic replacement is permitted. Existing final prose remains once, currentalerts absent, B city foreground is themeink on white.
+
+API8094 PID67786/cwdoriginal967 and Vite5194 PID90312/cwdcanonical are preserved. Agent8097's previousPID80364/appRevision578 is historical; only its verified owned handle is restarted after this checkpoint, signed-in-codex/gpt-6.1-sol/high. Idle original8095 PID73337 and unrelated5173/8000/8010 remain untouched. Exact final health/PIDs/source provenance are in ignored latest-readiness.
+
+```sh
+cd /Users/ardaozdogru/.codex/worktrees/generative-spine/omio-gen-ui-demo
+OMIO_APP_REVISION=$(git rev-parse HEAD) API_PORT=8094 AGENT_PORT=8097 WEB_PORT=5194 OMIO_API_URL=http://127.0.0.1:8094 OMIO_AGENT_URL=http://127.0.0.1:8097 node --import tsx agent/server.ts
+```
+
+Do not use npmdev to restart these live handles: its bootstrap/supervisor can touch unrelated services. External fixture10M/source sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6 remains unchanged; read-only preserved-v2 provenance reports legacy drift honestly. No further live-model batch is part of closure.
+
+Current final source PRs2–24 are actually merged; PR1→dev and originalLOCAL conflict alignment follow the accepted final gate, with exact readbacks recorded only locally. Original967 history includes externalcarrier04ddaa7/hooksde8adc0/private967; preserve all intent, named fixtures/tests/hooks, current reviewed public guards and private evidence. Never push original/canonical. No worktree archival is required; stable ignored proofs must survive any later cleanup.
+
+All original21 packages are implemented and independently reviewed. Functional desktop delivery is complete; final live/repository readback is a delivery step. Mobile work is excluded by the latest user instruction. Human comparative scoring/selection is optional and remains unperformed. HistoricalSTOP/zero-corpus/pendingimplementation statements below are superseded and retained only for provenance.
+
+## Superseded STOP checkpoint — 2026-10-04
 
 The user's latest instruction is to fix A's duplicated output and B's errors, ensure both work, save the current status for later, and **STOP**. Those reported bugs are fixed and independently verified in the actual saved user chats. Both variants remain runnable. No further model calls, matrix cells, human ratings, old PR merges or implementation expansion are authorized by this stop checkpoint. The full implementation plan is **not complete**; remaining gates below are explicit.
 

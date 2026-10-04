@@ -1,6 +1,7 @@
 import { describe,expect,it } from 'vitest';
 import { parseChatRequest,parseToolOutput } from './request-schema';
 import { acceptTurn,spendTool } from './turn-budget';
+import { LIMITS } from '../src/generative/contracts';
 const request={id:'chat-1',variant:'a',messages:[{id:'user-1',role:'user',parts:[{type:'text',text:'Compare trains'}]}],currentContext:{schemaVersion:'1.0.0',turnId:'turn-1',artifacts:[],datasets:[],selectedFareFacts:[]}};
 describe('host request boundary',()=>{
  it('accepts native transport fields and validates compact context',()=>{
@@ -38,4 +39,29 @@ it('continues after the captured failed B compose placeholder without replaying 
  const parsed=parseChatRequest({...request,variant:'b',messages:[...request.messages,{id:'failed-scene',role:'assistant',parts:[failed]},{id:'follow-up',role:'user',parts:[{type:'text',text:'I will stay 5 days'}]}]})
  expect(parsed.messages[1]?.parts).toEqual([])
  expect(parsed.messages[2]?.parts[0]?.text).toBe('I will stay 5 days')
+})
+
+
+it.each([{carriers:[{id:'carrier-1772yvd',name:'ÖBB'}]},{carrierIds:['carrier-1772yvd']}])('accepts preserved named and legacy carrier tool history',metadata=>{
+ const output={datasetId:'dataset-1',...metadata,truncated:false}
+ expect(parseToolOutput('find_carriers',output)).toEqual(output)
+ const message={id:'named-carrier-history',role:'assistant',parts:[{type:'tool-find_carriers',toolCallId:'carrier-call',state:'output-available',input:{datasetRef:'dataset-1'},output}]}
+ const parsed=parseChatRequest({...request,id:`carrier-history-${Object.keys(metadata)[0]}`,messages:[...request.messages,message]})
+ expect(parsed.messages[1]?.parts[0]?.output).toEqual(output)
+ const turn=acceptTurn(parsed)
+ for(let index=1;index<LIMITS.toolCalls;index++)spendTool(turn,'find_carriers')
+ expect(()=>spendTool(turn,'find_carriers')).toThrow('budget')
+})
+it.each([
+ {carriers:Array.from({length:21},(_,index)=>({id:`carrier-${index}`,name:'Provider'}))},
+ {carrierIds:Array.from({length:21},(_,index)=>`carrier-${index}`)},
+ {carriers:[{id:'carrier-1',name:'x'.repeat(121)}]},
+ {carriers:[{id:'carrier-1',name:'   '}]},
+ {carriers:[{id:'carrier-1',name:'Provider',rows:[{priceCents:100}]}]},
+ {carriers:[{id:'x'.repeat(97),name:'Provider'}]},
+ {carriers:[{id:'carrier-1',name:'Provider'}],carrierIds:['carrier-1']},
+])('rejects unsafe or oversized carrier output history',metadata=>{
+ const output={datasetId:'dataset-1',...metadata,truncated:false}
+ expect(()=>parseToolOutput('find_carriers',output)).toThrow()
+ expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'unsafe-carriers',role:'assistant',parts:[{type:'tool-find_carriers',toolCallId:'call',state:'output-available',input:{datasetRef:'dataset-1'},output}]}]})).toThrow()
 })

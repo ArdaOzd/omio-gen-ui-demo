@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { AgentContextEnvelopeSchema, CoverageSchema, DatasetIdSchema, QueryIRSchema, parseAgentContext } from './index';
+import { AgentContextEnvelopeSchema, CoverageSchema, DatasetIdSchema, QueryIRSchema, parseAgentContext, CoverageRequestSchema } from './index';
+import { createSyntheticRows } from '../data/synthetic-source';
+import { parseChatRequest } from '../../../agent/request-schema';
 import { assertNoBulkData, LEAKAGE_SENTINEL } from './privacy';
 describe('model and persistence boundaries', () => {
   it('rejects unknown keys at every snapshot level', () => {
@@ -23,3 +25,24 @@ describe('model and persistence boundaries', () => {
     expect(QueryIRSchema.safeParse({...query,sql:'select *'}).success).toBe(false);
   });
 });
+
+it('rejects nine passengers at the browser contract before a backend request',()=>{
+ expect(()=>CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-03'},modes:['train'],passengers:9})).toThrow()
+})
+
+it('rejects complete camelCase fare data hidden in uploaded tool schema constants',()=>{
+ const row=createSyntheticRows(1)[0]
+ const tools={load_fares:{parameters:{type:'object',properties:{hidden:{const:[row,row]}}}}}
+ expect(()=>assertNoBulkData({tools})).toThrow()
+ expect(()=>parseChatRequest({id:'privacy-probe',variant:'b',currentContext:{schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]},messages:[{id:'u',role:'user',parts:[{type:'text',text:'Trip'}]}],tools})).toThrow()
+ const {availableSeats,direct,...fact}=createSyntheticRows(1)[0]!
+ expect(()=>assertNoBulkData({selectedFareFacts:[fact],parameters:{properties:{priceCents:{type:'number'}}}})).not.toThrow()
+})
+
+it('accepts additive bounded older-artifact summaries but rejects forged overlap and copied fields',()=>{
+ const summary={artifactId:'older',variant:'b',label:'Earlier itinerary',revision:2,lastInteractionAt:'2026-10-03T12:00:00.000Z'}
+ const base={schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]}
+ expect(parseAgentContext({...base,olderArtifactSummaries:[summary]}).olderArtifactSummaries).toEqual([summary])
+ expect(()=>parseAgentContext({...base,olderArtifactSummaries:[summary,summary]})).toThrow('Duplicate')
+ expect(()=>parseAgentContext({...base,olderArtifactSummaries:[{...summary,datasetRefs:['hidden']}]})).toThrow()
+})

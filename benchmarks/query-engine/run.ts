@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test'
 import { mkdir,writeFile } from 'node:fs/promises'
 import { cpus,totalmem,platform,release } from 'node:os'
+import {execFileSync} from 'node:child_process'
 const output=process.env.OMIO_BENCHMARK_OUTPUT??'benchmarks/query-engine/artifacts'
 await mkdir(output,{recursive:true})
 const browser=await chromium.launch({headless:true,channel:'chrome'})
@@ -27,7 +28,7 @@ while(!done){await sampleHeap();await new Promise(resolve=>setTimeout(resolve,20
 const report=await page.evaluate(()=>window.queryBenchmark)
 await page.screenshot({path:`${output}/results.png`,fullPage:true})
 await context.tracing.stop({path:`${output}/trace.zip`})
-await writeFile(`${output}/results.json`,JSON.stringify({...report,browser:browser.version(),runtime:process.version,hardware:{cpu:cpus()[0]?.model,cores:cpus().length,memoryBytes:totalmem(),platform:platform(),release:release()},ports:{vite:5312},errors,memorySamples:measurements},null,2))
+await writeFile(`${output}/results.json`,JSON.stringify({...report,sourceRevision:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),sourceDirty:execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim()!==''||execFileSync('git',['diff','--cached','--name-only'],{encoding:'utf8'}).trim()!=='',browser:browser.version(),runtime:process.version,hardware:{cpu:cpus()[0]?.model,cores:cpus().length,memoryBytes:totalmem(),platform:platform(),release:release()},ports:{vite:5312},errors,memorySamples:measurements},null,2))
 await browser.close()
-if(report.error||errors.length||report.metrics.some(metric=>metric.workloads.some(workload=>!workload.correct)))process.exitCode=1
+if(report.error||!report.invertedOracleRejected||report.nullableOracle?.some(item=>!item.typescriptCorrect||!item.duckdbCorrect||!item.agreement)||errors.length||report.metrics.some(metric=>metric.workloads.some(workload=>!workload.correct)))process.exitCode=1
 console.log(JSON.stringify({done:report.done,error:report.error,errors,metrics:report.metrics,memorySamples:measurements.length},null,2))

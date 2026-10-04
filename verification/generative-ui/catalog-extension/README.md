@@ -2,7 +2,7 @@
 
 This is deterministic real-framework evidence, with no model calls. Native A uses the compiler-owned toolkit and streamed `present`; B uses the real OpenUI parser/renderer and shared catalog.
 
-At 360px, select a Bus fare with FarePicker, observe `1 selected fare`, then clear it and observe `0 selected fares`. Native A's selection happens before stream completion and survives the completed tool input. Both pass without page errors, overflow or chat network requests. `result.json` records Chrome version and outcomes. Screenshots are generated into the ignored `artifacts/` directory by the repeatable runner.
+At 360px, select a Bus fare with FarePicker, observe `1 selected fare`, then clear it and observe `0 selected fares`. Native A's selection happens before stream completion and survives the completed tool input. Both pass without page errors, overflow or chat network requests. `result.json` records Chrome version and outcomes. The selected-state screenshots are retained as `a.png` and `b.png`; reruns also write screenshots into the ignored `artifacts/` directory.
 
 ```sh
 node_modules/.bin/vite --config verification/generative-ui/catalog-extension/spike/vite.config.ts --host 127.0.0.1 --port 5397

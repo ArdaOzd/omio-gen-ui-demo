@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { ArtifactIdSchema,ArtifactUIStateSchema,CoverageRequestSchema,DatasetIdSchema,CONTRACT_VERSION,CATALOG_VERSION,UIStateRevisionSchema,type FareDataBridge,type UIStateStore } from '../contracts'
+import { ArtifactIdSchema,ArtifactUIStateSchema,CoverageRequestSchema,DatasetIdSchema,CONTRACT_VERSION,CATALOG_VERSION,UIStateRevisionSchema,LIMITS,type FareDataBridge,type UIStateStore } from '../contracts'
 import { assertNoBulkData } from '../contracts/privacy'
 const descriptor=z.strictObject({datasetId:DatasetIdSchema,request:CoverageRequestSchema,sourceVersion:z.string().min(1).max(96),complete:z.boolean()})
-export const PersistedThreadSchema=z.strictObject({recordRevision:z.number().int().nonnegative().optional(),schemaVersion:z.literal(CONTRACT_VERSION),catalogVersion:z.literal(CATALOG_VERSION),activeArtifactId:ArtifactIdSchema.optional(),parserVersion:z.literal('openui-0.3.0'),queryVersion:z.literal('1'),messages:z.array(z.unknown()).max(200),artifacts:z.array(z.strictObject({variant:z.enum(['a','b']),source:z.string().max(60000),state:ArtifactUIStateSchema})).max(20),descriptors:z.array(descriptor).max(20)})
+export const PersistedThreadSchema=z.strictObject({recordRevision:z.number().int().nonnegative().optional(),schemaVersion:z.literal(CONTRACT_VERSION),catalogVersion:z.literal(CATALOG_VERSION),activeArtifactId:ArtifactIdSchema.optional(),parserVersion:z.literal('openui-0.3.0'),queryVersion:z.literal('1'),messages:z.array(z.unknown()).max(200),artifacts:z.array(z.strictObject({variant:z.enum(['a','b']),source:z.string().max(60000),state:ArtifactUIStateSchema})).max(LIMITS.storedArtifacts),descriptors:z.array(descriptor).max(LIMITS.storedArtifacts*LIMITS.artifactDatasets)})
 export type PersistedThread=z.infer<typeof PersistedThreadSchema>
 export interface ThreadStorage {read(key:string):Promise<unknown>;write(key:string,value:PersistedThread,expectedRevision?:number):Promise<void>}
 export class ThreadConflictError extends Error{constructor(){super('A newer conversation was saved in another tab. Reload to see it; this tab has not overwritten it.');this.name='ThreadConflictError'}}

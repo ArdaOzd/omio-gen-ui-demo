@@ -1,13 +1,15 @@
 import { z } from 'zod';
-import { EditArtifactInputSchema,CoverageRequestSchema,ArtifactIdSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,DatasetManifestSchema,BoundedFareFactSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
+import {SummarizeFaresInputSchema} from '../src/generative/tools/summarize-schema';
+import { HISTORY_LIMITS } from '../src/generative/chat/history-limits';
+import { EditArtifactInputSchema,CoverageRequestSchema,ArtifactIdSchema,DatasetIdSchema,FareIdSchema,DatasetManifestSchema,BoundedFareFactSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { validateReactiveProgram } from '../src/generative/variants/b/query/validate-program';
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
 export const TOOL_NAMES=['load_fares','summarize_fares','get_top_fares','get_fare','get_route','find_carriers','present','compose_reactive_scene','edit_artifact','create_artifact'] as const;
 const ToolSchema=z.strictObject({description:z.string().max(30000).optional(),parameters:z.record(z.string(),z.unknown()),providerOptions:z.record(z.string(),z.unknown()).optional()});
-const PartSchema=z.object({type:z.string().max(80),text:z.string().max(5000).optional(),state:z.string().max(40).optional(),toolCallId:z.string().max(128).optional(),toolName:z.string().max(80).optional(),input:z.unknown().optional(),output:z.unknown().optional(),errorText:z.string().max(200).optional()});
-const MessageSchema=z.object({id:z.string().min(1).max(128),role:z.enum(['user','assistant','system']),parts:z.array(PartSchema).max(40)});
-const RequestSchema=z.strictObject({id:z.string().max(128),messages:z.array(MessageSchema).max(60),currentContext:z.unknown(),variant:z.enum(['a','b']),provider:z.enum(['codex','fixture']).optional(),tools:z.record(z.string(),ToolSchema).optional(),system:z.string().max(30000).optional(),trigger:z.string().optional(),messageId:z.string().optional(),metadata:z.unknown().optional(),callSettings:z.unknown().optional(),config:z.unknown().optional()});
+const PartSchema=z.object({type:z.string().max(80),text:z.string().max(HISTORY_LIMITS.textCharacters).optional(),state:z.string().max(40).optional(),toolCallId:z.string().max(128).optional(),toolName:z.string().max(80).optional(),input:z.unknown().optional(),output:z.unknown().optional(),errorText:z.string().max(200).optional()});
+const MessageSchema=z.object({id:z.string().min(1).max(128),role:z.enum(['user','assistant','system']),parts:z.array(PartSchema).max(HISTORY_LIMITS.parts)});
+const RequestSchema=z.strictObject({id:z.string().max(128),messages:z.array(MessageSchema).max(HISTORY_LIMITS.messages),currentContext:z.unknown(),variant:z.enum(['a','b']),provider:z.enum(['codex','fixture']).optional(),tools:z.record(z.string(),ToolSchema).optional(),system:z.string().max(30000).optional(),trigger:z.string().optional(),messageId:z.string().optional(),metadata:z.unknown().optional(),callSettings:z.unknown().optional(),config:z.unknown().optional()});
 export type ChatRequest=Omit<z.infer<typeof RequestSchema>,'currentContext'> & {currentContext:AgentContextEnvelope};
 export function parseChatRequest(input:unknown):ChatRequest {
  assertNoBulkData(input);const request=RequestSchema.parse(input);
@@ -21,7 +23,7 @@ export function parseChatRequest(input:unknown):ChatRequest {
   for(const part of message.parts){
    if(part.type==='file')throw new Error('Attachments are unsupported by this demo');
    if(part.type!=='text' && part.type!=='step-start' && !part.type.startsWith('tool-') && part.type!=='dynamic-tool')throw new Error('Unsupported message part');
-   if(part.type==='text')z.string().max(5000).parse(part.text);
+   if(part.type==='text')z.string().max(HISTORY_LIMITS.textCharacters).parse(part.text);
    if(part.type.startsWith('tool-')||part.type==='dynamic-tool'){
     const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5);
     if(!name||!TOOL_NAMES.some(tool=>tool===name)||!part.toolCallId)throw new Error('Invalid tool identity');
@@ -31,21 +33,19 @@ export function parseChatRequest(input:unknown):ChatRequest {
   }
  }
  if(!request.messages.some(message=>message.role==='user'))throw new Error('Missing visible user turn');
- if(JSON.stringify(request.messages).length>40_000)throw new Error('History exceeds byte budget');
+ if(JSON.stringify(request.messages).length>HISTORY_LIMITS.serializedCharacters)throw new Error('History exceeds byte budget');
  const messages=request.messages.map(message=>({...message,parts:message.parts.filter(part=>part.state!=='input-streaming' && part.state!=='output-error')}));
  return {...request,messages,currentContext:context};
 }
 
 const id=z.string().min(1).max(96);
 const revision=z.number().int().nonnegative();
-const ErrorOutput=z.strictObject({status:z.literal('error'),code:z.literal('LOCAL_TOOL_FAILED')});
-const LegacyBoundedFareFactSchema=BoundedFareFactSchema.omit({carrierName:true});
-const FareFactHistorySchema=z.union([BoundedFareFactSchema,LegacyBoundedFareFactSchema]);
+const ErrorOutput=z.strictObject({status:z.literal('error'),code:z.enum(['LOCAL_TOOL_FAILED','LOCAL_TOOL_CANCELLED','DATASET_CAPACITY_EXCEEDED'])});
 export function parseToolOutput(name:string,input:unknown):unknown {
  if(ErrorOutput.safeParse(input).success)return ErrorOutput.parse(input);
  if(name==='load_fares')return DatasetManifestSchema.parse(input);
- if(name==='get_fare')return FareFactHistorySchema.parse(input);
- if(name==='get_top_fares')return z.strictObject({datasetId:id,revision,facts:z.array(FareFactHistorySchema).max(5)}).parse(input);
+ if(name==='get_fare')return BoundedFareFactSchema.parse(input);
+ if(name==='get_top_fares')return z.strictObject({datasetId:id,revision,facts:z.array(BoundedFareFactSchema).max(5)}).parse(input);
  if(name==='summarize_fares')return z.strictObject({datasetId:id,revision,groups:z.array(z.strictObject({label:z.string().max(160),count:z.number().int().nonnegative()})).max(30),truncated:z.boolean()}).parse(input);
  if(name==='get_route')return z.strictObject({datasetId:id,originIds:z.array(id).max(8),destinationIds:z.array(id).max(8),modes:z.array(z.enum(['train','bus','flight','ferry'])).max(4)}).parse(input);
  if(name==='find_carriers')return z.union([
@@ -62,7 +62,7 @@ export function parseToolOutput(name:string,input:unknown):unknown {
 export function parseToolInput(name:string,input:unknown):unknown {
  assertNoBulkData(input);
  if(name==='load_fares')return z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}).parse(input);
- if(name==='summarize_fares')return z.strictObject({datasetRef:DatasetIdSchema,groupBy:FareFieldSchema}).parse(input);
+ if(name==='summarize_fares')return SummarizeFaresInputSchema.parse(input);
  if(name==='get_top_fares')return z.strictObject({datasetRef:DatasetIdSchema,objective:z.enum(['cheapest','fastest'])}).parse(input);
  if(name==='get_fare')return z.strictObject({fareId:FareIdSchema}).parse(input);
  if(name==='get_route'||name==='find_carriers')return z.strictObject({datasetRef:DatasetIdSchema}).parse(input);

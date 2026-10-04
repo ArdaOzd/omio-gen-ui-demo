@@ -1,26 +1,37 @@
-[graphify] MultiDiGraph edge-collapse diagnostic
-input: graphify-out/graph.json
-input_stage: provided JSON (normal graph.json is post-build)
-effective_directed: False
-nodes: 1259
-unverified_code_nodes: 0
-raw_edges: 2442
-valid_candidate_edges: 2442
-missing_endpoint_edges: 0
-dangling_endpoint_edges: 0
-self_loop_edges: 0
-exact_duplicate_edges: 0
-directed_unique_endpoint_pairs: 2442
-directed_same_endpoint_collapsed_edges: 0
-undirected_unique_endpoint_pairs: 2442
-undirected_same_endpoint_collapsed_edges: 0
-same_endpoint_group_count: 0
-relation_variant_groups: 0
-source_file_variant_groups: 0
-source_location_variant_groups: 0
-context_variant_groups: 0
-post_build_graph_type: Graph
-post_build_nodes: 1259
-post_build_edges: 2442
-producer_suppression_sites: 12
-note: normal graph.json is post-build; raw producer loss must be measured earlier.
+{
+  "nodes": 1896,
+  "edges": 3656,
+  "danglingEndpoints": 0,
+  "scope": {
+    "scope": "Partial semantic coverage: hash-verified canonical571 records plus local AST refresh and grounded original status. No model extraction.",
+    "historicalOriginal": "967de22fc3878dc8895f24b13b7ef00c2b191da8",
+    "authoritativeSemanticCheckpoint": "57105899c8d00af9d630487565d0e9be00df4f38",
+    "premergeSnapshot": "artifacts/original-local-integration-2026-10-05/premerge/graphify-out/",
+    "verifiedReuseFiles": 330,
+    "differingSources": [
+      "README.md",
+      "agent/request-schema.test.ts",
+      "src/generative/catalog/catalog.test.tsx",
+      "src/generative/data/data-state.test.ts",
+      "src/generative/data/synthetic-source.ts",
+      "src/generative/query/query-engine.test.ts",
+      "src/generative/state/action-router.test.ts",
+      "src/generative/state/persistence.test.ts",
+      "src/generative/tools/browser-tools.test.ts",
+      "verification/generative-ui/a/spike/main.tsx",
+      "src/generative/data/search-client.test.ts",
+      "docs/status/generative-ui-ab-handoff.md",
+      "src/generative/catalog/primitives.test.tsx",
+      "verification/generative-ui/catalog-extension/spike/main.tsx",
+      "docs/decisions/framework-compatibility.md"
+    ],
+    "lateLocalStatusEdits": [
+      "docs/status/generative-ui-ab-handoff.md",
+      "docs/implementation/generative-ui-ab-ledger.md",
+      "docs/plans/generative-ui-ab-implementation-plan.md",
+      "verification/generative-ui/comparison-decision.md"
+    ]
+  },
+  "fixturePreserved": true,
+  "hooksPreserved": true
+}

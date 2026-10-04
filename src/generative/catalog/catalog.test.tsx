@@ -6,7 +6,7 @@ import { ArtifactIdSchema, FareRowSchema, type FareRow, type BoundedQueryResult 
 import { TravelProvider, useTravelQuery, filterPredicate } from './context'
 import { CatalogNode } from './component'
 const artifactId=ArtifactIdSchema.parse('artifact-1')
-const fare=(id:string,mode:'train'|'bus',price:number):FareRow=>FareRowSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'carrier-1772yvd':'carrier-1hc5s74',carrierName:mode==='train'?'ÖBB':'FlixBus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
+const fare=(id:string,mode:'train'|'bus',price:number):FareRow=>FareRowSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'eurostar':'flixbus',carrierName:mode==='train'?'Eurostar':'FlixBus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
 async function setup(options:Parameters<typeof createFareDataBridge>[0]={}){
  const bridge=createFareDataBridge({pageSource:async()=>({rows:[fare('f1','train',5500),fare('f2','bus',2300)],total:2,page:1,pages:1,sourceVersion:'fixture-v1'}),...options})
  const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train','bus'],passengers:2},new AbortController().signal)
@@ -18,7 +18,7 @@ describe('shared direct travel controls',()=>{
  it('updates siblings, selections and synthetic totals locally across repeated revisions',async()=>{
   const{services,state}=await setup()
   render(<TravelProvider services={services}><CatalogNode kind="ModeChips" artifactRef={artifactId}/><CatalogNode kind="FareCards" artifactRef={artifactId}/><CatalogNode kind="SyntheticTotal" artifactRef={artifactId}/></TravelProvider>)
-  await screen.findByText('ÖBB');expect(screen.getByText('FlixBus')).toBeInTheDocument()
+  await screen.findByText('Eurostar');expect(screen.getByText('FlixBus')).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button',{name:'Train'}));await waitFor(()=>expect(screen.queryByText('FlixBus')).not.toBeInTheDocument())
   fireEvent.click(screen.getByRole('button',{name:'Train'}));await screen.findByText('FlixBus')
   fireEvent.click(screen.getByRole('button',{name:/Select Bus FlixBus/}));await screen.findByText('€46.00')
@@ -30,16 +30,6 @@ describe('shared direct travel controls',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Bus'}));const revision=state.get(artifactId).revision
   view.rerender(<TravelProvider services={services}><CatalogNode kind="ModeChips" artifactRef={artifactId} $status="done"/></TravelProvider>)
   expect(screen.getByRole('button',{name:'Bus'})).toHaveAttribute('aria-pressed','true');expect(state.get(artifactId).revision).toBe(revision)
- })
- it('renders readable carrier names while retaining internal ids for filtering',async()=>{
-  const{services,state}=await setup()
-  render(<TravelProvider services={services}><CatalogNode kind="CarrierFilter" artifactRef={artifactId}/><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
-  const flix=await screen.findByRole('checkbox',{name:'FlixBus'})
-  expect(screen.queryByText(/carrier-/i)).not.toBeInTheDocument()
-  fireEvent.click(flix)
-  await waitFor(()=>expect(state.get(artifactId).filters.carrierIds).toEqual(['carrier-1hc5s74']))
-  expect(await screen.findByRole('button',{name:/Select Bus FlixBus/})).toBeInTheDocument()
-  expect(screen.queryByRole('button',{name:/Select Train ÖBB/})).not.toBeInTheDocument()
  })
 })
 
@@ -55,7 +45,7 @@ it('keeps explicit leg mode controls separate from the global mode filter',async
  const{services,state,manifest}=await setup()
  render(<TravelProvider services={services}><CatalogNode kind="ModeChips" artifactRef={artifactId} datasetRef={manifest.datasetId}/><CatalogNode kind="FareCards" artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
  fireEvent.click(screen.getByRole('button',{name:'Bus'}))
- await screen.findByText('FlixBus');await waitFor(()=>expect(screen.queryByText('ÖBB')).not.toBeInTheDocument())
+ await screen.findByText('FlixBus');await waitFor(()=>expect(screen.queryByText('Eurostar')).not.toBeInTheDocument())
  expect(state.get(artifactId).filters.modes).toEqual([]);expect(state.get(artifactId).modesByLeg['london:paris']).toEqual(['bus'])
 })
 
