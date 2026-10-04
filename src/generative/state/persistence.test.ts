@@ -39,3 +39,19 @@ describe('descriptor-only thread persistence',()=>{
   const snapshot=exportAgentContext({turnId:'turn-1',activeArtifactId:item.id,artifactIds:[item.id],store:item.store,bridge:item.bridge});expect(snapshot.artifacts[0]?.revision).toBe(1);expect(snapshot.artifacts[0]?.filters.directOnly).toBe(true);expect(snapshot.datasets[0]?.rowCount).toBe(2);expect(JSON.stringify(snapshot)).not.toContain('availableSeats":3')
  })
 })
+
+it('saves and restores 21 unique descriptors across three valid artifact states',async()=>{
+ const makeBridge=()=>createFareDataBridge({pageSource:async input=>({rows:[],total:0,pages:1,page:input.page,sourceVersion:'multi-v1'})})
+ const bridge=makeBridge(),store=createUIStateStore(),descriptors:PersistedThread['descriptors']=[],artifacts:PersistedThread['artifacts']=[]
+ for(let artifact=0;artifact<3;artifact++){
+  const refs=[]
+  for(let leg=0;leg<7;leg++){const date=new Date(Date.UTC(2026,9,2+artifact*7+leg)).toISOString().slice(0,10),coverage={...request,dateWindow:{from:date,to:date}},manifest=await bridge.load(coverage,new AbortController().signal);refs.push(manifest.datasetId);descriptors.push({datasetId:manifest.datasetId,request:coverage,sourceVersion:'multi-v1',complete:true})}
+  const id=ArtifactIdSchema.parse(`persisted-${artifact}`);store.initializeMissing(id,{datasetRefs:refs});artifacts.push({variant:'b',source:`root = TravelSurface("${id}")`,state:store.get(id)})
+ }
+ const activeArtifactId=artifacts[2]?.state.artifactId,record:PersistedThread={schemaVersion:'1.0.0',catalogVersion:'1.0.0',parserVersion:'openui-0.3.0',queryVersion:'1',messages:[{id:'saved-user',role:'user',parts:[{type:'text',text:'Keep my three itineraries'}]}],activeArtifactId,artifacts,descriptors},io=memory(),persistence=createThreadPersistence(io.storage)
+ await persistence.save('three',record);const loaded=await persistence.load('three');if(!loaded)throw new Error('Missing multi-artifact record')
+ const restored=createUIStateStore(),fresh=makeBridge();const manifests=await persistence.restore(loaded,fresh,restored,new AbortController().signal)
+ expect(loaded.descriptors).toHaveLength(21);expect(manifests).toHaveLength(21);expect(loaded.messages).toEqual(record.messages);expect(loaded.activeArtifactId).toBe(activeArtifactId)
+ for(const artifact of artifacts)expect(restored.get(artifact.state.artifactId)).toEqual(artifact.state)
+ expect(JSON.stringify(io.values.get('three'))).not.toContain('"rows":')
+})
