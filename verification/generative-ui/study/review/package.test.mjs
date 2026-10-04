@@ -29,3 +29,15 @@ test('review export requires real reviewer entry and both available review modes
 test('default sampling includes both rounds for all twelve families and keeps failures visible',()=>{const packet=buildReviewPackage([{...cell('a'),outcome:'fail'},cell('b')],{participant:'anonymous-001'});assert.equal(packet.public.items.length,24);assert.equal(packet.public.sampling.families.length,12);assert.equal(packet.public.items.filter(item=>item.status==='recorded completion failed').length,1);assert.equal(packet.public.items.filter(item=>item.status==='not collected').length,22)})
 
 test('non-final native workflow proof cannot enter a study packet or become machine authorship',()=>{const record={...cell('a'),liveModelAuthorship:false,classification:'zero-model native workflow proof'};assert.throws(()=>buildReviewPackage([record],{participant:'anonymous-999'}),/No verified native study/);const proof=buildReviewPackage([record],{participant:'anonymous-999',readinessOnly:true});assert.match(proof.public.classification,/Non-final/);assert.equal(proof.private.items[proof.public.items.find(item=>item.artifactAvailable).token].record.liveModelAuthorship,false);assert.equal(proof.public.humanRatings,null)});
+test('verified pre-model failures are honest unavailable cards, never silently uncollected or synthetic authorship',()=>{
+ const failed={...cell('b'),liveModelAuthorship:false,outcome:'fail',runEnvironment:{id:'frozen-environment'},persisted:null,captureAvailable:false};
+ const packet=buildReviewPackage([cell('a'),failed],{participant:'anonymous-001',families:['local-controls']});
+ assert.equal(packet.public.items[1].status,'recorded completion failed');
+ assert.equal(packet.public.items[1].artifactAvailable,false);
+ assert.equal(packet.private.items[packet.public.items[1].token].record.liveModelAuthorship,false);
+ assert.equal(packet.public.humanRatings,null);
+ const synthetic={...failed,classification:'zero-model native workflow proof'};
+ const rejected=buildReviewPackage([cell('a'),synthetic],{participant:'anonymous-001',families:['local-controls']});
+ assert.equal(rejected.public.items[1].status,'not collected');
+ assert.equal(rejected.private.skipped.length,1);
+});

@@ -18,7 +18,7 @@ const tasks={
 const same=(a,b,keys)=>keys.every(key=>a?.[key]===b?.[key]);
 export function buildReviewPackage(records,{participant,families=Object.keys(tasks),readinessOnly=false}={}){
  if(!/^anonymous-\d{3,}$/.test(participant??''))throw new Error('Use a stable anonymous participant ID, such as anonymous-001');
- const valid=records.filter(record=>record.excludedFromComparison!==true&&record.runtimeValid===true&&record.fixtureValid!==false&&(record.liveModelAuthorship===true||readinessOnly&&record.classification==='zero-model native workflow proof'));
+ const valid=records.filter(record=>record.excludedFromComparison!==true&&record.runtimeValid===true&&record.fixtureValid!==false&&(record.liveModelAuthorship===true||record.outcome==='fail'&&record.liveModelAuthorship===false&&typeof record.runEnvironment?.id==='string'&&record.runEnvironment.id.length>0&&record.classification!=='zero-model native workflow proof'||readinessOnly&&record.classification==='zero-model native workflow proof'));
  if(!valid.length)throw new Error('No verified native study records are available');
  const runtime=valid[0].runtime,fixture=valid[0].fixture;
  for(const record of valid){
