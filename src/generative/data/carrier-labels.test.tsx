@@ -1,11 +1,12 @@
 import {expect,it} from 'vitest'
-import {render,screen} from '@testing-library/react'
+import {fireEvent,render,screen} from '@testing-library/react'
 import {ArtifactIdSchema,BoundedFareFactSchema,FareRowSchema,parseQuery} from '../contracts'
 import {assertNoBulkData} from '../contracts/privacy'
 import {createFareDataBridge} from './fare-data-bridge'
 import {createSearchPageSource} from './search-client'
 import {createUIStateStore} from '../state/ui-state-store'
 import {TravelProvider} from '../catalog/context'
+import {CatalogNode} from '../catalog/component'
 import {ReactiveScene} from '../variants/b/renderer'
 const request={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['bus'] as const,passengers:1}
 const apiRow={id:'same-fare',mode:'bus',company:'Blablacar Bus',departure_time:'2026-10-02T09:00',duration_minutes:120,origin:{id:'london'},destination:{id:'paris'},price_cents:2103,currency:'EUR',available_seats:9}
@@ -49,4 +50,12 @@ it('keeps label indexes within resource generations and removes them when their 
  bridge.release(first.datasetId);expect(bridge.getCarrierLabel?.('stable-legacy-provider',first.datasetId)).toBeUndefined()
  expect(bridge.getCarrierLabel?.('stable-legacy-provider')).toBe('Updated API provider')
  bridge.release(second.datasetId);expect(bridge.getCarrierLabel?.('stable-legacy-provider')).toBeUndefined()
+})
+
+it('shows authoritative names in carrier filters while dispatching only the same stable carrier ID',async()=>{
+ const bridge=createFareDataBridge({pageSource}),manifest=await bridge.load({...request,modes:[...request.modes]},new AbortController().signal),state=createUIStateStore(),id=ArtifactIdSchema.parse('carrier-control')
+ state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-02'}})
+ render(<TravelProvider services={{bridge,state,activate:()=>{},activeId:()=>id}}><CatalogNode kind="CarrierFilter" artifactRef={id} datasetRef={manifest.datasetId}/></TravelProvider>)
+ const checkbox=await screen.findByRole('checkbox',{name:'Blablacar Bus'});fireEvent.click(checkbox)
+ expect(state.get(id).filters.carrierIds).toEqual(['carrier-1ixeerp']);expect(checkbox).toBeChecked()
 })
