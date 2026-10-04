@@ -38,3 +38,11 @@ it('rejects complete camelCase fare data hidden in uploaded tool schema constant
  const {availableSeats,direct,...fact}=createSyntheticRows(1)[0]!
  expect(()=>assertNoBulkData({selectedFareFacts:[fact],parameters:{properties:{priceCents:{type:'number'}}}})).not.toThrow()
 })
+
+it('accepts additive bounded older-artifact summaries but rejects forged overlap and copied fields',()=>{
+ const summary={artifactId:'older',variant:'b',label:'Earlier itinerary',revision:2,lastInteractionAt:'2026-10-03T12:00:00.000Z'}
+ const base={schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]}
+ expect(parseAgentContext({...base,olderArtifactSummaries:[summary]}).olderArtifactSummaries).toEqual([summary])
+ expect(()=>parseAgentContext({...base,olderArtifactSummaries:[summary,summary]})).toThrow('Duplicate')
+ expect(()=>parseAgentContext({...base,olderArtifactSummaries:[{...summary,datasetRefs:['hidden']}]})).toThrow()
+})
