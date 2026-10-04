@@ -27,9 +27,9 @@ export function validatePresentPrefix(source:string,scope:{artifactIds:Set<strin
     if(value.length>scalarLimit(key)||scalars.has(key)&&!scalars.get(key)?.safeParse(value).success)throw new Error('Partial scalar limit');
     if(key==='$type'&&!names.has(value))throw new Error('Unknown partial component');
     if(key==='artifactRef'&&!scope.artifactIds.has(value))throw new Error('Unknown partial artifact');
-    if(key==='datasetRef'&&!scope.datasetIds.has(value))throw new Error('Unknown partial dataset');
-    if(key==='actionRef'&&!registeredActions.has(value))throw new Error('Unknown partial action');
-    if(key==='selectorRef'&&!registeredSelectors.has(value))throw new Error('Unknown partial selector');
+    if(key==='datasetRef'&&value&&!scope.datasetIds.has(value))throw new Error('Unknown partial dataset');
+    if(key==='actionRef'&&value&&!registeredActions.has(value))throw new Error('Unknown partial action');
+    if(key==='selectorRef'&&value&&!registeredSelectors.has(value))throw new Error('Unknown partial selector');
    }
   }else {
    if(char==='"'){inString=true;start=index;stringIsKey=previous==='{'||previous===','&&containers.at(-1)==='object';}

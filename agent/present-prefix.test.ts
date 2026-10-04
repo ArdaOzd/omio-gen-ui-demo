@@ -16,3 +16,12 @@ it.each([{body:'x'.repeat(601)},{title:'x'.repeat(161)},{datasetRef:'x'.repeat(9
  const encoded=JSON.stringify({$type:'TravelSurface',artifactRef:'a',children:[{$type:'Callout',artifactRef:'a',...props}]})
  expect(()=>validatePresentPrefix(encoded,scope)).toThrow()
 })
+
+it.each(['datasetRef','actionRef','selectorRef'])('matches canonical empty optional reference %s',field=>{
+ const callout={$type:'Callout',artifactRef:'a',[field]:''}
+ const tree={$type:'TravelSurface',artifactRef:'a',children:[callout]}
+ const encoded=JSON.stringify(tree)
+ expect(()=>validatePresentTree(tree,scope)).not.toThrow()
+ for(let cut=1;cut<=encoded.length;cut++)expect(()=>validatePresentPrefix(encoded.slice(0,cut),scope)).not.toThrow()
+ expect(()=>validatePresentPrefix(JSON.stringify({...tree,children:[{...callout,[field]:'unknown'}]}),scope)).toThrow('Unknown partial')
+})
