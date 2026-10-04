@@ -49,7 +49,7 @@ it('keeps ready facts stable across unrelated edits and rejects an older selecte
  act(()=>value.state.dispatch({kind:'sort',artifactId:value.id,sort:{field:'durationMinutes',direction:'desc'}}))
  expect(screen.getByText('€0.00')).toBeVisible();expect(lookup).toHaveBeenCalledTimes(calls)
 })
-it('refreshes selected facts on real resource generation changes and rejects late old-source facts',async()=>{
+it.each(['a','b'])('refreshes selected facts and rejects late old-source facts through %s',async variant=>{
  let generation=1
  const bridge=createFareDataBridge({maxRows:1,pageSource:async input=>({rows:['one','two'].map(id=>FareRowSchema.parse({id,originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',priceCents:generation*1000,durationMinutes:120,departureMinutes:600,availableSeats:8,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})),total:2,page:1,pages:2,sourceVersion:`v${generation}`})})
  const request=CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-03'},modes:['train'],passengers:1})
@@ -57,7 +57,7 @@ it('refreshes selected facts on real resource generation changes and rejects lat
  state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-03'},selectedFareIds:[FareRowSchema.shape.id.parse('one')]})
  const original=bridge.lookupFare;let releaseOld:()=>void=()=>{},first=true
  const lookup=vi.spyOn(bridge,'lookupFare').mockImplementation(async(id,fields)=>{const fact=await original(id,fields);if(first){first=false;await new Promise<void>(resolve=>{releaseOld=resolve})}return fact})
- render(<TravelProvider services={{bridge,state,activate:()=>{},activeId:()=>id}}><CatalogNode kind="SyntheticTotal" artifactRef={id}/></TravelProvider>)
+ render(<TravelProvider services={{bridge,state,activate:()=>{},activeId:()=>id}}><>{variant==='a'?<CatalogNode kind="SyntheticTotal" artifactRef={id}/>:<ReactiveScene artifactRef={id} program={'total = SyntheticTotal("source-facts")\nroot = TravelSurface("source-facts", null, null, null, "Trip", null, [total])'}/>}</></TravelProvider>)
  await waitFor(()=>expect(lookup).toHaveBeenCalledTimes(1))
  generation=2;await act(async()=>{await bridge.load(request,new AbortController().signal)})
  await screen.findByText('€20.00');await act(async()=>releaseOld());expect(screen.getByText('€20.00')).toBeVisible();expect(screen.queryByText('€10.00')).not.toBeInTheDocument()
