@@ -1,6 +1,6 @@
 import { DatasetRevisionSchema, type AllowedFareField, type BoundedQueryResult, type DatasetId, type DatasetRevision, type FareRow, type JsonScalar, type PredicateTree, type QueryIR } from '../contracts'
 import { abortError } from '../data/resource-loader'
-export type QueryResource={rows:readonly FareRow[];revision:DatasetRevision;sourceVersion:string}
+export type QueryResource={rows:readonly FareRow[];revision:DatasetRevision;sourceVersion:string;logicalDatasetId?:DatasetId}
 export type QueryResources=ReadonlyMap<DatasetId,QueryResource>
 export type QueryLimits={maxScanRows:number;maxJoinRows:number;maxGroups:number;maxResultBytes:number;yieldEvery:number}
 const defaults:QueryLimits={maxScanRows:1_000_000,maxJoinRows:200_000,maxGroups:1000,maxResultBytes:65536,yieldEvery:4096}

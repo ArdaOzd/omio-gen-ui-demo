@@ -5,7 +5,7 @@ import { createSearchPageSource } from './search-client'
 
 export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:number;maxPages?:number;queryEngine?:LocalQueryEngine}={}):FareDataBridge {
   const engine=options.queryEngine??createLocalQueryEngine()
-  const resources=new Map<DatasetId,{manifest:DatasetManifest;rows:FareRow[];byId:Map<string,FareRow>;carrierNames:Map<string,string>;references:number}>()
+  const resources=new Map<DatasetId,{manifest:DatasetManifest;engineId:DatasetId;rows:FareRow[];byId:Map<string,FareRow>;carrierNames:Map<string,string>;references:number}>()
   const pending=new Map<string,{promise:Promise<DatasetManifest>;controller:AbortController;subscribers:number}>()
   const listeners=new Map<DatasetId,Set<()=>void>>()
   const fields:DatasetFieldManifest[]=FareFieldSchema.options.map(name=>({name,type:['priceCents','durationMinutes','departureMinutes','availableSeats'].includes(name)?'number':name==='synthetic'||name==='direct'?'boolean':'string',nullable:name==='carrierName',filterable:true,groupable:true,joinKey:['id','originId','destinationId','serviceDate','carrierId'].includes(name)}))
@@ -24,7 +24,18 @@ export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:nu
         const counts:Partial<Record<FareRow['mode'],number>>={};for(const row of result.rows)counts[row.mode]=(counts[row.mode]??0)+1
         const summary={modeCounts:counts,...(result.rows.length?{minPriceCents:range.minPrice,maxPriceCents:range.maxPrice,minDurationMinutes:range.minDuration,maxDurationMinutes:range.maxDuration}:{})}
         const manifest=DatasetManifestSchema.parse({datasetId:id,revision:DatasetRevisionSchema.parse((existing?.manifest.revision??0)+1),schemaVersion:CONTRACT_VERSION,coverage:{...request,complete:result.complete,truncated:!result.complete},rowCount:result.rows.length,fields,compactSummary:summary,source:{kind:'search',descriptorId:`resource-${stableRef(key)}`,sourceVersion:result.sourceVersion}})
-        await engine.register(id,{rows:result.rows,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion});if(controller.signal.aborted){engine.release(id);throw abortError()}resources.set(id,{manifest,rows:result.rows,byId:new Map(result.rows.map(row=>[row.id,row])),carrierNames:new Map(result.rows.flatMap(row=>row.carrierName?[[row.carrierId,row.carrierName]]:[])),references:existing?.references??0});listeners.get(id)?.forEach(listener=>listener());return manifest
+        const engineId=DatasetIdSchema.parse(`cache-${crypto.randomUUID()}`)
+        let committed=false
+        try{
+          await engine.register(engineId,{rows:result.rows,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion,logicalDatasetId:id})
+          if(controller.signal.aborted)throw abortError()
+          const previous=resources.get(id)
+          resources.set(id,{manifest,engineId,rows:result.rows,byId:new Map(result.rows.map(row=>[row.id,row])),carrierNames:new Map(result.rows.flatMap(row=>row.carrierName?[[row.carrierId,row.carrierName]]:[])),references:previous?.references??0})
+          committed=true
+          if(previous)engine.release(previous.engineId)
+          listeners.get(id)?.forEach(listener=>listener())
+          return manifest
+        }finally{if(!committed)engine.release(engineId)}
       }).finally(()=>{if(pending.get(key)?.controller===controller)pending.delete(key)})
       active={promise,controller,subscribers:0};pending.set(key,active)
     }
@@ -41,9 +52,15 @@ export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:nu
   return {load,
     getCarrierLabel(carrierId,datasetId){if(datasetId)return resources.get(datasetId)?.carrierNames.get(carrierId);const names=new Set([...resources.values()].flatMap(resource=>{const name=resource.carrierNames.get(carrierId);return name?[name]:[]}));return names.size===1?[...names][0]:undefined},
     getManifest(id){const resource=resources.get(id);if(!resource)throw new Error('Expired dataset reference');return structuredClone(resource.manifest)},
-    async query(input,signal){const query=parseQuery(input,[...resources.values()].map(resource=>resource.manifest));return engine.execute(query,signal)},
+    async query(input,signal){
+      const query=parseQuery(input,[...resources.values()].map(resource=>resource.manifest))
+      const captured=query.sources.map(source=>{const resource=resources.get(source.datasetRef);if(!resource)throw new Error('Expired dataset reference');return{source,resource}})
+      const result=await engine.execute({...query,sources:captured.map(({source,resource})=>({...source,datasetRef:resource.engineId}))},signal)
+      if(captured.some(({source,resource})=>resources.get(source.datasetRef)!==resource))throw new Error('Stale query result')
+      return result
+    },
     async lookupFare(id,_fields){for(const resource of resources.values()){const row=resource.byId.get(id);if(row){const {availableSeats:_seats,direct:_direct,...fact}=row;return BoundedFareFactSchema.parse(fact)}}throw new Error('Expired fare reference')},
     subscribe(id,listener){const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
-    release(id){const resource=resources.get(id);if(resource&&--resource.references<=0){resources.delete(id);engine.release(id);listeners.delete(id)}},
+    release(id){const resource=resources.get(id);if(resource&&--resource.references<=0){resources.delete(id);engine.release(resource.engineId);listeners.delete(id)}},
   }
 }
