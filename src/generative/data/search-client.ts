@@ -14,7 +14,7 @@ export function createSearchPageSource(options:{fetch?:typeof fetch;baseUrl?:str
     return {page:data.page,pages:data.pages,total:data.total,sourceVersion:payload.source_version,rows:data.results.map(row=>{
       const datePart=row.departure_time.includes('T')?row.departure_time.split('T')[1]:row.departure_time
       const [hours,minutes]=(datePart??'').split(':').map(Number)
-      return FareRowSchema.parse({id:row.id,originId:row.origin.id,destinationId:row.destination.id,serviceDate:data.date,mode:row.mode,carrierId:`carrier-${stableRef(row.company)}`,priceCents:row.price_cents,durationMinutes:row.duration_minutes,departureMinutes:(hours??0)*60+(minutes??0),availableSeats:row.available_seats,currency:row.currency,synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
+      return FareRowSchema.parse({id:row.id,originId:row.origin.id,destinationId:row.destination.id,serviceDate:data.date,mode:row.mode,carrierId:`carrier-${stableRef(row.company)}`,carrierName:row.company,priceCents:row.price_cents,durationMinutes:row.duration_minutes,departureMinutes:(hours??0)*60+(minutes??0),availableSeats:row.available_seats,currency:row.currency,synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
     })}
   }
 }

@@ -28,7 +28,7 @@ export const CoverageSchema = CoverageRequestSchema.extend({ complete: z.boolean
 export type Coverage = z.infer<typeof CoverageSchema>;
 export const FareRowSchema = z.strictObject({
   id: FareIdSchema, originId: ref, destinationId: ref, serviceDate: DateSchema, mode: TransportModeSchema,
-  carrierId: ref, priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(),
+  carrierId: ref, carrierName: z.string().trim().min(1).max(120).nullish(), priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(),
   departureMinutes: z.number().int().min(0).max(1439), availableSeats: z.number().int().nonnegative(),
   currency: z.literal('EUR'), synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees'),
   direct: z.boolean(),
@@ -37,9 +37,9 @@ export type FareRow = z.infer<typeof FareRowSchema>;
 export const FareFieldSchema = FareRowSchema.keyof();
 export type AllowedFareField = z.infer<typeof FareFieldSchema>;
 export const DatasetFieldManifestSchema = z.strictObject({
-  name: FareFieldSchema, type: z.enum(['string', 'number', 'boolean']), nullable: z.literal(false),
+  name: FareFieldSchema, type: z.enum(['string', 'number', 'boolean']), nullable: z.boolean(),
   filterable: z.boolean(), groupable: z.boolean(), joinKey: z.boolean(),
-});
+}).refine(field=>field.name==='carrierName'||!field.nullable,'Only carrierName can be nullable');
 export type DatasetFieldManifest = z.infer<typeof DatasetFieldManifestSchema>;
 export const CompactSummarySchema = z.strictObject({
   minPriceCents: z.number().int().nonnegative().optional(), maxPriceCents: z.number().int().nonnegative().optional(),
@@ -75,7 +75,7 @@ export type ArtifactUIState = z.infer<typeof ArtifactUIStateSchema>;
 export const ExecutionGuardSchema = z.strictObject({ turnId: ref, artifactId: ArtifactIdSchema, uiStateRevision: UIStateRevisionSchema,
   requestId: ref, datasetId: DatasetIdSchema.optional(), datasetRevision: DatasetRevisionSchema.optional() });
 export type ExecutionGuard = z.infer<typeof ExecutionGuardSchema>;
-export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: TransportModeSchema, carrierId: ref,
+export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: TransportModeSchema, carrierId: ref, carrierName: z.string().trim().min(1).max(120).nullish(),
   priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(), serviceDate: DateSchema,
   departureMinutes: z.number().int().min(0).max(1439), originId: ref, destinationId: ref, currency: z.literal('EUR'),
   synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees') });
@@ -107,8 +107,9 @@ export function parseAgentContext(input: unknown): AgentContextEnvelope {
 }
 
 const scalar = z.union([z.string().max(160), z.number().finite(), z.boolean()]);
-export type JsonScalar = z.infer<typeof scalar>;
-export type PredicateTree = { all: PredicateTree[] } | { any: PredicateTree[] } | { field: AllowedFareField; op: 'eq'|'neq'|'in'|'gte'|'lte'|'between'|'contains'; value: JsonScalar | JsonScalar[] };
+export type JsonScalar = z.infer<typeof scalar> | null;
+type QueryValue=z.infer<typeof scalar>;
+export type PredicateTree = { all: PredicateTree[] } | { any: PredicateTree[] } | { field: AllowedFareField; op: 'eq'|'neq'|'in'|'gte'|'lte'|'between'|'contains'; value: QueryValue | QueryValue[] };
 export const PredicateTreeSchema: z.ZodType<PredicateTree> = z.lazy(() => z.union([
   z.strictObject({ all: z.array(PredicateTreeSchema).min(1).max(16) }),
   z.strictObject({ any: z.array(PredicateTreeSchema).min(1).max(16) }),
@@ -137,6 +138,7 @@ export interface FareDataBridge {
   lookupFare(id: FareId, fields: AllowedFareField[]): Promise<BoundedFareFact>;
   subscribe(datasetId: DatasetId, listener: () => void): () => void;
   release(datasetId: DatasetId): void;
+  getCarrierLabel?(carrierId:string,datasetId?:DatasetId):string|undefined;
 }
 export interface UIStateStore {
   get(artifactId: ArtifactId): ArtifactUIState;
