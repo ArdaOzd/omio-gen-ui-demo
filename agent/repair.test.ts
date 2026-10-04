@@ -3,6 +3,24 @@ import { InvalidModelOutputError, withOneRepair } from './repair';
 
 afterEach(() => vi.useRealTimers());
 describe('one bounded model repair', () => {
+ it('observes only bounded attempt metadata across validation repair', async()=>{
+  vi.useFakeTimers();const observed:unknown[]=[];let calls=0;
+  await expect(withOneRepair({prompt:'private prompt',signal:new AbortController().signal,onAttempt:event=>observed.push(event),run:async()=>++calls===1?'private invalid source':'valid',validate:value=>{if(value!=='valid')throw new Error('private validation detail')}})).resolves.toBe('valid');
+  expect(observed).toEqual([{attempt:0,status:'start',reason:'initial',elapsedMs:0},{attempt:0,status:'end',reason:'invalid-output',elapsedMs:0},{attempt:1,status:'start',reason:'validation-repair',elapsedMs:0},{attempt:1,status:'end',reason:'accepted',elapsedMs:0}]);
+  expect(JSON.stringify(observed)).not.toContain('private');
+ });
+ it('observes a terminal provider failure without a repair attempt', async()=>{
+  const observed:unknown[]=[];
+  await expect(withOneRepair({prompt:'context',signal:new AbortController().signal,onAttempt:event=>observed.push(event),run:async()=>{throw new Error('private RPC payload')},validate:()=>{}})).rejects.toThrow('private RPC payload');
+  expect(observed).toMatchObject([{attempt:0,status:'start',reason:'initial'},{attempt:0,status:'end',reason:'provider-error'}]);expect(observed).toHaveLength(2);
+ });
+ it('records cancellation and timeout without an accepted or second attempt', async()=>{
+  vi.useFakeTimers();const controller=new AbortController(),cancelEvents:unknown[]=[],timeoutEvents:unknown[]=[];
+  const cancelled=withOneRepair({prompt:'context',signal:controller.signal,onAttempt:event=>cancelEvents.push(event),run:async()=>new Promise<string>(()=>{}),validate:()=>{}});const cancelRejected=expect(cancelled).rejects.toThrow('cancelled');controller.abort();await cancelRejected;
+  const timed=withOneRepair({prompt:'context',signal:new AbortController().signal,onAttempt:event=>timeoutEvents.push(event),run:async()=>new Promise<string>(()=>{}),validate:()=>{}});const timeoutRejected=expect(timed).rejects.toThrow('timed out');await vi.advanceTimersByTimeAsync(120_000);await timeoutRejected;
+  expect(cancelEvents).toEqual([{attempt:0,status:'start',reason:'initial',elapsedMs:0},{attempt:0,status:'end',reason:'cancelled',elapsedMs:0}]);
+  expect(timeoutEvents).toEqual([{attempt:0,status:'start',reason:'initial',elapsedMs:0},{attempt:0,status:'end',reason:'timeout',elapsedMs:120_000}]);
+ });
  it('repairs validation once with original context and sanitized feedback', async () => {
   const prompts:string[]=[];let calls=0;
   const result=await withOneRepair({prompt:'compact original context',signal:new AbortController().signal,run:async prompt=>{prompts.push(prompt);return ++calls===1?'invalid secret source':'valid'},validate:value=>{if(value!=='valid')throw new Error('Invalid generated scene')}});
