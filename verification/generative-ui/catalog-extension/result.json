@@ -1,0 +1,32 @@
+{
+  "recordedAt": "2026-10-03T10:22:12.275Z",
+  "classification": "deterministic real-adapter proof; no live model authorship",
+  "reports": [
+    {
+      "variant": "a",
+      "browser": "154.0.8037.97",
+      "viewport": 360,
+      "selectedCount": 1,
+      "deselectedCount": 0,
+      "realNativePresent": true,
+      "realOpenUIRenderer": false,
+      "streamPreserved": true,
+      "pageErrors": [],
+      "chatNetworkRequests": 0,
+      "horizontalOverflow": false
+    },
+    {
+      "variant": "b",
+      "browser": "154.0.8037.97",
+      "viewport": 360,
+      "selectedCount": 1,
+      "deselectedCount": 0,
+      "realNativePresent": false,
+      "realOpenUIRenderer": true,
+      "streamPreserved": false,
+      "pageErrors": [],
+      "chatNetworkRequests": 0,
+      "horizontalOverflow": false
+    }
+  ]
+}

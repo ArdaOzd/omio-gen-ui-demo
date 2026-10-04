@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { type BoundedFareFact } from '../../contracts'
+import { legDate,tripDatesForLegDeparture } from '../../state/leg-bindings'
 import { cityLabel, departure, duration, money, useArtifact, useFareRows, useTravelAction, useTravelQuery, filterPredicate } from '../context'
 import type { WidgetProps } from '../layout'
 export function FareCards(props:WidgetProps) {
@@ -19,7 +20,10 @@ export function FarePicker(props:WidgetProps) {
 }
 export function PriceCalendar(props:WidgetProps) {
  const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state,false),groupBy:['serviceDate'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'count',op:'count'}],orderBy:[{field:'serviceDate',direction:'asc'}],limit:30}));const dispatch=useTravelAction(props.artifactRef)
- return <section className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-calendar">{result.data?.rows.map(row=>typeof row.serviceDate==='string'&&typeof row.minimum==='number'?<button key={row.serviceDate} type="button" aria-pressed={result.state.dates.start===row.serviceDate} onClick={()=>{if(typeof row.serviceDate==='string')dispatch({kind:'dates',artifactId:result.state.artifactId,dates:{...result.state.dates,start:row.serviceDate}})}}><span>{new Date(`${row.serviceDate}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{money(row.minimum)}</strong><small>{row.count} options</small></button>:null)}</div>{result.status==='loading'&&<p role="status">Comparing dates…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
+ const [dateError,setDateError]=useState('')
+ const origin=result.datasetId?result.services.bridge.getManifest(result.datasetId).coverage.originIds[0]??'':''
+ const chooseDate=(date:string)=>{let dates:ReturnType<typeof tripDatesForLegDeparture>;try{dates=tripDatesForLegDeparture(result.services.state.get(result.state.artifactId),origin,date)}catch{setDateError('This departure would move the itinerary outside supported calendar dates.');return}dispatch({kind:'dates',artifactId:result.state.artifactId,dates});setDateError('')}
+ return <section className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-calendar">{result.data?.rows.map(row=>typeof row.serviceDate==='string'&&typeof row.minimum==='number'?<button key={row.serviceDate} type="button" aria-pressed={legDate(result.state,origin)===row.serviceDate} onClick={()=>{if(typeof row.serviceDate==='string')chooseDate(row.serviceDate)}}><span>{new Date(`${row.serviceDate}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{money(row.minimum)}</strong><small>{row.count} options</small></button>:null)}</div>{dateError&&<p role="alert">{dateError}</p>}{result.status==='loading'&&<p role="status">Comparing dates…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
 }
 export function Comparison(props:WidgetProps) {
  const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),groupBy:['mode'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'fastest',op:'min',field:'durationMinutes'},{as:'count',op:'count'}],limit:4}));
@@ -30,19 +34,38 @@ function useSelectedFacts(ref:string){
  useEffect(()=>{let active=true;Promise.all(state.selectedFareIds.map(id=>services.bridge.lookupFare(id,[]))).then(items=>{if(active)setFacts(items)}).catch(()=>{if(active)setFacts([])});return()=>{active=false}},[services.bridge,selected])
  return{services,state,facts}
 }
-export function Total(props:WidgetProps&{detail?:boolean}) {
+export function Total(props:WidgetProps) {
  const {services,state,facts}=useSelectedFacts(props.artifactRef)
  const passengers=state.datasetRefs[0]?services.bridge.getManifest(state.datasetRefs[0]).coverage.passengers:1
- return <section className="travel-total"><span>{props.title??'Your selected trip'}</span><strong>{money(facts.reduce((sum,f)=>sum+f.priceCents,0)*passengers)}</strong><p>{facts.length} selected leg{facts.length===1?'':'s'} · {passengers} passenger{passengers===1?'':'s'}</p><small>Synthetic total, including demo fees. No booking is available.</small>{props.detail&&<ol className="travel-timeline">{facts.map(fact=><li key={fact.id}><strong>{cityLabel(fact.originId)} → {cityLabel(fact.destinationId)}</strong><span>{fact.serviceDate} · {cityLabel(fact.mode)} · {money(fact.priceCents)} per passenger</span></li>)}</ol>}</section>
+ return <section className="travel-total"><span>{props.title??'Synthetic total'}</span><strong>{money(facts.reduce((sum,f)=>sum+f.priceCents,0)*passengers)}</strong><p>{passengers} passenger{passengers===1?'':'s'}</p><small>Synthetic total, including demo fees. No booking is available.</small></section>
 }
+export function SelectedItinerary(props:WidgetProps) {
+ const {state,facts}=useSelectedFacts(props.artifactRef)
+ return <section className="travel-panel" aria-label="Selected itinerary"><h3>{props.title??'Selected fares'}</h3>{facts.length?<ol className="travel-timeline">{facts.map(fact=><li key={fact.id}><strong>{cityLabel(fact.originId)} → {cityLabel(fact.destinationId)}</strong><span>{fact.serviceDate} · {cityLabel(fact.mode)} · {money(fact.priceCents)} per passenger</span></li>)}</ol>:<p role="status">{state.selectedFareIds.length?'Loading selected fares…':'Choose a fare to see your itinerary.'}</p>}</section>
+}
+export function ComparisonTable(props:WidgetProps) {
+ const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),project:['id','mode','carrierId','serviceDate','departureMinutes','durationMinutes','priceCents'],orderBy:[state.sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:20}))
+ const rows=result.data?.rows??[]
+ const first=rows[0]
+ const columns=first&&'priceCents' in first?['mode','carrierId','serviceDate','departureMinutes','durationMinutes','priceCents']:Object.keys(first??{}).filter(field=>field!=='id')
+ const labels:Record<string,string>={mode:'Mode',carrierId:'Carrier',serviceDate:'Date',departureMinutes:'Departure',durationMinutes:'Duration',priceCents:'Fare',minimum:'From',fastest:'Fastest',count:'Options'}
+ const display=(field:string,value:unknown)=>typeof value==='number'?['priceCents','minimum'].includes(field)?money(value):['durationMinutes','fastest'].includes(field)?duration(value):field==='departureMinutes'?departure(value):String(value):typeof value==='string'?['mode','carrierId'].includes(field)?cityLabel(value):value:'–'
+ return <section className="travel-panel"><h3>{props.title??'Compare fares'}</h3><div className="travel-table-wrap"><table aria-label="Compare fares"><caption>Synthetic fares per passenger</caption><thead><tr>{columns.map(field=><th scope="col" key={field}>{labels[field]??cityLabel(field)}</th>)}</tr></thead><tbody>{rows.map((row,index)=><tr key={typeof row.id==='string'?row.id:index}>{columns.map((field,column)=>column===0?<th key={field} scope="row">{display(field,row[field])}</th>:<td key={field}>{display(field,row[field])}</td>)}</tr>)}</tbody></table></div>{result.status==='loading'&&<p role="status">Comparing fares…</p>}{result.status==='ready'&&!rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
+}
+export function ModeBreakdown(props:WidgetProps) {
+ const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),groupBy:['mode'],metrics:[{as:'count',op:'count'}],limit:4}))
+ return <section className="travel-panel"><h3>{props.title??'Options by mode'}</h3><div className="travel-table-wrap"><table aria-label="Options by mode"><thead><tr><th scope="col">Mode</th><th scope="col">Options</th></tr></thead><tbody>{result.data?.rows.map(row=><tr key={String(row.mode)}><th scope="row">{cityLabel(String(row.mode))}</th><td>{row.count}</td></tr>)}</tbody></table></div>{result.status==='loading'&&<p role="status">Counting options…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
+}
+
 export function Coverage(props:WidgetProps) {
  const {services,state}=useArtifact(props.artifactRef); const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
  return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
 }
 function useRouteStops(ref:string) {
  const {services,state}=useArtifact(ref)
- if(state.stays.length)return state.stays
  const legs=state.datasetRefs.map(id=>services.bridge.getManifest(id).coverage)
+ const origin=legs[0]?.originIds[0]
+ if(state.stays.length)return origin&&state.stays[0]?.cityId!==origin?[{cityId:origin,nights:0},...state.stays]:state.stays
  const distinct=legs.filter((leg,index)=>legs.findIndex(other=>other.originIds[0]===leg.originIds[0]&&other.destinationIds[0]===leg.destinationIds[0])===index)
  const cities=distinct.length?[distinct[0].originIds[0],...distinct.map(leg=>leg.destinationIds[0])].filter((city):city is string=>typeof city==='string'):[]
  return cities.map(cityId=>({cityId,nights:0}))
@@ -66,4 +89,10 @@ export function Plot(props:WidgetProps) {
 export function CheapestFastest(props:WidgetProps) {
  const cheapest=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),orderBy:[{field:'priceCents',direction:'asc'}],limit:1}));const fastest=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),orderBy:[{field:'durationMinutes',direction:'asc'}],limit:1}))
  return <section className="travel-panel"><h3>{props.title??'Cheapest and fastest'}</h3><div className="travel-responsivegrid">{[{name:'Lowest fare',row:cheapest.data?.rows[0]},{name:'Fastest journey',row:fastest.data?.rows[0]}].map(({name,row})=><div className="travel-insight" key={name}><span>{name}</span><strong>{row&&typeof row.priceCents==='number'?money(row.priceCents):'No match'}</strong><p>{row&&typeof row.durationMinutes==='number'?duration(row.durationMinutes):''} {row?cityLabel(String(row.mode)):''}</p></div>)}</div></section>
+}
+
+export function SelectedFareCount(props:WidgetProps) {
+ const {state}=useArtifact(props.artifactRef)
+ const count=state.selectedFareIds.length
+ return <p className="travel-caption" role="status" aria-label="Selected fares" aria-atomic="true">{count} selected fare{count===1?'':'s'}</p>
 }

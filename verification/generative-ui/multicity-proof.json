@@ -1,0 +1,1 @@
+{"status":"pass","kind":"actual-local-fare-browser-smoke","modelRequests":0,"initialDates":["2026-10-09","2026-10-11"],"afterStayDate":"2026-10-12","outsideDates":["2026-10-20","2026-10-23"],"sameLegReplacement":true,"invalidSelectionsCleared":true,"seedRefsRetained":true,"resourceHandles":4,"pageErrors":[]}
