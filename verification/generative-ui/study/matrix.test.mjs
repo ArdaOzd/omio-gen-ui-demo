@@ -27,3 +27,5 @@ test('resume excludes samples without matching verified runtime identity',()=>{
  assert.equal(canResume({...report,excludedFromComparison:true},cell,runtime,fixture),false)
  assert.equal(canResume(report,cell,{...runtime,reasoningEffort:'low'},fixture),false)
 })
+
+test('a resumed cell must link the same immutable run environment',()=>{const cell=buildMatrix(scenarios)[0],fixture={sourceVersion:'fixture',rowCount:10000000},report={...cell,runtime,appRevision:runtime.appRevision,runtimeValid:true,fixture,model:runtime.model,reasoning:runtime.reasoningEffort,provider:runtime.provider,liveModelAuthorship:true,outcome:'pass',runEnvironment:{id:'environment-one'}};assert.equal(canResume(report,cell,runtime,fixture,'environment-one'),true);assert.equal(canResume(report,cell,runtime,fixture,'environment-two'),false);assert.equal(canResume({...report,runEnvironment:undefined},cell,runtime,fixture,'environment-one'),false)});
