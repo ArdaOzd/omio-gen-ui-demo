@@ -48,6 +48,7 @@ export async function executeQuery(query:QueryIR,resources:QueryResources,signal
   if(index>0&&index%limits.yieldEvery===0)await new Promise<void>(resolve=>setTimeout(resolve,0))
  }
  let output:Array<Record<string,JsonScalar>>=[]
+ let projection:AllowedFareField[]|undefined
  if(query.groupBy?.length||query.metrics?.length){
   const groups=new Map<string,FareRow[]>()
   for(const row of filtered){const key=JSON.stringify((query.groupBy??[]).map(field=>row[field]));const group=groups.get(key)??[];group.push(row);groups.set(key,group);if(groups.size>limits.maxGroups)throw new Error('Grouping budget exceeded')}
@@ -69,13 +70,15 @@ export async function executeQuery(query:QueryIR,resources:QueryResources,signal
    return result
   })
  }else{
-  const fields:AllowedFareField[]=query.project??['id','mode','carrierId','priceCents','durationMinutes','serviceDate','departureMinutes','originId','destinationId']
-  output=filtered.map(row=>Object.fromEntries(fields.map(field=>[field,row[field]])))
+  projection=query.project??['id','mode','carrierId','priceCents','durationMinutes','serviceDate','departureMinutes','originId','destinationId']
+  output=filtered
  }
  const ordering=query.topK?[{field:query.topK.by,direction:query.topK.direction},...(query.orderBy??[])]:query.orderBy??[]
  output.sort((left,right)=>{for(const order of ordering){const difference=compare(valueOf(left,order.field),valueOf(right,order.field));if(difference)return order.direction==='desc'?-difference:difference}return String(left.id??JSON.stringify(left)).localeCompare(String(right.id??JSON.stringify(right)))})
  const total=output.length
- const rows=output.slice(0,Math.min(query.limit,query.topK?.k??query.limit))
+ const selectedRows=output.slice(0,Math.min(query.limit,query.topK?.k??query.limit))
+ const fields=projection
+ const rows=fields?selectedRows.map(row=>Object.fromEntries(fields.map(field=>[field,valueOf(row,field)]))):selectedRows
  if(new TextEncoder().encode(JSON.stringify(rows)).length>limits.maxResultBytes)throw new Error('Query transfer budget exceeded')
  if(signal.aborted)throw abortError()
  return {rows,total,truncated:rows.length<total,datasetRevision:DatasetRevisionSchema.parse(Math.max(...selected.map(item=>item.revision))),requestId:crypto.randomUUID()}

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createSnapshotTransport, snapshotRequest } from './transport'
 import type { UIMessage } from 'ai'
 
-const envelope = (turnId: string) => ({ schemaVersion: '1.0.0', turnId, artifacts: [], datasets: [], selectedFareFacts: [] })
+const envelope = (turnId: string) => ({ schemaVersion: '1.0.0', turnId, artifacts: [], olderArtifactSummaries: [], datasets: [], selectedFareFacts: [] })
 
 const messages: UIMessage[] = [{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'Compare options' }] }]
 

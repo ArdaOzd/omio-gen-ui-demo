@@ -1,9 +1,14 @@
-import { type ArtifactUIState,type Coverage,type FareDataBridge,type DatasetId,type CoverageRequest } from '../contracts'
+import { DateSchema,type ArtifactUIState,type Coverage,type FareDataBridge,type DatasetId,type CoverageRequest } from '../contracts'
 export function legKey(coverage:Pick<Coverage,'originIds'|'destinationIds'>):string|undefined{return coverage.originIds.length===1&&coverage.destinationIds.length===1?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined}
 export function legDate(state:ArtifactUIState,originId:string,date=state.dates.start):string{
  const stop=state.stays.findIndex(stay=>stay.cityId===originId)
  const nights=stop<0?0:state.stays.slice(0,stop+1).reduce((sum,stay)=>sum+stay.nights,0)
  return new Date(Date.parse(date)+nights*86400000).toISOString().slice(0,10)
+}
+export function tripDatesForLegDeparture(state:ArtifactUIState,originId:string,departureDate:string):ArtifactUIState['dates']{
+ const shift=Date.parse(departureDate)-Date.parse(legDate(state,originId))
+ const shifted=(date:string)=>DateSchema.parse(new Date(Date.parse(date)+shift).toISOString().slice(0,10))
+ return {start:shifted(state.dates.start),...(state.dates.end?{end:shifted(state.dates.end)}:{})}
 }
 export function legRequest(state:ArtifactUIState,coverage:Coverage):CoverageRequest{
  const key=legKey(coverage);const chosen=key?state.modesByLeg[key]??state.filters.modes:state.filters.modes
@@ -11,7 +16,7 @@ export function legRequest(state:ArtifactUIState,coverage:Coverage):CoverageRequ
 }
 export function legState(state:ArtifactUIState,coverage:Coverage):ArtifactUIState{
  const key=legKey(coverage)
- return {...state,dates:{...state.dates,start:legDate(state,coverage.originIds[0]??'')},filters:{...state.filters,modes:key&&state.modesByLeg[key]!==undefined?state.modesByLeg[key]??[]:state.filters.modes}}
+ return {...state,dates:{start:legDate(state,coverage.originIds[0]??''),...(state.dates.end?{end:legDate(state,coverage.originIds[0]??'',state.dates.end)}:{})},filters:{...state.filters,modes:key&&state.modesByLeg[key]!==undefined?state.modesByLeg[key]??[]:state.filters.modes}}
 }
 
 export function resolveBoundDatasetId(state:ArtifactUIState,bridge:FareDataBridge,seedRef:DatasetId):DatasetId{

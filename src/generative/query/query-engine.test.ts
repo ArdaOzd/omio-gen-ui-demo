@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { executeQuery } from './query-engine'
+import { createFareDataBridge } from '../data/fare-data-bridge'
+import { parseQuery } from '../contracts'
 import { DatasetIdSchema, DatasetRevisionSchema, FareIdSchema, type FareRow, type QueryIR } from '../contracts'
 const datasetId=DatasetIdSchema.parse('fixture')
 const rows:FareRow[]=[
@@ -27,4 +29,14 @@ describe('bounded local queries',()=>{
   multi.set(other,{rows,revision:DatasetRevisionSchema.parse(2),sourceVersion:'v1'})
   await expect(executeQuery(query({sources:[{datasetRef:datasetId,alias:'left'},{datasetRef:other,alias:'right'}],joins:[{rightAlias:'right',leftKey:'destinationId',rightKey:'destinationId',kind:'inner'}]}),multi,new AbortController().signal,{maxJoinRows:4})).rejects.toThrow(/join expansion/i)
  })
+})
+
+it('executes authored inclusive date-window queries through manifest validation',async()=>{
+ const dated=rows.map((row,index)=>({...row,serviceDate:`2026-10-${String(index+1).padStart(2,'0')}`}))
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:dated.filter(row=>row.serviceDate===input.date),total:1,pages:1,page:input.page,sourceVersion:'v1'})})
+ const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-01',to:'2026-10-03'},modes:['train','bus'],passengers:1},new AbortController().signal)
+ const input:QueryIR={version:1,sources:[{datasetRef:manifest.datasetId,alias:'fares'}],where:{field:'serviceDate',op:'between',value:['2026-10-02','2026-10-03']},groupBy:['mode'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'fastest',op:'min',field:'durationMinutes'},{as:'count',op:'count'}],limit:4}
+ const result=await bridge.query(parseQuery(input,[manifest]),new AbortController().signal)
+ expect(result.rows).toEqual([{mode:'bus',minimum:1000,fastest:380,count:2}])
+ expect(()=>parseQuery({...input,where:{field:'carrierId',op:'between',value:['a','z']}},[manifest])).toThrow(/Comparison requires/)
 })

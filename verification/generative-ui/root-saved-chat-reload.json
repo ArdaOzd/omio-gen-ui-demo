@@ -1,0 +1,32 @@
+{
+  "sourceRevision": "a36f4340bf66219ff7c6e1205cc216e7c71865b8",
+  "observation": "Root CUA actual saved-chat full reload; no imported fixture or storage reset",
+  "a": {
+    "artifactId": "artifact-b1ab4aca-b3e1-4e3c-8b34-e282e6550669",
+    "userMessageId": "Pw3pJQ5pgo1nOP0O",
+    "assistantMessageId": "hRKWORyRqS730H0V",
+    "revision": 5,
+    "busOnlyPreserved": true,
+    "selectedFareId": "fare_003796057",
+    "selectedTotalCents": 1998,
+    "threeCityMap": true,
+    "distinctCompactPickerAndDetailedCards": true,
+    "completedStepsInitiallyClosed": true,
+    "expandedPriorIntroWithoutChangingSelection": true,
+    "alerts": 0
+  },
+  "b": {
+    "artifactId": "artifact-372a6384-6768-42e0-850e-519a230e35ff",
+    "userMessageId": "ZIYSTKeS7udRK28N",
+    "assistantMessageId": "3hAQarty9rnZu47T",
+    "revision": 5,
+    "sourceCharacters": 3339,
+    "sourcePreserved": true,
+    "fullCalloutVisible": true,
+    "calloutDOMCharacters": 193,
+    "completedStepsInitiallyClosed": true,
+    "alerts": 0,
+    "preparingSpinner": false
+  },
+  "historicalLogs": "Earlier HMR Query AbortError events remain; no claim that the entire historical log buffer is empty."
+}

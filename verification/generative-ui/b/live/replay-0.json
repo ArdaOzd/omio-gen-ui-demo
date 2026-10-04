@@ -1,0 +1,40 @@
+{
+  "index": 0,
+  "classification": "deterministic replay of genuinely model-authored SSE; real Python fare API and browser query worker; follow-up snapshot inspection",
+  "passed": true,
+  "localClickChatDelta": 0,
+  "snapshot": {
+    "artifactId": "artifact-b72fdc22-64ef-4324-a1d2-a49ff3f69a99",
+    "revision": 6,
+    "runtimeVariables": {
+      "$show": true
+    },
+    "datasetRefs": [
+      "dataset-1hq3nnw"
+    ],
+    "selectedFareIds": [],
+    "filters": {
+      "modes": [
+        "bus"
+      ],
+      "carrierIds": [],
+      "directOnly": false
+    },
+    "dates": {
+      "start": "2026-10-09"
+    },
+    "stays": [],
+    "sort": {
+      "field": "priceCents",
+      "direction": "asc"
+    },
+    "modesByLeg": {},
+    "pending": [],
+    "layoutSummary": "TravelHero / FarePicker / TravelSurface / Stack / SplitPane / StickySummary / ModeChips / ComparisonTable / SyntheticTotal / CoverageSummary / SelectedItinerary / RetryAction",
+    "catalogVersion": "1.0.0"
+  },
+  "errors": [],
+  "visibleText": "Compare interfacesClassic searchVersion B · Signed-in Codex\nwayfinder\nTravel ideas, made yours\n\nLoad London to Paris for 2026-10-09 through 2026-10-15, one passenger, train bus flight. Compare the modes with minimum prices, fastest durations and counts using your own reactive local query. Give me local mode filters and a Show details action that reveals coverage information, plus a selected-trip summary. Choose a clear arrangement and an actual state/query/conditional-action graph. Finish with a brief explanation.\n\nIâ€™ll load Londonâ€“Paris coverage for 9â€“15 October 2026, for one passenger across train, bus and flight.\n\nTravel data updated locally.\n\nIâ€™ll load Londonâ€“Paris coverage for 9â€“15 October 2026, for one passenger across train, bus and flight.\n\nIâ€™ll arrange the mode comparison and fare picker beside a persistent selected-trip summary, with coverage details hidden until requested.\n\nLondonâ€“Paris comparison\nLondon to Paris Â· 9â€“15 October 2026 Â· 1 passenger\nFilter transport modes\nTrain\nBus\nFlight\nFerry\nNo modes selected means all modes.\nMinimum price, fastest duration and fare count by mode\nSynthetic fares per passenger\nMode\tFrom\tFastest\tOptions\nBus\t€20.79\t7h 36m\t19\nChoose a fare\n\n19 matches · Synthetic fares per passenger\n\nBUS\nCarrier 1ixeerp\n\n01:30 · 8h 21m\n\nLondon → Paris · 2026-10-12\n€20.79\nSelect\nBUS\nCarrier 1kmj2pr\n\n01:23 · 9h 54m\n\nLondon → Paris · 2026-10-11\n€22.87\nSelect\nBUS\nCarrier 1ixeerp\n\n01:50 · 9h 6m\n\nLondon → Paris · 2026-10-15\n€23.90\nSelect\nBUS\nCarrier 1kmj2pr\n\n17:16 · 8h 45m\n\nLondon → Paris · 2026-10-09\n€25.43\nSelect\nBUS\nCarrier 1hc5s74\n\n06:27 · 8h 40m\n\nLondon → Paris · 2026-10-09\n€26.55\nSelect\nBUS\nCarrier 1hc5s74\n\n22:03 · 9h 40m\n\nLondon → Paris · 2026-10-10\n€27.60\nSelect\nBUS\nCarrier 1hc5s74\n\n22:16 · 8h 40m\n\nLondon → Paris · 2026-10-13\n€28.44\nSelect\nBUS\nCarrier 1kmj2pr\n\n15:31 · 8h 41m\n\nLondon → Paris · 2026-10-15\n€29.16\nSelect\nBUS\nCarrier 1kmj2pr\n\n14:49 · 9h 28m\n\nLondon → Paris · 2026-10-12\n€31.07\nSelect\nBUS\nCarrier 1kmj2pr\n\n09:43 · 7h 57m\n\nLondon → Paris · 2026-10-10\n€31.35\nSelect\nBUS\nCarrier 1kmj2pr\n\n01:31 · 9h 4m\n\nLondon → Paris · 2026-10-14\n€32.74\nSelect\nBUS\nCarrier 1ixeerp\n\n17:06 · 10h 10m\n\nLondon → Paris · 2026-10-10\n€32.83\nSelect\nBUS\nCarrier 1ixeerp\n\n00:11 · 9h 33m\n\nLondon → Paris · 2026-10-09\n€32.86\nSelect\nBUS\nCarrier 1hc5s74\n\n08:52 · 7h 36m\n\nLondon → Paris · 2026-10-15\n€34.95\nSelect\nBUS\nCarrier 1hc5s74\n\n16:53 · 8h 0m\n\nLondon → Paris · 2026-10-14\n€36.30\nSelect\nBUS\nCarrier 1hc5s74\n\n08:57 · 8h 44m\n\nLondon → Paris · 2026-10-12\n€36.57\nSelect\nBUS\nCarrier 1ixeerp\n\n09:03 · 8h 17m\n\nLondon → Paris · 2026-10-11\n€37.86\nSelect\nBUS\nCarrier 1ixeerp\n\n06:47 · 9h 24m\n\nLondon → Paris · 2026-10-14\n€37.91\nSelect\nBUS\nCarrier 1hc5s74\n\n16:26 · 9h 32m\n\nLondon → Paris · 2026-10-11\n€39.04\nSelect\nShow details\nLoaded coverage\n\nComplete · London → Paris · 2026-10-09 to 2026-10-15 · 57 synthetic fares\n\nYour selection\nSelected trip\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\nSynthetic total Â· EUR per passenger\n€0.00\n\n0 selected legs · 1 passenger\n\nSynthetic total, including demo fees. No booking is available.\n\nMode filters recompute both local queries across the full week. Show details reveals coverage; choosing a fare updates the summary. Prices are synthetic demo fares.\n\nIâ€™ll load Londonâ€“Paris coverage for 9â€“15 October 2026, for one passenger across train, bus and flight.\n\nIâ€™ll arrange the mode comparison and fare picker beside a persistent selected-trip summary, with coverage details hidden until requested.\n\nMode filters recompute both local queries across the full week. Show details reveals coverage; choosing a fare updates the summary. Prices are synthetic demo fares.\n\nMode filters update minimum prices, fastest durations and counts across the full week. Show details reveals coverage; selecting a fare updates the persistent trip summary. Prices are synthetic demo fares.\n\nRetry\nActive travel view · artifact-b72fdc22-64ef-4324-a1d2-a49ff3f69a99\nSynthetic fares\nSend\nStop",
+  "tableRows": 1,
+  "fareChoices": 19
+}
