@@ -1,3 +1,5 @@
+import { ToolResponse } from 'assistant-stream'
+import { useTravelServices,type TravelServices } from '../../catalog/context'
 import { useEffect,useRef } from 'react'
 import { z } from 'zod'
 import { useAuiState,useToolArgsStatus,type Toolkit } from '@assistant-ui/react'
@@ -12,21 +14,28 @@ export function SceneToolFrame({args,isStreaming,failed,repaired}:{args:Partial<
  if(typeof args.program!=='string'||typeof args.artifactRef!=='string')return <div role="status">Preparing reactive view…</div>
  return <ReactiveScene program={args.program} artifactRef={args.artifactRef} isStreaming={isStreaming}/>
 }
-export function hasAcceptedRepairAfter(parts:readonly ScenePart[],toolCallId:string,artifactRef?:string){
+export function hasAcceptedRepairAfter(parts:readonly ScenePart[],toolCallId:string,artifactRef?:string,services?:TravelServices){
  return hasLaterAcceptedScene(parts,toolCallId,'compose_reactive_scene',artifactRef,part=>{
   if(part.isError||typeof part.result!=='object'||part.result===null||!('status' in part.result)||part.result.status!=='accepted')return false
   const input=ComposeSceneInputSchema.safeParse(part.args);if(!input.success)return false
-  try{validateReactiveProgram(input.data.program);return true}catch{return false}
+  try{if(services)validateHostScene(input.data,services);else validateReactiveProgram(input.data.program);return true}catch{return false}
  })
+}
+function validateHostScene(input:z.infer<typeof ComposeSceneInputSchema>,services:TravelServices){
+ const state=services.state.get(input.artifactRef),datasetIds=new Set(state.datasetRefs.map(id=>services.bridge.getManifest(id).datasetId))
+ return validateReactiveProgram(input.program,{scope:{artifactId:state.artifactId,datasetIds}})
 }
 const semanticSchema=ArtifactUIStateSchema.pick({filters:true,dates:true,sort:true,stays:true,modesByLeg:true,selectedFareIds:true})
 export const bInstructions=`Write an OpenUI v0.5 program. Each newline separates a statement: name = Expression. root must be TravelSurface. All forty registered travel components use the same positional signature NAME(artifactRef, datasetRef?, actionRef?, selectorRef?, title?, variant?, children?, value?, binding?, query?, action?, body?). Optional positional fields use null. children is an array of component references. Declare state as $name = literal, use $name or $name.field in expressions, including ternary condition ? component : null. Bind a component's value to a $variable and binding to one of filters, dates, sort, stays, modesByLeg, selectedFareIds. Example of a generic binding: control = ModeChips(artifactRef, null, null, null, "Modes", null, null, $filters, "filters"). Use Query("local_query", QueryIR) and supply its declaration reference to a view's query argument. Use Mutation("patch_artifact_state", typed command patch); ordered Action([@Run(mutation), @Set($show, true)]) or @Reset($show) goes in the action argument of RetryAction. Computed queries and conditional children may depend on state variables. Programs must have different dependency and arrangement choices for different user needs.`+'\nUse Query("local_query", QueryIR), Mutation("patch_artifact_state", typedUICommandPatch). No refresh intervals. Bind controls using canonical positional six props then children,value,binding,query,action,body. Titles are short headings of at most160 characters. Callout explanatory copy belongs in body (last argument), at most600 characters. Legacy Callout text in title is displayed as body when longer than160 characters. Object state is allowed only for validated semantic bindings. Other state is primitive and bounded. Query result props refer to Query declarations; never literal rows. Each editable semantic variable must have at least one component binding to its host field; Global ModeChips omits datasetRef and binds the entire filters object. A per-leg ModeChips supplies datasetRef and binds the entire modesByLeg map; use the stable originId:destinationId key in query mode predicates. Never bind a scalar mode. Optional positional arguments use null. Layout children contain references or conditionals. RetryAction can run an ordered Action as its last argument. Use latest context values as defaults. ComparisonTable, ComparisonMatrix and ModeBreakdown queries produce mode, minimum (min priceCents), fastest (min durationMinutes), count. PriceCalendar queries produce serviceDate, minimum and count. FareCards, FarePicker, ItineraryTimeline and DurationPricePlot queries project all FareRow fields so shared widgets can display them.'+'\nHost semantic fields: '+JSON.stringify(z.toJSONSchema(semanticSchema))+'\nlocal_query input: '+JSON.stringify(z.toJSONSchema(QueryIRSchema))+'\npatch_artifact_state input: '+JSON.stringify(z.toJSONSchema(UICommandPatchSchema))
-export const bToolkit={compose_reactive_scene:{type:'frontend',description:bInstructions,parameters:ComposeSceneInputSchema,execute:async(input:unknown)=>{const parsed=ComposeSceneInputSchema.parse(input);try{validateReactiveProgram(parsed.program);return{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'accepted'}}catch{return{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'error'}}},render:function SceneTool({args,status,addResult,result,toolCallId,isError}){
- const completed=useRef(false),{propStatus}=useToolArgsStatus(),streaming=propStatus.program==='streaming'
- const repaired=useAuiState(state=>hasAcceptedRepairAfter(state.message.parts,toolCallId,args.artifactRef))
+export const bToolkit={compose_reactive_scene:{type:'frontend',description:bInstructions,parameters:ComposeSceneInputSchema,execute:async(input:unknown)=>{const parsed=ComposeSceneInputSchema.parse(input);return new ToolResponse({result:{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'error'},isError:true})},render:function SceneTool({args,status,addResult,result,toolCallId,isError}){
+ const services=useTravelServices();const completed=useRef(false),{propStatus}=useToolArgsStatus(),streaming=propStatus.program==='streaming'
+ const repaired=useAuiState(state=>hasAcceptedRepairAfter(state.message.parts,toolCallId,args.artifactRef,services))
  useEffect(()=>{if(streaming||completed.current||result)return;const parsed=ComposeSceneInputSchema.safeParse(args);if(!parsed.success)return;completed.current=true
-  try{validateReactiveProgram(parsed.data.program);addResult({artifactId:parsed.data.artifactRef,programRevision:parsed.data.programRevision,status:'accepted'})}catch{addResult({artifactId:parsed.data.artifactRef,programRevision:parsed.data.programRevision,status:'error'})}
- },[args,streaming,result,addResult])
- return <SceneToolFrame args={args} isStreaming={streaming} failed={isError===true||status.type==='incomplete'||typeof result==='object'&&result!==null&&'status' in result&&result.status==='error'} repaired={repaired}/>
+  try{validateHostScene(parsed.data,services);addResult({artifactId:parsed.data.artifactRef,programRevision:parsed.data.programRevision,status:'accepted'})}catch{addResult(new ToolResponse({result:{artifactId:parsed.data.artifactRef,programRevision:parsed.data.programRevision,status:'error'},isError:true}))}
+ },[args,streaming,result,addResult,services])
+ let invalidReferences=false
+ if(typeof args.program==='string'&&typeof args.artifactRef==='string'){try{const state=services.state.get(ArtifactIdSchema.parse(args.artifactRef));validateReactiveProgram(args.program,{complete:!streaming,scope:{artifactId:state.artifactId,datasetIds:new Set(state.datasetRefs.map(id=>services.bridge.getManifest(id).datasetId))}})}catch{invalidReferences=true}}
+ return <SceneToolFrame args={args} isStreaming={streaming} failed={invalidReferences||isError===true||status.type==='incomplete'||typeof result==='object'&&result!==null&&'status' in result&&result.status==='error'} repaired={repaired}/>
 }}} satisfies Toolkit
+export function createBToolkit(services:TravelServices){return {...bToolkit,compose_reactive_scene:{...bToolkit.compose_reactive_scene,execute:async(input:unknown)=>{const parsed=ComposeSceneInputSchema.parse(input);try{validateHostScene(parsed,services);return new ToolResponse({result:{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'accepted'}})}catch{return new ToolResponse({result:{artifactId:parsed.artifactRef,programRevision:parsed.programRevision,status:'error'},isError:true})}}}} satisfies Toolkit}
 export default bToolkit
