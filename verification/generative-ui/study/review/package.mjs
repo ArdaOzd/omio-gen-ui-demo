@@ -16,9 +16,9 @@ const tasks={
  recovery:'Inspect the retained useful artifact after recorded cancellation/retry. Operate its controls; this replay does not generate another response.'
 };
 const same=(a,b,keys)=>keys.every(key=>a?.[key]===b?.[key]);
-export function buildReviewPackage(records,{participant,families=Object.keys(tasks)}={}){
+export function buildReviewPackage(records,{participant,families=Object.keys(tasks),readinessOnly=false}={}){
  if(!/^anonymous-\d{3,}$/.test(participant??''))throw new Error('Use a stable anonymous participant ID, such as anonymous-001');
- const valid=records.filter(record=>record.excludedFromComparison!==true&&record.runtimeValid===true&&record.fixtureValid!==false&&record.liveModelAuthorship===true);
+ const valid=records.filter(record=>record.excludedFromComparison!==true&&record.runtimeValid===true&&record.fixtureValid!==false&&(record.liveModelAuthorship===true||readinessOnly&&record.classification==='zero-model native workflow proof'));
  if(!valid.length)throw new Error('No verified native study records are available');
  const runtime=valid[0].runtime,fixture=valid[0].fixture;
  for(const record of valid){
@@ -48,6 +48,6 @@ export function buildReviewPackage(records,{participant,families=Object.keys(tas
    privateItems[token]={variant,cellId:record?.id??null,record:record??null};
   }
  }
- const publicPacket={schemaVersion:1,participant,sourceFreeze:{runtime,fixture},dimensions,sampling:{families,cache:'cold',wording:'fixed',rule:'Predeclared: one cold/fixed cell per family and representation, including failed and missing cells; other machine cells remain in the complete corpus'},scale:{minimum:1,maximum:5,anchors:{1:'Poor',2:'Weak',3:'Acceptable',4:'Good',5:'Excellent'}},humanRatings:null,items};
+ const publicPacket={schemaVersion:1,classification:readinessOnly?'Non-final native workflow proof. No machine matrix cells or human ratings.':'Frozen machine corpus for human review',participant,sourceFreeze:{runtime,fixture},dimensions,sampling:{families,cache:'cold',wording:'fixed',rule:'Predeclared: one cold/fixed cell per family and representation, including failed and missing cells; other machine cells remain in the complete corpus'},scale:{minimum:1,maximum:5,anchors:{1:'Poor',2:'Weak',3:'Acceptable',4:'Good',5:'Excellent'}},humanRatings:null,items};
  return {public:publicPacket,private:{schemaVersion:1,participant,items:privateItems,skipped:records.filter(record=>!valid.includes(record)).map(record=>({cellId:record.id,reason:'Excluded or unverified native evidence'}))},template:{schemaVersion:1,classification:'human-entered ratings',participant,sourceFreeze:publicPacket.sourceFreeze,reviews:items.map(({token})=>({token,captureReviewed:false,handsOnAttempted:false,ratings:Object.fromEntries(dimensions.map(dimension=>[dimension,null])),notes:''}))}};
 }

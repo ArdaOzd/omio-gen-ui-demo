@@ -1,6 +1,7 @@
 import{validateReviewExport}from'/review/export-validation.mjs';
 const packet=await(await fetch('/manifest.json')).json(),draft=await(await fetch('/ratings-template.json')).json(),byToken=new Map(draft.reviews.map(review=>[review.token,review]));
 const find=id=>document.getElementById(id),select=find('item'),status=find('status'),frame=find('interactive');
+find('classification').textContent=packet.classification;
 find('source').textContent=`Anonymous reviewer ${packet.participant} · App freeze ${packet.sourceFreeze.runtime.appRevision} · Synthetic fare source ${packet.sourceFreeze.fixture.sourceVersion}`;
 for(const[itemIndex,item]of packet.items.entries()){const option=document.createElement('option');option.value=item.token;option.textContent=`Case ${item.caseId.slice(5)} · Round ${item.round}`;select.append(option);if(itemIndex===0)select.value=item.token;}
 for(const dimension of packet.dimensions){const label=document.createElement('label');label.textContent=dimension;const input=document.createElement('select');input.dataset.dimension=dimension;input.setAttribute('aria-label',dimension);for(const value of['',1,2,3,4,5]){const option=document.createElement('option');option.value=String(value);option.textContent=value===''?'Unrated':String(value);input.append(option);}label.append(input);find('ratings').append(label);}

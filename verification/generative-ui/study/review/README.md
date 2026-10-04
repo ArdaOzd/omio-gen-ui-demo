@@ -36,3 +36,7 @@ node --test verification/generative-ui/study/review/package.test.mjs
 `../task-coverage-2026-10-03.json` records the separately verified study fare/date eligibility. Its check proves genuine data exists for local actions; a generated scene that binds the wrong window or omits a control still fails its machine cell.
 
 Fixture global bounds are January 1, 2026 through December 31, 2027. Study resources initially cover October 9–15 only. October 20/22 therefore exercise a new browser resource load even though the SQLite source contains genuine rows for those days. An empty authored view does not prove SQLite lacks fares.
+
+Run `node --import tsx verification/generative-ui/study/review/verify-workflow.mjs` for a non-final, zero-model engineering proof using the retained A/B calendar records. Its new temporary package has 24 honest cards, only two available recorded replays, and 22 uncollected cards. It exercises capture loading, real fare date/sort/keyboard selection, mobile width, reload, private-map denial, model-POST blocking and untouched-export rejection. It creates no human ratings and cannot be ingested as machine authorship.
+
+Use the isolated browser window opened by the review server. Its exact native records live only in that context's IndexedDB at the temporary loopback origin. Pasting the URL into an unrelated browser context does not restore those records. The URL is available only while the supervised server runs.

@@ -11,6 +11,7 @@ export function validateReviewExport(input,packet){
   if(typeof review.notes!=='string'||review.notes.length>2000)throw new Error('Review notes must be text of at most 2000 characters');
   if(!rated&&!review.notes.trim())continue;
   if((item.captureAvailable&&review.captureReviewed!==true)||(item.artifactAvailable&&review.handsOnAttempted!==true))throw new Error('Confirm capture and hands-on review for each available mode');
+  if(rated&&!review.notes.trim())throw new Error('Add short reviewer notes explaining the entered ratings');
   if(!item.captureAvailable&&!item.artifactAvailable&&rated)throw new Error('Unavailable evidence cannot receive quality ratings');
   reviews.push({token:review.token,captureReviewed:review.captureReviewed===true,handsOnAttempted:review.handsOnAttempted===true,ratings,notes:review.notes});
  }

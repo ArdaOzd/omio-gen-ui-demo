@@ -20,10 +20,12 @@ test('review export requires real reviewer entry and both available review modes
  assert.throws(()=>validateReviewExport(packet.template,packet.public),/No reviewer ratings/)
  const entered=structuredClone(packet.template);entered.reviews[0].ratings['visual quality']=4
  assert.throws(()=>validateReviewExport(entered,packet.public),/capture and hands-on/)
- entered.reviews[0].captureReviewed=true;entered.reviews[0].handsOnAttempted=true;entered.reviews[0].notes='Keyboard controls were usable.'
+ entered.reviews[0].captureReviewed=true;entered.reviews[0].handsOnAttempted=true;assert.throws(()=>validateReviewExport(entered,packet.public),/reviewer notes/);entered.reviews[0].notes='Keyboard controls were usable.'
  assert.equal(validateReviewExport(entered,packet.public).reviews.length,1)
  entered.reviews[0].ratings.usability=6;assert.throws(()=>validateReviewExport(entered,packet.public),/between 1 and 5/)
  entered.reviews[0].ratings.usability=null;entered.reviews[0].token='unknown-item';assert.throws(()=>validateReviewExport(entered,packet.public),/Unknown review item/)
 })
 
 test('default sampling includes both rounds for all twelve families and keeps failures visible',()=>{const packet=buildReviewPackage([{...cell('a'),outcome:'fail'},cell('b')],{participant:'anonymous-001'});assert.equal(packet.public.items.length,24);assert.equal(packet.public.sampling.families.length,12);assert.equal(packet.public.items.filter(item=>item.status==='recorded completion failed').length,1);assert.equal(packet.public.items.filter(item=>item.status==='not collected').length,22)})
+
+test('non-final native workflow proof cannot enter a study packet or become machine authorship',()=>{const record={...cell('a'),liveModelAuthorship:false,classification:'zero-model native workflow proof'};assert.throws(()=>buildReviewPackage([record],{participant:'anonymous-999'}),/No verified native study/);const proof=buildReviewPackage([record],{participant:'anonymous-999',readinessOnly:true});assert.match(proof.public.classification,/Non-final/);assert.equal(proof.private.items[proof.public.items.find(item=>item.artifactAvailable).token].record.liveModelAuthorship,false);assert.equal(proof.public.humanRatings,null)});
