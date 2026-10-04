@@ -1,6 +1,7 @@
 import { AssistantChatTransport } from '@assistant-ui/ai-sdk'
 import { parseAgentContext } from '../contracts'
 import { assertNoBulkData } from '../contracts/privacy'
+import { projectNetworkHistory } from './history-projection'
 import type { HttpChatTransportInitOptions, PrepareSendMessagesRequest, UIMessage } from 'ai'
 
 export function snapshotRequest<T extends UIMessage>(capture: () => unknown): PrepareSendMessagesRequest<T> {
@@ -10,7 +11,7 @@ export function snapshotRequest<T extends UIMessage>(capture: () => unknown): Pr
     return { body: {
       ...options.body,
       id: options.id,
-      messages: options.messages,
+      messages: projectNetworkHistory(options.messages),
       trigger: options.trigger,
       messageId: options.messageId,
       metadata: options.requestMetadata,
