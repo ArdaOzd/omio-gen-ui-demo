@@ -27,7 +27,7 @@ export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:nu
         const engineId=DatasetIdSchema.parse(`cache-${crypto.randomUUID()}`)
         let committed=false
         try{
-          await engine.register(engineId,{rows:result.rows,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion})
+          await engine.register(engineId,{rows:result.rows,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion,logicalDatasetId:id})
           if(controller.signal.aborted)throw abortError()
           const previous=resources.get(id)
           resources.set(id,{manifest,engineId,rows:result.rows,byId:new Map(result.rows.map(row=>[row.id,row])),carrierNames:new Map(result.rows.flatMap(row=>row.carrierName?[[row.carrierId,row.carrierName]]:[])),references:previous?.references??0})

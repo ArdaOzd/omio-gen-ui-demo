@@ -1,6 +1,7 @@
-import {describe,expect,it} from 'vitest'
+import {describe,expect,it,vi} from 'vitest'
 import {createFareDataBridge} from './fare-data-bridge'
-import {createLocalQueryEngine,type LocalQueryEngine} from '../query/worker-client'
+import {createLocalQueryEngine,createWorkerQueryEngine,type QueryWorker,type LocalQueryEngine} from '../query/worker-client'
+import type {WorkerRequest,WorkerResponse} from '../query/protocol'
 import {FareIdSchema,type CoverageRequest,type DatasetId,type QueryIR} from '../contracts'
 
 const request:CoverageRequest={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['bus'],passengers:1}
@@ -62,6 +63,31 @@ describe('registration commit preserves published resources',()=>{
   const previous=bridge.query(query(old.datasetId),new AbortController().signal),rejected=expect(previous).rejects.toThrow(/stale/i)
   await evaluated.promise;const fresh=await bridge.load(request,new AbortController().signal);finish.resolve();await rejected
   expect((await bridge.query(query(fresh.datasetId),new AbortController().signal)).datasetRevision).toBe(fresh.revision)
+ })
+
+ it('posts explicit logical identity with each physical worker generation while public query/context refs stay logical',async()=>{
+  const sent:WorkerRequest[]=[],handlers=new Set<(event:MessageEvent<unknown>)=>void>()
+  const worker:QueryWorker={postMessage(message){sent.push(message)},addEventListener(_type,handler){handlers.add(handler)},removeEventListener(_type,handler){handlers.delete(handler)},terminate(){handlers.clear()}}
+  const reply=(data:WorkerResponse)=>{for(const handler of handlers)handler(new MessageEvent('message',{data}))}
+  const engine=createWorkerQueryEngine(worker),bridge=createFareDataBridge({queryEngine:engine,pageSource:async()=>({rows:[row('one')],total:1,pages:1,page:1,sourceVersion:'logical-v1'})})
+  const loading=bridge.load(request,new AbortController().signal)
+  await vi.waitFor(()=>expect(sent.some(message=>message.kind==='register')).toBe(true))
+  const registration=sent.find(message=>message.kind==='register');if(!registration||registration.kind!=='register')throw new Error('Missing registration')
+  expect(registration.resource.logicalDatasetId).toMatch(/^dataset-/)
+  expect(registration.datasetId).toMatch(/^cache-/)
+  expect(registration.resource).toMatchObject({sourceVersion:'logical-v1',revision:1})
+  reply({kind:'ready',id:registration.id});const manifest=await loading,logicalQuery=query(manifest.datasetId)
+  expect(manifest.datasetId).toBe(registration.resource.logicalDatasetId)
+  const querying=bridge.query(logicalQuery,new AbortController().signal),requestMessage=sent.at(-1)
+  if(!requestMessage||requestMessage.kind!=='query')throw new Error('Missing worker query')
+  expect(requestMessage.query.sources[0]?.datasetRef).toBe(registration.datasetId)
+  const observed={...requestMessage.query,sources:requestMessage.query.sources.map(source=>({...source,datasetRef:registration.resource.logicalDatasetId}))}
+  expect(observed).toEqual(logicalQuery)
+  reply({kind:'result',id:requestMessage.id,result:{rows:[{id:'one',priceCents:1000}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:requestMessage.id}})
+  const result=await querying
+  expect(JSON.stringify({manifest,result})).not.toContain('cache-')
+  expect(bridge.getManifest(manifest.datasetId)).toEqual(manifest)
+  bridge.release(manifest.datasetId);engine.dispose()
  })
 
 })
