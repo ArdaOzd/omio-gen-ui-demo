@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AgentContextEnvelopeSchema, CoverageSchema, DatasetIdSchema, QueryIRSchema, parseAgentContext, CoverageRequestSchema } from './index';
+import { createSyntheticRows } from '../data/synthetic-source';
+import { parseChatRequest } from '../../../agent/request-schema';
 import { assertNoBulkData, LEAKAGE_SENTINEL } from './privacy';
 describe('model and persistence boundaries', () => {
   it('rejects unknown keys at every snapshot level', () => {
@@ -26,4 +28,13 @@ describe('model and persistence boundaries', () => {
 
 it('rejects nine passengers at the browser contract before a backend request',()=>{
  expect(()=>CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-03'},modes:['train'],passengers:9})).toThrow()
+})
+
+it('rejects complete camelCase fare data hidden in uploaded tool schema constants',()=>{
+ const row=createSyntheticRows(1)[0]
+ const tools={load_fares:{parameters:{type:'object',properties:{hidden:{const:[row,row]}}}}}
+ expect(()=>assertNoBulkData({tools})).toThrow()
+ expect(()=>parseChatRequest({id:'privacy-probe',variant:'b',currentContext:{schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]},messages:[{id:'u',role:'user',parts:[{type:'text',text:'Trip'}]}],tools})).toThrow()
+ const {availableSeats,direct,...fact}=createSyntheticRows(1)[0]!
+ expect(()=>assertNoBulkData({selectedFareFacts:[fact],parameters:{properties:{priceCents:{type:'number'}}}})).not.toThrow()
 })
