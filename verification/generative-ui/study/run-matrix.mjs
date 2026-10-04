@@ -5,6 +5,7 @@ import{buildMatrix,summarize,withheld,assertFixture,assertRuntime}from'./matrix.
 import{analyzeSource,analyzeAuthorshipCorpus,analyzeAcceptedArtifacts,timelineRevealActions}from'./source-analysis.mjs'
 import{fareSearchDate,firstFareOption,assertSourceAvailability,assertDelayedCoverage}from'./semantic-gates.mjs'
 import{sourceQueries}from'./evidence-gates.mjs'
+import{getSceneMetadata}from'../../../src/generative/scene-metadata.ts'
 import{observeCondition,conditionScope}from'./conditions.mjs'
 import{collectRunEnvironment,saveRunEnvironment}from'./run-environment.mjs'
 import{createSourceOracle}from'./source-oracle.mjs'
@@ -171,7 +172,7 @@ export async function interactions(page,recorder,cell){
 export function recoveryAttempt(record){
  const artifact=record.artifacts.find(item=>item.state.artifactId===record.activeArtifactId),message=record.messages.at(-1);
  if(!artifact||!analyzeAcceptedArtifacts({...record,artifacts:[artifact]}).some(analysis=>analysis.valid))throw new Error('Recovery has no valid accepted active scene');
- const accepted=part=>part.state==='output-available'&&part.input?.artifactRef===artifact.state.artifactId&&(part.type==='tool-compose_reactive_scene'?part.output?.status==='accepted'&&part.output.artifactId===artifact.state.artifactId&&part.input.program===artifact.source:part.type==='tool-present'&&part.output&&Object.keys(part.output).length===0&&JSON.stringify(part.input)===JSON.stringify(JSON.parse(artifact.source)));
+ const accepted=part=>part.state==='output-available'&&part.input?.artifactRef===artifact.state.artifactId&&(part.type==='tool-compose_reactive_scene'?part.output?.status==='accepted'&&part.output.artifactId===artifact.state.artifactId&&part.input.program===artifact.source:part.type==='tool-present'&&part.output&&Object.keys(part.output).length===0&&getSceneMetadata([{id:'recovery-ack',role:'assistant',parts:[part]}]).sources.get(artifact.state.artifactId)===artifact.source);
  if(!record.messages.some(message=>message.parts.some(accepted)))throw new Error('Recovery active scene lacks a matching successful native tool acknowledgement');
  if(message?.role!=='assistant')throw new Error('Recovery has no terminal assistant attempt');
  const attempts=message.parts.filter(part=>['tool-present','tool-compose_reactive_scene'].includes(part.type)),terminal=attempts.at(-1);

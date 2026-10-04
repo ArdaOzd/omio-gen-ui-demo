@@ -3,6 +3,7 @@ import assert from'node:assert/strict';
 import{readFile}from'node:fs/promises';
 import{chromium}from'@playwright/test';
 import{taskDOM,assertRecoveryHealthy,recoveryAttempt}from'./run-matrix.mjs';
+import{getSceneMetadata}from'../../../src/generative/scene-metadata.ts';
 test('browser geometry measures associated filter/result regions with real catalog CSS',async()=>{
  const browser=await chromium.launch({channel:'chrome',headless:true}),page=await browser.newPage({viewport:{width:1280,height:1000}}),css=await readFile(new URL('../../../src/generative/catalog/tokens.css',import.meta.url),'utf8');
  const comparison='<table><tbody><tr><td>Train</td></tr><tr><td>Bus</td></tr></tbody></table>',calendar='<div class="travel-calendar"><button>October 9</button></div>',offers='<div class="travel-fares"><article>Local fare</article></div>',modes='<fieldset><div class="travel-chips"><button>Bus</button></div></fieldset>',dates='<fieldset><label class="travel-field">Start<input type="date"></label><label class="travel-field">End<input type="date"></label></fieldset>';
@@ -30,4 +31,13 @@ test('recovery terminal gate preserves historical failures and rejects a current
   await page.locator('.travel-message-assistant').last().evaluate((element,notice)=>element.insertAdjacentHTML('beforeend',`<p>${notice}</p>`),notice);
   await assert.rejects(()=>assertRecoveryHealthy(page,record));
  }finally{await browser.close()}
+});
+
+test('native A acknowledgement matches canonical saved source despite legal raw prop key order',()=>{
+ const part={type:'tool-present',toolCallId:'native-a',state:'output-available',input:{$type:'TravelSurface',artifactRef:'art',title:'Usable view'},output:{}},message={role:'assistant',id:'native-message',parts:[part]},source=getSceneMetadata([message]).sources.get('art'),artifact={variant:'a',source,state:{artifactId:'art'}},record={activeArtifactId:'art',artifacts:[artifact],messages:[message]};
+ assert.notEqual(JSON.stringify(part.input),source,'Actual metadata validation canonicalizes raw property order');
+ assert.equal(recoveryAttempt(record).terminalSceneAttempt,'accepted');
+ assert.throws(()=>recoveryAttempt({...record,artifacts:[{...artifact,source:getSceneMetadata([{...message,parts:[{...part,input:{...part.input,title:'Other view'}}]}]).sources.get('art')}]}),/acknowledgement/);
+ assert.throws(()=>recoveryAttempt({...record,messages:[{...message,parts:[{...part,state:'output-error',output:undefined}]}]}),/acknowledgement/);
+ assert.throws(()=>recoveryAttempt({...record,messages:[{...message,parts:[]}]}),/acknowledgement/);
 });
