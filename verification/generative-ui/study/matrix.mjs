@@ -26,7 +26,7 @@ export const withheld=[
 ]
 
 export function canResume(previous,cell,runtime,fixture,environmentId){
- return (environmentId===undefined||previous?.runEnvironment?.id===environmentId)&&previous?.excludedFromComparison!==true&&previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.runtimeValid===true&&['appRevision','model','provider','reasoningEffort'].every(key=>previous?.runtime?.[key]===runtime[key])&&previous?.appRevision===runtime.appRevision&&previous?.model===runtime.model&&previous?.reasoning===runtime.reasoningEffort&&previous?.provider===runtime.provider&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
+ return (environmentId===undefined||previous?.runEnvironment?.id===environmentId)&&previous?.excludedFromComparison!==true&&previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.runtimeValid===true&&['appRevision','model','provider','reasoningEffort'].every(key=>previous?.runtime?.[key]===runtime[key])&&previous?.appRevision===runtime.appRevision&&previous?.model===runtime.model&&previous?.reasoning===runtime.reasoningEffort&&previous?.provider===runtime.provider&&(previous?.liveModelAuthorship===true||(previous?.outcome==='fail'&&previous?.liveModelAuthorship===false))&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
 }
 
 export function assertFixture(actual,expected){
