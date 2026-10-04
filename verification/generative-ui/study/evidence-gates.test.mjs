@@ -33,3 +33,15 @@ test('retained reuse is bound to the exact accepted source and artifact, never a
  for(const options of [{currentScene:{artifactId:'art',source:'new scene'}},{retainedScene:{artifactId:'other',source:'accepted scene'}},{newAcceptedTarget:true}, {acceptedScene:false}])assert.throws(()=>gate(options),/latest date|accepted current scene/);
  assert.equal(gate({newAcceptedTarget:true,queries:[query,query]}).successfulScopedQueries,1,'A newly accepted target needs fresh query proof');
 });
+
+test('fresh fare evidence must match the final filters and sort, including date-query before later sort change',()=>{
+ const latest={...state,dates:{start:'2026-10-10'},sort:{field:'durationMinutes',direction:'asc'}},dated={...query,scope:{...query.scope,where:{all:[{field:'serviceDate',op:'eq',value:'2026-10-10'},{field:'mode',op:'in',value:['bus']}]}},resultDates:['2026-10-10']},options={...sample,state:latest,retainedInitial:false,offset:1,queries:[query,dated]};
+ assert.deepEqual(sourceQueries(options),[],'The date query preceding the final duration sort is not final fare evidence');
+ const matching={...dated,scope:{...dated.scope,orderBy:[{field:'durationMinutes',direction:'asc'}]}};
+ assert.deepEqual(sourceQueries({...options,queries:[query,dated,matching]}),[matching]);
+ assert.deepEqual(sourceQueries({...options,queries:[query,matching],state:{...latest,filters:{...latest.filters,modes:['train']}}}),[]);
+ const emptyFare={...dated,resultFareRows:0,scope:{...dated.scope,project:['id','priceCents']}};
+ assert.deepEqual(sourceQueries({...options,queries:[query,emptyFare]}),[],'An empty fare query still carries its sort contract');
+ const aggregate={...dated,resultFareRows:0,scope:{...dated.scope,project:['serviceDate'],groupBy:['serviceDate'],orderBy:[{field:'serviceDate',direction:'asc'}]}};
+ assert.deepEqual(sourceQueries({...options,queries:[query,aggregate]}),[aggregate],'Calendar aggregates retain their own meaningful ordering');
+});

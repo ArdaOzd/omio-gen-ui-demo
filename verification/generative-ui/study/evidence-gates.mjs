@@ -11,7 +11,7 @@ function currentScope(query,state,descriptor){
  const allowed=node=>!node||node.all?(!node||node.all.every(allowed)):node.any?node.any.every(allowed):field(node.field)==='serviceDate'||expected.some(({name,op,value})=>implies(node,name,op,value));
  if(!allowed(query.scope.where)||!expected.every(({name,op,value,optional})=>optional||implies(query.scope.where,name,op,value)))return false;
 
- return query.resultFareRows===0||field(query.scope.orderBy?.[0]?.field)===state.sort.field&&query.scope.orderBy[0].direction===state.sort.direction;
+ return field(query.scope.orderBy?.[0]?.field)===state.sort.field&&query.scope.orderBy[0].direction===state.sort.direction;
 }
 export function sourceQueries({queries,resources,descriptors,state,sourceVersion,offset=0,retainedInitial=false,acceptedScene=false,retainedScene,currentScene,newAcceptedTarget=false}){
  if(retainedInitial&&!acceptedScene)throw new Error('Retained initial evidence requires an accepted current scene');
@@ -23,7 +23,8 @@ export function sourceQueries({queries,resources,descriptors,state,sourceVersion
    const generation=generations[index],descriptor=descriptors.find(item=>item.datasetId===source.datasetRef&&state.datasetRefs.includes(item.datasetId)&&item.sourceVersion===sourceVersion);
    if(!descriptor||!generation||generation.datasetId!==source.datasetRef||generation.sourceVersion!==sourceVersion)return false;
    const current=resources.some(resource=>resource.datasetId===generation.datasetId&&resource.physicalDatasetId===generation.physicalDatasetId&&resource.sourceVersion===generation.sourceVersion&&resource.revision===generation.revision&&resource.rowCount===generation.rowCount);
-   return current&&(!reuse||currentScope(query,state,descriptor));
+   const project=(query.scope.project??[]).map(field),fareEvidence=query.resultFareRows>0||project.includes('id')&&project.includes('priceCents');
+   return current&&(!fareEvidence||currentScope(query,state,descriptor));
   });
  });
 }
