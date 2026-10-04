@@ -64,3 +64,10 @@ it('refreshes selected facts on real resource generation changes and rejects lat
  expect(state.get(id).selectedFareIds).toEqual(['one']);expect(state.get(id).revision).toBe(0)
  const calls=lookup.mock.calls.length;act(()=>state.dispatch({kind:'sort',artifactId:id,sort:{field:'durationMinutes',direction:'desc'}}));expect(screen.getByText('€20.00')).toBeVisible();expect(lookup).toHaveBeenCalledTimes(calls)
 })
+
+it.each(['CitySequence','RouteMap','CoverageSummary','StayAllocation'])('%s explains a valid empty itinerary without inventing route facts',async name=>{
+ const value=await fixture();const id=ArtifactIdSchema.parse('empty-route');value.state.initializeMissing(id,{datasetRefs:[],stays:[]})
+ render(<TravelProvider services={value.services}><CatalogNode kind={name} artifactRef={id}/></TravelProvider>)
+ expect(await screen.findByRole('status')).toHaveTextContent(/Add stops|No travel data/i)
+ expect(screen.queryByRole('img')).not.toBeInTheDocument();expect(value.state.get(id).revision).toBe(0)
+})

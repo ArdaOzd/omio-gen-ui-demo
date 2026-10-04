@@ -75,7 +75,7 @@ export function ModeBreakdown(props:WidgetProps) {
 
 export function Coverage(props:WidgetProps) {
  const {services,state}=useArtifact(props.artifactRef); const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
- return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
+ return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{!manifests.length&&<p role="status">No travel data is loaded. Add stops in your next message.</p>}{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
 }
 function useRouteStops(ref:string) {
  const {services,state}=useArtifact(ref)
@@ -88,11 +88,11 @@ function useRouteStops(ref:string) {
 }
 export function CitySequence(props:WidgetProps) {
  const stops=useRouteStops(props.artifactRef)
- return <section className="travel-panel"><h3>{props.title??'Your stops'}</h3><ol className="travel-timeline" aria-label="Travel stops">{stops.map((stop,index)=><li key={`${stop.cityId}-${index}`}><strong>{cityLabel(stop.cityId)}</strong>{stop.nights>0&&<span>{stop.nights} night{stop.nights===1?'':'s'}</span>}</li>)}</ol></section>
+ return <section className="travel-panel"><h3>{props.title??'Your stops'}</h3>{!stops.length&&<p role="status">Add stops in your next message to see your route.</p>}<ol className="travel-timeline" aria-label="Travel stops">{stops.map((stop,index)=><li key={`${stop.cityId}-${index}`}><strong>{cityLabel(stop.cityId)}</strong>{stop.nights>0&&<span>{stop.nights} night{stop.nights===1?'':'s'}</span>}</li>)}</ol></section>
 }
 export function Route(props:WidgetProps) {
  const cities=useRouteStops(props.artifactRef).map(stop=>stop.cityId)
- return <section className="travel-panel"><h3>{props.title??'Your route'}</h3><svg viewBox="0 0 600 135" role="img" aria-label={`Schematic route: ${cities.map(cityLabel).join(' to ')}`}><path d="M45 55H555" stroke="var(--travel-blue)" strokeWidth="3" fill="none"/>{cities.map((city,i)=>{const x=45+i*510/Math.max(1,cities.length-1);return <g key={`${city}-${i}`}><circle cx={x} cy="55" r="9" fill="var(--travel-blue)"/><text x={x} y="92" textAnchor="middle">{cityLabel(city)}</text></g>})}</svg><small>Schematic route, not a geographic map.</small></section>
+ return <section className="travel-panel"><h3>{props.title??'Your route'}</h3>{!cities.length?<p role="status">Add stops in your next message to see your route.</p>:<><svg viewBox="0 0 600 135" role="img" aria-label={`Schematic route: ${cities.map(cityLabel).join(' to ')}`}><path d="M45 55H555" stroke="var(--travel-blue)" strokeWidth="3" fill="none"/>{cities.map((city,i)=>{const x=45+i*510/Math.max(1,cities.length-1);return <g key={`${city}-${i}`}><circle cx={x} cy="55" r="9" fill="var(--travel-blue)"/><text x={x} y="92" textAnchor="middle">{cityLabel(city)}</text></g>})}</svg><small>Schematic route, not a geographic map.</small></>}</section>
 }
 export function Timeline(props:WidgetProps) {
  const result=useFareRows(props.artifactRef,props.datasetRef);const selected=useSelectedFacts(props.artifactRef)
