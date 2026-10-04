@@ -12,10 +12,10 @@ function matches(row:FareRow,predicate:PredicateTree):boolean {
  switch(predicate.op){
  case'eq':return current===value
  case'neq':return current!==value
- case'in':return current!==null&&Array.isArray(value)&&value.includes(current)
- case'gte':return !Array.isArray(value)&&compare(current,value)>=0
- case'lte':return !Array.isArray(value)&&compare(current,value)<=0
- case'between':return Array.isArray(value)&&value[0]!==undefined&&value[1]!==undefined&&compare(current,value[0])>=0&&compare(current,value[1])<=0
+ case'in':return Array.isArray(value)&&value.includes(current)
+ case'gte':return current!==null&&value!==null&&!Array.isArray(value)&&compare(current,value)>=0
+ case'lte':return current!==null&&value!==null&&!Array.isArray(value)&&compare(current,value)<=0
+ case'between':return current!==null&&Array.isArray(value)&&value[0]!=null&&value[1]!=null&&compare(current,value[0])>=0&&compare(current,value[1])<=0
  case'contains':return typeof current==='string'&&typeof value==='string'&&current.includes(value)
  default:{const never:never=predicate.op;throw new Error(String(never))}
  }
