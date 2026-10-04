@@ -1,5 +1,84 @@
 # Generative UI A/B continuation handoff
 
+## Authoritative stop checkpoint — 2026-10-04
+
+The user's latest instruction is to fix A's duplicated output and B's errors, ensure both work, save the current status for later, and **STOP**. Those reported bugs are fixed and independently verified in the actual saved user chats. Both variants remain runnable. No further model calls, matrix cells, human ratings, old PR merges or implementation expansion are authorized by this stop checkpoint. The full implementation plan is **not complete**; remaining gates below are explicit.
+
+### Source, checkout and review identity
+
+All relative evidence paths in this document resolve in the canonical checkout below; the original mirror contains only this handoff file.
+
+Final verified product tree: `21e2c4ddcfac029443984bf9ef1996ffe6224327`, branch `feature/gen-ui-ab-integration`, canonical `/Users/ardaozdogru/.codex/worktrees/generative-spine/omio-gen-ui-demo`. Evidence/document/graph commits follow this product commit; read `git rev-parse HEAD` and `/api/agent/health` for the final checkpoint revision rather than treating an embedded hash as the latest tip.
+
+Publication status: the final canonical checkpoint/evidence commits are **local and unpushed**. Automatic approval rejected the combined commit/push because it treated screenshots, local-path/status data and generated graphs as sensitive payload to an unverified remote; no push ran. Root instructed no retry or bypass under STOP. Local handoff is complete; any later publication must resolve this explicit blocker.
+
+Original `/Users/ardaozdogru/projects/omio-gen-ui-demo` was tracked-clean at external `de8adc0` on `feature/gen-ui-ab-demo` before this one-file local documentation mirror. External `04ddaa7ea3632570b106385057f4a920660ca8fd` (carrier work) and `de8adc0` (Graphify lifecycle hooks) supersede the Oct3 eighteen-dirty-files state. Preserve those commits exactly. The original receives **only this handoff file**, a narrow local commit; it is not pushed because that would publish the two external commits. Its product tree differs from canonical. Do not reset it or blindly bulk merge its older implementation. Read current Git for the mirror commit's own revision.
+
+PR7 boundary repairs and PR9 query/calendar/context repairs passed independent cross-review. PR10 carrier display repairs were accepted independently through `6a5fd36f1f62642cb5d8919768482a3ef88082d8` (four filter-label tests and strict TypeScript; earlier eleven carrier/compatibility tests). Independent current canonical duplication/B regression review passed sixteen targeted tests plus strict TypeScript at `57aaf08`. The exact `/review-agent` capability was unavailable; these focused reviews are not a completed replacement whole-plan review. Final `/code-review` standards/spec gate remains pending before PR1→dev.
+
+### Actual saved A/B chats: final reload passed
+
+The root orchestrator explicitly reloaded the actual user tabs at `http://127.0.0.1:5194` against product `21e2c4d`. For **both** variants, `JSON.stringify(messages)` and `JSON.stringify(artifactRecords)` exactly matched the fresh Oct4 baselines. No chat/model request, control edit, selection edit or storage reset occurred. Conversation diagnostics are closed. Evidence: `verification/generative-ui/root-saved-chat-proof-2026-10-04.json` (compact facts, no fare-row corpus or rewritten source).
+
+- A: artifact `artifact-b1ab4aca-b3e1-4e3c-8b34-e282e6550669`, revision66; `fare_003796061` remains selected, Bus / **Blablacar Bus**, 07:03, €28.10; train/bus/flight preferences preserved. One FarePicker with101 options. Zero alerts, zero repeated visible "Travel data updated locally." lines, one final answer.
+- B: artifact `artifact-372a6384-6768-42e0-850e-519a230e35ff`, revision17, exact3339-character authored source preserved, no fare selected. Two FarePickers each have101 options. Zero alerts, zero repeated visible local status lines, one final answer. Authoritative carrier labels render even with the genuine legacy projection that omits `carrierName`.
+
+Do not restore historical Bus€19.98 / Train revision22 captures over these records. Same-origin IndexedDB is `omio-generative-state`, `threads`; preserve current records and stale-tab protection.
+
+### Repairs and final checks
+
+Completed-tool statuses fold into Completed steps without rewriting canonical message/tool history. B query/result and selection scopes use the exact current authored query and current host-owned resource generations; late results, dynamic foreign-resource escapes and unregistered host refs are rejected. Cancelled SDK loads cannot commit even when the loader ignores cancellation; cancellation releases acquired resources. Passenger controls and request contracts cap at8. A ninth distinct artifact resource returns an explicit bounded error before commit rather than reporting success with a missing descriptor. Privacy boundaries reject full camelCase/snake_case fare corpora in nested tool schemas and full FareRow object literals while retaining bounded selected facts. Context snapshots retain all owned refs (derived64 bound), export active + latest7 full artifacts plus typed compact older summaries, and preserve active refs within the24KB budget. Query sorting occurs before projection; calendar/route actions reconcile leg dates correctly.
+
+Carrier labels come from the actual API `company` field through an optional local label and source-generation-scoped index. Stable IDs, legacy saved facts and authored B projections are preserved; releases clear labels. Missing labels use an explicit synthetic ID. No hardcoded provider names or fixture regeneration was used. Full old FareRows lacking the optional label remain prohibited at privacy boundaries.
+
+Final checks at product `21e2c4d`: **159 Vitest tests /38 files**, strict TypeScript, byte-exact generated catalog and production build all passed. Existing third-party annotation/large-chunk advisories remain. Eight Python tests passed earlier; no backend change followed. Exact scope: `verification/generative-ui/final-checks-2026-10-04.json`.
+
+New zero-model native carrier proof: **3/3** retained genuine A0/B0/B1 programs,390px reduced-motion Chrome, real8094 API/browser worker, zero page errors/alerts/model requests, isolated storage. Results/screenshots/reproducible runner: `verification/generative-ui/carrier-labels/`. Run `node --import tsx verification/generative-ui/carrier-labels/verify.mjs` only after a later explicit verification request; it creates isolated contexts and blocks chat requests. Historical15/15 genuine native responsive/focus cases at360/800/1280 remain `verification/generative-ui/resume-artifacts/final-native-proof/`; they exercised earlier product `4e70310`, not this final tree and not formal study cells. A historical screenshot's mojibake is a retained replay-encoding limitation; the final actual user B text is correct. No screen-reader completeness claim is made.
+
+### Services and unchanged source
+
+Authoritative user origin5194 serves canonical Vite and proxies fare API8094 / canonical agent8097. The final integration owner pins only agent8097 to the final checkpoint HEAD after documentation/graphs. Provider is signed-in Codex, `gpt-6.1-sol`, `reasoningEffort: high`. No model request is active. API8094 PID67786, Vite5194 PID90312 and preserved original idle agent8095 PID73337 were verified; canonical agent PID96307 is superseded by the final controlled restart. Read current health/PID, not these historical handles. Temporary carrier5198 is stopped. Other external services on5173/8000/8010 are unrelated and untouched.
+
+```sh
+curl http://127.0.0.1:5194/api/health
+curl http://127.0.0.1:5194/api/agent/health
+```
+
+External fixture remains `/Users/ardaozdogru/projects/omio-gen-ui-demo/data/omio.sqlite3`,10,000,000 fares,1,598,590,976 bytes, mtime_ns1790978499798379462, source `sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6`. Domain2026-01-01–2027-12-31; loaded resource windows are cache coverage, not global availability. Preserved generator_version2 still lacks newer manifest destinations/routes: provenance verifier gap remains, do not regenerate under STOP. A mistaken temporary carrier preview bootstrap created its own ignored1M scratch fixture in that isolated worktree; it never modified the external10M fixture or user chats. The owned scratch fixture is removed at shutdown.
+
+Restart only an intentionally stopped owned service after verifying PID/port/cwd. Use independently owned processes, **not `npm run dev`** (it may bootstrap data/supervise unrelated processes):
+
+```sh
+# canonical agent only
+cd /Users/ardaozdogru/.codex/worktrees/generative-spine/omio-gen-ui-demo
+OMIO_APP_REVISION=$(git rev-parse HEAD) API_PORT=8094 AGENT_PORT=8097 WEB_PORT=5194 OMIO_API_URL=http://127.0.0.1:8094 OMIO_AGENT_URL=http://127.0.0.1:8097 node --import tsx agent/server.ts
+# canonical Vite only, if stopped
+API_PORT=8094 AGENT_PORT=8097 WEB_PORT=5194 OMIO_API_URL=http://127.0.0.1:8094 OMIO_AGENT_URL=http://127.0.0.1:8097 node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5194 --strictPort
+# fare API only, if stopped; preserve the explicit external database path
+cd /Users/ardaozdogru/projects/omio-gen-ui-demo
+python3 -m backend.app --port 8094 --database /Users/ardaozdogru/projects/omio-gen-ui-demo/data/omio.sqlite3
+```
+
+Full local code-review graph rebuild completed (156 files,1454 nodes,13723 edges). Graphify local AST refresh completed (1315 nodes,2685 edges,0 dangling edges); all283 pre-existing document/asset nodes were retained. Both knowledge graphs receive a bounded local code/AST refresh. Existing semantic nodes are preserved; changed document/image semantic extraction is **pending** under STOP, with no semantic model calls. Shared external Graphify hooks are skipped for these narrow commits (`GRAPHIFY_SKIP_HOOK=1`) so original graph files are not rewritten. Historical untracked failed screenshots/debug directories and Graphify label caches remain preserved separately from task commits.
+
+### PRs, parked work and remaining plan gates
+
+Actual GitHub MERGED states (not merely closed): PR7→`1b1a263`, PR9→`782d3a5`, PR2→`21f0011`, PR4→`57aaf08`, PR10→`21e2c4d`. PR2/4 reconciliation preserved the tested latest tree and their unique evidence; no blind ours/force resolution. Origin/dev `dc14f22` is already an ancestor. **PR1→dev is still open draft**; dev/main have not received final integration. PR3 B (`0bbc274`) and PR6 catalog (`803e1a0`) remain open draft; patch-equivalent functionality is integrated but their remaining unique changes/ancestry must be audited before any later merge. PR8 study readiness is open at `52d83910866bf0a37899c2c41ebed62c6dca04c2`, held, not merged. No additional merges under STOP.
+
+- Canonical worktree: branch `feature/gen-ui-ab-integration`; product21e2, later owned checkpoint commits; preserved untracked historical failure/debug paths and two Graphify label caches.
+- Boundary worktree `gen-ui-boundary-repairs`: branch `fix/gen-ui-boundary-guards`,434e54d, PR7 merged; untracked dependency symlink.
+- Carrier worktree `gen-ui-carrier-labels`: branch `fix/gen-ui-carrier-labels`,6a5fd36, PR10 merged; proof copied to canonical, dependency symlink retained.
+- Audit `gen-ui-review-repairs`: branch `feature/gen-ui-catalog-stories`, local/unpushed `52bff8c4073c8c2fa1deccfcc372ecb02645baf7`. Eight verification-only story files are **committed**, tracked clean; two untracked Graphify labels. Four-row native A/B FareCards smoke and standalone TypeScript passed; comprehensive P20 per-export loading/error/partial/retry/control recipe/visual sweep remains unfinished. Its5398 services are stopped.
+- Study `gen-ui-study-readiness`: branch `feature/gen-ui-study-readiness`, published52d8391/PR8. Published24 offline checks and four real native cold/warm startup proofs passed with zero model calls. Preserved uncommitted modified `study/run-matrix.mjs`; new `source-analysis.mjs`, `source-analysis.test.mjs`, `source-oracle.mjs`, `task-gates.mjs`, `task-gates.test.mjs`, `verify-first-tasks.mjs`, `stop-handoff-2026-10-04.md` under `verification/generative-ui/study/`. Working-diff27 offline checks/import/diff checks and96-cell dry run passed with0 calls; new native first-task verifier was **not launched**. Its four tracked graph deltas, labels/backups and dependency symlink remain untouched. Read its stop-handoff before resuming.
+
+Remaining gates: finish and independently review the parked study semantic assertions (actual facet predicate/result semantics; A corpus counts excluding mere hierarchy reorders; native reveal/per-leg/query privacy proof); integrate reviewed PR8 and remaining branch ancestry; complete P20 standalone stories; implement/verify declared-nullable-field predicate semantics (new optional carrierName currently normalizes output null but input null predicates remain rejected; plan507 gap); refresh/document changed semantics; rerun justified engine benchmarks against final nullable-label projection (historical50k/200k results are not this HEAD); resolve source-manifest provenance gap without changing the fixture silently; complete requested whole-plan review standards/spec evidence and source/runtime freeze. Then, only after a new user resume, collect the declared96-cell matrix, genuine blinded interactive human UX review across all six dimensions, P52 recommendation/selection and human acceptance. **None of the formal96 cells or human ratings is collected; no winner or framework removal is claimed.**
+
+On later resume, read current Git/services and this checkpoint first, preserve original external history and saved chats, inspect parked failures rather than assuming green historical evidence applies to the new head, and keep both A/B runnable. Do not continue automatically from the historical instructions below.
+
+## Superseded historical checkpoint (2026-10-03)
+
+Everything below is retained for provenance. Its dirty-original, source/PR/PID, carrier fallback and service bootstrap statements are obsolete and superseded by the Oct4 checkpoint above.
+
 ## Final stop checkpoint — 2026-10-03
 
 The user asked to fix A's duplicated output and B's errors, ensure the fixes work, save the status for later, and stop. Those reported defects are fixed and verified in the actual saved chats. Agent work is stopped after the final integration-owner graph/identity refresh. Do not start the study, make further model calls or remove either variant without a later explicit request. No formal winner, human UX rating or 96-cell study result is claimed.
