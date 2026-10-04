@@ -22,7 +22,7 @@ it('retains API carrier names and same IDs through bounded facts and old authore
  expect(await screen.findByRole('option',{name:/Blablacar Bus/})).toHaveValue(apiRow.id)
  expect(state.get(id).datasetRefs).toEqual([manifest.datasetId]);expect(state.get(id).selectedFareIds).toEqual([])
 })
-it('projects and orders nullable display names without breaking unlabeled legacy rows or allowing null predicates',async()=>{
+it('projects and orders nullable display names without breaking unlabeled legacy rows or bypassing declared nullability',async()=>{
  const named=(await pageSource({originId:'london',destinationId:'paris',date:'2026-10-02',passengers:1,page:1,limit:100},new AbortController().signal)).rows[0];if(!named)throw new Error('Missing fixture')
  const {carrierName:_name,...legacy}=named
  expect(FareRowSchema.parse(legacy)).toEqual(legacy)
@@ -34,7 +34,8 @@ it('projects and orders nullable display names without breaking unlabeled legacy
   const query=parseQuery({version:1,sources:[{datasetRef:manifest.datasetId,alias:'f'}],project,orderBy:[{field:'carrierName',direction:'asc'}],limit:2},[manifest]),result=await bridge.query(query,new AbortController().signal)
   expect(result.rows.map(row=>[row.id,row.carrierName])).toEqual([['named','Blablacar Bus'],['legacy',null]])
  }
- expect(()=>parseQuery({version:1,sources:[{datasetRef:manifest.datasetId,alias:'f'}],where:{field:'carrierName',op:'eq',value:null},limit:2},[manifest])).toThrow()
+ const missing=parseQuery({version:1,sources:[{datasetRef:manifest.datasetId,alias:'f'}],where:{field:'carrierName',op:'eq',value:null},project:['id','carrierName'],limit:2},[manifest])
+ expect((await bridge.query(missing,new AbortController().signal)).rows).toEqual([{id:'legacy',carrierName:null}])
  expect(()=>assertNoBulkData({hidden:{const:[legacy]}})).toThrow('Copied normalized fare data')
 })
 

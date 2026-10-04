@@ -108,12 +108,13 @@ export function parseAgentContext(input: unknown): AgentContextEnvelope {
 
 const scalar = z.union([z.string().max(160), z.number().finite(), z.boolean()]);
 export type JsonScalar = z.infer<typeof scalar> | null;
-type QueryValue=z.infer<typeof scalar>;
+const queryScalar=scalar.nullable();
+type QueryValue=z.infer<typeof queryScalar>;
 export type PredicateTree = { all: PredicateTree[] } | { any: PredicateTree[] } | { field: AllowedFareField; op: 'eq'|'neq'|'in'|'gte'|'lte'|'between'|'contains'; value: QueryValue | QueryValue[] };
 export const PredicateTreeSchema: z.ZodType<PredicateTree> = z.lazy(() => z.union([
   z.strictObject({ all: z.array(PredicateTreeSchema).min(1).max(16) }),
   z.strictObject({ any: z.array(PredicateTreeSchema).min(1).max(16) }),
-  z.strictObject({ field: FareFieldSchema, op: z.enum(['eq','neq','in','gte','lte','between','contains']), value: z.union([scalar, z.array(scalar).min(1).max(20)]) }),
+  z.strictObject({ field: FareFieldSchema, op: z.enum(['eq','neq','in','gte','lte','between','contains']), value: z.union([queryScalar, z.array(queryScalar).min(1).max(20)]) }),
 ]));
 export const QueryIRSchema = z.strictObject({ version: z.literal(1), sources: z.array(z.strictObject({ datasetRef: DatasetIdSchema, alias: ref })).min(1).max(3),
   where: PredicateTreeSchema.optional(), project: z.array(FareFieldSchema).max(16).optional(), groupBy: z.array(FareFieldSchema).max(3).optional(),
@@ -156,7 +157,7 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   for (const source of query.sources) {
     const manifest = manifests.find(m => m.datasetId === source.datasetRef);
     if (!manifest || aliases.has(source.alias)) throw new Error('Unknown dataset or duplicate alias');
-    aliases.add(source.alias); manifest.fields.forEach(field => fields.set(field.name, field));
+    aliases.add(source.alias); manifest.fields.forEach(field => fields.set(field.name, {...field,nullable:field.nullable&&(fields.get(field.name)?.nullable??true)}));
   }
   let leaves = 0;
   const visit = (predicate: PredicateTree, depth: number): void => {
@@ -167,10 +168,11 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
     const field = fields.get(predicate.field);
     if (!field?.filterable) throw new Error('Undeclared filter field');
     const values = Array.isArray(predicate.value) ? predicate.value : [predicate.value];
-    if (values.some(value => typeof value !== field.type)) throw new Error('Predicate type mismatch');
+    if (values.some(value => value===null ? !field.nullable : typeof value !== field.type)) throw new Error('Predicate type mismatch or undeclared null');
+    if (values.includes(null) && !['eq','neq','in'].includes(predicate.op)) throw new Error('Null requires equality or membership');
     if (predicate.op === 'contains' && field.type !== 'string') throw new Error('Contains requires text');
     if (['gte','lte','between'].includes(predicate.op) && field.type !== 'number' && predicate.field !== 'serviceDate') throw new Error('Comparison requires number or serviceDate');
-    if (predicate.op === 'between' && (values.length !== 2 || values[0] === undefined || values[1] === undefined || values[0] > values[1])) throw new Error('Between requires ordered pair');
+    if (predicate.op === 'between' && (values.length !== 2 || values[0] == null || values[1] == null || values[0] > values[1])) throw new Error('Between requires ordered pair');
     if (predicate.op === 'in' && !Array.isArray(predicate.value)) throw new Error('In requires list');
     if (!['in','between'].includes(predicate.op) && Array.isArray(predicate.value)) throw new Error('Operator requires scalar');
   };
