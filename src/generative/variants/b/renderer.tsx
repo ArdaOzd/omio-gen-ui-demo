@@ -24,6 +24,7 @@ export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{p
   const program=analysis.current;if(!program)throw new Error('QUERY_PENDING')
   const state=host.state.get(id),original=evaluateQueryArguments(program,statementId,state,latest.current)
   const query={...original,sources:original.sources.map(source=>({...source,datasetRef:resolveBoundDatasetId(state,host.bridge,source.datasetRef)}))}
+  if(query.sources.some(source=>!state.datasetRefs.includes(source.datasetRef)))throw new Error('UNKNOWN_DATASET_REFERENCE')
   return parseQuery(query,query.sources.map(source=>host.bridge.getManifest(source.datasetRef)))
  },[host,id])
  const executeSceneQuery=useMemo(()=>async(statementId:string,signal:AbortSignal,kind?:string,validatedQuery?:ValidatedQueryIR)=>{
@@ -43,7 +44,7 @@ export function ReactiveScene({program,artifactRef,isStreaming=false,onError}:{p
  }),[host,id,executeSceneQuery,artifactRef])
  useEffect(()=>()=>{controllers.current.forEach(c=>c.abort())},[])
  useEffect(()=>{if(validation.error)onError?.(validation.error)},[validation.error,onError])
- return <SceneQueryProvider value={{bindings:analysis.current?.queryBindings??[],currentQuery:currentSceneQuery,execute:executeSceneQuery}}><Renderer library={bLibrary} response={validation.result?program:lastValid.current} isStreaming={isStreaming} initialState={latest.current} toolProvider={provider} publishObservability={false} onStateUpdate={raw=>{
+ return <SceneQueryProvider value={{artifactId:id,bindings:analysis.current?.queryBindings??[],currentQuery:currentSceneQuery,execute:executeSceneQuery}}><Renderer library={bLibrary} response={validation.result?program:lastValid.current} isStreaming={isStreaming} initialState={latest.current} toolProvider={provider} publishObservability={false} onStateUpdate={raw=>{
   const compact:Record<string,unknown>={};for(const variable of validation.result?.variables??[]){if(variable in raw)compact[variable]=raw[variable]}
   latest.current=compact;applyBindingState(compact,bindings,host.state,host.dispatch??host.state.dispatch)
   const primitive=Object.fromEntries(Object.entries(compact).filter(([key,value])=>!bindings.some(b=>b.variable===key)&&(value===null||typeof value==='string'||typeof value==='number'||typeof value==='boolean')))

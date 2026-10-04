@@ -1,7 +1,7 @@
 import { useEffect,useMemo,useRef } from 'react'
 import { createLibrary,defineComponent,useStateField,useTriggerAction,type ComponentRenderProps } from '@openuidev/react-lang'
 import { z } from 'zod'
-import { FareIdSchema,FareRowSchema } from '../../../contracts'
+import { ArtifactIdSchema,DatasetIdSchema,FareIdSchema,FareRowSchema } from '../../../contracts'
 import type { QueryFareSelectionScope } from '../../../state/action-router'
 import { catalogDescriptors } from '../../../catalog/generated/catalog'
 import { CatalogNode } from '../../../catalog/component'
@@ -9,10 +9,11 @@ import { TravelProvider,useArtifact,useTravelServices } from '../../../catalog/c
 import { WorkerResponseSchema } from '../../../query/protocol'
 import { useSceneQuery } from './query-context'
 import { runBoundQueryResult } from '../query/result-ownership'
+import { resolveBoundDatasetId } from '../../../state/leg-bindings'
 import { parseAction } from '../query/action'
 import { bPropsSchema,bComponentPropsSchema } from '../query/schema'
 type Props=z.infer<typeof bPropsSchema>
-function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Props>){
+function HostBoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Props>){
  const host=useTravelServices(),{state}=useArtifact(props.artifactRef),trigger=useTriggerAction(),scene=useSceneQuery()
  const generatedQuery=scene?.bindings.find(binding=>binding.kind===name&&binding.artifactRef===props.artifactRef&&binding.datasetRef===(props.datasetRef??undefined)&&binding.title===(props.title??undefined))
  const field=useStateField(`${props.artifactRef}:${props.binding??name}`,props.value)
@@ -47,5 +48,15 @@ function BoundNode({name,props,renderNode}:{name:string}&ComponentRenderProps<Pr
  const normalized=name==='Callout'&&typeof scalar.title==='string'&&scalar.title.length>160?{...scalar,title:undefined,body:scalar.body??scalar.title}:scalar
  const checked=bPropsSchema.parse(normalized)
  return <TravelProvider services={services}><div onClick={action?()=>trigger(props.title??name,undefined,parseAction(action)):undefined}><CatalogNode kind={name} {...checked}>{renderNode(children)}</CatalogNode></div></TravelProvider>
+}
+function BoundNode(input:{name:string}&ComponentRenderProps<Props>){
+ const host=useTravelServices(),scene=useSceneQuery()
+ try{
+  if(scene){
+   if(input.props.artifactRef!==scene.artifactId)throw new Error('UNKNOWN_ARTIFACT_REFERENCE')
+   if(input.props.datasetRef){const state=host.state.get(ArtifactIdSchema.parse(input.props.artifactRef)),resolved=resolveBoundDatasetId(state,host.bridge,DatasetIdSchema.parse(input.props.datasetRef));if(!state.datasetRefs.includes(resolved))throw new Error('UNKNOWN_DATASET_REFERENCE')}
+  }
+ }catch{return <div role="alert" className="travel-notice">This generated view refers to travel data outside its artifact. Ask the assistant to repair it.</div>}
+ return <HostBoundNode {...input}/>
 }
 export const bLibrary=createLibrary({root:'TravelSurface',components:catalogDescriptors.map(d=>defineComponent({name:d.name,description:d.description,props:bComponentPropsSchema(d.name),component:input=><BoundNode name={d.name} {...input}/>}))})

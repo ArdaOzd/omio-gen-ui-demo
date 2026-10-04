@@ -5,7 +5,7 @@ import { assertNoBulkData,hasFareRowFields } from '../../../contracts/privacy'
 import { bSchemaLibrary,BindingSchema,type Binding } from './schema'
 export type ProgramBinding={variable:string;field:Binding;artifactRef:string}
 const names=new Set([...catalogDescriptors.map(d=>d.name),'Query','Mutation','Action','Set','Reset','Run'])
-export function validateReactiveProgram(program:string,options:{complete?:boolean;scope?:{artifactId:string;datasetIds:ReadonlySet<string>}}={}) {
+export function validateReactiveProgram(program:string,options:{complete?:boolean;scope?:{artifactId:string;datasetIds:ReadonlySet<string>;variables?:Readonly<Record<string,unknown>>}}={}) {
  if(typeof program!=='string'||program.length>60000)throw new Error('PROGRAM_SIZE')
  const closed=autoClose(program);if(options.complete!==false&&closed.wasIncomplete)throw new Error('PROGRAM_INCOMPLETE')
  let depth=0;for(const character of closed.text){if('[({'.includes(character)&&++depth>24)throw new Error('PROGRAM_DEPTH');if('])}'.includes(character))depth--}
@@ -36,7 +36,7 @@ export function validateReactiveProgram(program:string,options:{complete?:boolea
  for(const mutation of parsed.mutationStatements){if(mutation.toolAST?.k!=='Str'||mutation.toolAST.v!=='patch_artifact_state')throw new Error('MUTATION_TOOL_NOT_ALLOWED')}
  if(options.scope){
   const scope=options.scope
-  const resolve=(node:ASTNode|undefined,seen=new Set<string>()):unknown=>{if(node?.k==='Str')return node.v;if(node?.k==='StateRef')return parsed.stateDeclarations[node.n];if(node?.k==='Ref'&&!seen.has(node.n)){seen.add(node.n);return resolve(expressions.get(node.n),seen)}return undefined}
+  const resolve=(node:ASTNode|undefined,seen=new Set<string>()):unknown=>{if(node?.k==='Str')return node.v;if(node?.k==='StateRef')return scope.variables&&node.n in scope.variables?scope.variables[node.n]:parsed.stateDeclarations[node.n];if(node?.k==='Ref'&&!seen.has(node.n)){seen.add(node.n);return resolve(expressions.get(node.n),seen)}return undefined}
   for(const reference of references){if(resolve(reference.artifact)!==scope.artifactId)throw new Error('UNKNOWN_ARTIFACT_REFERENCE');if(reference.dataset&&reference.dataset.k!=='Null'&&!scope.datasetIds.has(String(resolve(reference.dataset))))throw new Error('UNKNOWN_DATASET_REFERENCE')}
   for(const reference of datasetReferences)if(!scope.datasetIds.has(String(resolve(reference))))throw new Error('UNKNOWN_DATASET_REFERENCE')
  }
