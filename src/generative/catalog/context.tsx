@@ -1,8 +1,10 @@
+import {filterPredicate} from '../state/filter-predicate'
+export {filterPredicate} from '../state/filter-predicate'
 import type { QueryFareSelectionScope } from '../state/action-router'
 import { legState, legRequest, resolveBoundDatasetId } from '../state/leg-bindings'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
-import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type PredicateTree, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
+import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type FareDataBridge, type FareRow, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
 export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>;selectFromQuery?:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>DispatchResult}; record?: (input: unknown) => void; queryForView?:()=>QueryIR; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
@@ -18,17 +20,6 @@ export function useArtifact(ref: string) {
 export function useTravelAction(ref: string) {
   const { services, state } = useArtifact(ref)
   return (command: UICommand) => { services.activate(ref); return (services.dispatch??services.state.dispatch)({ ...command, artifactId: state.artifactId, expectedRevision: services.state.get(state.artifactId).revision }) }
-}
-export function filterPredicate(state: ArtifactUIState, includeDate = true): PredicateTree | undefined {
-  const all: PredicateTree[] = []
-  if (state.filters.modes.length) all.push({ field: 'mode', op: 'in', value: state.filters.modes })
-  if (state.filters.carrierIds.length) all.push({ field: 'carrierId', op: 'in', value: state.filters.carrierIds })
-  if (state.filters.minPriceCents !== undefined) all.push({ field: 'priceCents', op: 'gte', value: state.filters.minPriceCents })
-  if (state.filters.maxPriceCents !== undefined) all.push({ field: 'priceCents', op: 'lte', value: state.filters.maxPriceCents })
-  if (state.filters.maxDurationMinutes !== undefined) all.push({ field: 'durationMinutes', op: 'lte', value: state.filters.maxDurationMinutes })
-  if (state.filters.directOnly) all.push({ field: 'direct', op: 'eq', value: true })
-  if (includeDate) all.push(state.dates.end ? { field: 'serviceDate', op: 'between', value: [state.dates.start,state.dates.end] } : { field: 'serviceDate', op: 'eq', value: state.dates.start })
-  return all.length ? { all } : undefined
 }
 export function useTravelQuery(ref: string, datasetRef: string | undefined, make: (state: ArtifactUIState, datasetId: ReturnType<typeof DatasetIdSchema.parse>) => QueryIR) {
   const { services, state } = useArtifact(ref)

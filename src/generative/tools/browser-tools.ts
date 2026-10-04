@@ -1,5 +1,8 @@
 import { z } from 'zod';
-import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,FareFieldSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId,type UICommand,type DispatchResult,LIMITS } from '../contracts';
+import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId,type UICommand,type DispatchResult,LIMITS } from '../contracts';
+import {SummarizeFaresInputSchema} from './summarize-schema';
+import {filterPredicate} from '../state/filter-predicate';
+import {legState,legRequest,resolveBoundDatasetId} from '../state/leg-bindings';
 import { coverageKey } from '../data/resource-loader';
 import { assertNoBulkData } from '../contracts/privacy';
 class LocalToolError extends Error{constructor(readonly code:'DATASET_CAPACITY_EXCEEDED'){super(code)}}
@@ -29,10 +32,19 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
    options.store.dispatch({artifactId,kind:'datasets',datasetRefs:[...new Set([...state.datasetRefs,manifest.datasetId])]});
    return manifest;
   }),
-  summarize_fares:wrap(z.strictObject({datasetRef:DatasetIdSchema,groupBy:FareFieldSchema}),'Return at most30 grouped counts',async({datasetRef,groupBy},signal)=>{
-   const manifest=options.bridge.getManifest(datasetRef);const query=parseQuery({version:1,sources:[{datasetRef,alias:'d'}],groupBy:[groupBy],metrics:[{as:'count',op:'count'}],limit:30},[manifest]);
-   const result=await options.bridge.query(query,signal);
-   return {datasetId:datasetRef,revision:manifest.revision,groups:result.rows.slice(0,30).map(row=>({label:String(row[groupBy]??''),count:Number(row.count??0)})),truncated:result.truncated};
+  summarize_fares:wrap(SummarizeFaresInputSchema,'Return at most30 grouped counts. Include artifactRef for the current artifact filters, leg dates and modes; omit artifactRef explicitly for a dataset-wide summary.',async({datasetRef,groupBy,artifactRef},signal)=>{
+   const scope=()=>{
+    if(!artifactRef)return{manifest:options.bridge.getManifest(datasetRef),where:undefined};
+    const state=options.store.get(artifactRef);if(!state.datasetRefs.includes(datasetRef))throw new Error('Dataset outside artifact');
+    const id=resolveBoundDatasetId(state,options.bridge,datasetRef),manifest=options.bridge.getManifest(id),request=legRequest(state,manifest.coverage);
+    if(!state.datasetRefs.includes(id)||request.passengers!==manifest.coverage.passengers||request.dateWindow.from<manifest.coverage.dateWindow.from||request.dateWindow.to>manifest.coverage.dateWindow.to||!request.modes.every(mode=>manifest.coverage.modes.includes(mode)))throw new Error('Current artifact coverage unavailable');
+    return{manifest,where:filterPredicate(legState(state,manifest.coverage))};
+   };
+   const captured=scope(),manifest=captured.manifest;
+   const query=parseQuery({version:1,sources:[{datasetRef:manifest.datasetId,alias:'f'}],where:captured.where,groupBy:[groupBy],metrics:[{as:'count',op:'count'}],limit:30},[manifest]);
+   const result=await options.bridge.query(query,signal),current=scope();
+   if(result.datasetRevision!==manifest.revision||current.manifest.datasetId!==manifest.datasetId||current.manifest.revision!==manifest.revision||current.manifest.source.sourceVersion!==manifest.source.sourceVersion||JSON.stringify(current.where)!==JSON.stringify(captured.where))throw new Error('Stale summary scope');
+   return {datasetId:manifest.datasetId,revision:manifest.revision,groups:result.rows.slice(0,30).map(row=>({label:String(row[groupBy]??''),count:Number(row.count??0)})),truncated:result.truncated};
   }),
   get_top_fares:wrap(z.strictObject({datasetRef:DatasetIdSchema,objective:z.enum(['cheapest','fastest'])}),'Return at most5 compact fare facts',async({datasetRef,objective},signal)=>{
    const manifest=options.bridge.getManifest(datasetRef);const field=objective==='cheapest'?'priceCents':'durationMinutes';
