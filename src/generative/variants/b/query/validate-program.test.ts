@@ -30,3 +30,22 @@ it('rejects literal Set values that cannot enter the declared host field',()=>{
  expect(()=>validateReactiveProgram(primitive('[1,2]'))).toThrow('VARIABLE_ASSIGNMENT_TYPE')
  expect(()=>validateReactiveProgram(source+'\nchange = RetryAction("art",null,null,null,"Change",null,null,null,null,null,Action([@Set($filters,"bus")]))')).toThrow('VARIABLE_ASSIGNMENT_TYPE')
 })
+
+
+it.each(['Select a fare','select a fare','sElEcT a fare'])('accepts ordinary heading and explanatory copy: %s',title=>{
+ const program=`note = Callout("art",null,null,null,"How to choose",null,null,null,null,null,null,${JSON.stringify('Compare options, then '+title+'.')})
+root = TravelSurface("art",null,null,null,${JSON.stringify(title)},null,[note])`
+ expect(()=>validateReactiveProgram(program)).not.toThrow()
+})
+it.each(['https://example.com','javascript:alert(1)','x'.repeat(601)])('retains prohibited text and size boundaries',text=>{
+ expect(()=>validateReactiveProgram(`note = Callout("art",null,null,null,"Note",null,null,null,null,null,null,${JSON.stringify(text)})\nroot = TravelSurface("art",null,null,null,"Trips",null,[note])`)).toThrow('FORBIDDEN_TEXT')
+})
+it('rejects SQL through query argument and tool boundaries',async()=>{
+ const {evaluateQueryArguments}=await import('./program-query')
+ const {createUIStateStore}=await import('../../../state/ui-state-store')
+ const {ArtifactIdSchema}=await import('../../../contracts')
+ const store=createUIStateStore(),id=ArtifactIdSchema.parse('art');store.initializeMissing(id,{})
+ for(const query of ['Query("local_query", "SELECT * FROM fares")','Query("local_query", {version:1,sources:[{datasetRef:"d",alias:"f"}],sql:"SELECT * FROM fares",limit:5})','Query("remote_sql", {version:1,sources:[{datasetRef:"d",alias:"f"}],limit:5})']){
+  expect(()=>{const program=validateReactiveProgram(`q = ${query}\nroot = TravelSurface("art")`);evaluateQueryArguments(program,'q',store.get(id),{})}).toThrow()
+ }
+})
