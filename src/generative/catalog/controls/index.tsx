@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { DatasetIdSchema, TransportModeSchema, type TransportMode } from '../../contracts'
-import { useArtifact, useTravelAction, useTravelQuery, filterPredicate, cityLabel, legKey } from '../context'
+import { useArtifact, useTravelAction, useTravelQuery, filterPredicate, carrierLabel, cityLabel, legKey } from '../context'
 import type { WidgetProps } from '../layout'
 export function Control({kind,...props}:WidgetProps & {kind:string}) {
   const {state,services}=useArtifact(props.artifactRef); const dispatch=useTravelAction(props.artifactRef); const id=useId()
@@ -19,5 +19,5 @@ export function Control({kind,...props}:WidgetProps & {kind:string}) {
 }
 function CarrierControl(props:WidgetProps) {
   const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate({...state,filters:{...state.filters,carrierIds:[]}}),groupBy:['carrierId'],metrics:[{as:'count',op:'count'}],limit:30}));const dispatch=useTravelAction(props.artifactRef)
-  return <fieldset className="travel-fieldset"><legend>{props.title??'Carriers'}</legend>{result.data?.rows.map(row=>typeof row.carrierId==='string'?<label className="travel-check" key={row.carrierId}><input type="checkbox" checked={result.state.filters.carrierIds.includes(row.carrierId)} onChange={e=>{if(typeof row.carrierId==='string')dispatch({kind:'filters',artifactId:result.state.artifactId,filters:{...result.state.filters,carrierIds:e.target.checked?[...result.state.filters.carrierIds,row.carrierId]:result.state.filters.carrierIds.filter(c=>c!==row.carrierId)}})}}/>{cityLabel(row.carrierId)}</label>:null)}</fieldset>
+  return <fieldset className="travel-fieldset"><legend>{props.title??'Carriers'}</legend>{result.data?.rows.map(row=>typeof row.carrierId==='string'?<label className="travel-check" key={row.carrierId}><input type="checkbox" checked={result.state.filters.carrierIds.includes(row.carrierId)} onChange={e=>{if(typeof row.carrierId==='string')dispatch({kind:'filters',artifactId:result.state.artifactId,filters:{...result.state.filters,carrierIds:e.target.checked?[...result.state.filters.carrierIds,row.carrierId]:result.state.filters.carrierIds.filter(c=>c!==row.carrierId)}})}}/>{carrierLabel({carrierId:row.carrierId},result.services.bridge,result.datasetId)}</label>:null)}</fieldset>
 }

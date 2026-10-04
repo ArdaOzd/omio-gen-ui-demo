@@ -9,7 +9,7 @@ import { CatalogNode } from './component'
 import { ReactiveScene } from '../variants/b/renderer'
 const id = ArtifactIdSchema.parse('trip')
 async function setup() {
- const rows = ['train', 'bus'].map((mode, index) => FareRowSchema.parse({id: `fare-${index}`, originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode, carrierId: index === 0 ? 'eurostar' : 'flixbus', priceCents: index === 0 ? 5500 : 2300, durationMinutes: index === 0 ? 140 : 470, departureMinutes: 600, availableSeats: 10, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true}))
+ const rows = ['train', 'bus'].map((mode, index) => FareRowSchema.parse({id: `fare-${index}`, originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode, carrierId: index === 0 ? 'eurostar' : 'flixbus', carrierName: index === 0 ? 'Eurostar' : 'Flixbus', priceCents: index === 0 ? 5500 : 2300, durationMinutes: index === 0 ? 140 : 470, departureMinutes: 600, availableSeats: 10, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true}))
  const bridge = createFareDataBridge({pageSource: async () => ({rows, total: 2, page: 1, pages: 1, sourceVersion: 'fixture-v1'})})
  const manifest = await bridge.load({originIds: ['london'], destinationIds: ['paris'], dateWindow: {from: '2026-10-09', to: '2026-10-09'}, modes: ['train', 'bus'], passengers: 2}, new AbortController().signal)
  const state = createUIStateStore()

@@ -72,3 +72,5 @@ export const money = (cents:number) => new Intl.NumberFormat('en-GB',{style:'cur
 export const duration = (minutes:number) => `${Math.floor(minutes/60)}h ${minutes%60}m`
 export const cityLabel = (id:string) => id.replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
 export const departure = (minutes:number) => `${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`
+
+export const carrierLabel=(row:Pick<FareRow,'carrierId'|'carrierName'>,bridge:FareDataBridge,datasetId?:ReturnType<typeof DatasetIdSchema.parse>)=>row.carrierName??bridge.getCarrierLabel?.(row.carrierId,datasetId)??`Synthetic carrier ${row.carrierId}`
