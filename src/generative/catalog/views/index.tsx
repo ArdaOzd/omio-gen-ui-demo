@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { type BoundedFareFact } from '../../contracts'
+import { legDate,tripDatesForLegDeparture } from '../../state/leg-bindings'
 import { cityLabel, departure, duration, money, useArtifact, useFareRows, useTravelAction, useTravelQuery, filterPredicate } from '../context'
 import type { WidgetProps } from '../layout'
 export function FareCards(props:WidgetProps) {
@@ -19,7 +20,10 @@ export function FarePicker(props:WidgetProps) {
 }
 export function PriceCalendar(props:WidgetProps) {
  const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state,false),groupBy:['serviceDate'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'count',op:'count'}],orderBy:[{field:'serviceDate',direction:'asc'}],limit:30}));const dispatch=useTravelAction(props.artifactRef)
- return <section className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-calendar">{result.data?.rows.map(row=>typeof row.serviceDate==='string'&&typeof row.minimum==='number'?<button key={row.serviceDate} type="button" aria-pressed={result.state.dates.start===row.serviceDate} onClick={()=>{if(typeof row.serviceDate==='string')dispatch({kind:'dates',artifactId:result.state.artifactId,dates:{...result.state.dates,start:row.serviceDate}})}}><span>{new Date(`${row.serviceDate}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{money(row.minimum)}</strong><small>{row.count} options</small></button>:null)}</div>{result.status==='loading'&&<p role="status">Comparing dates…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
+ const [dateError,setDateError]=useState('')
+ const origin=result.datasetId?result.services.bridge.getManifest(result.datasetId).coverage.originIds[0]??'':''
+ const chooseDate=(date:string)=>{let dates:ReturnType<typeof tripDatesForLegDeparture>;try{dates=tripDatesForLegDeparture(result.services.state.get(result.state.artifactId),origin,date)}catch{setDateError('This departure would move the itinerary outside supported calendar dates.');return}dispatch({kind:'dates',artifactId:result.state.artifactId,dates});setDateError('')}
+ return <section className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-calendar">{result.data?.rows.map(row=>typeof row.serviceDate==='string'&&typeof row.minimum==='number'?<button key={row.serviceDate} type="button" aria-pressed={legDate(result.state,origin)===row.serviceDate} onClick={()=>{if(typeof row.serviceDate==='string')chooseDate(row.serviceDate)}}><span>{new Date(`${row.serviceDate}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{money(row.minimum)}</strong><small>{row.count} options</small></button>:null)}</div>{dateError&&<p role="alert">{dateError}</p>}{result.status==='loading'&&<p role="status">Comparing dates…</p>}{result.status==='ready'&&!result.data?.rows.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</section>
 }
 export function Comparison(props:WidgetProps) {
  const result=useTravelQuery(props.artifactRef,props.datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:filterPredicate(state),groupBy:['mode'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'fastest',op:'min',field:'durationMinutes'},{as:'count',op:'count'}],limit:4}));
@@ -59,8 +63,9 @@ export function Coverage(props:WidgetProps) {
 }
 function useRouteStops(ref:string) {
  const {services,state}=useArtifact(ref)
- if(state.stays.length)return state.stays
  const legs=state.datasetRefs.map(id=>services.bridge.getManifest(id).coverage)
+ const origin=legs[0]?.originIds[0]
+ if(state.stays.length)return origin&&state.stays[0]?.cityId!==origin?[{cityId:origin,nights:0},...state.stays]:state.stays
  const distinct=legs.filter((leg,index)=>legs.findIndex(other=>other.originIds[0]===leg.originIds[0]&&other.destinationIds[0]===leg.destinationIds[0])===index)
  const cities=distinct.length?[distinct[0].originIds[0],...distinct.map(leg=>leg.destinationIds[0])].filter((city):city is string=>typeof city==='string'):[]
  return cities.map(cityId=>({cityId,nights:0}))
