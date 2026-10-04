@@ -1,31 +1,44 @@
-import { catalogDescriptors } from '../src/generative/catalog/generated/catalog';
+import { z } from 'zod';
+import { sharedPropsSchema,catalogDescriptors } from '../src/generative/catalog/generated/catalog';
 import { registeredActions,registeredSelectors,validatePresentTree } from '../src/generative/variants/a/tree';
-const keys=new Set(['$type','$key','artifactRef','datasetRef','actionRef','selectorRef','title','variant','children']);
+const scalars=new Map(Object.entries(sharedPropsSchema.shape));
+const keys=new Set(['$type','$key','children',...scalars.keys()]);
+const specifications=z.toJSONSchema(sharedPropsSchema).properties??{};
+function scalarLimit(key:string):number {
+ const field=specifications[key];
+ if(field&&typeof field==='object'){if(typeof field.maxLength==='number')return field.maxLength;if(Array.isArray(field.enum))return Math.max(...field.enum.map(value=>typeof value==='string'?value.length:0));}
+ return key==='children'?160:key==='$type'?Math.max(...catalogDescriptors.map(component=>component.name.length)):96;
+}
 const names=new Set<string>(catalogDescriptors.map(descriptor=>descriptor.name));
 export function validatePresentPrefix(source:string,scope:{artifactIds:Set<string>;datasetIds:Set<string>}):void {
  if(new TextEncoder().encode(source).length>24_000)throw new Error('Partial tree byte limit');
- let inString=false,escaped=false,start=0,depth=0,nodes=0,key='';
+ let inString=false,escaped=false,start=0,depth=0,nodes=0,key='',previous='',stringIsKey=false;const containers:Array<'object'|'array'>=[];
  for(let index=0;index<source.length;index++){
   const char=source[index];
   if(inString){
-   if(index-start>1000)throw new Error('Partial scalar string limit');
+   if(index-start>6*(stringIsKey?Math.max(...[...keys].map(key=>key.length)):scalarLimit(key))+1)throw new Error('Partial scalar string limit');
    if(escaped){escaped=false;continue;}
    if(char==='\\'){escaped=true;continue;}
    if(char!=='"')continue;
    inString=false;const value:unknown=JSON.parse(source.slice(start,index+1));if(typeof value!=='string')throw new Error('Invalid scalar');
-   let next=index+1;while(/\s/.test(source[next]??'')&&next<source.length)next++;
-   if(source[next]===':'){if(!keys.has(value))throw new Error('Unknown partial tree field');key=value;}
+   previous='"';
+   if(stringIsKey){if(!keys.has(value))throw new Error('Unknown partial tree field');key=value;}
    else {
-    if(value.length>(['title','children'].includes(key)?160:96))throw new Error('Partial scalar limit');
+    if(value.length>scalarLimit(key)||scalars.has(key)&&!scalars.get(key)?.safeParse(value).success)throw new Error('Partial scalar limit');
     if(key==='$type'&&!names.has(value))throw new Error('Unknown partial component');
     if(key==='artifactRef'&&!scope.artifactIds.has(value))throw new Error('Unknown partial artifact');
     if(key==='datasetRef'&&!scope.datasetIds.has(value))throw new Error('Unknown partial dataset');
     if(key==='actionRef'&&!registeredActions.has(value))throw new Error('Unknown partial action');
     if(key==='selectorRef'&&!registeredSelectors.has(value))throw new Error('Unknown partial selector');
    }
-  }else if(char==='"'){inString=true;start=index;}
-  else if(char==='{'){if(++depth>8||++nodes>80)throw new Error('Partial tree structural limit');}
-  else if(char==='}')depth--;
+  }else {
+   if(char==='"'){inString=true;start=index;stringIsKey=previous==='{'||previous===','&&containers.at(-1)==='object';}
+   else if(char==='{'){containers.push('object');if(++depth>8||++nodes>80)throw new Error('Partial tree structural limit');}
+   else if(char==='[')containers.push('array');
+   else if(char==='}'){containers.pop();depth--;}
+   else if(char===']')containers.pop();
+   if(!/\s/.test(char??''))previous=char??'';
+  }
  }
  if(depth===0&&!inString){try{validatePresentTree(JSON.parse(source),scope)}catch(error){if(source.trim().endsWith('}'))throw error;}}
 }
