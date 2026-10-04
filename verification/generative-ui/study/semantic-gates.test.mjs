@@ -12,3 +12,13 @@ test('source oracle applies the actual selected modes and finite user filters',(
 test('delayed coverage rejects the previous never-fired date matcher and late state overwrite',()=>{const request='/api/search?departure_date=2026-10-20';const oldMatched=new URL(request,'http://localhost').searchParams.get('date')==='2026-10-20';const facts={intercepted:Number(oldMatched),completed:Number(oldMatched),fulfilled:Number(oldMatched),canceled:0,latestDate:'2026-10-22',activeWindowStarts:['2026-10-22']};assert.throws(()=>assertDelayedCoverage(facts),/never completed/);const corrected={...facts,intercepted:Number(fareSearchDate(request)==='2026-10-20'),completed:1,fulfilled:1};assert.equal(assertDelayedCoverage(corrected).lateCompletionIgnored,true);assert.throws(()=>assertDelayedCoverage({...corrected,activeWindowStarts:['2026-10-20']}),/older delayed coverage/);assert.equal(assertDelayedCoverage({...corrected,fulfilled:0,canceled:1}).canceled,1)});
 
 test('departure action rejects authored literal or broad fare query even when the snapshot date changes',()=>{assert.equal(assertSourceAvailability({...sample,requireSingleDate:true}).availableCount,28);assert.throws(()=>assertSourceAvailability({...sample,requireSingleDate:true,queries:[{...query,scope:{...query.scope,where:{field:'serviceDate',op:'between',value:['2026-10-09','2026-10-15']}},resultDates:['2026-10-09','2026-10-10']}]}),/exactly the latest date/);assert.throws(()=>assertSourceAvailability({...sample,requireSingleDate:true,queries:[{...query,resultFareRows:0}]}),/exactly the latest date/)});
+
+
+test('exact singleton BETWEEN is accepted without admitting broad or ambiguous date predicates',()=>{
+ const exact={field:'serviceDate',op:'between',value:['2026-10-10','2026-10-10']},check=where=>assertSourceAvailability({...sample,requireSingleDate:true,queries:[{...query,scope:{...query.scope,where}}]});
+ assert.equal(check(exact).successfulScopedQueries,1);
+ assert.equal(check({all:[{field:'mode',op:'in',value:['bus']},exact]}).successfulScopedQueries,1);
+ for(const where of [{...exact,value:['2026-10-09','2026-10-15']},{...exact,value:['2026-10-11','2026-10-11']},{any:[exact,{field:'serviceDate',op:'eq',value:'2026-10-11'}]},{field:'serviceDate',op:'in',value:['2026-10-10','2026-10-11']}])assert.throws(()=>check(where),/exactly the latest date/);
+ assert.throws(()=>assertSourceAvailability({...sample,requireSingleDate:true,queries:[{...query,scope:{...query.scope,where:exact},resultFareRows:0}]}),/exactly the latest date/);
+ assert.throws(()=>assertSourceAvailability({...sample,requireSingleDate:true,queries:[{...query,scope:{...query.scope,where:exact},resultDates:['2026-10-11']}]}),/exactly the latest date/);
+})
