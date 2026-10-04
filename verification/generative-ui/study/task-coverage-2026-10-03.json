@@ -1,0 +1,163 @@
+{
+  "classification": "read-only task eligibility; no model calls",
+  "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+  "globalFixtureDateBounds": {
+    "from": "2026-01-01",
+    "to": "2027-12-31"
+  },
+  "loadedResourceWindow": {
+    "from": "2026-10-09",
+    "to": "2026-10-15"
+  },
+  "fixedAndWithheldWindow": {
+    "from": "2026-10-09",
+    "to": "2026-10-15"
+  },
+  "actionDates": {
+    "localSelection": "2026-10-10",
+    "multiCitySecondLeg": "2026-10-11",
+    "slowCoverage": "2026-10-20",
+    "latestCoverage": "2026-10-22"
+  },
+  "observations": [
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-09",
+      "availableFareCount": 85,
+      "availableByMode": {
+        "train": 36,
+        "bus": 29,
+        "flight": 20,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-10",
+      "availableFareCount": 75,
+      "availableByMode": {
+        "train": 25,
+        "bus": 28,
+        "flight": 22,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-11",
+      "availableFareCount": 87,
+      "availableByMode": {
+        "train": 32,
+        "bus": 37,
+        "flight": 18,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-12",
+      "availableFareCount": 82,
+      "availableByMode": {
+        "train": 32,
+        "bus": 29,
+        "flight": 21,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-13",
+      "availableFareCount": 83,
+      "availableByMode": {
+        "train": 31,
+        "bus": 30,
+        "flight": 22,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-14",
+      "availableFareCount": 83,
+      "availableByMode": {
+        "train": 37,
+        "bus": 30,
+        "flight": 16,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-15",
+      "availableFareCount": 91,
+      "availableByMode": {
+        "train": 45,
+        "bus": 27,
+        "flight": 19,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-20",
+      "availableFareCount": 91,
+      "availableByMode": {
+        "train": 44,
+        "bus": 30,
+        "flight": 17,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "london",
+      "destination": "paris",
+      "date": "2026-10-22",
+      "availableFareCount": 77,
+      "availableByMode": {
+        "train": 32,
+        "bus": 20,
+        "flight": 25,
+        "ferry": 0
+      }
+    },
+    {
+      "origin": "paris",
+      "destination": "barcelona",
+      "date": "2026-10-11",
+      "availableFareCount": 47,
+      "availableByMode": {
+        "train": 28,
+        "bus": 0,
+        "flight": 19,
+        "ferry": 0
+      }
+    }
+  ],
+  "eligibleFamilies": [
+    "cheap-fast",
+    "train-bus",
+    "calendar",
+    "multi-city",
+    "rearrange",
+    "text-state",
+    "local-controls",
+    "coverage",
+    "stream-edit",
+    "two-artifacts",
+    "reload",
+    "recovery"
+  ],
+  "intentionalEmptyModes": [
+    "London\u2192Paris ferry",
+    "Paris\u2192Barcelona bus/ferry"
+  ],
+  "limits": "Proves source data availability, not that a generated scene binds correct resource coverage or exposes required controls. Missing bindings or controls remain failed study cells."
+}
