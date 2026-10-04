@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-10-02T21:34:30.885500+00:00",
+  "classification": "actual synthetic backend availability; no model or user-session edits",
+  "baseUrl": "http://127.0.0.1:8094",
+  "passengers": 1,
+  "legs": [
+    {
+      "origin": "barcelona",
+      "destination": "prague",
+      "date": "2026-10-03",
+      "total": 0,
+      "pages": 0,
+      "modeCounts": {},
+      "trainBusCount": 0,
+      "routePresent": false,
+      "supportedModes": []
+    },
+    {
+      "origin": "prague",
+      "destination": "paris",
+      "date": "2026-10-05",
+      "total": 3,
+      "pages": 1,
+      "modeCounts": {
+        "flight": 3
+      },
+      "trainBusCount": 0,
+      "routePresent": true,
+      "supportedModes": [
+        "flight"
+      ]
+    },
+    {
+      "origin": "paris",
+      "destination": "prague",
+      "date": "2026-10-10",
+      "total": 3,
+      "pages": 1,
+      "modeCounts": {
+        "flight": 3
+      },
+      "trainBusCount": 0,
+      "routePresent": true,
+      "supportedModes": [
+        "flight"
+      ]
+    }
+  ],
+  "conclusion": "No requested train/bus fares. Barcelona-Prague is absent; Prague-Paris and Paris-Prague support flight only. Requested coverage modes do not imply availability."
+}

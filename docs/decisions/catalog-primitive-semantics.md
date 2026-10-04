@@ -1,0 +1,22 @@
+# Distinct travel catalog primitives
+
+The acceptance reference requires granular components the model can arrange independently. The shared catalog review found several exported names rendering the same composite. This change gives the views separate semantics without suppressing authored nodes or changing positional props.
+
+- SelectedItinerary shows selected fare route/date/mode/per-passenger facts and an empty/loading state. It no longer duplicates the synthetic total, selected count or booking disclaimer. Pair it with SyntheticTotal and SelectedFareCount when those summaries help.
+- SyntheticTotal shows the sum of selected synthetic fare prices multiplied by passengers and its synthetic-price explanation. It does not render the selected itinerary.
+- ComparisonTable defaults to a bounded ranked comparison of individual fares. Existing B programs may supply authored grouped query results; those bounded columns still render, rather than dropping an accepted source or replacing its query.
+- ComparisonMatrix remains the mode price/duration comparison. ModeBreakdown shows only mode and count, preserving B's authored `count` metric such as a sum of availableSeats.
+
+These additive semantic corrections keep names, schemas, version1.0.0 and B positional ordering intact. The regenerated catalog/native registration describes the actual primitive responsibilities. Two focused tests failed before the correction because details repeated the total panel and the ranked comparison was a mode aggregate. After correction they pass with the existing shared-catalog and B authored-query/state tests. The final integration owner verifies accepted historical programs and current stored chats against the combined source.
+
+The audit also identified DateWindow as a single-date alias and RetryAction as an unchanged-dataset dispatch. DateWindow now exposes start/end controls with inclusive local query semantics, rejects reversed input, and offsets both endpoints on later itinerary legs. DateStrip remains a single date and clears the window when edited. RetryAction invokes the bounded action router retry operation; it repeats missing coverage after failure without rewriting dates, filters or selected IDs. The fail-first/succeed-second integration test confirms an actual resource load. The query-lifecycle owner supplies the coordinated inclusive-predicate/retry-dispatch type seam.
+
+Additional real A/B tests select two fares on different adjacent routes and dates in a combined coverage resource, filter the current list to Bus, then verify both selected facts and the exact two-passenger total remain visible without mutating host state. Tabs already provides actual tab/tabpanel roles, ArrowLeft/Right/Home/End roving focus and hidden inactive panels; the existing keyboard test exercises ArrowRight/Home rather than inferring behavior from CSS.
+
+## Scoped fare-selection date intent
+
+A genuine B week-wide query exposed a valid later-date selection being cleared against the host's old point date. The trusted router now exposes `selectFromQuery` with a typed query-result scope built only by a completed local query. It contains bounded offered IDs, normalized query, a fresh query reader and source-generation records. The router compares query identity and every source revision/version before dispatch and after asynchronous fact lookup. No serialized model command can supply this scope.
+
+For a valid authored wide query with a point-date host, selecting a later departure aligns trip start after subtracting the originating leg's stay offset. Controls and the next snapshot therefore carry the new date. Existing explicit date windows remain unchanged for an in-window choice. The latest compatible fare on a leg wins; incompatible selections clear after the derived dates change. An obsolete native point offer is rejected without changing departure date or dropping the valid existing same-leg selection. Expired query results, IDs absent from the actual result and changed source generations are rejected. Normal native/model selection cannot use the authored-query date alignment path.
+
+Six focused selection tests cover the observed failing-before case, snapshot/date alignment, stale query/native offers, explicit window preservation, later-leg stays/latest choice, source changes and fresh-query rechecking after delayed lookup. Runtime integration owns the B provider that builds this scope from actual completed queries; final live-browser proof verifies the whole path.

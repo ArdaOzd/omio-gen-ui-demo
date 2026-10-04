@@ -1,0 +1,7 @@
+# Signed-in Codex provider verification
+
+Verified 2026-10-02 with installed Codex app-server0.159.0-alpha.12.1 and model gpt-6.1-sol at high reasoning. A strict JSON greeting emitted18 item/agentMessage/delta notifications before turn/completed. These are genuine model generation events. The HTTP adapter forwards incremental decoded text and tool JSON; it does not slice a completed response to imitate streaming.
+
+The process runs stdio in an empty temporary directory with ephemeral threads, read-only sandbox, never approvals, no web search, zero project document bytes, shell/code mode/plugins/apps/multi-agent/hooks disabled, and each configured top-level MCP server disabled. The subprocess environment includes only HOME, PATH and TMPDIR. The probe event inventory contained no shell, command, MCP or tool invocation requests. The app-server does not accept the exec-only ignore-user-config switch, so explicit overrides disable its configured capabilities.
+
+The model receives a bounded compact context and allowed frontend tool schemas. It chooses one text/tool decision per request. The browser executes allowed frontend tools and returns bounded results for continuation. A server-owned visible-turn ledger caps cumulative calls and fact requests across HTTP continuation. The same provider and model serve A and B. Fixture responses carry an explicit fixture label and provide no live-model evidence.
