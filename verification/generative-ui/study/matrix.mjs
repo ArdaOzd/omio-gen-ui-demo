@@ -25,8 +25,8 @@ export const withheld=[
  'Compose London→Paris October 9–15, 2026 with modes, dates, sorting and fares. I may stop and retry a replacement; keep the existing artifact usable and recover from one invalid scene without losing my choices.'
 ]
 
-export function canResume(previous,cell,runtime,fixture){
- return previous?.excludedFromComparison!==true&&previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.runtimeValid===true&&['appRevision','model','provider','reasoningEffort'].every(key=>previous?.runtime?.[key]===runtime[key])&&previous?.appRevision===runtime.appRevision&&previous?.model===runtime.model&&previous?.reasoning===runtime.reasoningEffort&&previous?.provider===runtime.provider&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
+export function canResume(previous,cell,runtime,fixture,environmentId){
+ return (environmentId===undefined||previous?.runEnvironment?.id===environmentId)&&previous?.excludedFromComparison!==true&&previous?.fixtureValid!==false&&previous?.fixture?.sourceVersion===fixture.sourceVersion&&previous?.fixture?.rowCount===fixture.rowCount&&previous?.runtimeValid===true&&['appRevision','model','provider','reasoningEffort'].every(key=>previous?.runtime?.[key]===runtime[key])&&previous?.appRevision===runtime.appRevision&&previous?.model===runtime.model&&previous?.reasoning===runtime.reasoningEffort&&previous?.provider===runtime.provider&&previous?.liveModelAuthorship===true&&['pass','fail'].includes(previous?.outcome)&&['id','scenario','cache','wording','variant','seed'].every(key=>previous[key]===cell[key])
 }
 
 export function assertFixture(actual,expected){

@@ -1,0 +1,35 @@
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {expect} from '@playwright/test';
+import {buildReviewPackage,validateReviewExport} from './package.mjs';
+import {startReviewServer} from './serve-review.mjs';
+import {instrument,chooseFare,sourceGate} from '../run-matrix.mjs';
+import {oracleFacts} from '../semantic-gates.mjs';
+import {stableRef} from '../../../../src/generative/data/resource-loader.ts';
+const upstream=process.env.OMIO_DEMO_URL??'http://127.0.0.1:5194',output=process.env.OMIO_REVIEW_PROOF_OUTPUT??`/private/tmp/omio-review-proof-${Date.now()}`;
+const runtime=await(await fetch(upstream+'/api/agent/health')).json(),health=await(await fetch(upstream+'/api/health')).json(),fixture={sourceVersion:health.source_version,rowCount:health.fare_count};
+const original=JSON.parse(await readFile('verification/generative-ui/resume-artifacts/final-native-proof/results.json','utf8'));
+const records=['a','b'].map(variant=>{const native=original.results.find(item=>item.variant===variant&&item.index===1&&item.passed&&item.persisted);if(!native)throw new Error('Missing genuine recorded native source');return{id:`calendar-cold-fixed-${variant}`,scenario:'calendar',cache:'cold',wording:'fixed',variant,runtime,fixture,appRevision:runtime.appRevision,runtimeValid:true,fixtureValid:true,liveModelAuthorship:false,classification:'zero-model native workflow proof',outcome:'pass',captureAvailable:true,persisted:native.persisted}});
+const packet=buildReviewPackage(records,{participant:'anonymous-999',readinessOnly:true});
+await mkdir(output,{recursive:false});for(const path of ['public','public/captures','private'])await mkdir(join(output,path),{mode:path==='private'?0o700:0o755});
+for(const[path,value]of [['public/manifest.json',packet.public],['public/ratings-template.json',packet.template],['private/identity-map.json',packet.private]])await writeFile(join(output,path),JSON.stringify(value,null,2),{mode:path.startsWith('private')?0o600:0o644});
+let review;const results=[];
+try{
+ review=await startReviewServer({packageDirectory:output,upstream,headless:true});await review.context.addInitScript(instrument);const page=review.reviewer;
+ const manifest=await(await fetch(new URL('/manifest.json',review.url))).json();expect(manifest.items).toHaveLength(24);expect(manifest.humanRatings).toBeNull();expect(manifest.items.filter(item=>item.status==='not collected')).toHaveLength(22);
+ expect((await fetch(new URL('/private/identity-map.json',review.url))).status).toBe(404);expect((await fetch(new URL('/api/chat',review.url),{method:'POST',body:'{}'})).status).toBe(403);
+ await page.getByRole('button',{name:'Export my ratings'}).click();await expect(page.locator('#status')).toContainText('No reviewer ratings');
+ for(const item of manifest.items.filter(item=>item.artifactAvailable)){
+  const variant=packet.private.items[item.token].variant;await page.locator('#item').selectOption(item.token);await expect(page.locator('#capture')).toBeVisible();await expect.poll(()=>page.locator('#capture').evaluate(node=>node.naturalWidth)).toBeGreaterThan(0);await page.getByRole('button',{name:'Open interactive view'}).click();await expect(page.locator('#status')).toContainText('Interactive view ready',{timeout:30000});
+  const frame=page.frame({name:'review-artifact'});await frame.locator('.travel-travelsurface').last().waitFor();const errors=[];page.on('pageerror',error=>errors.push(String(error)));
+  expect(await frame.locator('.travel-variant-nav:visible,.travel-composer-wrap:visible,#root>details:visible').count()).toBe(0);
+  const recorder={requests:[],sourceVersion:fixture.sourceVersion,targetQueryOffset:0};
+  recorder.oracle=async(state,date)=>{const params=new URLSearchParams({origin:'london',destination:'paris',departure_date:date,passengers:'1',limit:'100'}),data=await(await fetch(upstream+'/api/search?'+params)).json();if(data.source_version!==fixture.sourceVersion||data.outbound.pages>1)throw new Error('Source oracle drift');return{filteredCount:oracleFacts(data.outbound.results.map(row=>({mode:row.mode,carrierId:`carrier-${stableRef(row.company)}`,priceCents:row.price_cents,durationMinutes:row.duration_minutes,direct:true})),{...state.filters,modes:state.modesByLeg['london:paris']??state.filters.modes}).length}};
+  await frame.locator('.travel-travelsurface').last().locator('input[type=date]').first().fill('2026-10-10');await frame.locator('.travel-travelsurface').last().locator('select:has(option[value="durationMinutes:asc"])').first().selectOption('durationMinutes:asc');const availability=await sourceGate(frame,recorder,{variant,requireSingleDate:true},'2026-10-10');const actions={sourceAvailability:availability,fareSelection:await chooseFare(frame.locator('.travel-travelsurface').last()),date:'2026-10-10',sort:'durationMinutes:asc'};await expect.poll(()=>frame.evaluate(variant=>new Promise(resolve=>{const open=indexedDB.open('omio-generative-state',1);open.onsuccess=()=>{const get=open.result.transaction('threads').objectStore('threads').get(`travel-${variant}`);get.onsuccess=()=>resolve(get.result.artifacts.at(-1).state.selectedFareIds.length)}}),variant)).toBe(1);const before=await frame.evaluate(variant=>new Promise(resolve=>{const open=indexedDB.open('omio-generative-state',1);open.onsuccess=()=>{const get=open.result.transaction('threads').objectStore('threads').get(`travel-${variant}`);get.onsuccess=()=>resolve(get.result.artifacts.map(item=>item.state.selectedFareIds))}}),variant);
+  await page.getByRole('button',{name:'Use 390px width'}).click();expect(await page.locator('#interactive').evaluate(node=>node.clientWidth)).toBeLessThanOrEqual(390);await page.getByRole('button',{name:'Reload interactive view',exact:true}).click();await expect(page.locator('#status')).toContainText('Interactive view ready');await frame.locator('.travel-travelsurface').last().waitFor();
+  const after=await frame.evaluate(variant=>new Promise(resolve=>{const open=indexedDB.open('omio-generative-state',1);open.onsuccess=()=>{const get=open.result.transaction('threads').objectStore('threads').get(`travel-${variant}`);get.onsuccess=()=>resolve(get.result.artifacts.map(item=>item.state.selectedFareIds))}}),variant);expect(after).toEqual(before);expect(errors).toEqual([]);
+  results.push({variant,passed:true,actions,reloadRetainedSelection:true,publicCaptureAvailable:true,blindedNavigation:true,humanRatings:null});
+ }
+ expect(review.diagnostics().forwardedModelRequests).toBe(0);expect(results).toHaveLength(2);expect(()=>validateReviewExport(packet.template,manifest)).toThrow('No reviewer ratings');
+ console.log(JSON.stringify({output,reviewUrl:review.url,classification:packet.public.classification,results,humanRatings:null,modelRequests:review.diagnostics()}));
+}finally{await writeFile(join(output,'workflow-proof.json'),JSON.stringify({classification:'zero-model native workflow verification, not matrix evidence or human judgments',appRevision:runtime.appRevision,fixture,humanRatings:null,results},null,2));if(review)await review.stop();}
