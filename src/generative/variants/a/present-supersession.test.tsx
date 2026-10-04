@@ -14,7 +14,7 @@ function mount(parts:UIMessage['parts'],earlier:UIMessage[]=[]){
  Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}})
  vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
  const state=createUIStateStore();for(const id of ['art-1','art-2'])state.initializeMissing(ArtifactIdSchema.parse(id),{})
- render(<GenerativeChat variant="a" services={{state,bridge:createFareDataBridge(),activeId:()=>'art-1',activate:()=>{}}} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],datasets:[],selectedFareFacts:[]})} initialMessages={[...earlier,{id:'assistant-final',role:'assistant',parts}]}/> )
+ render(<GenerativeChat variant="a" services={{state,bridge:createFareDataBridge(),activeId:()=>'art-1',activate:()=>{}}} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={[...earlier,{id:'assistant-final',role:'assistant',parts}]}/> )
 }
 it('shows only the latest accepted native present for one artifact in the same assistant message',()=>{
  mount([accepted('first','art-1','First scene'),accepted('replacement','art-1','Replacement scene')])
