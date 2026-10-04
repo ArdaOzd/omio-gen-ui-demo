@@ -20,3 +20,25 @@ describe('bounded direct artifact tools',()=>{
   const {store,tools}=setup();const result=await tools.load_fares.execute({coverage});expect(result).toMatchObject({rowCount:0,coverage:{complete:true}});expect(store.get(artifactId).dates.start).toBe('2026-10-09');expect(result).not.toHaveProperty('rows');
  });
 });
+
+it('propagates SDK cancellation and never commits late coverage',async()=>{
+ const store=createUIStateStore();store.initializeMissing(artifactId,{})
+ let release=()=>{},started=()=>{},observed:AbortSignal|undefined
+ const ready=new Promise<void>(resolve=>{started=resolve}),gate=new Promise<void>(resolve=>{release=resolve})
+ const bridge=createFareDataBridge({pageSource:async(_input,signal)=>{observed=signal;started();await gate;return{rows:[],total:0,pages:1,page:1,sourceVersion:'fixture'}}})
+ const controller=new AbortController(),tool=createBrowserTools({store,bridge,activeArtifactId:()=>artifactId}).load_fares
+ const pending=tool.execute({coverage},{abortSignal:controller.signal})
+ await ready;controller.abort();release()
+ expect(await pending).toMatchObject({status:'error'})
+ expect(observed?.aborted).toBe(true);expect(store.get(artifactId).datasetRefs).toEqual([])
+})
+it('reports capacity instead of acknowledging an unretained ninth resource',async()=>{
+ const store=createUIStateStore();store.initializeMissing(artifactId,{})
+ const bridge=createFareDataBridge({pageSource:async()=>({rows:[],total:0,pages:1,page:1,sourceVersion:'fixture'})})
+ const tools=createBrowserTools({store,bridge,activeArtifactId:()=>artifactId})
+ for(let day=1;day<=8;day++){const date=`2026-10-${String(day).padStart(2,'0')}`;await tools.load_fares.execute({coverage:{...coverage,dateWindow:{from:date,to:date}}})}
+ const before=store.get(artifactId),date='2026-10-09'
+ expect(await tools.load_fares.execute({coverage:{...coverage,dateWindow:{from:date,to:date}}})).toMatchObject({status:'error',code:'DATASET_CAPACITY_EXCEEDED'})
+ expect(store.get(artifactId)).toEqual(before)
+ expect(await tools.load_fares.execute({coverage:{...coverage,dateWindow:{from:'2026-10-01',to:'2026-10-01'}}})).toHaveProperty('datasetId')
+})
