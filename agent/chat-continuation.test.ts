@@ -12,9 +12,23 @@ const {decision}=vi.hoisted(()=>({decision:vi.fn()}))
 vi.mock('./codex-provider',()=>({codexDecision:decision}))
 vi.mock('./location-catalog',()=>({loadLocationCatalog:async()=>[]}))
 import { handleChat } from './chat-route'
+import { InvalidModelOutputError } from './repair'
 const servers:ReturnType<typeof createServer>[]=[]
 afterEach(async()=>{await Promise.all(servers.splice(0).map(server=>new Promise<void>(resolve=>server.close(()=>resolve()))));decision.mockReset()})
 describe('native frontend tool continuation messages',()=>{
+ it('passes one effective request signal through a repaired native HTTP stream',async()=>{
+  const id=ArtifactIdSchema.parse('deadline-chat-artifact'),store=createUIStateStore();store.initializeMissing(id,{})
+  const context=exportAgentContext({turnId:'deadline-chat-test',activeArtifactId:id,artifactIds:[id],store,bridge:createFareDataBridge()})
+  const parent=new AbortController(),signals:AbortSignal[]=[]
+  decision.mockImplementation(async({signal,onDelta})=>{signals.push(signal);if(signals.length===1)throw new InvalidModelOutputError('Model returned an invalid decision');onDelta('intro','Repaired once.','none');return{intro:'Repaired once.',toolName:'none',toolInput:'{}',outro:''}})
+  const server=createServer(async(request,response)=>{try{let body='';for await(const chunk of request)body+=chunk.toString();await handleChat(parseChatRequest(JSON.parse(body)),response,parent.signal)}catch(error){response.writeHead(500);response.end(String(error))}});servers.push(server)
+  await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw new Error('Expected local test server')
+  const chat=new Chat({transport:new DefaultChatTransport({api:`http://127.0.0.1:${address.port}`,body:{variant:'a',currentContext:context,tools:{}}})})
+  await chat.sendMessage({text:'Plan this route.'});await vi.waitFor(()=>expect(chat.status).toBe('ready'))
+  expect(signals).toHaveLength(2);expect(signals[0]).toBe(signals[1]);expect(signals[0]).not.toBe(parent.signal)
+  expect(chat.messages.filter(message=>message.role==='assistant')).toHaveLength(1);expect(chat.messages.at(-1)?.parts.filter(part=>part.type==='text').map(part=>part.text)).toEqual(['Repaired once.'])
+ })
+
  it('keeps three tool steps and each prose segment in one assistant message',async()=>{
   const id=ArtifactIdSchema.parse('continuation-artifact'),store=createUIStateStore();store.initializeMissing(id,{})
   const context=exportAgentContext({turnId:'continuation-test',activeArtifactId:id,artifactIds:[id],store,bridge:createFareDataBridge()})
