@@ -1,0 +1,9 @@
+# Personal demo comparison decision
+
+Retain both implementations. The purpose is hands-on comparison of native component composition and authored reactive programs over the same travel data and controls. No variant is removed or chosen on behalf of the user.
+
+A has three recorded genuinely authored recursive arrangements, usable partial controls, and a real latest-state text-only/reload/cancel proof. B uses the public OpenUI runtime with actual variables, conditions, QueryIR dependencies and ordered actions; its parser and host-state bridge are tested independently. Variant-specific live evidence is retained in the respective directories. Early B transport declaration and prompt-size failures are diagnostic failures, not model authoring successes.
+
+The shared TypeScript worker passes predeclared 50k/200k correctness, latency, transfer and cancellation gates. DuckDB remains a documented faster alternative for large repeated analytics, with a substantial WASM/cold-start cost. Both variants use the same signed-in Codex model, component vocabulary, data fixture, state stores and design tokens.
+
+Human visual quality, usability, creativity, hierarchy, mobile adaptation and perceived-responsiveness scores remain uncollected. The local study form exists for those ratings. This record makes no statistical or subjective winner claim, and applies only to this personal synthetic-data demo. The full twelve-family cold/warm counterbalanced machine study is paused at the user’s request and remains outstanding for a later session. Representative actual model cases and deterministic interaction tests are classified separately. The reported conversation failures are fixed; final saved-chat reload and genuine completion proofs pass. Work is stopped at the user’s request. See `docs/status/generative-ui-ab-handoff.md` for the exact continuation state.
