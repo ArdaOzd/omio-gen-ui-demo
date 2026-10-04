@@ -16,7 +16,7 @@ describe('classic search resolves paged results for its selected mode',()=>{
  })
  it('fetches the first available fallback mode',async()=>{
   const modes:string[]=[];const summary={...summaries,train:{count:0,minimum_price_cents:0}};mockSearch(async url=>{const mode=url.searchParams.get('mode')!;modes.push(mode);return response(mode==='all'?'flight':mode,summary)})
-  start();await screen.findByText('Bus operator');expect(modes).toEqual(['all','bus']);expect(screen.getByRole('tab',{name:/Buses/})).toHaveAttribute('aria-selected','true')
+  start();await screen.findByText('Bus operator');expect(modes).toEqual(['all','bus']);await waitFor(()=>expect(screen.getByRole('tab',{name:/Buses/})).toHaveAttribute('aria-selected','true'))
  })
  it('preserves an actual empty search without inventing a mode or issuing a second fetch',async()=>{
   const modes:string[]=[];const summary={train:{count:0,minimum_price_cents:0},bus:{count:0,minimum_price_cents:0},flight:{count:0,minimum_price_cents:0},ferry:{count:0}};mockSearch(async url=>{modes.push(url.searchParams.get('mode')!);return response('',summary)})
