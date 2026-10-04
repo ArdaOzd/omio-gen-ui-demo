@@ -74,8 +74,12 @@ export function ModeBreakdown(props:WidgetProps) {
 }
 
 export function Coverage(props:WidgetProps) {
- const {services,state}=useArtifact(props.artifactRef); const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
- return <section className="travel-notice"><strong>{props.title??'Loaded travel data'}</strong>{!manifests.length&&<p role="status">No travel data is loaded. Add stops in your next message.</p>}{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
+ const {services,state}=useArtifact(props.artifactRef),refs=JSON.stringify(state.datasetRefs)
+ const subscribe=useMemo(()=>(listener:()=>void)=>{const releases=state.datasetRefs.map(id=>services.bridge.subscribe(id,listener));return()=>releases.forEach(release=>release())},[services.bridge.subscribe,refs])
+ const read=()=>JSON.stringify(state.datasetRefs.map(id=>services.bridge.getManifest(id).revision))
+ useSyncExternalStore(subscribe,read,read)
+ const manifests=state.datasetRefs.map(id=>services.bridge.getManifest(id))
+ return <section className="travel-notice" role="status" aria-atomic="true"><strong>{props.title??'Loaded travel data'}</strong>{!manifests.length&&<p>No travel data is loaded. Add stops in your next message.</p>}{manifests.map(m=><p key={m.datasetId}>{m.coverage.complete?'Complete':'Partial'} · {cityLabel(m.coverage.originIds.join(', '))} → {cityLabel(m.coverage.destinationIds.join(', '))} · {m.coverage.dateWindow.from} to {m.coverage.dateWindow.to} · {m.rowCount.toLocaleString()} synthetic fares</p>)}</section>
 }
 function useRouteStops(ref:string) {
  const {services,state}=useArtifact(ref)

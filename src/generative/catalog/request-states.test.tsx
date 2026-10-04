@@ -71,3 +71,11 @@ it.each(['CitySequence','RouteMap','CoverageSummary','StayAllocation'])('%s expl
  expect(await screen.findByRole('status')).toHaveTextContent(/Add stops|No travel data/i)
  expect(screen.queryByRole('img')).not.toBeInTheDocument();expect(value.state.get(id).revision).toBe(0)
 })
+
+it('announces current coverage after a resource reload without rewriting artifact state',async()=>{
+ let complete=false;const bridge=createFareDataBridge({maxRows:1,pageSource:async input=>({rows:[FareRowSchema.parse({id:'coverage-fare',originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:8,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}),...(complete?[]:[FareRowSchema.parse({id:'coverage-extra',originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:8,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})])],total:complete?1:2,page:1,pages:complete?1:2,sourceVersion:'coverage-v1'})})
+ const request=CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-03'},modes:['train'],passengers:1}),manifest=await bridge.load(request,new AbortController().signal),state=createUIStateStore(),id=ArtifactIdSchema.parse('coverage-status')
+ state.initializeMissing(id,{datasetRefs:[manifest.datasetId]});render(<TravelProvider services={{bridge,state,activate:()=>{},activeId:()=>id}}><CatalogNode kind="CoverageSummary" artifactRef={id}/></TravelProvider>)
+ expect(screen.getByText(/Partial ·/)).toBeVisible();complete=true;await act(async()=>{await bridge.load(request,new AbortController().signal)})
+ expect(await screen.findByRole('status')).toHaveTextContent(/Complete ·/);expect(state.get(id).revision).toBe(0)
+})
