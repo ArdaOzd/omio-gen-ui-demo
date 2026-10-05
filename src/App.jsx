@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { buildSearchUrl, getJson, normalizeLocations, normalizeSearch } from './api.js'
+import { buildSearchUrl, getJson, modes, normalizeLocations, normalizeSearch } from './api.js'
 import LandingPage from './components/LandingPage.jsx'
 import ResultsPage from './components/ResultsPage.jsx'
+import { storeSmartPlannerHandoff } from './generative/smart-planner-handoff.ts'
 
 function localDate(date = new Date()) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
@@ -82,8 +83,18 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: options.instant ? 'auto' : 'smooth' })
 
     try {
-      const payload = await getJson(buildSearchUrl(query), controller.signal)
-      setResults(normalizeSearch(payload))
+      let resolvedQuery = query
+      let normalized = normalizeSearch(await getJson(buildSearchUrl(query), controller.signal))
+      if (query.mode === 'all') {
+        const mode = modes.find((candidate) => normalized.mode_summary[candidate].count > 0)
+        if (mode) {
+          resolvedQuery = { ...query, mode }
+          normalized = normalizeSearch(await getJson(buildSearchUrl(resolvedQuery), controller.signal))
+        }
+      }
+      if (controller.signal.aborted || requestRef.current !== controller) return
+      setSearch(resolvedQuery)
+      setResults(normalized)
       setStatus('success')
     } catch (requestError) {
       if (requestError.name === 'AbortError') return
@@ -99,6 +110,11 @@ export default function App() {
     setStatus('idle')
     setError('')
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function openSmartPlanner(prompt) {
+    const { id } = storeSmartPlannerHandoff(prompt)
+    window.location.assign(`/a?handoff=${encodeURIComponent(id)}`)
   }
 
   if (view === 'results') {
@@ -123,6 +139,7 @@ export default function App() {
       dateBounds={dateBounds}
       onSearch={runSearch}
       onSearchChange={setSearch}
+      onPlan={openSmartPlanner}
     />
   )
 }

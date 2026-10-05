@@ -1,0 +1,1 @@
+{"declaredAt":"2026-10-02T19:39:00Z","rowCounts":[50000,200000],"samplesPerWorkload":10,"warmQueryP95Ms":1500,"coldLoadMs":15000,"resultBytes":65536,"visibleCancelMs":100,"workerCancelAckMs":500,"normalQueryMainThreadLongTasks":0,"memory":{"measurement":"Chromium JSHeapUsedSize plus worker CDP heap where supported","limitBytes":536870912}}

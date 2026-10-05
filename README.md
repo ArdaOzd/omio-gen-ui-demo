@@ -1,48 +1,44 @@
 # Omio generative UI demo
 
-This local demo recreates Omio's landing page through its mobile-app section and
-adds a working connection-results page for trains, buses, flights, and ferries.
-Schedules, prices, and seat counts are deterministic synthetic data. The SQLite
-database contains exactly 10,000,000 fares across a broad European-capital network.
-All schedules and fares are generated examples and are not live or bookable inventory.
+The classic Omio-style search and conversational travel interface share a deterministic
+SQLite fixture of 10,000,000 synthetic fares across a broad European-capital network.
+The generative interface uses native React component composition with the signed-in
+Codex `gpt-6.1-sol` model at high reasoning. Direct controls query local data and do
+not call the model. All schedules and fares are generated examples and are not live
+or bookable inventory.
 
 ## Run locally
 
-Install the frontend dependencies once:
-
 ```sh
 npm install
-```
-
-Start the API and Vite development server together:
-
-```sh
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/. If `data/omio.sqlite3` is missing, the command first
-generates the full database. A running API on port 8000 is reused.
+Open [generative travel](http://127.0.0.1:5173/generative), [the direct route](http://127.0.0.1:5173/a), or [classic search](http://127.0.0.1:5173/). The launcher starts three owned processes: Python fare API on 8000, model agent on 8010, and Vite on 5173. It generates the full fixture if missing and stops its children together. Occupied ports fail explicitly; existing unrelated servers are not reused. Old `/b` and `/study` bookmarks redirect to `/a`.
 
-For a production build and local preview:
+The agent uses your already signed-in local Codex CLI. No separate API key is needed. On macOS its default binary is the bundled Codex executable in `/Applications/ChatGPT.app`; set `CODEX_BINARY` to another installed Codex executable when needed. Model execution runs in an empty temporary directory with read-only isolation and shell, web, apps, plugins, MCP and delegation disabled. The service binds to loopback.
+
+To change ports or reuse a local fixture:
 
 ```sh
-npm start
+API_PORT=8094 AGENT_PORT=8095 WEB_PORT=5194 OMIO_DATABASE=/absolute/path/omio.sqlite3 npm run dev
 ```
 
-This builds the frontend, starts or reuses the API, and serves the built site at
-http://127.0.0.1:4173/.
+For a production build and local preview, run `npm start` and open `http://127.0.0.1:4173/generative`. Agent health is available at `/api/agent/health`; fare health at `/api/health`. Abort a response with Stop; Retry uses the latest local state. Saved conversations retain artifact source, descriptor requests and compact state in IndexedDB; row buffers are reloaded locally.
 
-## Useful commands
+## Verify
 
 ```sh
 npm run seed       # regenerate data/omio.sqlite3 with 10,000,000 fares
-npm run build      # build the React frontend
+npm run typecheck
+npm run check:catalog
+npm test
+npm run test:browser
+npm run build
+npm run benchmark:query # optional TS/DuckDB browser benchmark
 python3 -m unittest discover -s backend/tests -v
 ```
 
-The API contract and direct Python commands are documented in
-[backend/README.md](backend/README.md). Original visual asset URLs are recorded in
-[public/assets/omio/SOURCES.md](public/assets/omio/SOURCES.md).
+Playwright uses installed Chrome. Signed-in live composition replay: `OMIO_DEMO_URL=http://127.0.0.1:5173 node verification/generative-ui/a/run-live.mjs`. Evidence lives in `verification/generative-ui/`; real model outputs and deterministic renderer fixtures are labeled separately. The optional TS-versus-DuckDB benchmark has its own dependency manifest under `benchmarks/query-engine/`; recorded thresholds and results are checked in.
 
-Development starts from `dev`. Stable releases live on `main`. See
-[CONTRIBUTING.md](CONTRIBUTING.md) for the branch naming and merge flow.
+The API contract is documented in [backend/README.md](backend/README.md), and source asset URLs are listed in [public/assets/omio/SOURCES.md](public/assets/omio/SOURCES.md). Development starts from `dev`; stable releases live on `main`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the merge flow.

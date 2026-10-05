@@ -35,6 +35,18 @@ and required query indexes:
 python3 -m backend.verify_db data/omio.sqlite3 --expected-rows 10000000
 ```
 
+## Preserve an externally supplied version2 fixture
+
+The default verifier remains strict against the current pasted source catalog. A preserved version2 synthetic fixture can be structurally valid while predating later route/provider/location additions. Do not regenerate or replace that file merely to make the current-catalog check green.
+
+For this explicit compatibility case, use:
+
+```sh
+python3 -m backend.verify_db /path/to/preserved.sqlite3 --expected-rows 10000000 --manifest-policy preserved-v2 --json
+```
+
+This profile requires generator version2, synthetic-demo/EUR metadata, exact actual and metadata counts, complete daily route coverage, valid fare facts, required indexes, foreign keys and SQLite integrity. It opens read-only and rejects source changes during verification. The report names all missing current catalog requirements under `source_manifest_drift`; `source_manifest_status: drift` does not mean current-source-manifest compliance. It declares actual available modes, locations and calendar range rather than invented capabilities. Application queries and studies must use that observed source identity and availability. Reports remain local artifacts; this profile changes neither the database nor the current catalog.
+
 ## Run the API
 
 ```sh

@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { displayLocation } from '../api.js'
 import Icon from './Icons.jsx'
 
@@ -198,9 +198,13 @@ export default function SearchForm({
   dateBounds,
   onChange,
   onSubmit,
+  onPlan,
   compact = false,
 }) {
   const [message, setMessage] = useState('')
+  const [planningMode, setPlanningMode] = useState('travel')
+  const [plannerPrompt, setPlannerPrompt] = useState('')
+  const plannerSubmitted = useRef(false)
 
   function update(patch) {
     onChange({ ...search, ...patch })
@@ -223,19 +227,50 @@ export default function SearchForm({
     onSubmit({ ...search, origin, destination, page: 1 })
   }
 
+  function submitPlan(event) {
+    event.preventDefault()
+    if (plannerSubmitted.current) return
+    if (!plannerPrompt.trim()) {
+      setMessage('Tell the planner what kind of trip you want.')
+      return
+    }
+    plannerSubmitted.current = true
+    setMessage('')
+    onPlan(plannerPrompt)
+  }
+
+  const smartPlanner = !compact && planningMode === 'planner'
+
   return (
-    <form className={`search-form ${compact ? 'search-form--compact' : ''}`} onSubmit={submit}>
+    <form className={`search-form ${compact ? 'search-form--compact' : ''}`} onSubmit={smartPlanner ? submitPlan : submit}>
       {!compact && (
-        <div className="search-form__tabs" aria-label="Planning mode">
-          <span className="search-form__tab search-form__tab--active">
+        <div className="search-form__tabs" role="tablist" aria-label="Planning mode">
+          <button type="button" role="tab" aria-selected={!smartPlanner} className={`search-form__tab ${!smartPlanner ? 'search-form__tab--active' : ''}`} onClick={() => { setPlanningMode('travel'); setMessage('') }}>
             <Icon name="spark" size={17} /> Travel
-          </span>
-          <span className="search-form__tab" title="The demo uses deterministic generated schedules">
+          </button>
+          <button type="button" role="tab" aria-selected={smartPlanner} className={`search-form__tab ${smartPlanner ? 'search-form__tab--active' : ''}`} onClick={() => { setPlanningMode('planner'); setMessage('') }}>
             <Icon name="spark" size={17} /> Smart planner
-          </span>
+          </button>
         </div>
       )}
 
+      {smartPlanner ? (
+        <div className="search-form__planner">
+          <label>
+            <span className="sr-only">Describe your trip</span>
+            <textarea
+              aria-label="Describe your trip"
+              value={plannerPrompt}
+              maxLength={5000}
+              rows={2}
+              autoFocus
+              placeholder="Plan a five-day train trip from Prague to the Italian coast in June…"
+              onChange={(event) => setPlannerPrompt(event.target.value)}
+            />
+          </label>
+          <button className="search-button" type="submit">Plan my trip</button>
+        </div>
+      ) : (
       <div className="search-form__row">
         <div className="search-form__locations">
           <LocationField
@@ -329,6 +364,7 @@ export default function SearchForm({
           Search
         </button>
       </div>
+      )}
       {message && <p className="form-message">{message}</p>}
     </form>
   )
