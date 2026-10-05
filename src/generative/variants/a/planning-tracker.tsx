@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArtifactIdSchema, type ArtifactId, type BoundedFareFact, type FareId } from '../../contracts'
 import { carrierLabel, cityLabel, departure, money, useTravelServices } from '../../catalog/context'
@@ -97,6 +97,7 @@ export function PlanningTracker() {
   const services = useTravelServices()
   const { fares, loading } = usePlanningFares()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const tracker = useRef<HTMLDivElement>(null)
 
   if (!fares.length) return null
 
@@ -121,7 +122,7 @@ export function PlanningTracker() {
     if (active && services.activeId() !== active) services.activate(active)
   }
 
-  return <Card className="travel-planning-tracker" role="complementary" aria-label="Planning tracker">
+  return <Card ref={tracker} className="travel-planning-tracker" role="complementary" aria-label="Planning tracker">
     <div className="travel-planning-header">
       <div><span className="travel-planning-eyebrow">Your trip</span><h2>Planning tracker</h2></div>
       <Button type="button" variant="outline" className="travel-planning-clear" onClick={clear}>Clear all</Button>
@@ -138,9 +139,9 @@ export function PlanningTracker() {
     </ol>
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild><Button type="button" className="travel-planning-buy">Buy</Button></DialogTrigger>
-      <DialogContent className="travel-dialog" showCloseButton={false}>
-        <DialogHeader><DialogTitle id="travel-confirmation-title">Congrats, you are set for the trip.</DialogTitle><DialogDescription className="sr-only">Your selected synthetic itinerary is ready.</DialogDescription></DialogHeader>
-        <DialogFooter><DialogClose asChild><Button type="button">Close</Button></DialogClose></DialogFooter>
+      <DialogContent container={tracker.current?.closest<HTMLElement>('.travel-app')} overlayClassName="travel-dialog-backdrop" className="travel-dialog" showCloseButton={false}>
+        <DialogTitle id="travel-confirmation-title">Congrats, you are set for the trip.</DialogTitle><DialogDescription className="sr-only">Your selected synthetic itinerary is ready.</DialogDescription>
+        <DialogClose asChild><Button type="button">Close</Button></DialogClose>
       </DialogContent>
     </Dialog>
   </Card>
