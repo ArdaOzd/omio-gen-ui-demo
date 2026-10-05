@@ -11,8 +11,9 @@ import { ThreadShell } from './thread-shell'
 import { normalizeToolContinuations } from './continuation-history'
 import {CanonicalMessagesContext} from './narrative-disclosure'
 import { completeSmartPlannerHandoff } from '../smart-planner-handoff'
+import { PlanningTracker } from '../variants/a/planning-tracker'
 import '../catalog/tokens.css'
-export type GenerativeChatProps={services:TravelServices;capture:()=>AgentContextEnvelope;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];initialRunMessageId?:string;onMessages?:(messages:UIMessage[])=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand'}
+export type GenerativeChatProps={services:TravelServices;capture:()=>AgentContextEnvelope|Promise<AgentContextEnvelope>;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];initialRunMessageId?:string;onMessages?:(messages:UIMessage[])=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand'}
 export function GenerativeChat(props:GenerativeChatProps){
  const toolkit=useMemo(()=>{
   const browser=createBrowserTools({bridge:props.services.bridge,store:props.services.state,activeArtifactId:()=>ArtifactIdSchema.parse(props.services.activeId()),createArtifact:props.services.createArtifact,dispatch:props.services.dispatch,whenIdle:props.services.whenIdle})
@@ -40,5 +41,5 @@ export function GenerativeChat(props:GenerativeChatProps){
   start()
   return unsubscribe
  },[runtime,props.initialRunMessageId])
- return <div className="travel-app" data-theme={props.theme??'blue'}><TravelProvider services={props.services}><AssistantRuntimeProvider runtime={runtime} config={AuiConfig({tools:Tools({toolkit})})}><CanonicalMessagesContext.Provider value={canonicalMessages}><ThreadShell/></CanonicalMessagesContext.Provider></AssistantRuntimeProvider></TravelProvider></div>
+ return <div className="travel-app" data-theme={props.theme??'blue'}><TravelProvider services={props.services}><AssistantRuntimeProvider runtime={runtime} config={AuiConfig({tools:Tools({toolkit})})}><CanonicalMessagesContext.Provider value={canonicalMessages}><div className="travel-workspace"><ThreadShell/><PlanningTracker/></div></CanonicalMessagesContext.Provider></AssistantRuntimeProvider></TravelProvider></div>
 }

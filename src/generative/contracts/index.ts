@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const CONTRACT_VERSION = '1.0.0';
 export const CATALOG_VERSION = '1.0.0';
-export const LIMITS = Object.freeze({ snapshotBytes: 24_000, artifacts: 8, storedArtifacts: 20, artifactDatasets: 8, snapshotDatasets: 8 * 8, passengers: 8, selectedFacts: 5, queryRows: 100, queryGroups: 30, treeNodes: 80, treeDepth: 8, toolCalls: 12, factBudget: 12 });
+export const LIMITS = Object.freeze({ snapshotBytes: 24_000, artifacts: 8, storedArtifacts: 20, artifactDatasets: 8, snapshotDatasets: 8 * 8, passengers: 8, plannedFares: 20 * 8, selectedFacts: 20 * 8, queryRows: 100, queryGroups: 30, treeNodes: 80, treeDepth: 8, toolCalls: 12, factBudget: 12 });
 const ref = z.string().min(1).max(96).regex(/^[a-zA-Z0-9_.:-]+$/);
 const revision = z.number().int().nonnegative();
 export const DatasetIdSchema = ref.brand<'DatasetId'>();
@@ -91,7 +91,7 @@ export type OlderArtifactSummary=z.infer<typeof OlderArtifactSummarySchema>;
 export const AgentContextEnvelopeSchema = z.strictObject({ schemaVersion: z.literal(CONTRACT_VERSION), turnId: ref,
   activeArtifactId: ArtifactIdSchema.optional(), artifacts: z.array(CompactArtifactSnapshotSchema).max(LIMITS.artifacts),
   olderArtifactSummaries:z.array(OlderArtifactSummarySchema).max(LIMITS.storedArtifacts).default([]),
-  datasets: z.array(DatasetManifestSchema).max(LIMITS.snapshotDatasets), selectedFareFacts: z.array(BoundedFareFactSchema).max(LIMITS.selectedFacts) });
+  datasets: z.array(DatasetManifestSchema).max(LIMITS.snapshotDatasets), plannedFareIds:z.array(FareIdSchema).max(LIMITS.plannedFares).optional(), selectedFareFacts: z.array(BoundedFareFactSchema).max(LIMITS.selectedFacts) });
 export type AgentContextEnvelope = z.infer<typeof AgentContextEnvelopeSchema>;
 export function parseAgentContext(input: unknown): AgentContextEnvelope {
   const result = AgentContextEnvelopeSchema.parse(input);
@@ -101,7 +101,10 @@ export function parseAgentContext(input: unknown): AgentContextEnvelope {
   if(new Set(summaryIds).size!==summaryIds.length||summaryIds.some(id=>fullIds.has(id)))throw new Error('Duplicate older artifact summary');
   const datasets = new Set(result.datasets.map(d => d.datasetId));
   if (result.artifacts.some(a => a.datasetRefs.some(id => !datasets.has(id)))) throw new Error('Unknown dataset reference');
-  const selected = new Set(result.artifacts.flatMap(a => a.selectedFareIds));
+  if(result.plannedFareIds&&new Set(result.plannedFareIds).size!==result.plannedFareIds.length)throw new Error('Duplicate planned fare');
+  const artifactSelections=result.artifacts.flatMap(a=>a.selectedFareIds)
+  if(result.plannedFareIds&&artifactSelections.some(id=>!result.plannedFareIds?.includes(id)))throw new Error('Missing planned fare');
+  const selected = new Set(result.plannedFareIds??artifactSelections);
   if (result.selectedFareFacts.some(f => !selected.has(f.id))) throw new Error('Unselected fare fact');
   return result;
 }

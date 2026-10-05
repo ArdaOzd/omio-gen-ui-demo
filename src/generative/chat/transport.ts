@@ -4,9 +4,9 @@ import { assertNoBulkData } from '../contracts/privacy'
 import { projectNetworkHistory } from './history-projection'
 import type { HttpChatTransportInitOptions, PrepareSendMessagesRequest, UIMessage } from 'ai'
 
-export function snapshotRequest<T extends UIMessage>(capture: () => unknown): PrepareSendMessagesRequest<T> {
-  return (options) => {
-    const currentContext = parseAgentContext(capture())
+export function snapshotRequest<T extends UIMessage>(capture: () => unknown | Promise<unknown>): PrepareSendMessagesRequest<T> {
+  return async (options) => {
+    const currentContext = parseAgentContext(await capture())
     assertNoBulkData(currentContext)
     return { body: {
       ...options.body,
@@ -21,7 +21,7 @@ export function snapshotRequest<T extends UIMessage>(capture: () => unknown): Pr
 }
 
 export function createSnapshotTransport<T extends UIMessage>(options: {
-  capture: () => unknown
+  capture: () => unknown | Promise<unknown>
   transport?: Omit<HttpChatTransportInitOptions<T>, 'prepareSendMessagesRequest'>
 }) {
   return new AssistantChatTransport<T>({

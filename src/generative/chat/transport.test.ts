@@ -34,4 +34,13 @@ describe('snapshot-aware native assistant-ui transport', () => {
     }
     expect(requests).toMatchObject([{ currentContext: envelope('turn-1') }, { currentContext: envelope('turn-2'), trigger: 'regenerate-message' }])
   })
+
+  it('awaits an asynchronous snapshot before preparing the request', async () => {
+    let resolveCapture: ((value: ReturnType<typeof envelope>) => void) | undefined
+    const prepare = snapshotRequest(() => new Promise<ReturnType<typeof envelope>>(resolve => { resolveCapture = resolve }))
+    const pending = prepare({ id: 'thread-1', messages, requestMetadata: undefined, body: {}, credentials: undefined, headers: undefined, api: '/api/chat', trigger: 'submit-message', messageId: undefined })
+    expect(resolveCapture).toBeTypeOf('function')
+    resolveCapture?.(envelope('turn-async'))
+    await expect(pending).resolves.toMatchObject({ body: { currentContext: { turnId: 'turn-async' } } })
+  })
 })

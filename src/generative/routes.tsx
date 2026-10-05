@@ -6,7 +6,7 @@ import { createFareDataBridge } from './data/fare-data-bridge';
 import { createUIStateStore } from './state/ui-state-store';
 import { createArtifactStore } from './state/artifact-store';
 import { createActionRouter } from './state/action-router';
-import { captureAgentContext } from './state/snapshot-exporter';
+import { captureAgentContextWithSelectedFares } from './state/snapshot-exporter';
 import { createIndexedDBStorage, createThreadPersistence, ThreadConflictError } from './state/persistence';
 import { assertNoBulkData } from './contracts/privacy';
 import { GenerativeChat } from './chat/runtime-provider';
@@ -16,7 +16,7 @@ function createServices(onCoverageStatus:(message:string)=>void){
  const bridge=createFareDataBridge();const state=createUIStateStore();const artifacts=createArtifactStore();
  const createArtifact=()=>{if(artifacts.getIds().length>=8)throw new Error('Eight-artifact limit reached');const id=ArtifactIdSchema.parse(`artifact-${crypto.randomUUID()}`);artifacts.register(id);state.initializeMissing(id,{});artifacts.activate(id);return id;};
  const router=createActionRouter(state,{bridge,activate:id=>artifacts.activate(id),onCoverageStatus:status=>onCoverageStatus(status.status==='loading'?'Loading the requested travel dates…':status.status==='error'?status.message??'Coverage could not be loaded. Try the date again.':'')});
- const services:TravelServices={bridge,state,activeId:artifacts.getActiveId,subscribeActive:artifacts.subscribe,activate:id=>artifacts.activate(ArtifactIdSchema.parse(id)),dispatch:router,whenIdle:router.whenIdle,createArtifact};
+ const services:TravelServices={bridge,state,activeId:artifacts.getActiveId,artifactIds:artifacts.getIds,subscribeActive:artifacts.subscribe,activate:id=>artifacts.activate(ArtifactIdSchema.parse(id)),dispatch:router,whenIdle:router.whenIdle,createArtifact};
  return {services,artifacts,createArtifact,router};
 }
 export function GenerativeRoute(){
@@ -31,7 +31,7 @@ export function GenerativeRoute(){
   if(handoff)setInitialRunMessageId(handoff.id);setReady(true);
  }).catch(()=>{if(controller.signal.aborted)return;setRestoreError(true);setNotice('Your saved conversation has been kept. Its travel data could not be restored; retry when the local API is available.');});return()=>controller.abort();},[runtime,persistence,key,restoreAttempt]);
  const {layouts}=getSceneMetadata(messages);
- const capture=()=>captureAgentContext({turnId:`turn-${crypto.randomUUID()}`,activeArtifactId:runtime.artifacts.getActiveId(),artifactIds:runtime.artifacts.getIds(),store:runtime.services.state,bridge:runtime.services.bridge,layoutSummaries:layouts});
+ const capture=()=>captureAgentContextWithSelectedFares({turnId:`turn-${crypto.randomUUID()}`,activeArtifactId:runtime.artifacts.getActiveId(),artifactIds:runtime.artifacts.getIds(),store:runtime.services.state,bridge:runtime.services.bridge,layoutSummaries:layouts});
  const save=async(next:UIMessage[])=>{
   assertNoBulkData(next);const {sources}=getSceneMetadata(next);const states=runtime.artifacts.getIds().map(id=>runtime.services.state.get(id));const refs=[...new Set(states.flatMap(state=>state.datasetRefs))];
   await persistence.save(key,{schemaVersion:CONTRACT_VERSION,catalogVersion:CATALOG_VERSION,activeArtifactId:runtime.artifacts.getActiveId(),parserVersion:'native-present-1',queryVersion:'1',messages:next,artifacts:states.map(state=>({variant:'a',source:sources.get(state.artifactId)??'No scene authored yet.',state})),descriptors:refs.map(datasetId=>{const manifest=runtime.services.bridge.getManifest(datasetId);return {datasetId,request:{originIds:manifest.coverage.originIds,destinationIds:manifest.coverage.destinationIds,dateWindow:manifest.coverage.dateWindow,modes:manifest.coverage.modes,passengers:manifest.coverage.passengers},sourceVersion:manifest.source.sourceVersion,complete:manifest.coverage.complete}})});

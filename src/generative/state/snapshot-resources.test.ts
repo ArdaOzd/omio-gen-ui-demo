@@ -1,9 +1,9 @@
 import {createThreadPersistence,parsePersistedThread} from './persistence'
 import {expect,it} from 'vitest'
-import {ArtifactIdSchema,CoverageRequestSchema,LIMITS,FareIdSchema,parseQuery,FareRowSchema} from '../contracts'
+import {ArtifactIdSchema,BoundedFareFactSchema,CoverageRequestSchema,LIMITS,FareIdSchema,parseQuery,FareRowSchema,type FareDataBridge} from '../contracts'
 import {createFareDataBridge} from '../data/fare-data-bridge'
 import {createUIStateStore} from './ui-state-store'
-import {exportAgentContext,captureAgentContext} from './snapshot-exporter'
+import {exportAgentContext,captureAgentContext,captureAgentContextWithSelectedFares} from './snapshot-exporter'
 const id=ArtifactIdSchema.parse('review-art')
 const request=CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-03',to:'2026-10-09'},modes:['train'],passengers:1})
 const source=async(input:{originId:string;destinationId:string;date:string;page:number})=>({rows:[FareRowSchema.parse({id:FareIdSchema.parse(`${input.originId}-${input.destinationId}-${input.date}`),originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})],total:1,pages:1,page:input.page,sourceVersion:'v1'})
@@ -47,4 +47,49 @@ it('demotes older snapshots to metadata to meet the byte budget while preserving
  const covered=new Set(context.datasets.map(dataset=>dataset.datasetId));for(const artifact of context.artifacts)for(const ref of artifact.datasetRefs)expect(covered.has(ref)).toBe(true)
  expect(new TextEncoder().encode(JSON.stringify(context)).length).toBeLessThanOrEqual(LIMITS.snapshotBytes)
  expect(fixture.artifactIds.map(id=>fixture.store.get(id))).toEqual(before)
+})
+it('keeps every deduplicated planned fare id when selected artifacts are demoted',async()=>{
+ const fixture=await restoredContextFixture()
+ for(const [artifactIndex,artifactId] of fixture.artifactIds.entries())for(let fareIndex=0;fareIndex<8;fareIndex++){
+  const current=fixture.store.get(artifactId)
+  fixture.store.dispatch({kind:'select',artifactId,fareId:FareIdSchema.parse(`planned-${artifactIndex}-${fareIndex}`),selected:true,expectedRevision:current.revision})
+ }
+ const context=captureAgentContext({...fixture,turnId:'planned-fares'})
+ expect(context.artifacts.length).toBeLessThan(fixture.artifactIds.length)
+ expect(context.plannedFareIds).toHaveLength(LIMITS.plannedFares)
+ expect(new Set(context.plannedFareIds).size).toBe(LIMITS.plannedFares)
+ expect(new TextEncoder().encode(JSON.stringify(context)).length).toBeLessThanOrEqual(LIMITS.snapshotBytes)
+})
+it('trims rich fare facts in deterministic order before planned ids',async()=>{
+ const fixture=await restoredContextFixture()
+ for(const [artifactIndex,artifactId] of fixture.artifactIds.entries())for(let fareIndex=0;fareIndex<8;fareIndex++){
+  const current=fixture.store.get(artifactId)
+  fixture.store.dispatch({kind:'select',artifactId,fareId:FareIdSchema.parse(`detail-${artifactIndex}-${fareIndex}`),selected:true,expectedRevision:current.revision})
+ }
+ const bridge:FareDataBridge={...fixture.bridge,lookupFare:async fareId=>BoundedFareFactSchema.parse({id:fareId,mode:'train',carrierId:'rail',carrierName:'A very descriptive synthetic railway carrier name used to exercise the bounded context budget',priceCents:1000,durationMinutes:90,serviceDate:'2026-10-06',departureMinutes:480,originId:'berlin',destinationId:'prague',currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees'})}
+ const context=await captureAgentContextWithSelectedFares({...fixture,bridge,turnId:'fact-budget'})
+ expect(context.plannedFareIds).toHaveLength(LIMITS.plannedFares)
+ expect(context.selectedFareFacts.length).toBeGreaterThan(0)
+ expect(context.selectedFareFacts.length).toBeLessThan(LIMITS.plannedFares)
+ expect(context.selectedFareFacts.map(fact=>fact.id)).toEqual(context.plannedFareIds?.slice(0,context.selectedFareFacts.length))
+ expect(new TextEncoder().encode(JSON.stringify(context)).length).toBeLessThanOrEqual(LIMITS.snapshotBytes)
+})
+it('captures one immutable selection version while fare lookup is pending',async()=>{
+ const artifactId=ArtifactIdSchema.parse('held-selection')
+ const oldFareId=FareIdSchema.parse('fare-old')
+ const newFareId=FareIdSchema.parse('fare-new')
+ const store=createUIStateStore();store.initializeMissing(artifactId,{selectedFareIds:[oldFareId]})
+ const base=createFareDataBridge()
+ let release:((fact:ReturnType<typeof BoundedFareFactSchema.parse>)=>void)|undefined
+ const held=new Promise<ReturnType<typeof BoundedFareFactSchema.parse>>(resolve=>{release=resolve})
+ const bridge:FareDataBridge={...base,lookupFare:async()=>held}
+ const pending=captureAgentContextWithSelectedFares({turnId:'held',activeArtifactId:artifactId,artifactIds:[artifactId],store,bridge})
+ let current=store.get(artifactId);store.dispatch({kind:'select',artifactId,fareId:oldFareId,selected:false,expectedRevision:current.revision})
+ current=store.get(artifactId);store.dispatch({kind:'select',artifactId,fareId:newFareId,selected:true,expectedRevision:current.revision})
+ release?.(BoundedFareFactSchema.parse({id:oldFareId,mode:'train',carrierId:'rail',carrierName:'Rail',priceCents:1000,durationMinutes:90,serviceDate:'2026-10-06',departureMinutes:480,originId:'berlin',destinationId:'prague',currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees'}))
+ const context=await pending
+ expect(context.plannedFareIds).toEqual([oldFareId])
+ expect(context.artifacts[0]?.selectedFareIds).toEqual([oldFareId])
+ expect(context.selectedFareFacts.map(fact=>fact.id)).toEqual([oldFareId])
+ expect(store.get(artifactId).selectedFareIds).toEqual([newFareId])
 })
