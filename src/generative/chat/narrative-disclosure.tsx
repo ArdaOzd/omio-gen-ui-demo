@@ -11,7 +11,7 @@ export function completedNarrativeIndices(message:UIMessage|undefined,parts:read
  const accepted=earlier.some(part=>{
   if(!isToolUIPart(part)||part.state!=='output-available'||typeof part.output!=='object'||part.output===null)return false
   const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5)
-  return name==='present'?Object.keys(part.output).length===0:name==='compose_reactive_scene'&&'status' in part.output&&part.output.status==='accepted'
+  return name==='present'&&Object.keys(part.output).length===0
  })
  if(!accepted)return hidden
  const rawTexts=message.parts.flatMap((part,index)=>part.type==='text'?[{text:part.text,earlier:index<finalStart}]:[])

@@ -1769,5 +1769,3 @@ export const catalogDescriptors=[
 ] as const;
 export const componentNames=catalogDescriptors.map(d=>d.name);
 export const sharedPropsSchema=z.strictObject({artifactRef:z.string().min(1).max(96),datasetRef:z.string().max(96).optional(),actionRef:z.string().max(96).optional(),selectorRef:z.string().max(96).optional(),title:z.string().max(160).optional(),variant:z.enum(['default','compact','emphasis']).optional(),body:z.string().max(600).optional()});
-export const orderedPropertyNames=['artifactRef','datasetRef','actionRef','selectorRef','title','variant'] as const;
-export const bDefinitions=catalogDescriptors.map(descriptor=>({name:descriptor.name,description:descriptor.description,props:orderedPropertyNames}));

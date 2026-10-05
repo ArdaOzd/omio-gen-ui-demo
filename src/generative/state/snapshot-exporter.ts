@@ -15,13 +15,13 @@ function finish(candidate:AgentContextEnvelope):AgentContextEnvelope{
 export function exportAgentContext(input:ExportInput):AgentContextEnvelope{
  return finish(envelope(input,snapshots(input),input.olderArtifactSummaries??[]))
 }
-export function captureAgentContext(input:Omit<ExportInput,'olderArtifactSummaries'|'selectedFareFacts'>&{variant:'a'|'b'}):AgentContextEnvelope{
+export function captureAgentContext(input:Omit<ExportInput,'olderArtifactSummaries'|'selectedFareFacts'>):AgentContextEnvelope{
  const records=snapshots(input).map(snapshot=>({snapshot,lastInteractionAt:input.store.get(snapshot.artifactId).lastInteractionAt}))
  records.sort((left,right)=>Number(right.snapshot.artifactId===input.activeArtifactId)-Number(left.snapshot.artifactId===input.activeArtifactId)||Date.parse(right.lastInteractionAt)-Date.parse(left.lastInteractionAt)||(left.snapshot.artifactId===right.snapshot.artifactId?0:left.snapshot.artifactId<right.snapshot.artifactId?-1:1))
  const included=records.slice(0,LIMITS.artifacts)
  while(true){
   const ids=new Set(included.map(record=>record.snapshot.artifactId))
-  const summaries=records.filter(record=>!ids.has(record.snapshot.artifactId)).map(record=>({artifactId:record.snapshot.artifactId,variant:input.variant,label:record.snapshot.layoutSummary.slice(0,160),revision:record.snapshot.revision,lastInteractionAt:record.lastInteractionAt}))
+ const summaries=records.filter(record=>!ids.has(record.snapshot.artifactId)).map(record=>({artifactId:record.snapshot.artifactId,variant:'a' as const,label:record.snapshot.layoutSummary.slice(0,160),revision:record.snapshot.revision,lastInteractionAt:record.lastInteractionAt}))
   const candidate=envelope(input,included.map(record=>record.snapshot),summaries)
   if(new TextEncoder().encode(JSON.stringify(candidate)).length<=LIMITS.snapshotBytes||included.length<=1)return finish(candidate)
   included.pop()

@@ -22,13 +22,12 @@ export function snapshotRequest<T extends UIMessage>(capture: () => unknown): Pr
 
 export function createSnapshotTransport<T extends UIMessage>(options: {
   capture: () => unknown
-  variant: 'a' | 'b'
   transport?: Omit<HttpChatTransportInitOptions<T>, 'prepareSendMessagesRequest'>
 }) {
   return new AssistantChatTransport<T>({
     api: '/api/chat',
     ...options.transport,
-    body: { variant: options.variant, ...options.transport?.body },
+    body: options.transport?.body,
     prepareSendMessagesRequest: snapshotRequest<T>(options.capture),
   })
 }

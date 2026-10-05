@@ -21,7 +21,7 @@ describe('snapshot-aware native assistant-ui transport', () => {
   it('captures fresh state on every real send including continuation and retry', async () => {
     let revision = 1
     const requests: unknown[] = []
-    const transport = createSnapshotTransport({ variant: 'a', capture: () => envelope(`turn-${revision}`), transport: {
+    const transport = createSnapshotTransport({ capture: () => envelope(`turn-${revision}`), transport: {
       fetch: async (_url, init) => {
         requests.push(JSON.parse(String(init?.body)))
         return new Response('data: {"type":"start","messageId":"assistant-1"}\n\ndata: {"type":"finish","finishReason":"stop"}\n\ndata: [DONE]\n\n', { headers: { 'content-type': 'text/event-stream', 'x-vercel-ai-ui-message-stream': 'v1' } })
@@ -32,6 +32,6 @@ describe('snapshot-aware native assistant-ui transport', () => {
       await stream.pipeTo(new WritableStream())
       revision += 1
     }
-    expect(requests).toMatchObject([{ variant: 'a', currentContext: envelope('turn-1') }, { variant: 'a', currentContext: envelope('turn-2'), trigger: 'regenerate-message' }])
+    expect(requests).toMatchObject([{ currentContext: envelope('turn-1') }, { currentContext: envelope('turn-2'), trigger: 'regenerate-message' }])
   })
 })

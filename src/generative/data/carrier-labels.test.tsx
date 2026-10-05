@@ -7,18 +7,15 @@ import {createSearchPageSource} from './search-client'
 import {createUIStateStore} from '../state/ui-state-store'
 import {TravelProvider} from '../catalog/context'
 import {CatalogNode} from '../catalog/component'
-import {ReactiveScene} from '../variants/b/renderer'
 const request={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['bus'] as const,passengers:1}
 const apiRow={id:'same-fare',mode:'bus',company:'Blablacar Bus',departure_time:'2026-10-02T09:00',duration_minutes:120,origin:{id:'london'},destination:{id:'paris'},price_cents:2103,currency:'EUR',available_seats:9}
 const pageSource=createSearchPageSource({fetch:async()=>new Response(JSON.stringify({source_version:'v1',outbound:{date:'2026-10-02',page:1,pages:1,total:1,results:[apiRow]}}))})
-it('retains API carrier names and same IDs through bounded facts and old authored projections',async()=>{
+it('retains API carrier names and same IDs through bounded facts and native views',async()=>{
  const bridge=createFareDataBridge({pageSource}),manifest=await bridge.load({...request,modes:[...request.modes]},new AbortController().signal)
  const fact=await bridge.lookupFare(FareRowSchema.shape.id.parse(apiRow.id),['id'])
  expect(fact).toMatchObject({id:apiRow.id,carrierId:'carrier-1ixeerp',carrierName:apiRow.company})
  const state=createUIStateStore(),id=ArtifactIdSchema.parse('labels');state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-02'}})
- const legacyFields=FareRowSchema.keyof().options.filter(field=>field!=='carrierName')
- const program=`q = Query("local_query", {version:1,sources:[{datasetRef:"${manifest.datasetId}",alias:"f"}],project:${JSON.stringify(legacyFields)},limit:100})\noffers = FarePicker("labels", "${manifest.datasetId}", null, null, "Offers", null, null, null, null, q)\nroot = TravelSurface("labels", null, null, null, "Trip", null, [offers])`
- render(<TravelProvider services={{bridge,state,activate:()=>{},activeId:()=>id}}><ReactiveScene artifactRef={id} program={program}/></TravelProvider>)
+ render(<TravelProvider services={{bridge,state,activate:()=>{},activeId:()=>id}}><CatalogNode kind="FarePicker" artifactRef={id} datasetRef={manifest.datasetId}/></TravelProvider>)
  expect(await screen.findByRole('option',{name:/Blablacar Bus/})).toHaveValue(apiRow.id)
  expect(state.get(id).datasetRefs).toEqual([manifest.datasetId]);expect(state.get(id).selectedFareIds).toEqual([])
 })

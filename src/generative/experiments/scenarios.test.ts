@@ -1,3 +1,0 @@
-import { describe,expect,it } from 'vitest';
-import { assignment,scenarios,withheldPrompt } from './scenarios';
-describe('counterbalanced experiment fixtures',()=>{it('covers all twelve families with stable assignment and withheld wording',()=>{expect(new Set(scenarios.map(s=>s.id)).size).toBe(12);expect(assignment('anonymous-01')).toEqual(assignment('anonymous-01'));expect(new Set(Array.from({length:20},(_,i)=>assignment(`anonymous-${i}`).join('/')))).toEqual(new Set(['a/b','b/a']));expect(withheldPrompt(0,1)).not.toBe(scenarios[0].prompt);expect(withheldPrompt(0,1)).toContain(scenarios[0].prompt);})});

@@ -13,6 +13,6 @@ it('keeps the saved conversation untouched when resources fail, then restores it
  const messages=[{id:'saved-user',role:'user',parts:[{type:'text',text:'Preserved travel conversation'}]}]
  io.load.mockResolvedValue({messages,artifacts:[{state:{artifactId:'retained'}}],activeArtifactId:'retained'})
  io.restore.mockRejectedValueOnce(new Error('API unavailable')).mockImplementationOnce(async(_record:unknown,_bridge:unknown,store:UIStateStore)=>{store.initializeMissing(ArtifactIdSchema.parse('retained'),{})})
- render(<GenerativeRoute variant="b"/>);await screen.findByRole('button',{name:'Retry restoring conversation'});expect(screen.queryByTestId('restored-chat')).toBeNull();expect(io.save).not.toHaveBeenCalled();
+ render(<GenerativeRoute/>);await screen.findByRole('button',{name:'Retry restoring conversation'});expect(screen.queryByTestId('restored-chat')).toBeNull();expect(io.save).not.toHaveBeenCalled();
  fireEvent.click(screen.getByRole('button',{name:'Retry restoring conversation'}));await waitFor(()=>expect(screen.getByTestId('restored-chat').textContent).toBe('Preserved travel conversation'));expect(io.load).toHaveBeenCalledTimes(2);expect(io.save).not.toHaveBeenCalled();
 })

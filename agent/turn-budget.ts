@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { LIMITS,type ArtifactId,type UIStateRevision } from '../src/generative/contracts';
 import type { ChatRequest } from './request-schema';
-type SceneCompletion={artifactRef:ArtifactId;uiStateRevision:UIStateRevision;toolName:'present'|'compose_reactive_scene'};
+type SceneCompletion={artifactRef:ArtifactId;uiStateRevision:UIStateRevision;toolName:'present'};
 const ledger=new Map<string,{calls:number;facts:number;expires:number;scenes:Map<string,SceneCompletion>}>();
 export function acceptTurn(request:ChatRequest):string {
  const user=[...request.messages].reverse().find(message=>message.role==='user');
@@ -29,7 +29,7 @@ export function spendTool(key:string,name:string):void {
 }
 
 export function recordScene(key:string,callId:string,toolName:string,artifactRef:ArtifactId,uiStateRevision:UIStateRevision):void{
- if(toolName!=='present'&&toolName!=='compose_reactive_scene')return;
+ if(toolName!=='present')return;
  const entry=ledger.get(key);if(!entry)throw new Error('Unknown turn');
  entry.scenes.set(callId,{artifactRef,uiStateRevision,toolName});
 }
@@ -38,12 +38,12 @@ export function getAcceptedScenes(key:string,request:ChatRequest):SceneCompletio
  let userIndex=request.messages.length-1;while(userIndex>=0&&request.messages[userIndex]?.role!=='user')userIndex--;const result=new Map<string,SceneCompletion>();
  for(const message of request.messages.slice(userIndex+1))for(const part of message.parts){
   const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5);
-  if((name!=='present'&&name!=='compose_reactive_scene')||part.state!=='output-available'||!part.toolCallId)continue;
+  if(name!=='present'||part.state!=='output-available'||!part.toolCallId)continue;
   const input=part.input,output=part.output;if(typeof input!=='object'||input===null||!('artifactRef' in input)||typeof output!=='object'||output===null)continue;
   const artifact=request.currentContext.artifacts.find(artifact=>artifact.artifactId===input.artifactRef);if(!artifact)continue;
-  if(name==='present'?Object.keys(output).length!==0:!('status' in output)||output.status!=='accepted'||!('artifactId' in output)||output.artifactId!==artifact.artifactId||!('programRevision' in input)||!('programRevision' in output)||input.programRevision!==output.programRevision)continue;
+  if(Object.keys(output).length!==0)continue;
   const issued=ledger.get(key)?.scenes.get(part.toolCallId);
-  const revision=issued?.uiStateRevision??(name==='compose_reactive_scene'&&'programRevision' in input&&'programRevision' in output&&input.programRevision===output.programRevision?output.programRevision:undefined);
+  const revision=issued?.uiStateRevision;
   if(revision!==artifact.revision||issued&&(issued.artifactRef!==artifact.artifactId||issued.toolName!==name))continue;
   result.set(artifact.artifactId,{artifactRef:artifact.artifactId,uiStateRevision:artifact.revision,toolName:name});
  }

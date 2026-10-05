@@ -23,7 +23,7 @@ const scenes=[node('TravelSurface','root',[node('SplitPane','split',[node('Stack
 const scene=scenes[Number(new URLSearchParams(location.search).get('scene')??0)]??scenes[0];const input=JSON.stringify(scene)
 let sends=0;let resume=()=>{}
 const requests:unknown[]=[]
-const transport=createSnapshotTransport({variant:'a',capture,transport:{fetch:async(_url,init)=>{
+const transport=createSnapshotTransport({capture,transport:{fetch:async(_url,init)=>{
  requests.push(JSON.parse(String(init?.body)));sends++
  const stream=new ReadableStream<Uint8Array>({start(controller){const write=(part:unknown)=>controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(part)}\n\n`));write({type:'start',messageId:'assistant-1'});write({type:'start-step'})
  if(sends===1){write({type:'text-start',id:'intro'});write({type:'text-delta',id:'intro',delta:'Before the view.'});write({type:'text-end',id:'intro'});write({type:'tool-input-start',toolCallId:'present-1',toolName:'present'});write({type:'tool-input-delta',toolCallId:'present-1',inputTextDelta:input.slice(0,-2)});resume=()=>{write({type:'tool-input-delta',toolCallId:'present-1',inputTextDelta:input.slice(-2)});write({type:'tool-input-available',toolCallId:'present-1',toolName:'present',input:scene});write({type:'finish-step'});write({type:'finish',finishReason:'tool-calls'});controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));controller.close()}}

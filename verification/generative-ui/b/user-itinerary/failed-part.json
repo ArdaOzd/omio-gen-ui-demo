@@ -1,8 +1,0 @@
-{
-  "type": "tool-compose_reactive_scene",
-  "toolCallId": "ba0dbf46-f26a-4def-95d7-4a3150fdf266",
-  "state": "output-error",
-  "input": {},
-  "errorText": "This scene could not be completed. One bounded repair is allowed.",
-  "rejectedSourceRetained": false
-}

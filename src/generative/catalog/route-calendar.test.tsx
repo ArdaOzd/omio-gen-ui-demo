@@ -5,7 +5,6 @@ import {createFareDataBridge} from '../data/fare-data-bridge'
 import {createUIStateStore} from '../state/ui-state-store'
 import {createActionRouter} from '../state/action-router'
 import {legDate,tripDatesForLegDeparture} from '../state/leg-bindings'
-import {ReactiveScene} from '../variants/b/renderer'
 import {TravelProvider} from './context'
 import {CatalogNode} from './component'
 const id=ArtifactIdSchema.parse('review-art')
@@ -46,21 +45,4 @@ it('shifts leap-day windows by UTC days and rejects calendar overflow before sta
  const before=state.get(far)
  expect(()=>tripDatesForLegDeparture(before,'london','9999-12-31')).toThrow()
  expect(state.get(far)).toEqual(before)
-})
-
-it('uses the actual OpenUI calendar and route with destination stays and exports the chosen leg date',async()=>{
- const bridge=createFareDataBridge({pageSource:source}),state=createUIStateStore()
- const first=await bridge.load(request,new AbortController().signal),second=await bridge.load({...request,originIds:['paris'],destinationIds:['barcelona']},new AbortController().signal)
- state.initializeMissing(id,{datasetRefs:[first.datasetId,second.datasetId],dates:{start:'2026-10-03'},stays:[{cityId:'paris',nights:2},{cityId:'barcelona',nights:4}]})
- const router=createActionRouter(state,{bridge}),services={bridge,state,dispatch:router,activeId:()=>id,activate:()=>{}}
- const program=`q = Query("local_query", {version:1,sources:[{datasetRef:"${second.datasetId}",alias:"f"}],groupBy:["serviceDate"],metrics:[{as:"minimum",op:"min",field:"priceCents"},{as:"count",op:"count"}],orderBy:[{field:"serviceDate",direction:"asc"}],limit:30})
-calendar = PriceCalendar("${id}", "${second.datasetId}", null, null, "Paris departure", null, null, null, null, q)
-route = RouteMap("${id}")
-root = TravelSurface("${id}", null, null, null, "Trip", null, [route,calendar])`
- render(<TravelProvider services={services}><ReactiveScene artifactRef={id} program={program}/></TravelProvider>)
- expect(screen.getByRole('img')).toHaveAccessibleName('Schematic route: London to Paris to Barcelona')
- const button=await screen.findByRole('button',{name:/Tue 6 Oct/});fireEvent.click(button);await router.whenIdle(id)
- expect(button).toHaveAttribute('aria-pressed','true');expect(legDate(state.get(id),'paris')).toBe('2026-10-06')
- expect(state.exportSnapshot(id)).toMatchObject({dates:{start:'2026-10-04'},selectedFareIds:[]})
- router.dispose()
 })

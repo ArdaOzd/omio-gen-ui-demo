@@ -18,16 +18,13 @@
     "check:catalog": "tsx src/generative/catalog/generate.ts --check",
     "generate:catalog": "tsx src/generative/catalog/generate.ts",
     "agent:dev": "tsx agent/server.ts",
-    "benchmark:query": "node scripts/run-query-benchmark.mjs",
-    "experiment:live": "tsx verification/generative-ui/run-experiment.ts"
+    "benchmark:query": "node scripts/run-query-benchmark.mjs"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.130",
     "@assistant-ui/ai-sdk": "0.0.9",
     "@assistant-ui/react": "0.15.23",
     "@assistant-ui/react-generative-ui": "0.0.22",
-    "@openuidev/lang-core": "0.3.0",
-    "@openuidev/react-lang": "0.3.0",
     "ai": "7.0.127",
     "assistant-stream": "0.3.46",
     "react": "^19.2.0",
