@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildSearchUrl, getJson, modes, normalizeLocations, normalizeSearch } from './api.js'
 import LandingPage from './components/LandingPage.jsx'
 import ResultsPage from './components/ResultsPage.jsx'
+import { storeSmartPlannerHandoff } from './generative/smart-planner-handoff.ts'
 
 function localDate(date = new Date()) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
@@ -111,6 +112,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  function openSmartPlanner(prompt) {
+    const { id } = storeSmartPlannerHandoff(prompt)
+    window.location.assign(`/a?handoff=${encodeURIComponent(id)}`)
+  }
+
   if (view === 'results') {
     return (
       <ResultsPage
@@ -133,6 +139,7 @@ export default function App() {
       dateBounds={dateBounds}
       onSearch={runSearch}
       onSearchChange={setSearch}
+      onPlan={openSmartPlanner}
     />
   )
 }

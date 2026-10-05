@@ -40,6 +40,7 @@ export default function LandingPage({
   dateBounds,
   onSearch,
   onSearchChange,
+  onPlan,
 }) {
   const [offerIndex, setOfferIndex] = useState(0)
   const offer = offers[offerIndex]
@@ -80,6 +81,7 @@ export default function LandingPage({
             dateBounds={dateBounds}
             onChange={onSearchChange}
             onSubmit={onSearch}
+            onPlan={onPlan}
           />
         </div>
       </section>

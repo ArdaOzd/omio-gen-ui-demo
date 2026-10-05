@@ -154,6 +154,28 @@ select:focus-visible {
   padding: 0 12px;
   color: #53658e;
   font-weight: 500;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.search-form__planner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 12px;
+  padding: 16px 24px 22px;
+}
+
+.search-form__planner textarea {
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  border: 1px solid #d7dce8;
+  border-radius: 6px;
+  padding: 13px 16px;
+  color: var(--navy);
+  background: #f7f8fb;
+  font: inherit;
 }
 
 .search-form__tab--active {
@@ -1428,6 +1450,11 @@ select:focus-visible {
 
   .search-form__tabs {
     padding-inline: 12px;
+  }
+
+  .search-form__planner {
+    grid-template-columns: 1fr;
+    padding: 12px;
   }
 
   .search-form__row,
