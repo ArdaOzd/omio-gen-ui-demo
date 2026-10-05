@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { displayLocation, modes, sortTrips } from '../api.js'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Spinner } from '@/components/ui/spinner'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import Icon from './Icons.jsx'
 import Logo from './Logo.jsx'
 import SearchForm from './SearchForm.jsx'
@@ -67,8 +76,10 @@ function dateSequence(selected, min, max) {
 function ResultCard({ trip, selected, onSelect }) {
   const color = companyColors[trip.company] || '#132968'
   return (
-    <article className={`result-card ${selected ? 'result-card--selected' : ''}`}>
-      <button className="result-card__main" type="button" onClick={onSelect}>
+    <Card className={`result-card ${selected ? 'result-card--selected' : ''}`} role="article">
+      <Collapsible open={selected} onOpenChange={onSelect}>
+      <CollapsibleTrigger asChild>
+      <Button className="result-card__main" variant="ghost" type="button">
         <span className="result-card__company" style={{ color }}>
           {trip.company}
         </span>
@@ -96,9 +107,9 @@ function ResultCard({ trip, selected, onSelect }) {
           <span>{trip.available_seats > 0 ? `${trip.available_seats} seats left` : 'Available'}</span>
         </span>
         <Icon name="chevron" className="result-card__chevron" size={22} />
-      </button>
-      {selected && (
-        <div className="result-card__details">
+      </Button>
+      </CollapsibleTrigger>
+        <CollapsibleContent className="result-card__details">
           <span>
             <Icon name={trip.mode} size={19} /> {modeLabels[trip.mode] || trip.mode}
           </span>
@@ -106,9 +117,9 @@ function ResultCard({ trip, selected, onSelect }) {
             <Icon name="seat" size={19} /> {trip.available_seats} empty seats
           </span>
           <span>Fare generated for this travel demo</span>
-        </div>
-      )}
-    </article>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   )
 }
 
@@ -117,7 +128,7 @@ function RouteMap({ trip, search }) {
   const destination = trip?.destination || displayLocation(search.destination)
   return (
     <aside className="route-rail" aria-label="Selected journey route">
-      <div className="map-app-card">
+      <Card className="map-app-card">
         <img
           src="/assets/omio/app-qr.svg"
           alt="QR code for the Omio app"
@@ -128,7 +139,7 @@ function RouteMap({ trip, search }) {
           <p>✓ Tickets available offline</p>
           <p>✓ Live trip updates</p>
         </div>
-      </div>
+      </Card>
       <div className="route-map">
         <span className="map-label map-label--paris">Paris</span>
         <span className="map-label map-label--berlin">Berlin</span>
@@ -249,7 +260,7 @@ export default function ResultsPage({
         <div className="results-header__actions">
           <span>€</span>
           <span>EN</span>
-          <span className="demo-label">Synthetic schedule demo</span>
+          <Badge className="demo-label">Synthetic schedule demo</Badge>
         </div>
       </header>
 
@@ -267,17 +278,21 @@ export default function ResultsPage({
       <div className="results-layout">
         <section className="results-list" aria-label="Travel connections">
           <div className="results-toolbar">
-            <div className="mode-tabs" role="tablist" aria-label="Transport mode">
+            <ToggleGroup
+              type="single"
+              value={activeMode}
+              onValueChange={(value) => value && chooseMode(value)}
+              className="mode-tabs"
+              aria-label="Transport mode"
+            >
               {modes.map((mode) => {
                 const summary = legModeSummary?.[mode] || {}
                 return (
-                  <button
+                  <ToggleGroupItem
                     key={mode}
+                    value={mode}
                     type="button"
-                    role="tab"
-                    aria-selected={activeMode === mode}
                     className={activeMode === mode ? 'is-active' : ''}
-                    onClick={() => chooseMode(mode)}
                   >
                     <Icon name={mode} size={27} />
                     <span>
@@ -288,15 +303,16 @@ export default function ResultsPage({
                           : 'No fares yet'}
                       </small>
                     </span>
-                  </button>
+                  </ToggleGroupItem>
                 )
               })}
-            </div>
+            </ToggleGroup>
 
             <div className="date-strip" aria-label="Travel date">
               {dates.map((date) => (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   key={date}
                   className={date === search.departureDate ? 'is-active' : ''}
                   onClick={() => chooseDate(date)}
@@ -307,95 +323,96 @@ export default function ResultsPage({
                       ? `from ${formatPrice(currentSummary.min_price)}`
                       : 'Check fare'}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
 
             <div className="filter-row">
-              <label className="sort-control">
+              <Label className="sort-control">
                 <span>Sort</span>
-                <select value={draft.sort} onChange={(event) => updateSort(event.target.value)}>
-                  <option value="price_asc">Price: low to high</option>
-                  <option value="price_desc">Price: high to low</option>
-                  <option value="duration_asc">Travel time: shortest</option>
-                  <option value="duration_desc">Travel time: longest</option>
-                </select>
-              </label>
-              <button
+                <NativeSelect value={draft.sort} onChange={(event) => updateSort(event.target.value)}>
+                  <NativeSelectOption value="price_asc">Price: low to high</NativeSelectOption>
+                  <NativeSelectOption value="price_desc">Price: high to low</NativeSelectOption>
+                  <NativeSelectOption value="duration_asc">Travel time: shortest</NativeSelectOption>
+                  <NativeSelectOption value="duration_desc">Travel time: longest</NativeSelectOption>
+                </NativeSelect>
+              </Label>
+              <Button
                 className={`filter-pill ${directOnly ? 'is-active' : ''}`}
+                variant={directOnly ? 'default' : 'outline'}
                 type="button"
                 aria-pressed={directOnly}
                 onClick={() => setDirectOnly((current) => !current)}
               >
                 Direct only
-              </button>
-              <span className="filter-summary">
+              </Button>
+              <Badge className="filter-summary" variant="outline">
                 {status === 'success'
                   ? `${displayedTotal.toLocaleString()} options`
                   : 'Finding options'}
-              </span>
+              </Badge>
             </div>
 
             {search.returnDate && status === 'success' && (
-              <div className="leg-switch" role="tablist" aria-label="Journey leg">
-                <button
+              <ToggleGroup
+                type="single"
+                value={activeLeg}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setActiveLeg(value)
+                  setSelectedId(null)
+                }}
+                className="leg-switch"
+                aria-label="Journey leg"
+              >
+                <ToggleGroupItem
                   type="button"
-                  role="tab"
+                  value="outbound"
                   className={activeLeg === 'outbound' ? 'is-active' : ''}
-                  aria-selected={activeLeg === 'outbound'}
-                  onClick={() => {
-                    setActiveLeg('outbound')
-                    setSelectedId(null)
-                  }}
                 >
                   Outbound · {formatDate(search.departureDate, { month: 'short', day: 'numeric' })}
-                </button>
-                <button
+                </ToggleGroupItem>
+                <ToggleGroupItem
                   type="button"
-                  role="tab"
+                  value="return"
                   className={activeLeg === 'return' ? 'is-active' : ''}
-                  aria-selected={activeLeg === 'return'}
-                  onClick={() => {
-                    setActiveLeg('return')
-                    setSelectedId(null)
-                  }}
                 >
                   Return · {formatDate(search.returnDate, { month: 'short', day: 'numeric' })}
-                </button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             )}
           </div>
 
           <div className="result-content" aria-live="polite">
             {status === 'loading' && (
-              <div className="loading-state">
-                <span className="loading-spinner" />
+              <Card className="loading-state" role="status">
+                <Spinner className="loading-spinner" />
                 <h2>Comparing every available fare</h2>
                 <p>Checking generated schedules and empty seats.</p>
-              </div>
+              </Card>
             )}
 
             {status === 'error' && (
-              <div className="message-state">
-                <h2>We could not load these connections</h2>
-                <p>{error}</p>
-                <button type="button" onClick={() => onSearch(search, { instant: true })}>
+              <Alert className="message-state" variant="destructive">
+                <AlertTitle><h2>We could not load these connections</h2></AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+                <Button type="button" variant="outline" onClick={() => onSearch(search, { instant: true })}>
                   Try again
-                </button>
-              </div>
+                </Button>
+              </Alert>
             )}
 
             {status === 'success' && rows.length === 0 && (
-              <div className="message-state">
+              <Card className="message-state" role="status">
                 <Icon name={activeMode} size={42} />
                 <h2>No {modeLabels[activeMode].toLowerCase()} match this search</h2>
                 <p>Try another date, turn off “Direct only”, or choose a different transport tab.</p>
                 {directOnly && (
-                  <button type="button" onClick={() => setDirectOnly(false)}>
+                  <Button type="button" variant="outline" onClick={() => setDirectOnly(false)}>
                     Show connections with transfers
-                  </button>
+                  </Button>
                 )}
-              </div>
+              </Card>
             )}
 
             {status === 'success' && rows.length > 0 && (
@@ -422,23 +439,25 @@ export default function ResultsPage({
                   ))}
                 </div>
                 <div className="pagination" aria-label="Result pages">
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     disabled={page <= 1}
                     onClick={() => onSearch({ ...search, mode: activeMode, page: page - 1 }, { instant: true })}
                   >
                     Previous
-                  </button>
+                  </Button>
                   <span>
                     Page {page} of {pageCount}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     disabled={page >= pageCount}
                     onClick={() => onSearch({ ...search, mode: activeMode, page: page + 1 }, { instant: true })}
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </>
             )}

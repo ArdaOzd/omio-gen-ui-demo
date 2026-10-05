@@ -1,5 +1,12 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { displayLocation } from '../api.js'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import Icon from './Icons.jsx'
 
 function LocationField({ label, value, locations, onChange }) {
@@ -8,6 +15,7 @@ function LocationField({ label, value, locations, onChange }) {
   const [activeIndex, setActiveIndex] = useState(-1)
   const rootRef = useRef(null)
   const listboxId = useId()
+  const inputId = `${listboxId}-input`
 
   useEffect(() => setInput(displayLocation(value)), [value])
 
@@ -97,9 +105,10 @@ function LocationField({ label, value, locations, onChange }) {
 
   return (
     <div className="location-field" ref={rootRef}>
-      <label>
+      <Label htmlFor={inputId}>
         <span className="sr-only">{label}</span>
-        <input
+        <Input
+          id={inputId}
           value={input}
           placeholder={`${label}: City, station, airport or port`}
           autoComplete="off"
@@ -113,16 +122,16 @@ function LocationField({ label, value, locations, onChange }) {
             open && activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
           }
         />
-      </label>
+      </Label>
       {open && suggestions.length > 0 && (
-        <div
+        <Card
           id={listboxId}
           className="location-menu"
           role="listbox"
           aria-label={`${label} suggestions`}
         >
           {suggestions.map((location, index) => (
-            <button
+            <Button
               key={location.id}
               id={`${listboxId}-option-${index}`}
               type="button"
@@ -135,9 +144,9 @@ function LocationField({ label, value, locations, onChange }) {
             >
               <Icon name="mapPin" size={18} />
               <span>{displayLocation(location)}</span>
-            </button>
+            </Button>
           ))}
-        </div>
+        </Card>
       )}
     </div>
   )
@@ -241,129 +250,135 @@ export default function SearchForm({
 
   const smartPlanner = !compact && planningMode === 'planner'
 
-  return (
-    <form className={`search-form ${compact ? 'search-form--compact' : ''}`} onSubmit={smartPlanner ? submitPlan : submit}>
-      {!compact && (
-        <div className="search-form__tabs" role="tablist" aria-label="Planning mode">
-          <button type="button" role="tab" aria-selected={!smartPlanner} className={`search-form__tab ${!smartPlanner ? 'search-form__tab--active' : ''}`} onClick={() => { setPlanningMode('travel'); setMessage('') }}>
-            <Icon name="spark" size={17} /> Travel
-          </button>
-          <button type="button" role="tab" aria-selected={smartPlanner} className={`search-form__tab ${smartPlanner ? 'search-form__tab--active' : ''}`} onClick={() => { setPlanningMode('planner'); setMessage('') }}>
-            <Icon name="spark" size={17} /> Smart planner
-          </button>
-        </div>
-      )}
+  const plannerPanel = (
+    <div className="search-form__planner">
+      <Label>
+        <span className="sr-only">Describe your trip</span>
+        <Textarea
+          aria-label="Describe your trip"
+          value={plannerPrompt}
+          maxLength={5000}
+          rows={2}
+          autoFocus
+          placeholder="Plan a five-day train trip from Prague to the Italian coast in June…"
+          onChange={(event) => setPlannerPrompt(event.target.value)}
+        />
+      </Label>
+      <Button className="search-button" type="submit">Plan my trip</Button>
+    </div>
+  )
 
-      {smartPlanner ? (
-        <div className="search-form__planner">
-          <label>
-            <span className="sr-only">Describe your trip</span>
-            <textarea
-              aria-label="Describe your trip"
-              value={plannerPrompt}
-              maxLength={5000}
-              rows={2}
-              autoFocus
-              placeholder="Plan a five-day train trip from Prague to the Italian coast in June…"
-              onChange={(event) => setPlannerPrompt(event.target.value)}
-            />
-          </label>
-          <button className="search-button" type="submit">Plan my trip</button>
-        </div>
-      ) : (
-      <div className="search-form__row">
-        <div className="search-form__locations">
-          <LocationField
-            label="From"
-            value={search.origin}
-            locations={locations}
-            onChange={(origin) => update({ origin })}
-          />
-          <button
-            className="swap-button"
-            type="button"
-            aria-label="Swap origin and destination"
-            onClick={() => update({ origin: search.destination, destination: search.origin })}
-          >
-            <Icon name="swap" size={22} />
-          </button>
-          <LocationField
-            label="To"
-            value={search.destination}
-            locations={locations}
-            onChange={(destination) => update({ destination })}
-          />
-        </div>
+  const travelPanel = (
+    <div className="search-form__row">
+      <div className="search-form__locations">
+        <LocationField
+          label="From"
+          value={search.origin}
+          locations={locations}
+          onChange={(origin) => update({ origin })}
+        />
+        <Button
+          className="swap-button"
+          type="button"
+          aria-label="Swap origin and destination"
+          onClick={() => update({ origin: search.destination, destination: search.origin })}
+        >
+          <Icon name="swap" size={22} />
+        </Button>
+        <LocationField
+          label="To"
+          value={search.destination}
+          locations={locations}
+          onChange={(destination) => update({ destination })}
+        />
+      </div>
 
-        <label className="search-control search-control--date">
-          <span>{compact ? 'Depart' : 'Departure'}</span>
-          <input
+      <Label className="search-control search-control--date">
+        <span>{compact ? 'Depart' : 'Departure'}</span>
+        <Input
+          type="date"
+          value={search.departureDate}
+          min={dateBounds.min}
+          max={dateBounds.max}
+          onChange={(event) =>
+            update({
+              departureDate: event.target.value,
+              returnDate:
+                search.returnDate && search.returnDate < event.target.value
+                  ? event.target.value
+                  : search.returnDate,
+            })
+          }
+          required
+        />
+      </Label>
+
+      {search.returnDate ? (
+        <Label className="search-control search-control--date search-control--return">
+          <span>Return</span>
+          <Input
             type="date"
-            value={search.departureDate}
-            min={dateBounds.min}
+            value={search.returnDate}
+            min={search.departureDate || dateBounds.min}
             max={dateBounds.max}
-            onChange={(event) =>
-              update({
-                departureDate: event.target.value,
-                returnDate:
-                  search.returnDate && search.returnDate < event.target.value
-                    ? event.target.value
-                    : search.returnDate,
-              })
-            }
+            onChange={(event) => update({ returnDate: event.target.value })}
             required
           />
-        </label>
-
-        {search.returnDate ? (
-          <label className="search-control search-control--date search-control--return">
-            <span>Return</span>
-            <input
-              type="date"
-              value={search.returnDate}
-              min={search.departureDate || dateBounds.min}
-              max={dateBounds.max}
-              onChange={(event) => update({ returnDate: event.target.value })}
-              required
-            />
-            <button
-              className="clear-return"
-              type="button"
-              aria-label="Remove return journey"
-              onClick={() => update({ returnDate: '' })}
-            >
-              ×
-            </button>
-          </label>
-        ) : (
-          <button
-            className="add-return"
+          <Button
+            className="clear-return"
             type="button"
-            onClick={() => update({ returnDate: search.departureDate })}
+            aria-label="Remove return journey"
+            onClick={() => update({ returnDate: '' })}
           >
-            + Add return
-          </button>
-        )}
+            ×
+          </Button>
+        </Label>
+      ) : (
+        <Button
+          className="add-return"
+          type="button"
+          onClick={() => update({ returnDate: search.departureDate })}
+        >
+          + Add return
+        </Button>
+      )}
 
-        <label className="search-control search-control--passengers">
-          <Icon name="user" size={20} />
-          <span className="sr-only">Passengers</span>
-          <select
-            value={search.passengers}
-            onChange={(event) => update({ passengers: Number(event.target.value) })}
-          >
-            {[1, 2, 3, 4, 5, 6].map((count) => (
-              <option key={count} value={count}>
-                {count} {count === 1 ? 'traveller' : 'travellers'}
-              </option>
-            ))}
-          </select>
-        </label>
+      <Label className="search-control search-control--passengers">
+        <Icon name="user" size={20} />
+        <span className="sr-only">Passengers</span>
+        <NativeSelect
+          value={search.passengers}
+          onChange={(event) => update({ passengers: Number(event.target.value) })}
+        >
+          {[1, 2, 3, 4, 5, 6].map((count) => (
+            <NativeSelectOption key={count} value={count}>
+              {count} {count === 1 ? 'traveller' : 'travellers'}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </Label>
 
-        <button className="search-button" type="submit">
-          Search
-        </button>
-      </div>
+      <Button className="search-button" type="submit">
+        Search
+      </Button>
+    </div>
+  )
+
+  return (
+    <form className={`search-form ${compact ? 'search-form--compact' : ''}`} onSubmit={smartPlanner ? submitPlan : submit}>
+      {compact ? travelPanel : (
+        <Tabs value={planningMode} onValueChange={(value) => { setPlanningMode(value); setMessage('') }}>
+          <TabsList className="search-form__tabs" variant="line" aria-label="Planning mode">
+          <TabsTrigger type="button" value="travel" className={`search-form__tab ${!smartPlanner ? 'search-form__tab--active' : ''}`}>
+            <Icon name="spark" size={17} /> Travel
+          </TabsTrigger>
+          <TabsTrigger type="button" value="planner" className={`search-form__tab ${smartPlanner ? 'search-form__tab--active' : ''}`}>
+            <Icon name="spark" size={17} /> Smart planner
+          </TabsTrigger>
+          </TabsList>
+          <TabsContent value="travel" className="search-form__tab-panel">{travelPanel}</TabsContent>
+          <TabsContent value="planner" className="search-form__tab-panel">{plannerPanel}</TabsContent>
+        </Tabs>
       )}
       {message && <p className="form-message">{message}</p>}
     </form>

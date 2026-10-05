@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, it, vi } from 'vitest'
 vi.mock('./components/Icons.jsx', () => ({ default: () => null }))
 import SearchForm from './components/SearchForm.jsx'
@@ -14,10 +15,11 @@ const search = {
 
 beforeEach(() => sessionStorage.clear())
 
-it('switches the landing search to a planner prompt and submits it once', () => {
+it('switches the landing search to a planner prompt and submits it once', async () => {
+  const user = userEvent.setup()
   const onPlan = vi.fn()
   render(<SearchForm search={search} locations={[search.origin, search.destination]} dateBounds={{ min: '2026-01-01', max: '2027-12-31' }} onChange={vi.fn()} onSubmit={vi.fn()} onPlan={onPlan} />)
-  fireEvent.click(screen.getByRole('tab', { name: 'Smart planner' }))
+  await user.click(screen.getByRole('tab', { name: 'Smart planner' }))
   const prompt = '  Five days by train from Prague to Rome  '
   fireEvent.change(screen.getByRole('textbox', { name: 'Describe your trip' }), { target: { value: prompt } })
   fireEvent.submit(screen.getByRole('button', { name: 'Plan my trip' }).closest('form')!)

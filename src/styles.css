@@ -104,6 +104,9 @@ select:focus-visible {
 }
 
 .logo-button {
+  width: auto;
+  height: auto;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -116,6 +119,7 @@ select:focus-visible {
   padding: 4px 10px;
   border: 1px solid #d7dceb;
   border-radius: 999px;
+  background: #fff;
   color: #5a6b97;
   font-size: 12px;
   font-weight: 700;
@@ -139,16 +143,24 @@ select:focus-visible {
   box-shadow: 0 4px 8px rgba(19, 41, 104, 0.1);
 }
 
+.search-form > [data-slot='tabs'] {
+  gap: 0;
+}
+
 .search-form__tabs {
   display: flex;
+  width: 100%;
   gap: 6px;
   height: 54px;
+  justify-content: flex-start;
   padding: 0 24px;
   border-bottom: 1px solid #e0e3ec;
 }
 
 .search-form__tab {
   display: inline-flex;
+  height: 100%;
+  flex: none;
   align-items: center;
   gap: 7px;
   padding: 0 12px;
@@ -248,11 +260,13 @@ select:focus-visible {
   top: calc(100% + 8px);
   z-index: 80;
   width: min(360px, 88vw);
+  gap: 0;
   padding: 8px;
   border: 1px solid #dfe4ef;
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 14px 34px rgba(19, 41, 104, 0.2);
+  color: inherit;
 }
 
 .location-menu button {
@@ -260,10 +274,12 @@ select:focus-visible {
   align-items: center;
   gap: 10px;
   width: 100%;
+  height: auto;
   padding: 11px 10px;
   border: 0;
   border-radius: 7px;
   background: transparent;
+  font-size: 16px;
   text-align: left;
 }
 
@@ -320,6 +336,15 @@ select:focus-visible {
   font-weight: 600;
 }
 
+.search-control [data-slot='native-select-wrapper'],
+.sort-control [data-slot='native-select-wrapper'] {
+  width: 100%;
+}
+
+.search-control [data-slot='native-select-icon'] {
+  display: none;
+}
+
 .search-control--passengers select {
   appearance: none;
 }
@@ -328,6 +353,7 @@ select:focus-visible {
   padding: 0 14px;
   border: 0;
   color: #8793b0;
+  font-size: 16px;
   text-align: left;
 }
 
@@ -352,6 +378,7 @@ select:focus-visible {
   border-radius: 7px;
   background: var(--coral);
   color: #fff;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -400,6 +427,7 @@ select:focus-visible {
 }
 
 .landing-header nav button {
+  height: auto;
   padding: 10px 12px;
   border: 0;
   border-radius: 6px;
@@ -503,8 +531,12 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  gap: 0;
+  border: 0;
   border-radius: 16px;
   background: #f5f9fd;
+  box-shadow: none;
+  color: inherit;
   text-align: center;
 }
 
@@ -528,10 +560,12 @@ select:focus-visible {
 }
 
 .offer-card button {
+  height: auto;
   padding: 10px 24px;
   border: 1px solid var(--navy);
   border-radius: 7px;
   background: #fff;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -669,6 +703,13 @@ select:focus-visible {
   height: 46px;
 }
 
+.app-badge-link {
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+}
+
 /* Results */
 
 .results-page {
@@ -748,6 +789,8 @@ select:focus-visible {
 
 .mode-tabs {
   display: grid;
+  width: 100%;
+  height: auto;
   grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid #cfd5e3;
 }
@@ -877,6 +920,7 @@ select:focus-visible {
 
 .filter-pill {
   padding: 0 20px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -887,12 +931,16 @@ select:focus-visible {
 
 .filter-summary {
   margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #7280a0;
   font-size: 13px;
 }
 
 .leg-switch {
   display: inline-flex;
+  height: auto;
   margin-top: 18px;
   padding: 4px;
   border-radius: 10px;
@@ -905,6 +953,7 @@ select:focus-visible {
   border-radius: 7px;
   background: transparent;
   color: #5b6c93;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -954,9 +1003,12 @@ select:focus-visible {
 
 .result-card {
   overflow: hidden;
+  gap: 0;
+  padding: 0;
   border: 1px solid transparent;
   border-radius: 10px;
   background: #fff;
+  color: inherit;
   box-shadow: 0 2px 5px rgba(19, 41, 104, 0.18);
 }
 
@@ -969,11 +1021,13 @@ select:focus-visible {
   grid-template-columns: 125px minmax(330px, 1fr) 115px 22px;
   align-items: center;
   width: 100%;
+  height: auto;
   min-height: 154px;
   padding: 20px 24px;
   border: 0;
   background: transparent;
   text-align: left;
+  white-space: normal;
 }
 
 .result-card__company {
@@ -1099,6 +1153,10 @@ select:focus-visible {
   font-size: 13px;
 }
 
+.result-card__details[data-state='closed'] {
+  display: none;
+}
+
 .result-card__details span {
   display: inline-flex;
   align-items: center;
@@ -1118,8 +1176,12 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 50px;
+  gap: 0;
+  border: 0;
   border-radius: 12px;
   background: #fff;
+  box-shadow: none;
+  color: inherit;
   text-align: center;
 }
 
@@ -1137,12 +1199,14 @@ select:focus-visible {
 }
 
 .message-state button {
+  height: auto;
   margin-top: 22px;
   padding: 11px 24px;
   border: 0;
   border-radius: 7px;
   background: var(--coral);
   color: #fff;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -1153,6 +1217,7 @@ select:focus-visible {
   border: 4px solid #dbe5f3;
   border-top-color: var(--coral);
   border-radius: 50%;
+  stroke: transparent;
 }
 
 @keyframes spin {
@@ -1170,10 +1235,12 @@ select:focus-visible {
 }
 
 .pagination button {
+  height: auto;
   padding: 10px 18px;
   border: 1px solid #cfd5e4;
   border-radius: 8px;
   background: #fff;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -1207,7 +1274,11 @@ select:focus-visible {
   gap: 24px;
   min-height: 205px;
   padding: 30px 34px;
+  border: 0;
+  border-radius: 0;
   background: #fff;
+  box-shadow: none;
+  color: inherit;
 }
 
 .map-app-card img {

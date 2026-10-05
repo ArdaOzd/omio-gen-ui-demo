@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import Logo from './Logo.jsx'
 import Icon from './Icons.jsx'
 import SearchForm from './SearchForm.jsx'
@@ -57,15 +60,15 @@ export default function LandingPage({
           <Logo inverse />
           <nav aria-label="Transport modes">
             {transportModes.map(([mode, label]) => (
-              <button type="button" key={mode} onClick={() => chooseMode(mode)}>
+              <Button type="button" variant="ghost" key={mode} onClick={() => chooseMode(mode)}>
                 {label}
-              </button>
+              </Button>
             ))}
           </nav>
           <div className="landing-header__actions">
             <span>€</span>
             <span>EN</span>
-            <span className="demo-label demo-label--inverse">Synthetic demo</span>
+            <Badge className="demo-label demo-label--inverse">Synthetic demo</Badge>
           </div>
         </header>
 
@@ -97,38 +100,45 @@ export default function LandingPage({
         </div>
 
         <div className="offer-carousel" aria-live="polite">
-          <button
+          <Button
             className="carousel-arrow carousel-arrow--left"
+            variant="ghost"
+            size="icon"
             type="button"
             aria-label="Previous offer"
             onClick={() => setOfferIndex((offerIndex - 1 + offers.length) % offers.length)}
           >
             <Icon name="arrow" size={22} />
-          </button>
-          <article className="offer-card">
+          </Button>
+          <Card className="offer-card" role="article">
             <span>{offer.eyebrow}</span>
             <strong>{offer.title}</strong>
             <p>{offer.text}</p>
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => onSearch({ ...search, mode: offer.mode, page: 1 })}
             >
               {offer.button}
-            </button>
-          </article>
-          <button
+            </Button>
+          </Card>
+          <Button
             className="carousel-arrow"
+            variant="ghost"
+            size="icon"
             type="button"
             aria-label="Next offer"
             onClick={() => setOfferIndex((offerIndex + 1) % offers.length)}
           >
             <Icon name="arrow" size={22} />
-          </button>
+          </Button>
           <div className="carousel-dots" aria-label="Select offer">
             {offers.map((item, index) => (
-              <button
+              <Button
                 key={item.title}
                 type="button"
+                variant="ghost"
+                size="icon"
                 className={index === offerIndex ? 'is-active' : ''}
                 aria-label={`Offer ${index + 1}`}
                 aria-current={index === offerIndex}
@@ -187,24 +197,30 @@ export default function LandingPage({
               </span>
             </div>
             <div className="app-badges">
-              <a href="https://www.omio.com/apps" target="_blank" rel="noreferrer">
-                <img
-                  src="/assets/omio/app-store.svg"
-                  alt="Download on the App Store"
-                />
-              </a>
-              <a href="https://www.omio.com/apps" target="_blank" rel="noreferrer">
-                <img
-                  src="/assets/omio/google-play.svg"
-                  alt="Get it on Google Play"
-                />
-              </a>
-              <a href="https://www.omio.com/apps" target="_blank" rel="noreferrer">
-                <img
-                  src="/assets/omio/app-gallery.svg"
-                  alt="Explore it on AppGallery"
-                />
-              </a>
+              <Button asChild variant="link" className="app-badge-link">
+                <a href="https://www.omio.com/apps" target="_blank" rel="noreferrer">
+                  <img
+                    src="/assets/omio/app-store.svg"
+                    alt="Download on the App Store"
+                  />
+                </a>
+              </Button>
+              <Button asChild variant="link" className="app-badge-link">
+                <a href="https://www.omio.com/apps" target="_blank" rel="noreferrer">
+                  <img
+                    src="/assets/omio/google-play.svg"
+                    alt="Get it on Google Play"
+                  />
+                </a>
+              </Button>
+              <Button asChild variant="link" className="app-badge-link">
+                <a href="https://www.omio.com/apps" target="_blank" rel="noreferrer">
+                  <img
+                    src="/assets/omio/app-gallery.svg"
+                    alt="Explore it on AppGallery"
+                  />
+                </a>
+              </Button>
             </div>
           </div>
         </div>
