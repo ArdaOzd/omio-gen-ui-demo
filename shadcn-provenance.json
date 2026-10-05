@@ -1,0 +1,45 @@
+{
+  "cli": {
+    "package": "shadcn",
+    "version": "4.21.0",
+    "init": "shadcn@4.21.0 init -y -b radix -t vite -p nova"
+  },
+  "registry": {
+    "style": "radix-nova",
+    "base": "radix",
+    "source": "https://github.com/shadcn-ui/ui/tree/shadcn%404.21.0/apps/v4/registry/bases/radix/ui",
+    "documentation": "https://ui.shadcn.com/docs/installation/vite"
+  },
+  "generatedComponents": [
+    "alert",
+    "badge",
+    "button",
+    "card",
+    "checkbox",
+    "collapsible",
+    "dialog",
+    "field",
+    "input",
+    "label",
+    "native-select",
+    "scroll-area",
+    "separator",
+    "skeleton",
+    "spinner",
+    "table",
+    "tabs",
+    "textarea",
+    "toggle",
+    "toggle-group"
+  ],
+  "localAdaptations": [
+    {
+      "file": "src/shadcn.css",
+      "change": "Omit Tailwind Preflight and global font/base rules; keep shadcn layers below the existing app stylesheet."
+    },
+    {
+      "file": "src/main.jsx",
+      "change": "Load the shadcn theme before the existing app stylesheet."
+    }
+  ]
+}

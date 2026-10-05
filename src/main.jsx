@@ -1,6 +1,7 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
+import './shadcn.css'
 import './styles.css'
 const GenerativeRoute=lazy(()=>import('./generative/routes.tsx').then(module=>({default:module.GenerativeRoute})))
 const loading=<p role="status">Opening your travel conversation…</p>
