@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ArtifactIdSchema, type ArtifactId, type BoundedFareFact, type FareId } from '../../contracts'
 import { carrierLabel, cityLabel, departure, money, useTravelServices } from '../../catalog/context'
 
@@ -93,24 +97,6 @@ export function PlanningTracker() {
   const services = useTravelServices()
   const { fares, loading } = usePlanningFares()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const buyButton = useRef<HTMLButtonElement>(null)
-  const closeButton = useRef<HTMLButtonElement>(null)
-  const dialogWasOpen = useRef(false)
-
-  useEffect(() => {
-    if (!dialogOpen) {
-      if (dialogWasOpen.current) buyButton.current?.focus()
-      dialogWasOpen.current = false
-      return
-    }
-    dialogWasOpen.current = true
-    closeButton.current?.focus()
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDialogOpen(false)
-    }
-    document.addEventListener('keydown', closeOnEscape)
-    return () => document.removeEventListener('keydown', closeOnEscape)
-  }, [dialogOpen])
 
   if (!fares.length) return null
 
@@ -135,27 +121,27 @@ export function PlanningTracker() {
     if (active && services.activeId() !== active) services.activate(active)
   }
 
-  return <aside className="travel-planning-tracker" aria-label="Planning tracker">
+  return <Card className="travel-planning-tracker" role="complementary" aria-label="Planning tracker">
     <div className="travel-planning-header">
       <div><span className="travel-planning-eyebrow">Your trip</span><h2>Planning tracker</h2></div>
-      <button type="button" className="travel-planning-clear" onClick={clear}>Clear all</button>
+      <Button type="button" variant="outline" className="travel-planning-clear" onClick={clear}>Clear all</Button>
     </div>
-    {loading && <p className="travel-caption" role="status">Loading selected fares…</p>}
+    {loading && <Skeleton className="travel-caption" role="status">Loading selected fares…</Skeleton>}
     <ol className="travel-planning-list">
       {fares.map(fare => <li key={fare.fareId} className="travel-planning-fare">
         {fare.fact ? <>
           <div className="travel-planning-route"><strong>{cityLabel(fare.fact.originId)} → {cityLabel(fare.fact.destinationId)}</strong><span>{fare.fact.serviceDate} · {departure(fare.fact.departureMinutes)}</span></div>
           <div className="travel-planning-detail"><span>{cityLabel(fare.fact.mode)} · {carrierLabel(fare.fact, services.bridge)}</span><strong>{money(fare.fact.priceCents)}</strong></div>
         </> : <div className="travel-planning-route"><strong>Selected fare</strong><span>Details are temporarily unavailable.</span></div>}
-        <button type="button" className="travel-planning-cancel" aria-label={`Cancel ${fare.fact ? `${cityLabel(fare.fact.originId)} to ${cityLabel(fare.fact.destinationId)} on ${fare.fact.serviceDate}` : 'selected fare'}`} onClick={() => remove(fare)}>Cancel</button>
+        <Button type="button" variant="outline" className="travel-planning-cancel" aria-label={`Cancel ${fare.fact ? `${cityLabel(fare.fact.originId)} to ${cityLabel(fare.fact.destinationId)} on ${fare.fact.serviceDate}` : 'selected fare'}`} onClick={() => remove(fare)}>Cancel</Button>
       </li>)}
     </ol>
-    <button ref={buyButton} type="button" className="travel-planning-buy" onClick={() => setDialogOpen(true)}>Buy</button>
-    {dialogOpen && <div className="travel-dialog-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setDialogOpen(false) }}>
-      <div className="travel-dialog" role="dialog" aria-modal="true" aria-labelledby="travel-confirmation-title">
-        <h2 id="travel-confirmation-title">Congrats, you are set for the trip.</h2>
-        <button ref={closeButton} type="button" onClick={() => setDialogOpen(false)}>Close</button>
-      </div>
-    </div>}
-  </aside>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild><Button type="button" className="travel-planning-buy">Buy</Button></DialogTrigger>
+      <DialogContent className="travel-dialog" showCloseButton={false}>
+        <DialogHeader><DialogTitle id="travel-confirmation-title">Congrats, you are set for the trip.</DialogTitle><DialogDescription className="sr-only">Your selected synthetic itinerary is ready.</DialogDescription></DialogHeader>
+        <DialogFooter><DialogClose asChild><Button type="button">Close</Button></DialogClose></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </Card>
 }

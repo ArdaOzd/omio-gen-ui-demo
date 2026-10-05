@@ -1,4 +1,6 @@
 import { Component, type ReactNode } from 'react'
+import { Alert } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 import { sharedPropsSchema } from './generated/catalog'
 import { useTravelServices } from './context'
 import { ArtifactIdSchema, DatasetIdSchema } from '../contracts'
@@ -11,14 +13,14 @@ const controls=new Set(['ModeChips','CarrierFilter','PriceRange','DurationRange'
 const statuses=new Set(['ArtifactSkeleton','CoverageNotice','EmptyState','InlineError','StaleBadge','RetryAction'])
 export class ArtifactErrorBoundary extends Component<{children:ReactNode},{failed:boolean}> {
  state={failed:false};static getDerivedStateFromError(){return{failed:true}}
- render(){return this.state.failed?<div role="alert" className="travel-tools-error">This view could not be displayed. Ask the assistant to regenerate it.</div>:this.props.children}
+ render(){return this.state.failed?<Alert className="travel-tools-error">This view could not be displayed. Ask the assistant to regenerate it.</Alert>:this.props.children}
 }
 export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  const services=useTravelServices()
  const {children,$status,...scalar}=input;const parsed=sharedPropsSchema.safeParse(scalar)
- if(!parsed.success)return $status==='streaming'?<div className="travel-skeleton" role="status">Preparing view…</div>:<div className="travel-tools-error" role="alert">This view has invalid references.</div>
+ if(!parsed.success)return $status==='streaming'?<Skeleton className="travel-skeleton" role="status">Preparing view…</Skeleton>:<Alert className="travel-tools-error">This view has invalid references.</Alert>
  const props={...parsed.data,children,$status}
- try {services.state.get(ArtifactIdSchema.parse(props.artifactRef));if(props.datasetRef)services.bridge.getManifest(DatasetIdSchema.parse(props.datasetRef))}catch{return <div className="travel-notice" role="status">This view's travel data is not available. Reload or retry the conversation.</div>}
+ try {services.state.get(ArtifactIdSchema.parse(props.artifactRef));if(props.datasetRef)services.bridge.getManifest(DatasetIdSchema.parse(props.datasetRef))}catch{return <Alert className="travel-notice" role="status">This view's travel data is not available. Reload or retry the conversation.</Alert>}
  let content:ReactNode
  if(layouts.has(kind))content=<Layout kind={kind} {...props}/>
  else if(controls.has(kind))content=<Control kind={kind} {...props}/>
@@ -39,7 +41,7 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  case 'DurationPricePlot':content=<Plot {...props}/>;break
  case 'CheapestFastest':content=<CheapestFastest {...props}/>;break
  case 'SelectedFareCount':content=<SelectedFareCount {...props}/>;break
- default:content=<div role="alert">Unknown travel component.</div>
+ default:content=<Alert>Unknown travel component.</Alert>
  }
  return <ArtifactErrorBoundary>{content}</ArtifactErrorBoundary>
 }

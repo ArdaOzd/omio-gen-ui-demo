@@ -39,6 +39,7 @@ it('moves tab focus with arrow keys and keeps roving focus in the selected tab',
  const tabs=screen.getAllByRole('tab');tabs[0]?.focus();fireEvent.keyDown(tabs[0]!,{key:'ArrowRight'})
  expect(tabs[1]).toHaveFocus();expect(tabs[1]).toHaveAttribute('aria-selected','true')
  fireEvent.keyDown(tabs[1]!,{key:'Home'});expect(tabs[0]).toHaveFocus()
+ expect(fireEvent.keyDown(tabs[0]!,{key:'ArrowRight',altKey:true})).toBe(true);expect(tabs[0]).toHaveFocus();expect(tabs[0]).toHaveAttribute('aria-selected','true')
 })
 
 it('keeps explicit leg mode controls separate from the global mode filter',async()=>{

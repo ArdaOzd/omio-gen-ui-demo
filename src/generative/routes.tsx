@@ -1,4 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { getSceneMetadata } from './scene-metadata';
 import type { UIMessage } from 'ai';
 import { ArtifactIdSchema, CATALOG_VERSION, CONTRACT_VERSION, type ArtifactId } from './contracts';
@@ -20,7 +26,7 @@ function createServices(onCoverageStatus:(message:string)=>void){
  return {services,artifacts,createArtifact,router};
 }
 export function GenerativeRoute(){
- const [notice,setNotice]=useState('');const [restoreAttempt,setRestoreAttempt]=useState(0);const [restoreError,setRestoreError]=useState(false);const [diagnostics,setDiagnostics]=useState('');const [runtime]=useState(()=>createServices(setNotice));const [registryRevision,setRegistryRevision]=useState(0);const [ready,setReady]=useState(false);const [messages,setMessages]=useState<UIMessage[]>([]);const [initialRunMessageId,setInitialRunMessageId]=useState<string>();
+ const [notice,setNotice]=useState('');const [restoreAttempt,setRestoreAttempt]=useState(0);const [restoreError,setRestoreError]=useState(false);const [diagnostics,setDiagnostics]=useState('');const [diagnosticsOpen,setDiagnosticsOpen]=useState(false);const [runtime]=useState(()=>createServices(setNotice));const [registryRevision,setRegistryRevision]=useState(0);const [ready,setReady]=useState(false);const [messages,setMessages]=useState<UIMessage[]>([]);const [initialRunMessageId,setInitialRunMessageId]=useState<string>();
  const persistence=useMemo(()=>createThreadPersistence(),[]);const key='travel-a';
  useEffect(()=>{const controller=new AbortController();setRestoreError(false);persistence.load(key).then(async record=>{
   let valid: UIMessage[]=[];let sourceRefreshed=false;
@@ -46,7 +52,7 @@ export function GenerativeRoute(){
   const manifests=refs.map(datasetId=>{try{const manifest=runtime.services.bridge.getManifest(datasetId);return {datasetId,rowCount:manifest.rowCount,coverage:manifest.coverage,sourceVersion:manifest.source.sourceVersion,compactSummary:manifest.compactSummary};}catch{return {datasetId,error:'Manifest unavailable'};}});
   setDiagnostics(JSON.stringify({schemaVersion:CONTRACT_VERSION,threadId:key,activeArtifactId:runtime.artifacts.getActiveId(),messages,artifactRecords,manifests,persisted},null,2));
  };
- if(!ready)return <div className="travel-app">{restoreError?<><p role="alert">{notice}</p><button type="button" onClick={()=>setRestoreAttempt(value=>value+1)}>Retry restoring conversation</button><div aria-label="Saved conversation">{messages.map(message=><p key={message.id}>{message.parts.flatMap(part=>part.type==='text'?[part.text]:[]).join(' ')}</p>)}</div></>:<p role="status">Restoring travel conversation…</p>}</div>;
+ if(!ready)return <div className="travel-app">{restoreError?<><Alert>{notice}</Alert><Button type="button" onClick={()=>setRestoreAttempt(value=>value+1)}>Retry restoring conversation</Button><Card aria-label="Saved conversation">{messages.map(message=><p key={message.id}>{message.parts.flatMap(part=>part.type==='text'?[part.text]:[]).join(' ')}</p>)}</Card></>:<Skeleton className="travel-skeleton" role="status">Restoring travel conversation…</Skeleton>}</div>;
 
- return <><nav className="travel-variant-nav"><a href="/">Classic search</a><span>Generative travel · Signed-in Codex</span></nav>{notice&&<p role="status">{notice}</p>}<GenerativeChat services={runtime.services} capture={capture} initialMessages={messages} initialRunMessageId={initialRunMessageId} onMessages={next=>void save(next).catch(error=>setNotice(error instanceof ThreadConflictError?error.message:'Local history could not be saved.'))}/>{import.meta.env.DEV&&<details onToggle={event=>{if(event.currentTarget.open)void readDiagnostics().catch(()=>setDiagnostics('Conversation diagnostics could not be read.'));}}><summary>Developer conversation diagnostics</summary><button type="button" onClick={()=>void readDiagnostics()}>Refresh diagnostics</button><textarea aria-label="Conversation diagnostics" readOnly value={diagnostics} rows={12} style={{width:'100%',fontFamily:'monospace'}}/></details>}</>;
+ return <><nav className="travel-variant-nav"><Button asChild variant="link"><a href="/">Classic search</a></Button><span>Generative travel · Signed-in Codex</span></nav>{notice&&<Alert role="status">{notice}</Alert>}<GenerativeChat services={runtime.services} capture={capture} initialMessages={messages} initialRunMessageId={initialRunMessageId} onMessages={next=>void save(next).catch(error=>setNotice(error instanceof ThreadConflictError?error.message:'Local history could not be saved.'))}/>{import.meta.env.DEV&&<Collapsible open={diagnosticsOpen} onOpenChange={open=>{setDiagnosticsOpen(open);if(open)void readDiagnostics().catch(()=>setDiagnostics('Conversation diagnostics could not be read.'));}}><CollapsibleTrigger asChild><Button type="button" variant="outline">Developer conversation diagnostics</Button></CollapsibleTrigger><CollapsibleContent><Button type="button" variant="outline" onClick={()=>void readDiagnostics()}>Refresh diagnostics</Button><Textarea aria-label="Conversation diagnostics" readOnly value={diagnostics} rows={12} className="font-mono"/></CollapsibleContent></Collapsible>}</>;
 }
