@@ -7,8 +7,16 @@
   "registry": {
     "style": "radix-nova",
     "base": "radix",
-    "source": "https://github.com/shadcn-ui/ui/tree/shadcn%404.21.0/apps/v4/registry/bases/radix/ui",
+    "retrievedFrom": "https://ui.shadcn.com/r",
+    "retrievedOn": "2026-10-05",
+    "revision": "live registry; per-file SHA-256 hashes are verified by scripts/check-shadcn.mjs",
+    "source": "https://github.com/shadcn-ui/ui/tree/main/apps/v4/registry/bases/radix/ui",
     "documentation": "https://ui.shadcn.com/docs/installation/vite"
+  },
+  "license": {
+    "spdx": "MIT",
+    "notice": "LICENSES/shadcn-ui-MIT.txt",
+    "source": "https://github.com/shadcn-ui/ui/blob/main/LICENSE.md"
   },
   "generatedComponents": [
     "alert",
@@ -22,7 +30,6 @@
     "input",
     "label",
     "native-select",
-    "scroll-area",
     "separator",
     "skeleton",
     "spinner",
@@ -32,6 +39,28 @@
     "toggle",
     "toggle-group"
   ],
+  "sourceHashes": {
+    "alert": "f253568242c1c69b343f12474002fdbe229f603158171c59e21c491ab79f2e6e",
+    "badge": "59953420d01d23d172b4e32583426db153ff09226e2d460d53526b9f25282801",
+    "button": "08e5f87833c5db8436e89337ebde0f776bcdbf649d3de69fb89be6441ca2e366",
+    "card": "8ad3a18d36bda0598dc0e9aa96ea22854944d5443ee4946f1d173815e115375f",
+    "checkbox": "822b3036f883e950fe76cf78ac2710cbbca4512e7012c03c346845b7710bd232",
+    "collapsible": "c6598e5584f4258b5d9fefadbc5ad6a66888ad58729f4b634a0bb2d9c513188b",
+    "dialog": "7dbb00eeb1b68a7403c6a326904aa5d1e0d40edbea6f34c8460aadc48c8b56b1",
+    "field": "d7c372e8df76de0b4714c02497fefba29299e6baefb7c12fba289a2a374362bb",
+    "input": "75418e030b2a54dd017ac0f4588db4bbdbabca7525e88bbc9d84cb3e18bcb905",
+    "label": "b823de7355666bd6a6a2cf88a6630e436d021b38fdbef5b749fac0921b86f44d",
+    "native-select": "93262e9e6c108df664725a0043f0c06ef844e173088b18c0f807e753e2f86d22",
+    "separator": "b5b5460e5337c2d5f361c1512001615b2e5eacb38c7449a4418bb9ddb47c4bba",
+    "skeleton": "4c2af7fa9c645358a0fb188779deab6f0b981733b62befc25e18aaebea1350dc",
+    "spinner": "6916679a40ad1c7624520de5eaa7b337635e81f9a76413201267f8619844646f",
+    "table": "300dc171ff0e09543dce0787f43a3ceb0d168fa800eaecb98b6c5630f3c6d7e9",
+    "tabs": "4441d00edc402539d2183845bac2f56ca60d3794113febbef1d58cc60e3aed66",
+    "textarea": "82601c91ffc6c727d924162c78d7cb853114bcced4e2eb922a68ca12d4239c0f",
+    "toggle": "aafa82253550574c833d0072c9f6f4a71e36efdbbeddb8ddf1b09db1fbc1f621",
+    "toggle-group": "f0dcdf5d73ec55d4700d530c86611d12dd9071f5cf04d5f2def16757f1381d37"
+  },
+  "allowedNativeCompositions": [],
   "localAdaptations": [
     {
       "file": "src/shadcn.css",

@@ -16,6 +16,7 @@
     "test:browser": "playwright test",
     "test:leakage": "vitest run src/generative/contracts/privacy.test.ts",
     "check:catalog": "tsx src/generative/catalog/generate.ts --check",
+    "check:shadcn": "node scripts/check-shadcn.mjs",
     "generate:catalog": "tsx src/generative/catalog/generate.ts",
     "agent:dev": "tsx agent/server.ts",
     "benchmark:query": "node scripts/run-query-benchmark.mjs"
