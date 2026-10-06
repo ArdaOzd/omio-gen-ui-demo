@@ -15,6 +15,8 @@ import {
   type FareRow,
 } from '../../contracts'
 import { createUIStateStore } from '../../state/ui-state-store'
+import { createActionRouter } from '../../state/action-router'
+import { createFareDataBridge } from '../../data/fare-data-bridge'
 import { PlanningTracker } from './planning-tracker'
 
 const rows = [
@@ -100,5 +102,25 @@ describe('Version A planning tracker', () => {
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(buy).toHaveFocus()
+  })
+
+  it('removes a selected fare from the tracker after its route leg is replaced', async () => {
+    const selected = FareRowSchema.parse({ id: 'london-paris', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-08', mode: 'train', carrierId: 'rail', carrierName: 'Test Rail', priceCents: 4000, durationMinutes: 160, departureMinutes: 540, availableSeats: 4, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true })
+    const bridge = createFareDataBridge({ pageSource: async input => ({ rows: [FareRowSchema.parse({ ...selected, id: `${input.originId}-${input.destinationId}`, originId: input.originId, destinationId: input.destinationId, serviceDate: input.date })], total: 1, pages: 1, page: input.page, sourceVersion: 'route-tracker-v1' }) })
+    const seeded = await bridge.load({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-08', to: '2026-10-08' }, modes: ['train'], passengers: 1 }, new AbortController().signal)
+    const artifactId = ArtifactIdSchema.parse('route-tracker')
+    const state = createUIStateStore()
+    state.initializeMissing(artifactId, { datasetRefs: [seeded.datasetId], citySequence: ['london', 'paris'], dates: { start: '2026-10-08' }, selectedFareIds: [selected.id] })
+    const router = createActionRouter(state, { bridge })
+    const services = { bridge, state, dispatch: router, whenIdle: router.whenIdle, activeId: () => artifactId, artifactIds: () => [artifactId], activate: () => {} } satisfies TravelServices
+    render(<TravelProvider services={services}><PlanningTracker /></TravelProvider>)
+    await screen.findByRole('complementary', { name: 'Planning tracker' })
+
+    router({ kind: 'route', artifactId, citySequence: ['london', 'rome'] })
+    await router.whenIdle(artifactId)
+
+    expect(state.exportSnapshot(artifactId).selectedFareIds).toEqual([])
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Planning tracker' })).toBeNull())
+    router.dispose()
   })
 })

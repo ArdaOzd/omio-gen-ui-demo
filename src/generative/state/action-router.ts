@@ -63,7 +63,8 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
     }
     const current=store.get(command.artifactId)
     const scheduled=scheduleLegs(current,coverages,facts)
-    const compatible=facts.filter(fact=>{const leg=scheduled.find(item=>item.key===`${fact.originId}:${fact.destinationId}`);if(!leg?.selectionValid)return false;const to=current.displayWindowByLeg[leg.key]?.to??(current.dates.end?legDate(current,fact.originId,current.dates.end):selectionScope?undefined:leg.threshold.date);return to===undefined||fact.serviceDate<=to})
+    const activeRouteKeys=new Set(current.citySequence.slice(1).map((destination,index)=>`${current.citySequence[index]}:${destination}`))
+    const compatible=facts.filter(fact=>{const key=`${fact.originId}:${fact.destinationId}`;if(activeRouteKeys.size&& !activeRouteKeys.has(key))return false;const leg=scheduled.find(item=>item.key===key);if(!leg?.selectionValid)return false;const to=current.displayWindowByLeg[leg.key]?.to??(current.dates.end?legDate(current,fact.originId,current.dates.end):selectionScope?undefined:leg.threshold.date);return to===undefined||fact.serviceDate<=to})
     const last=new Map<string,string>();for(const fact of compatible)last.set(`${fact.originId}:${fact.destinationId}`,fact.id)
     for(const fact of facts){const current=store.get(command.artifactId)
      if(stale.has(fact.id)||last.get(`${fact.originId}:${fact.destinationId}`)!==fact.id)store.dispatch({kind:'select',artifactId:command.artifactId,fareId:fact.id,selected:false,expectedRevision:current.revision})

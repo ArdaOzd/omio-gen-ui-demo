@@ -3,7 +3,7 @@ import { resolveBoundDatasetId } from './leg-bindings'
 import { createActionRouter } from './action-router'
 import { createUIStateStore } from './ui-state-store'
 import { createFareDataBridge } from '../data/fare-data-bridge'
-import { ArtifactIdSchema,FareIdSchema,type FareRow,type CoverageRequest } from '../contracts'
+import { ArtifactIdSchema,FareIdSchema,type FareId,type FareRow,type CoverageRequest } from '../contracts'
 const request:CoverageRequest={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-08'},modes:['train'],passengers:1}
 const row:FareRow={id:FareIdSchema.parse('fare-1'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'test',carrierName:'Test Rail',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:4,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}
 describe('direct action coverage routing',()=>{
@@ -35,6 +35,29 @@ it('loads adjacent legs at stay offsets, routes leg modes, and replaces alternat
  router({kind:'stays',artifactId:id,stays:[{cityId:'paris',nights:3},{cityId:'barcelona',nights:4}]});await router.whenIdle(id)
  expect(calls).toContainEqual({origin:'paris',destination:'barcelona',date:'2026-10-05'});expect(store.get(id).selectedFareIds).toEqual(['london-paris-2026-10-02-bus'])
  expect(()=>bridge.getManifest(manifest.datasetId)).not.toThrow();router.dispose()
+})
+
+it('prunes fares from removed route legs without letting an older async route edit win',async()=>{
+ let releaseFirstLookup:(()=>void)|undefined
+ let lookupCount=0
+ const base=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`${input.originId}-${input.destinationId}`),originId:input.originId,destinationId:input.destinationId,serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'})})
+ const seed=await base.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'}},new AbortController().signal)
+ const bridge={...base,lookupFare:async(id:FareId,fields:[])=>{lookupCount+=1;if(lookupCount===1)await new Promise<void>(resolve=>{releaseFirstLookup=resolve});return base.lookupFare(id,fields)}}
+ const store=createUIStateStore();const id=ArtifactIdSchema.parse('route-selection');const selected=FareIdSchema.parse('london-paris')
+ store.initializeMissing(id,{datasetRefs:[seed.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-02'},selectedFareIds:[selected]})
+ const router=createActionRouter(store,{bridge})
+
+ router({kind:'route',artifactId:id,citySequence:['london','rome']})
+ router({kind:'route',artifactId:id,citySequence:['london','paris']})
+ await router.whenIdle(id)
+ releaseFirstLookup?.();await new Promise(resolve=>setTimeout(resolve,0))
+ expect(store.get(id).selectedFareIds).toEqual([selected])
+
+ router({kind:'route',artifactId:id,citySequence:['london','rome']});await router.whenIdle(id)
+ expect(store.get(id).selectedFareIds).toEqual([])
+ expect(store.exportSnapshot(id).selectedFareIds).toEqual([])
+ expect(store.get(id).datasetRefs.map(datasetId=>base.getManifest(datasetId).coverage).every(coverage=>coverage.originIds[0]==='london'&&coverage.destinationIds[0]==='rome')).toBe(true)
+ router.dispose()
 })
 
 it('resolves old scene refs to new covered handles while retaining a full-scope seed inside the interacted artifact',async()=>{
