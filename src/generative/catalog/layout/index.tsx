@@ -2,7 +2,7 @@ import { Children, useRef, useState, type KeyboardEvent, type ReactNode } from '
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-export type WidgetProps = { artifactRef:string; datasetRef?:string; title?:string; body?:string; variant?:'default'|'compact'|'emphasis'; actionRef?:string; selectorRef?:string; children?:ReactNode; $status?:'streaming'|'done' }
+export type WidgetProps = { artifactRef:string; datasetRef?:string; legIndex?:number; title?:string; body?:string; variant?:'default'|'compact'|'emphasis'; actionRef?:string; selectorRef?:string; children?:ReactNode; $status?:'streaming'|'done' }
 const structuralLayouts=new Set(['Section','Stack','Inline','ResponsiveGrid','SplitPane','StickySummary','Carousel'])
 export function Layout({kind,...props}:WidgetProps & {kind:string}) {
   const [tab,setTab]=useState('0'); const children=Children.toArray(props.children); const tabs=useRef<Array<HTMLButtonElement|null>>([])

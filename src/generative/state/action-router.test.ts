@@ -1,5 +1,4 @@
 import { describe,expect,it } from 'vitest'
-import { resolveBoundDatasetId } from './leg-bindings'
 import { createActionRouter } from './action-router'
 import { createUIStateStore } from './ui-state-store'
 import { createFareDataBridge } from '../data/fare-data-bridge'
@@ -60,12 +59,23 @@ it('prunes fares from removed route legs without letting an older async route ed
  router.dispose()
 })
 
-it('resolves old scene refs to new covered handles while retaining a full-scope seed inside the interacted artifact',async()=>{
+it('atomically replaces current coverage and expires the superseded artifact handle',async()=>{
  const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'})});const seed=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'}},new AbortController().signal)
  const store=createUIStateStore();const a=ArtifactIdSchema.parse('a');const b=ArtifactIdSchema.parse('b');for(const id of[a,b])store.initializeMissing(id,{datasetRefs:[seed.datasetId],dates:{start:'2026-10-02'}})
  const router=createActionRouter(store,{bridge});router({kind:'dates',artifactId:a,dates:{start:'2026-11-01'}});await router.whenIdle(a)
- expect(resolveBoundDatasetId(store.get(a),bridge,seed.datasetId)).not.toBe(seed.datasetId);expect(resolveBoundDatasetId(store.get(b),bridge,seed.datasetId)).toBe(seed.datasetId)
- expect(store.get(a).datasetRefs).toContain(seed.datasetId);expect(store.get(b).datasetRefs).toEqual([seed.datasetId]);router.dispose()
+ const current=store.get(a).datasetRefs[0];expect(current).not.toBe(seed.datasetId);expect(current&&bridge.getManifest(current).coverage.dateWindow.from).toBe('2026-11-01')
+ expect(store.get(a).datasetRefs).not.toContain(seed.datasetId);expect(store.get(b).datasetRefs).toEqual([seed.datasetId]);expect(()=>bridge.getManifest(seed.datasetId)).not.toThrow()
+ router({kind:'dates',artifactId:b,dates:{start:'2026-11-02'}});await router.whenIdle(b)
+ expect(()=>bridge.getManifest(seed.datasetId)).toThrow();router.dispose()
+})
+
+it('rejects a direct selection from an expired fare generation',async()=>{
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'})})
+ const expired=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'}},new AbortController().signal)
+ const store=createUIStateStore(),id=ArtifactIdSchema.parse('expired-selection');store.initializeMissing(id,{dates:{start:'2026-10-02'}})
+ bridge.release(expired.datasetId)
+ const router=createActionRouter(store,{bridge});router({kind:'select',artifactId:id,fareId:FareIdSchema.parse('fare-2026-10-02'),selected:true});await router.whenIdle(id)
+ expect(store.get(id).selectedFareIds).toEqual([]);router.dispose()
 })
 
 it('rejects changed source versions and clears unsupported old selections explicitly',async()=>{
@@ -80,7 +90,7 @@ it('restores the whole seeded mode scope after a narrow outside-date load',async
  const store=createUIStateStore();const id=ArtifactIdSchema.parse('modes');store.initializeMissing(id,{datasetRefs:[seed.datasetId],dates:{start:'2026-10-02'}});const router=createActionRouter(store,{bridge})
  router({kind:'modesByLeg',artifactId:id,modesByLeg:{'london:paris':['bus']}});await router.whenIdle(id);router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await router.whenIdle(id)
  router({kind:'modesByLeg',artifactId:id,modesByLeg:{'london:paris':[]}});await router.whenIdle(id)
- const current=bridge.getManifest(resolveBoundDatasetId(store.get(id),bridge,seed.datasetId));expect(current.coverage.dateWindow.from).toBe('2026-11-01');expect(current.coverage.modes).toEqual(['train','bus']);router.dispose()
+ const current=store.get(id).datasetRefs[0];if(!current)throw new Error('Missing current coverage');const manifest=bridge.getManifest(current);expect(manifest.coverage.dateWindow.from).toBe('2026-11-01');expect(manifest.coverage.modes).toEqual(['train','bus']);router.dispose()
 })
 
 it('drops zero-count modes while retaining the requested scope for later reloads',async()=>{
@@ -90,7 +100,7 @@ it('drops zero-count modes while retaining the requested scope for later reloads
  const router=createActionRouter(store,{bridge});router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await router.whenIdle(id)
  expect(store.get(id).availableModesByLeg['london:paris']).toEqual(['train'])
  expect(store.get(id).modesByLeg['london:paris']).toEqual([])
- const current=bridge.getManifest(resolveBoundDatasetId(store.get(id),bridge,seed.datasetId));expect(current.coverage.modes).toEqual(['train','bus']);router.dispose()
+ const current=store.get(id).datasetRefs[0];if(!current)throw new Error('Missing current coverage');expect(bridge.getManifest(current).coverage.modes).toEqual(['train','bus']);router.dispose()
 })
 
 it('keeps the chosen trip start and upstream fare when a valid arrival-derived downstream fare is selected',async()=>{

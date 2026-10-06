@@ -11,7 +11,8 @@ export function orderedLegResources(state:ArtifactUIState,bridge:FareDataBridge)
  const stops=route.filter((city,index,all):city is string=>!!city&&(index===0||city!==all[index-1]))
  if(stops.length>1){
   const ordered=stops.slice(1).flatMap((destination,index)=>{const resource=latest.get(`${stops[index]}:${destination}`);return resource?[resource]:[]})
-  if(state.citySequence.length>1||ordered.length)return ordered
+  if(state.citySequence.length>1)return ordered.length===stops.length-1?ordered:[]
+  if(ordered.length)return ordered
  }
  const seen=new Set<string>()
  return resources.flatMap(resource=>{if(seen.has(resource.key))return[];seen.add(resource.key);return[latest.get(resource.key)??resource]})
@@ -28,7 +29,7 @@ export function legRequest(state:ArtifactUIState,coverage:Coverage,selectedFacts
  const key=legKey(coverage);const chosen=key?state.modesByLeg[key]??state.filters.modes:state.filters.modes
  const threshold=legThreshold(state,coverage,selectedFacts)
  const visible=key?state.displayWindowByLeg[key]:undefined
- const fallbackTo=visible?.to??legDate(state,coverage.originIds[0]??'',state.dates.end??state.dates.start)
+ const fallbackTo=visible?.to??(state.dates.end?legDate(state,coverage.originIds[0]??'',state.dates.end):threshold.date)
  const requestedFrom=visible?.from&&visible.from>threshold.date?visible.from:threshold.date
  const from=requestedFrom>fallbackTo?fallbackTo:requestedFrom
  return {originIds:coverage.originIds,destinationIds:coverage.destinationIds,dateWindow:{from,to:fallbackTo},modes:chosen.length?chosen:coverage.modes,passengers:coverage.passengers}

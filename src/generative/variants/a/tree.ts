@@ -1,12 +1,13 @@
 import { z } from 'zod'
 import { LIMITS } from '../../contracts'
 import { assertNoBulkData } from '../../contracts/privacy'
-import { catalogDescriptors, sharedPropsSchema } from '../../catalog/generated/catalog'
-export type PresentNode=z.infer<typeof sharedPropsSchema>&{$type:string;$key?:string;children?:PresentNode|PresentNode[]|string}
+import { catalogDescriptors, nodePropsSchema } from '../../catalog/generated/catalog'
+import { isLegBoundPlannerComponent } from '../../catalog/trip-planning/binding'
+export type PresentNode=z.infer<typeof nodePropsSchema>&{$type:string;$key?:string;children?:PresentNode|PresentNode[]|string}
 const names=new Set<string>(catalogDescriptors.map(d=>d.name));const layouts=new Set<string>(catalogDescriptors.filter(d=>d.children).map(d=>d.name))
 export const registeredActions=new Set(['filters','dates','sort','sortByLeg','calendarDateByLeg','modesByLeg','select','stays','route','activate','retry'])
 export const registeredSelectors=new Set(['visibleFares','priceByDay','modeCounts','carrierCounts','cheapestFastest','selectedItinerary','syntheticTotal','coverage','route','timeline','legSchedule'])
-const nodeSchema:z.ZodType<PresentNode>=z.lazy(()=>sharedPropsSchema.extend({$type:z.string().refine(name=>names.has(name),'Unregistered component'),$key:z.string().max(96).optional(),children:z.union([z.string().max(160),nodeSchema,z.array(nodeSchema).max(LIMITS.treeNodes)]).optional()}))
+const nodeSchema:z.ZodType<PresentNode>=z.lazy(()=>nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name),'Unregistered component'),$key:z.string().max(96).optional(),children:z.union([z.string().max(160),nodeSchema,z.array(nodeSchema).max(LIMITS.treeNodes)]).optional()}))
 export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string>;datasetIds:Set<string>}):PresentNode {
  assertNoBulkData(input)
  if(new TextEncoder().encode(JSON.stringify(input)).length>24_000)throw new Error('Tree byte budget exceeded')
@@ -14,8 +15,11 @@ export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string
  let count=0;const keys=new Set<string>()
  const visit=(node:PresentNode,depth:number):void=>{
   if(++count>LIMITS.treeNodes||depth>LIMITS.treeDepth)throw new Error('Tree budget exceeded')
+  const legBound=isLegBoundPlannerComponent(node.$type)
+  if(node.legIndex!==undefined&&!legBound)throw new Error('legIndex is only valid for leg-bound planner components')
+  if(node.datasetRef&&legBound&&node.legIndex===undefined)throw new Error('Leg-bound planner dataset requires legIndex')
   if(scope&&!scope.artifactIds.has(node.artifactRef))throw new Error('Unknown artifact reference')
-  if(scope&&node.datasetRef&&!scope.datasetIds.has(node.datasetRef))throw new Error('Unknown dataset reference')
+  if(scope&&node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(legBound&&node.legIndex!==undefined))throw new Error('Unknown dataset reference')
   if(node.actionRef&&!registeredActions.has(node.actionRef))throw new Error('Unknown action reference')
   if(node.selectorRef&&!registeredSelectors.has(node.selectorRef))throw new Error('Unknown selector reference')
   if(node.$key){if(keys.has(node.$key))throw new Error('Duplicate node key');keys.add(node.$key)}
@@ -25,7 +29,7 @@ export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string
  visit(root,1);return root
 }
 
-const shallowNodeSchema=sharedPropsSchema.extend({$type:z.string().refine(name=>names.has(name)),$key:z.string().max(96).optional()})
+const shallowNodeSchema=nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name)),$key:z.string().max(96).optional()})
 /** Only completed, allowlisted scalar props reach the native renderer. */
 export function prunePresentTree(input:unknown,scope?:{artifactIds:Set<string>;datasetIds:Set<string>},partialPath?:readonly string[]):PresentNode|undefined {
  let remaining=LIMITS.treeNodes;const keys=new Set<string>()
@@ -38,8 +42,10 @@ export function prunePresentTree(input:unknown,scope?:{artifactIds:Set<string>;d
   }
   const parsed=shallowNodeSchema.safeParse(scalar);if(!parsed.success)return undefined
   const node=parsed.data
+  const legBound=isLegBoundPlannerComponent(node.$type)
+  if(node.legIndex!==undefined&&!legBound||node.datasetRef&&legBound&&node.legIndex===undefined)return undefined
   if(depth===1&&node.$type!=='TravelSurface')return undefined
-  if(scope&&(!scope.artifactIds.has(node.artifactRef)||(node.datasetRef&&!scope.datasetIds.has(node.datasetRef))))return undefined
+  if(scope&&(!scope.artifactIds.has(node.artifactRef)||(node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(legBound&&node.legIndex!==undefined))))return undefined
   if(node.actionRef&&!registeredActions.has(node.actionRef)||node.selectorRef&&!registeredSelectors.has(node.selectorRef))return undefined
   if(node.$key){if(keys.has(node.$key))return undefined;keys.add(node.$key)}
   if(!layouts.has(node.$type))return node

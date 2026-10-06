@@ -88,6 +88,29 @@ it('hides old-route fares while replacement coverage is loading', async () => {
   router.dispose()
 })
 
+it('keeps a standalone authored calendar bound by leg position after every endpoint changes', async () => {
+  const bridge=createFareDataBridge({pageSource:async input=>{
+    const row=FareRowSchema.parse({id:`${input.originId}-${input.destinationId}-${input.date}`,originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',carrierName:'Fixture Rail',priceCents:4700,durationMinutes:150,departureMinutes:540,availableSeats:12,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
+    return{rows:[row],total:1,pages:1,page:input.page,sourceVersion:'authored-binding-v1'}
+  }})
+  const load=async(originId:string,destinationId:string)=>bridge.load(CoverageRequestSchema.parse({originIds:[originId],destinationIds:[destinationId],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train'],passengers:1}),new AbortController().signal)
+  const first=await load('london','paris'),second=await load('paris','rome')
+  const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[first.datasetId,second.datasetId],citySequence:['london','paris','rome'],dates:{start:'2026-10-09'}})
+  const router=createActionRouter(state,{bridge})
+  render(<TravelProvider services={{bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}}><FareCalendar artifactRef={artifactId} datasetRef={first.datasetId} legIndex={0}/></TravelProvider>)
+  await screen.findByRole('heading',{name:'Fare calendar'})
+
+  for(const citySequence of [['berlin','paris','rome'],['berlin','amsterdam','rome'],['berlin','amsterdam','vienna']]){
+    router({kind:'route',artifactId,citySequence})
+    await router.whenIdle(artifactId)
+  }
+
+  const heading=await screen.findByRole('heading',{name:'Fare calendar'})
+  expect(heading.closest('.trip-calendar-header')).toHaveTextContent('Berlin Amsterdam')
+  expect(screen.queryByText('No route is ready yet')).not.toBeInTheDocument()
+  router.dispose()
+})
+
 it('shows only the leg display window and persists a day chosen from selected modes', async () => {
   const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-11' }, modes: ['train', 'bus'], passengers: 1 })
   const bridge = createFareDataBridge({ pageSource: async input => {
@@ -145,7 +168,7 @@ it('shifts the full itinerary window before querying and rendering a new first-l
   })
   const router = createActionRouter(state, { bridge })
   const services = { bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }
-  render(<TravelProvider services={services}><TravelDate artifactRef={artifactId} datasetRef={manifest.datasetId} /><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId} /></TravelProvider>)
+  render(<TravelProvider services={services}><TravelDate artifactRef={artifactId} datasetRef={manifest.datasetId} legIndex={0} /><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId} legIndex={0} /></TravelProvider>)
 
   fireEvent.change(screen.getByLabelText('Departure'), { target: { value: '2026-10-10' } })
   await router.whenIdle(artifactId)
@@ -171,7 +194,7 @@ it('lets a later-leg departure move backward by reducing its stay', async () => 
   const state = createUIStateStore()
   state.initializeMissing(artifactId, { datasetRefs: [first.datasetId, second.datasetId], citySequence: ['london', 'paris', 'rome'], dates: { start: '2026-10-26', end: '2026-11-02' }, stays: [{ cityId: 'paris', nights: 3 }, { cityId: 'rome', nights: 0 }] })
   const router = createActionRouter(state, { bridge })
-  render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}><TravelDate artifactRef={artifactId} datasetRef={second.datasetId} /></TravelProvider>)
+  render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}><TravelDate artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1} /></TravelProvider>)
   const input = screen.getByLabelText('Departure')
 
   expect(input).toHaveValue('2026-10-29')

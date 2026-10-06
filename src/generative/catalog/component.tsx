@@ -1,14 +1,15 @@
 import { Component, type ReactNode } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { sharedPropsSchema } from './generated/catalog'
+import { nodePropsSchema } from './generated/catalog'
 import { useTravelServices } from './context'
-import { ArtifactIdSchema, DatasetIdSchema } from '../contracts'
+import { ArtifactIdSchema } from '../contracts'
 import { Layout, type WidgetProps } from './layout'
 import { Control } from './controls'
 import { Status } from './status'
 import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, ComparisonTable, ModeBreakdown, SelectedItinerary, Total, Coverage, Route, Timeline, Plot, CheapestFastest, SelectedFareCount } from './views'
 import { CityField, TravelDate, StayDuration, TransportSelect, FareOrder, FadeFares, FareCalendar, MultiCityPlanGrid } from './trip-planning/components'
+import { resolvePlannerDatasetRef } from './trip-planning/binding'
 const layouts=new Set(['TravelSurface','TravelHero','Section','Stack','Inline','ResponsiveGrid','SplitPane','StickySummary','Tabs','Carousel','Callout'])
 const controls=new Set(['ModeChips','CarrierFilter','PriceRange','DurationRange','DirectToggle','SortSelect','DateStrip','DateWindow','StayAllocation'])
 const statuses=new Set(['ArtifactSkeleton','CoverageNotice','EmptyState','InlineError','StaleBadge','RetryAction'])
@@ -18,10 +19,13 @@ export class ArtifactErrorBoundary extends Component<{children:ReactNode},{faile
 }
 export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  const services=useTravelServices()
- const {children,$status,...scalar}=input;const parsed=sharedPropsSchema.safeParse(scalar)
+ const {children,$status,...scalar}=input;const parsed=nodePropsSchema.safeParse(scalar)
  if(!parsed.success)return $status==='streaming'?<Skeleton className="travel-skeleton" role="status">Preparing view…</Skeleton>:<Alert className="travel-tools-error">This view has invalid references.</Alert>
  const props={...parsed.data,children,$status}
- try {services.state.get(ArtifactIdSchema.parse(props.artifactRef));if(props.datasetRef)services.bridge.getManifest(DatasetIdSchema.parse(props.datasetRef))}catch{return <Alert className="travel-notice" role="status">This view's travel data is not available. Reload or retry the conversation.</Alert>}
+ try {
+  services.state.get(ArtifactIdSchema.parse(props.artifactRef))
+  resolvePlannerDatasetRef({kind,artifactRef:props.artifactRef,datasetRef:props.datasetRef,legIndex:props.legIndex},services.state,services.bridge)
+ }catch{return <Alert className="travel-notice" role="status">This view's travel data is not available. Reload or retry the conversation.</Alert>}
  let content:ReactNode
  if(layouts.has(kind))content=<Layout kind={kind} {...props}/>
  else if(controls.has(kind))content=<Control kind={kind} {...props}/>

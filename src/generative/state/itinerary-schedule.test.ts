@@ -6,7 +6,7 @@ import {legState} from './leg-bindings'
 const state = (nights = 3): ArtifactUIState => ({
   artifactId: ArtifactIdSchema.parse('schedule'), revision: UIStateRevisionSchema.parse(0), runtimeVariables: {}, datasetRefs: [],
   filters: {modes: [], carrierIds: [], directOnly: false}, dates: {start: '2026-10-26'},
-  citySequence:['london','paris','rome'],stays: [{cityId: 'paris', nights}], modesByLeg: {}, availableModesByLeg:{}, displayWindowByLeg:{}, sort: {field: 'priceCents', direction: 'asc'},sortByLeg:{},calendarDateByLeg:{},
+  citySequence:['london','paris','rome'],stays: [{cityId: 'paris', nights}], modesByLeg: {}, availableModesByLeg:{},requestedModesByLeg:{}, displayWindowByLeg:{}, sort: {field: 'priceCents', direction: 'asc'},sortByLeg:{},calendarDateByLeg:{},
   selectedFareIds: [], pending: [], lastInteractionAt: '2026-10-01T00:00:00.000Z',
 })
 const fare = (id:string, originId:string, destinationId:string, serviceDate:string, departureMinutes:number, durationMinutes:number):BoundedFareFact => ({

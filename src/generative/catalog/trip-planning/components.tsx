@@ -85,7 +85,11 @@ function routeCities(plan: Plan): string[] {
   return first ? [first.originId, ...plan.legs.map(leg => leg.destinationId)] : []
 }
 
-function resolveLeg(plan: Plan, datasetRef?: string): { leg: PlanLeg; index: number } | undefined {
+function resolveLeg(plan: Plan, datasetRef?: string, legIndex?: number): { leg: PlanLeg; index: number } | undefined {
+  if (legIndex !== undefined) {
+    const leg = plan.legs[legIndex]
+    return leg ? { leg, index: legIndex } : undefined
+  }
   if (!datasetRef) {
     const leg = plan.legs[0]
     return leg ? { leg, index: 0 } : undefined
@@ -206,7 +210,7 @@ function CityFields({ plan, leg, legIndex, locations, onlyDestination = false }:
 export function CityField(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
   const catalog = useLocationCatalog()
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
   return <Card className="trip-planning-control trip-city-card">
     <h3>{props.title ?? 'Cities'}</h3>
@@ -254,7 +258,7 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
 
 export function TravelDate(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
   return <Card className="trip-planning-control"><TravelDateControl plan={plan} leg={resolved.leg} label={props.title} /></Card>
 }
@@ -280,7 +284,7 @@ function StayDurationControl({ plan, leg, nextLeg, title }: { plan: Plan; leg: P
 
 export function StayDuration(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
   return <Card className="trip-planning-control"><StayDurationControl plan={plan} leg={resolved.leg} nextLeg={plan.legs[resolved.index + 1]} title={props.title} /></Card>
 }
@@ -319,7 +323,7 @@ function TransportSelectControl({ plan, leg, title, presentation = 'inline' }: {
 
 export function TransportSelect(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
   return <Card className="trip-planning-control"><TransportSelectControl plan={plan} leg={resolved.leg} title={props.title} /></Card>
 }
@@ -370,16 +374,16 @@ function FareOrderControl({ plan, leg, title }: { plan: Plan; leg: PlanLeg; titl
 
 export function FareOrder(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
   return <Card className="trip-planning-control"><FareOrderControl plan={plan} leg={resolved.leg} title={props.title} /></Card>
 }
 
-function FareStrip({ artifactRef, datasetRef, compact = false }: { artifactRef: string; datasetRef: string; compact?: boolean }) {
+function FareStrip({ artifactRef, datasetRef, legIndex, compact = false }: { artifactRef: string; datasetRef: string; legIndex?: number; compact?: boolean }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
   const result = useLegFareRows(artifactRef, datasetRef)
-  const resolved = resolveLeg(plan, datasetRef)
+  const resolved = resolveLeg(plan, datasetRef, legIndex)
   if (!resolved) return <EmptyPlanningState />
   if (result.status === 'loading') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
   if (result.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
@@ -401,9 +405,9 @@ function FareStrip({ artifactRef, datasetRef, compact = false }: { artifactRef: 
 
 export function FadeFares(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
-  return <Card className="trip-planning-control trip-fade-fares"><h3>{props.title ?? 'Choose a fare'}</h3><FareStrip artifactRef={props.artifactRef} datasetRef={resolved.leg.datasetId} /></Card>
+  return <Card className="trip-planning-control trip-fade-fares"><h3>{props.title ?? 'Choose a fare'}</h3><FareStrip artifactRef={props.artifactRef} datasetRef={resolved.leg.datasetId} legIndex={resolved.index} /></Card>
 }
 
 function dateRange(start: string, end: string): string[] {
@@ -417,10 +421,10 @@ function dateRange(start: string, end: string): string[] {
   return dates
 }
 
-function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: string; datasetRef: string; title?: string }) {
+function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifactRef: string; datasetRef: string; legIndex: number; title?: string }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
-  const resolved = resolveLeg(plan, datasetRef)
+  const resolved = resolveLeg(plan, datasetRef, legIndex)
   const displayWindow = resolved ? plan.state.displayWindowByLeg[resolved.leg.key] : undefined
   const legacyFrom = resolved ? legDate(plan.state, resolved.leg.originId, plan.state.dates.start) : plan.state.dates.start
   const legacyTo = resolved ? legDate(plan.state, resolved.leg.originId, plan.state.dates.end ?? plan.state.dates.start) : legacyFrom
@@ -489,9 +493,9 @@ function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: str
 
 export function FareCalendar(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
-  const resolved = resolveLeg(plan, props.datasetRef)
+  const resolved = resolveLeg(plan, props.datasetRef, props.legIndex)
   if (!resolved) return <EmptyPlanningState />
-  return <FareCalendarView artifactRef={props.artifactRef} datasetRef={resolved.leg.datasetId} title={props.title} />
+  return <FareCalendarView artifactRef={props.artifactRef} datasetRef={resolved.leg.datasetId} legIndex={resolved.index} title={props.title} />
 }
 
 function LegRow({ plan, leg, index, locations }: { plan: Plan; leg: PlanLeg; index: number; locations: LocationOption[] }) {

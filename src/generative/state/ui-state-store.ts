@@ -14,7 +14,7 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
   }
   function initializeMissing(artifactId: ArtifactId, defaults: Partial<ArtifactUIState>): void {
     if (states.has(artifactId)) return
-    const state = ArtifactUIStateSchema.parse({ revision:0,datasetRefs:[],filters:{modes:[],carrierIds:[],directOnly:false},dates:{start:now().slice(0,10)},citySequence:[],stays:[],modesByLeg:{},availableModesByLeg:{},displayWindowByLeg:{},sort:{field:'priceCents',direction:'asc'},sortByLeg:{},calendarDateByLeg:{},selectedFareIds:[],pending:[],lastInteractionAt:now(),...defaults,artifactId })
+    const state = ArtifactUIStateSchema.parse({ revision:0,datasetRefs:[],filters:{modes:[],carrierIds:[],directOnly:false},dates:{start:now().slice(0,10)},citySequence:[],stays:[],modesByLeg:{},availableModesByLeg:{},requestedModesByLeg:{},displayWindowByLeg:{},sort:{field:'priceCents',direction:'asc'},sortByLeg:{},calendarDateByLeg:{},selectedFareIds:[],pending:[],lastInteractionAt:now(),...defaults,artifactId })
     states.set(artifactId,state)
     listeners.get(artifactId)?.forEach(listener => listener())
   }
@@ -51,11 +51,12 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
         const legKeys=new Set(command.citySequence.slice(1).map((destination,index)=>`${command.citySequence[index]}:${destination}`))
         const destinations=new Set(command.citySequence.slice(1))
         const active=<T>(record:Record<string,T>):Record<string,T>=>Object.fromEntries(Object.entries(record).filter(([key])=>legKeys.has(key)))
-        patch={citySequence:command.citySequence,stays:current.stays.filter(stay=>destinations.has(stay.cityId)),modesByLeg:active(current.modesByLeg),availableModesByLeg:active(current.availableModesByLeg),displayWindowByLeg:active(current.displayWindowByLeg),sortByLeg:active(current.sortByLeg),calendarDateByLeg:active(current.calendarDateByLeg)};break
+        patch={citySequence:command.citySequence,stays:current.stays.filter(stay=>destinations.has(stay.cityId)),modesByLeg:active(current.modesByLeg),availableModesByLeg:active(current.availableModesByLeg),requestedModesByLeg:active(current.requestedModesByLeg),displayWindowByLeg:active(current.displayWindowByLeg),sortByLeg:active(current.sortByLeg),calendarDateByLeg:active(current.calendarDateByLeg)};break
       }
       case 'runtimeVariables': patch={runtimeVariables:command.runtimeVariables};break
       case 'modesByLeg': patch={modesByLeg:command.modesByLeg};break
       case 'availableModesByLeg':patch={availableModesByLeg:command.availableModesByLeg};break
+      case 'requestedModesByLeg':patch={requestedModesByLeg:command.requestedModesByLeg};break
       case 'displayWindowByLeg':patch={displayWindowByLeg:command.displayWindowByLeg};break
       case 'datasets': patch={datasetRefs:command.datasetRefs};break
       case 'select': patch={selectedFareIds:command.selected ? [...new Set([...current.selectedFareIds,command.fareId])] : current.selectedFareIds.filter(id => id !== command.fareId)};break
@@ -66,8 +67,8 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
     listeners.get(command.artifactId)?.forEach(listener => listener())
     return {status:'applied',revision:next.revision}
   }
-  return {get,initializeMissing,dispatch,
+  return {get,initializeMissing,dispatch,getIds:()=>[...states.keys()],
     subscribe(id,listener) {const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
-    exportSnapshot(id) {const state=get(id);return CompactArtifactSnapshotSchema.parse({artifactId:state.artifactId,revision:state.revision,datasetRefs:state.datasetRefs,selectedFareIds:state.selectedFareIds,filters:state.filters,dates:state.dates,citySequence:state.citySequence,stays:state.stays,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,displayWindowByLeg:state.displayWindowByLeg,pending:state.pending,sort:state.sort,sortByLeg:state.sortByLeg,calendarDateByLeg:state.calendarDateByLeg,runtimeVariables:state.runtimeVariables,legThresholds:[],componentBindings:[],layoutSummary:'Travel artifact with local dates, filters and selections.',catalogVersion:CATALOG_VERSION})},
+    exportSnapshot(id) {const state=get(id);return CompactArtifactSnapshotSchema.parse({artifactId:state.artifactId,revision:state.revision,datasetRefs:state.datasetRefs,selectedFareIds:state.selectedFareIds,filters:state.filters,dates:state.dates,citySequence:state.citySequence,stays:state.stays,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,requestedModesByLeg:state.requestedModesByLeg,displayWindowByLeg:state.displayWindowByLeg,pending:state.pending,sort:state.sort,sortByLeg:state.sortByLeg,calendarDateByLeg:state.calendarDateByLeg,runtimeVariables:state.runtimeVariables,legThresholds:[],componentBindings:[],layoutSummary:'Travel artifact with local dates, filters and selections.',catalogVersion:CATALOG_VERSION})},
   }
 }

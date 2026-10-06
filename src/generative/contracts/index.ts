@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const CONTRACT_VERSION = '1.0.0';
-export const CATALOG_VERSION = '1.0.0';
+export const CATALOG_VERSION = '1.1.0';
 export const LIMITS = Object.freeze({ snapshotBytes: 24_000, artifacts: 8, storedArtifacts: 20, artifactDatasets: 8, snapshotDatasets: 8 * 8, passengers: 8, plannedFares: 20 * 8, selectedFacts: 20 * 8, queryRows: 100, queryGroups: 30, treeNodes: 80, treeDepth: 8, toolCalls: 12, factBudget: 12 });
 const ref = z.string().min(1).max(96).regex(/^[a-zA-Z0-9_.:-]+$/);
 const revision = z.number().int().nonnegative();
@@ -72,14 +72,14 @@ export const LegThresholdSchema = z.strictObject({
   source: z.enum(['trip-date','selected-arrival']), precedingFareId: FareIdSchema.optional(), selectedFareId: FareIdSchema.optional(),
 });
 export type LegThresholdSummary = z.infer<typeof LegThresholdSchema>;
-export const ComponentBindingSchema=z.strictObject({key:ref.optional(),type:ref,legKey:ref.optional(),datasetRef:DatasetIdSchema.optional(),actionRef:ref.optional(),selectorRef:ref.optional()});
+export const ComponentBindingSchema=z.strictObject({key:ref.optional(),type:ref,legIndex:z.number().int().min(0).max(7).optional(),legKey:ref.optional(),datasetRef:DatasetIdSchema.optional(),actionRef:ref.optional(),selectorRef:ref.optional()});
 export type ComponentBinding=z.infer<typeof ComponentBindingSchema>;
 export const RuntimeVariablesSchema=z.record(z.string().regex(/^\$[A-Za-z][A-Za-z0-9_]{0,39}$/),z.union([z.string().max(160),z.number().finite(),z.boolean(),z.null()])).refine(value=>Object.keys(value).length<=16,'Runtime variable count exceeded');
 export const ArtifactUIStateSchema = z.strictObject({
   artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema, runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(LIMITS.artifactDatasets),
   filters: TravelFiltersSchema, dates: z.strictObject({ start: DateSchema, end: DateSchema.optional() }),
   citySequence: CitySequenceSchema.default([]), stays: z.array(StayAllocationSchema).max(8), modesByLeg: z.record(ref, z.array(TransportModeSchema).max(4)),
-  availableModesByLeg:z.record(ref,z.array(TransportModeSchema).max(4)).default({}),displayWindowByLeg:z.record(ref,dateWindow).default({}),
+  availableModesByLeg:z.record(ref,z.array(TransportModeSchema).max(4)).default({}),requestedModesByLeg:z.record(ref,z.array(TransportModeSchema).max(4)).default({}),displayWindowByLeg:z.record(ref,dateWindow).default({}),
   sortByLeg:z.record(ref,SortSpecSchema).default({}),calendarDateByLeg:z.record(ref,DateSchema).default({}),
   sort: SortSpecSchema, selectedFareIds: z.array(FareIdSchema).max(8),
   pending: z.array(z.strictObject({ requestId: ref, kind: z.enum(['load', 'query']) })).max(8), lastInteractionAt: z.string().datetime(),
@@ -97,7 +97,7 @@ export const CompactArtifactSnapshotSchema = z.strictObject({ artifactId: Artifa
   runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(LIMITS.artifactDatasets), selectedFareIds: z.array(FareIdSchema).max(8), filters: TravelFiltersSchema,
   dates: ArtifactUIStateSchema.shape.dates, citySequence: ArtifactUIStateSchema.shape.citySequence, stays: z.array(StayAllocationSchema).max(8), sort: SortSpecSchema,
   sortByLeg:ArtifactUIStateSchema.shape.sortByLeg,calendarDateByLeg:ArtifactUIStateSchema.shape.calendarDateByLeg,
-  availableModesByLeg:ArtifactUIStateSchema.shape.availableModesByLeg,displayWindowByLeg:ArtifactUIStateSchema.shape.displayWindowByLeg,
+  availableModesByLeg:ArtifactUIStateSchema.shape.availableModesByLeg,requestedModesByLeg:ArtifactUIStateSchema.shape.requestedModesByLeg,displayWindowByLeg:ArtifactUIStateSchema.shape.displayWindowByLeg,
   modesByLeg: ArtifactUIStateSchema.shape.modesByLeg, pending: ArtifactUIStateSchema.shape.pending,
   legThresholds: z.array(LegThresholdSchema).max(8).default([]), componentBindings:z.array(ComponentBindingSchema).max(LIMITS.treeNodes).default([]), layoutSummary: z.string().max(600), catalogVersion: z.literal(CATALOG_VERSION) });
 export type CompactArtifactSnapshot = z.infer<typeof CompactArtifactSnapshotSchema>;
@@ -149,7 +149,7 @@ export type BoundedQueryResult = { rows: Array<Record<string, JsonScalar>>; tota
 export type UICommand = { artifactId: ArtifactId; expectedRevision?: UIStateRevision } & (
   { kind: 'filters'; filters: TravelFilters } | { kind: 'dates'; dates: ArtifactUIState['dates'] } |
   { kind: 'sort'; sort: SortSpec } | {kind:'sortByLeg';sortByLeg:ArtifactUIState['sortByLeg']} | {kind:'calendarDateByLeg';calendarDateByLeg:ArtifactUIState['calendarDateByLeg']} | { kind: 'select'; fareId: FareId; selected: boolean } |
-  { kind: 'runtimeVariables'; runtimeVariables: ArtifactUIState['runtimeVariables'] } | { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | {kind:'availableModesByLeg';availableModesByLeg:ArtifactUIState['availableModesByLeg']} | {kind:'displayWindowByLeg';displayWindowByLeg:ArtifactUIState['displayWindowByLeg']} | { kind: 'route'; citySequence: ArtifactUIState['citySequence'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
+  { kind: 'runtimeVariables'; runtimeVariables: ArtifactUIState['runtimeVariables'] } | { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | {kind:'availableModesByLeg';availableModesByLeg:ArtifactUIState['availableModesByLeg']} | {kind:'requestedModesByLeg';requestedModesByLeg:ArtifactUIState['requestedModesByLeg']} | {kind:'displayWindowByLeg';displayWindowByLeg:ArtifactUIState['displayWindowByLeg']} | { kind: 'route'; citySequence: ArtifactUIState['citySequence'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
 export type DispatchResult = { status: 'applied'; revision: UIStateRevision } | { status: 'stale'; revision: UIStateRevision };
 export interface FareDataBridge {
   load(request: CoverageRequest, signal: AbortSignal): Promise<DatasetManifest>;
@@ -166,8 +166,9 @@ export interface UIStateStore {
   dispatch(command: UICommand): DispatchResult;
   subscribe(artifactId: ArtifactId, listener: () => void): () => void;
   exportSnapshot(artifactId: ArtifactId): CompactArtifactSnapshot;
+  getIds?(): ArtifactId[];
 }
-export type ComponentDescriptor = { name: string; description: string; group: 'layout'|'status'|'control'|'view'; props: ReadonlyArray<{ name: string; kind: 'ref'|'text'|'variant'; required: boolean }>; children: boolean };
+export type ComponentDescriptor = { name: string; description: string; group: 'layout'|'status'|'control'|'view'; props: ReadonlyArray<{ name: string; kind: 'ref'|'text'|'variant'|'number'; required: boolean }>; children: boolean };
 
 export function parseQuery(input: unknown, manifests: DatasetManifest[]): ValidatedQueryIR {
   const query = QueryIRSchema.parse(input);
@@ -228,6 +229,7 @@ export const UICommandPatchSchema = z.discriminatedUnion('kind', [
  z.strictObject({kind:z.literal('runtimeVariables'),runtimeVariables:RuntimeVariablesSchema}),
  z.strictObject({kind:z.literal('modesByLeg'),modesByLeg:ArtifactUIStateSchema.shape.modesByLeg}),
  z.strictObject({kind:z.literal('availableModesByLeg'),availableModesByLeg:ArtifactUIStateSchema.shape.availableModesByLeg}),
+ z.strictObject({kind:z.literal('requestedModesByLeg'),requestedModesByLeg:ArtifactUIStateSchema.shape.requestedModesByLeg}),
  z.strictObject({kind:z.literal('displayWindowByLeg'),displayWindowByLeg:ArtifactUIStateSchema.shape.displayWindowByLeg}),
  z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.boolean()}),
 ]);

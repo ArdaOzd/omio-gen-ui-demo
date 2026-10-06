@@ -1,6 +1,7 @@
 import type { ArtifactId,ArtifactUIState,CoverageRequest,DatasetManifest,DispatchResult,FareDataBridge,UICommand,UIStateStore,ValidatedQueryIR,DatasetId,DatasetRevision,FareId } from '../contracts'
 import { availableModes,legDate,legKey,legRequest,orderedLegResources } from './leg-bindings'
 import { scheduleLegs,staleDownstreamFareIds } from './itinerary-schedule'
+import { releaseDatasetWhenUnowned } from './dataset-ownership'
 export type QueryFareSelectionScope={
  kind:'query-result';fareIds:readonly FareId[];query:ValidatedQueryIR;currentQuery:()=>ValidatedQueryIR
  sources:ReadonlyArray<{datasetId:DatasetId;revision:DatasetRevision;sourceVersion:string}>
@@ -10,7 +11,7 @@ export function covers(manifest:DatasetManifest,request:CoverageRequest):boolean
  const coverage=manifest.coverage
  return coverage.complete&&!coverage.truncated&&request.passengers===coverage.passengers&&request.originIds.every(id=>coverage.originIds.includes(id))&&request.destinationIds.every(id=>coverage.destinationIds.includes(id))&&request.modes.every(mode=>coverage.modes.includes(mode))&&request.dateWindow.from>=coverage.dateWindow.from&&request.dateWindow.to<=coverage.dateWindow.to
 }
-const signature=(state:ArtifactUIState)=>JSON.stringify({dates:state.dates,citySequence:state.citySequence,stays:state.stays,modes:state.filters.modes,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,displayWindowByLeg:state.displayWindowByLeg})
+const signature=(state:ArtifactUIState)=>JSON.stringify({dates:state.dates,citySequence:state.citySequence,stays:state.stays,modes:state.filters.modes,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,requestedModesByLeg:state.requestedModesByLeg,displayWindowByLeg:state.displayWindowByLeg})
 function requestsFor(state:ArtifactUIState,bridge:FareDataBridge,selectedFacts:readonly Awaited<ReturnType<FareDataBridge['lookupFare']>>[]=[]):CoverageRequest[]{
  const resources=orderedLegResources(state,bridge)
  const first=resources[0]??state.datasetRefs.flatMap(datasetId=>{const coverage=bridge.getManifest(datasetId).coverage,key=legKey(coverage);return key?[{key,datasetId,coverage}]:[]})[0]
@@ -18,7 +19,8 @@ function requestsFor(state:ArtifactUIState,bridge:FareDataBridge,selectedFacts:r
  const coverageFor=(origin:string,destination:string)=>{
   const matches=state.datasetRefs.map(id=>bridge.getManifest(id).coverage).filter(coverage=>legKey(coverage)===`${origin}:${destination}`)
   const seed=matches[0]??first.coverage
-  const modes=[...new Set(matches.flatMap(coverage=>coverage.modes))]
+  const requested=state.requestedModesByLeg[`${origin}:${destination}`]
+  const modes=requested?.length?requested:[...new Set(matches.flatMap(coverage=>coverage.modes))]
   return{...seed,originIds:[origin],destinationIds:[destination],modes:modes.length?modes:seed.modes}
  }
  const route=state.citySequence.length>1?state.citySequence:state.stays.length?[first.coverage.originIds[0]!,...state.stays.map(stay=>stay.cityId)]:[]
@@ -73,7 +75,10 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
     }
     const retained=facts.filter(fact=>store.get(command.artifactId).selectedFareIds.includes(fact.id))
     if(aligned||['select','dates','route','stays'].includes(command.kind))await retry(command.artifactId,retained)
-   }).catch(()=>options.onCoverageStatus?.({artifactId:command.artifactId,status:'error',message:'The selected synthetic fare is no longer available.'})).finally(()=>{if(selections.get(command.artifactId)?.token===token)selections.delete(command.artifactId)})
+   }).catch(()=>{
+    if(command.kind==='select'&&command.selected&&selections.get(command.artifactId)?.token===token){const current=store.get(command.artifactId);if(current.selectedFareIds.includes(command.fareId))store.dispatch({kind:'select',artifactId:command.artifactId,fareId:command.fareId,selected:false,expectedRevision:current.revision})}
+    options.onCoverageStatus?.({artifactId:command.artifactId,status:'error',message:'The selected synthetic fare is no longer available.'})
+   }).finally(()=>{if(selections.get(command.artifactId)?.token===token)selections.delete(command.artifactId)})
    selections.set(command.artifactId,{token,promise});return result
   }
   if(!['dates','filters','route','stays','modesByLeg'].includes(command.kind))return result
@@ -84,6 +89,9 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
   const bridge=options.bridge;if(!bridge)return Promise.resolve()
   requests.get(artifactId)?.controller.abort();requests.delete(artifactId)
   let state=store.get(artifactId)
+  const requestedModesByLeg={...state.requestedModesByLeg}
+  for(const id of state.datasetRefs){const coverage=bridge.getManifest(id).coverage,key=legKey(coverage);if(key&&!requestedModesByLeg[key])requestedModesByLeg[key]=coverage.modes}
+  if(JSON.stringify(requestedModesByLeg)!==JSON.stringify(state.requestedModesByLeg)){store.dispatch({kind:'requestedModesByLeg',artifactId,requestedModesByLeg,expectedRevision:state.revision});state=store.get(artifactId)}
   const availableModesByLeg={...state.availableModesByLeg},modesByLeg={...state.modesByLeg}
   for(const id of state.datasetRefs){const manifest=bridge.getManifest(id),key=legKey(manifest.coverage);if(key){const actual=availableModes(manifest);availableModesByLeg[key]=actual;const chosen=modesByLeg[key];if(chosen){const retained=chosen.filter(mode=>actual.includes(mode));modesByLeg[key]=retained.length===actual.length?[]:retained}}}
   if(JSON.stringify(availableModesByLeg)!==JSON.stringify(state.availableModesByLeg)){store.dispatch({kind:'availableModesByLeg',artifactId,availableModesByLeg,expectedRevision:state.revision});state=store.get(artifactId)}
@@ -99,19 +107,20 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
     if(controller.signal.aborted||requests.get(artifactId)?.controller!==controller||signature(store.get(artifactId))!==captured)throw new Error('Superseded coverage')
     if(loaded.some(manifest=>manifest.source.sourceVersion!==manifests[0]?.source.sourceVersion))throw new Error('SOURCE_VERSION_CHANGED')
     const current=store.get(artifactId),all=[...current.datasetRefs,...loaded.map(manifest=>manifest.datasetId)]
-    const latest=new Map<string,DatasetId>(),seed=new Map<string,DatasetId>();for(const id of all){const key=legKey(bridge.getManifest(id).coverage);if(key){if(!seed.has(key))seed.set(key,id);latest.set(key,id)}}
+    const latest=new Map<string,DatasetId>();for(const id of all){const key=legKey(bridge.getManifest(id).coverage);if(key)latest.set(key,id)}
     const activeKeys=new Set(plans.map(plan=>legKey(plan)).filter((key):key is string=>key!==undefined))
     const currentRefs=[...activeKeys].flatMap(key=>{const last=latest.get(key);return last?[last]:[]})
     if(currentRefs.length>8)throw new Error('Eight-leg limit reached; start another travel view')
-    const seedRefs=[...activeKeys].flatMap(key=>{const first=seed.get(key);return first&&latest.get(key)!==first?[first]:[]})
-    const refs=[...seedRefs.slice(0,8-currentRefs.length),...currentRefs]
+    const refs=currentRefs
     const refreshedModes={...current.availableModesByLeg};for(const id of refs){const manifest=bridge.getManifest(id),key=legKey(manifest.coverage);if(key)refreshedModes[key]=availableModes(manifest)}
     const scopeResult=store.dispatch({kind:'availableModesByLeg',artifactId,availableModesByLeg:refreshedModes,expectedRevision:current.revision})
     if(scopeResult.status==='stale')throw new Error('Stale mode scope')
     let scoped=store.get(artifactId);const refreshedSelections={...scoped.modesByLeg}
     for(const [key,chosen] of Object.entries(refreshedSelections)){const actual=refreshedModes[key];if(actual){const retained=chosen.filter(mode=>actual.includes(mode));refreshedSelections[key]=retained.length===actual.length?[]:retained}}
     if(JSON.stringify(refreshedSelections)!==JSON.stringify(scoped.modesByLeg)){const selected=store.dispatch({kind:'modesByLeg',artifactId,modesByLeg:refreshedSelections,expectedRevision:scoped.revision});if(selected.status==='stale')throw new Error('Stale selected modes');scoped=store.get(artifactId)}
-    store.dispatch({kind:'datasets',artifactId,datasetRefs:refs,expectedRevision:scoped.revision})
+    const replaced=store.dispatch({kind:'datasets',artifactId,datasetRefs:refs,expectedRevision:scoped.revision})
+    if(replaced.status==='stale')throw new Error('Stale dataset replacement')
+    for(const previous of current.datasetRefs)if(!refs.includes(previous))releaseDatasetWhenUnowned(store,bridge,artifactId,previous)
     options.onCoverageStatus?.({artifactId,status:'ready'})
    }catch(error){for(const manifest of loaded)bridge.release(manifest.datasetId);if(!controller.signal.aborted){
      const changed=error instanceof Error&&error.message==='SOURCE_VERSION_CHANGED'

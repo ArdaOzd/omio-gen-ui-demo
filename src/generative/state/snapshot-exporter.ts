@@ -17,7 +17,9 @@ function prioritizeFacts(prepared:PreparedCapture,facts:BoundedFareFact[]):Bound
 function currentAuthoredBindings(input:ExportInput,snapshot:CompactArtifactSnapshot):ComponentBinding[]{
  const activeLegKeys=new Set(snapshot.citySequence.slice(1).map((destination,index)=>`${snapshot.citySequence[index]}:${destination}`))
  const latestByLeg=new Map(snapshot.datasetRefs.flatMap(datasetRef=>{try{const coverage=input.bridge.getManifest(datasetRef).coverage,key=`${coverage.originIds[0]??''}:${coverage.destinationIds[0]??''}`;return key===':'?[]:[[key,datasetRef] as const]}catch{return[]}}))
+ const currentByIndex=snapshot.citySequence.slice(1).map((destination,index)=>{const key=`${snapshot.citySequence[index]}:${destination}`;return{key,datasetRef:latestByLeg.get(key)}})
  return [...(input.componentBindings?.get(snapshot.artifactId)??snapshot.componentBindings)].flatMap(binding=>{
+  if(binding.legIndex!==undefined){const current=currentByIndex[binding.legIndex];return current?.datasetRef?[{...binding,legKey:current.key,datasetRef:current.datasetRef}]:[]}
   if(!binding.datasetRef||activeLegKeys.size===0)return[binding]
   try{const coverage=input.bridge.getManifest(binding.datasetRef).coverage,key=`${coverage.originIds[0]??''}:${coverage.destinationIds[0]??''}`;const current=latestByLeg.get(key);return activeLegKeys.has(key)&&current?[{...binding,datasetRef:current}]:[]}catch{return[]}
  })
@@ -34,13 +36,13 @@ function snapshots(input:ExportInput){
    const legKey=`${route[index]}:${destination}`,datasetRef=latest.get(legKey);if(!datasetRef)return[]
    const prefix=`${grid.key??'grid'}.leg-${index+1}`
    const bindings:ComponentBinding[]=[
-    {key:`${prefix}.cities`,type:'CityField',legKey,datasetRef,actionRef:'route'},
-    {key:`${prefix}.date`,type:'TravelDate',legKey,datasetRef,actionRef:'dates'},
-    {key:`${prefix}.transport`,type:'TransportSelect',legKey,datasetRef,actionRef:'modesByLeg'},
-    {key:`${prefix}.order`,type:'FareOrder',legKey,datasetRef,actionRef:'sortByLeg'},
-    {key:`${prefix}.fares`,type:'FadeFares',legKey,datasetRef,actionRef:'select',selectorRef:'visibleFares'},
+    {key:`${prefix}.cities`,type:'CityField',legIndex:index,legKey,datasetRef,actionRef:'route'},
+    {key:`${prefix}.date`,type:'TravelDate',legIndex:index,legKey,datasetRef,actionRef:'dates'},
+    {key:`${prefix}.transport`,type:'TransportSelect',legIndex:index,legKey,datasetRef,actionRef:'modesByLeg'},
+    {key:`${prefix}.order`,type:'FareOrder',legIndex:index,legKey,datasetRef,actionRef:'sortByLeg'},
+    {key:`${prefix}.fares`,type:'FadeFares',legIndex:index,legKey,datasetRef,actionRef:'select',selectorRef:'visibleFares'},
    ]
-   if(index<route.length-2)bindings.push({key:`${prefix}.stay`,type:'StayDuration',legKey,datasetRef,actionRef:'stays',selectorRef:'legSchedule'})
+   if(index<route.length-2)bindings.push({key:`${prefix}.stay`,type:'StayDuration',legIndex:index,legKey,datasetRef,actionRef:'stays',selectorRef:'legSchedule'})
    return bindings
   })
   return{...snapshot,componentBindings:[...authored,...internals].slice(0,LIMITS.treeNodes),layoutSummary:input.layoutSummaries?.get(id)??snapshot.layoutSummary}
