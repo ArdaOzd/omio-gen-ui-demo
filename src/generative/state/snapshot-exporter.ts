@@ -4,6 +4,16 @@ import { scheduleLegs, thresholdDateTime } from './itinerary-schedule'
 type ExportInput={turnId:string;activeArtifactId?:ArtifactId;artifactIds:ArtifactId[];store:UIStateStore;bridge:FareDataBridge;selectedFareFacts?:BoundedFareFact[];olderArtifactSummaries?:OlderArtifactSummary[];layoutSummaries?:ReadonlyMap<string,string>;componentBindings?:ReadonlyMap<string,readonly ComponentBinding[]>}
 type SnapshotRecord={snapshot:CompactArtifactSnapshot;lastInteractionAt:string;authoredBindingCount:number}
 type PreparedCapture={turnId:string;activeArtifactId?:ArtifactId;records:SnapshotRecord[];manifests:Map<string,ReturnType<FareDataBridge['getManifest']>>;plannedFareIds:ReturnType<UIStateStore['get']>['selectedFareIds']}
+function prioritizeRecords(records:SnapshotRecord[],activeArtifactId?:ArtifactId):SnapshotRecord[]{
+ return [...records].sort((left,right)=>Number(right.snapshot.artifactId===activeArtifactId)-Number(left.snapshot.artifactId===activeArtifactId)||Date.parse(right.lastInteractionAt)-Date.parse(left.lastInteractionAt)||(left.snapshot.artifactId===right.snapshot.artifactId?0:left.snapshot.artifactId<right.snapshot.artifactId?-1:1))
+}
+function prioritizeFacts(prepared:PreparedCapture,facts:BoundedFareFact[]):BoundedFareFact[]{
+ const ownerPriority=new Map<string,number>()
+ prepared.records.forEach((record,index)=>record.snapshot.selectedFareIds.forEach(fareId=>{if(!ownerPriority.has(fareId))ownerPriority.set(fareId,index)}))
+ const selectionOrder=new Map(prepared.plannedFareIds.map((fareId,index)=>[fareId,index]))
+ const unique=new Map(facts.map(fact=>[fact.id,fact]))
+ return [...unique.values()].sort((left,right)=>(ownerPriority.get(left.id)??Number.MAX_SAFE_INTEGER)-(ownerPriority.get(right.id)??Number.MAX_SAFE_INTEGER)||left.serviceDate.localeCompare(right.serviceDate)||left.departureMinutes-right.departureMinutes||(selectionOrder.get(left.id)??Number.MAX_SAFE_INTEGER)-(selectionOrder.get(right.id)??Number.MAX_SAFE_INTEGER)||left.id.localeCompare(right.id))
+}
 function currentAuthoredBindings(input:ExportInput,snapshot:CompactArtifactSnapshot):ComponentBinding[]{
  const activeLegKeys=new Set(snapshot.citySequence.slice(1).map((destination,index)=>`${snapshot.citySequence[index]}:${destination}`))
  return [...(input.componentBindings?.get(snapshot.artifactId)??snapshot.componentBindings)].filter(binding=>{
@@ -47,14 +57,14 @@ export function exportAgentContext(input:ExportInput):AgentContextEnvelope{
  return finish(envelope(input,snapshots(input),input.olderArtifactSummaries??[]))
 }
 function prepareCapture(input:Omit<ExportInput,'olderArtifactSummaries'|'selectedFareFacts'>):PreparedCapture{
- const records=snapshots(input).map(snapshot=>({snapshot,lastInteractionAt:input.store.get(snapshot.artifactId).lastInteractionAt,authoredBindingCount:currentAuthoredBindings(input,input.store.exportSnapshot(snapshot.artifactId)).length}))
+ const records=prioritizeRecords(snapshots(input).map(snapshot=>({snapshot,lastInteractionAt:input.store.get(snapshot.artifactId).lastInteractionAt,authoredBindingCount:currentAuthoredBindings(input,input.store.exportSnapshot(snapshot.artifactId)).length})),input.activeArtifactId)
  const manifests=new Map<string,ReturnType<FareDataBridge['getManifest']>>()
  for(const datasetId of new Set(records.flatMap(record=>record.snapshot.datasetRefs)))manifests.set(datasetId,structuredClone(input.bridge.getManifest(datasetId)))
  return {turnId:input.turnId,activeArtifactId:input.activeArtifactId,records,manifests,plannedFareIds:[...new Set(records.flatMap(record=>record.snapshot.selectedFareIds))]}
 }
 function capturePreparedContext(prepared:PreparedCapture,selectedFareFacts:BoundedFareFact[]):AgentContextEnvelope{
  const records=[...prepared.records]
- records.sort((left,right)=>Number(right.snapshot.artifactId===prepared.activeArtifactId)-Number(left.snapshot.artifactId===prepared.activeArtifactId)||Date.parse(right.lastInteractionAt)-Date.parse(left.lastInteractionAt)||(left.snapshot.artifactId===right.snapshot.artifactId?0:left.snapshot.artifactId<right.snapshot.artifactId?-1:1))
+ selectedFareFacts=prioritizeFacts(prepared,selectedFareFacts)
  const included=records.slice(0,LIMITS.artifacts)
  let factCount=selectedFareFacts.length
  let compactFactLabels=false
@@ -96,9 +106,7 @@ export function captureAgentContext(input:Omit<ExportInput,'olderArtifactSummari
 }
 export async function captureAgentContextWithSelectedFares(input:Omit<ExportInput,'olderArtifactSummaries'|'selectedFareFacts'>):Promise<AgentContextEnvelope>{
  const prepared=prepareCapture(input)
- const order=new Map(prepared.plannedFareIds.map((fareId,index)=>[fareId,index]))
  const resolved=await Promise.allSettled(prepared.plannedFareIds.map(fareId=>input.bridge.lookupFare(fareId,[])))
  const facts=resolved.flatMap(result=>result.status==='fulfilled'?[result.value]:[])
- facts.sort((left,right)=>left.serviceDate.localeCompare(right.serviceDate)||left.departureMinutes-right.departureMinutes||(order.get(left.id)??0)-(order.get(right.id)??0)||left.id.localeCompare(right.id))
  return capturePreparedContext(prepared,facts)
 }

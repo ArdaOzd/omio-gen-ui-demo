@@ -62,16 +62,19 @@ it('keeps every deduplicated planned fare id when selected artifacts are demoted
 })
 it('trims rich fare facts in deterministic order before planned ids',async()=>{
  const fixture=await restoredContextFixture()
- for(const [artifactIndex,artifactId] of fixture.artifactIds.entries())for(let fareIndex=0;fareIndex<8;fareIndex++){
+ const artifactIds=fixture.artifactIds.slice(0,8)
+ for(const [artifactIndex,artifactId] of artifactIds.entries())for(let fareIndex=0;fareIndex<8;fareIndex++){
   const current=fixture.store.get(artifactId)
   fixture.store.dispatch({kind:'select',artifactId,fareId:FareIdSchema.parse(`detail-${artifactIndex}-${fareIndex}`),selected:true,expectedRevision:current.revision})
  }
- const bridge:FareDataBridge={...fixture.bridge,lookupFare:async fareId=>BoundedFareFactSchema.parse({id:fareId,mode:'train',carrierId:'rail',carrierName:'A very descriptive synthetic railway carrier name used to exercise the bounded context budget',priceCents:1000,durationMinutes:90,serviceDate:'2026-10-06',departureMinutes:480,originId:'berlin',destinationId:'prague',currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees'})}
- const context=await captureAgentContextWithSelectedFares({...fixture,bridge,turnId:'fact-budget'})
- expect(context.plannedFareIds).toHaveLength(LIMITS.plannedFares)
+ const bridge:FareDataBridge={...fixture.bridge,lookupFare:async fareId=>{const [,_artifact,fare]=fareId.split('-');return BoundedFareFactSchema.parse({id:fareId,mode:'train',carrierId:`carrier-${'x'.repeat(80)}`,carrierName:'A very descriptive synthetic railway carrier name used to exercise the bounded context budget',priceCents:1000,durationMinutes:90,serviceDate:_artifact==='0'?`2026-12-${String(Number(fare)+1).padStart(2,'0')}`:`2026-01-${String(Number(fare)+1).padStart(2,'0')}`,departureMinutes:480,originId:`origin-${'y'.repeat(80)}`,destinationId:`destination-${'z'.repeat(80)}`,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees'})}}
+ const context=await captureAgentContextWithSelectedFares({...fixture,artifactIds,bridge,turnId:'fact-budget'})
+ expect(context.plannedFareIds).toHaveLength(64)
  expect(context.selectedFareFacts.length).toBeGreaterThan(0)
- expect(context.selectedFareFacts.length).toBeLessThan(LIMITS.plannedFares)
+ expect(context.selectedFareFacts.length).toBeLessThan(64)
  expect(context.selectedFareFacts.map(fact=>fact.id)).toEqual(context.plannedFareIds?.slice(0,context.selectedFareFacts.length))
+ expect(context.selectedFareFacts.filter(fact=>fact.id.startsWith('detail-0-'))).toHaveLength(8)
+ expect(context.selectedFareFacts[0]?.id).toBe('detail-0-0')
  expect(new TextEncoder().encode(JSON.stringify(context)).length).toBeLessThanOrEqual(LIMITS.snapshotBytes)
 })
 it('captures one immutable selection version while fare lookup is pending',async()=>{
