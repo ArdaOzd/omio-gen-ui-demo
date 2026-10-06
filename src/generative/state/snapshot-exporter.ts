@@ -16,9 +16,10 @@ function prioritizeFacts(prepared:PreparedCapture,facts:BoundedFareFact[]):Bound
 }
 function currentAuthoredBindings(input:ExportInput,snapshot:CompactArtifactSnapshot):ComponentBinding[]{
  const activeLegKeys=new Set(snapshot.citySequence.slice(1).map((destination,index)=>`${snapshot.citySequence[index]}:${destination}`))
- return [...(input.componentBindings?.get(snapshot.artifactId)??snapshot.componentBindings)].filter(binding=>{
-  if(!binding.datasetRef||activeLegKeys.size===0)return true
-  try{const coverage=input.bridge.getManifest(binding.datasetRef).coverage,key=`${coverage.originIds[0]??''}:${coverage.destinationIds[0]??''}`;return activeLegKeys.has(key)}catch{return false}
+ const latestByLeg=new Map(snapshot.datasetRefs.flatMap(datasetRef=>{try{const coverage=input.bridge.getManifest(datasetRef).coverage,key=`${coverage.originIds[0]??''}:${coverage.destinationIds[0]??''}`;return key===':'?[]:[[key,datasetRef] as const]}catch{return[]}}))
+ return [...(input.componentBindings?.get(snapshot.artifactId)??snapshot.componentBindings)].flatMap(binding=>{
+  if(!binding.datasetRef||activeLegKeys.size===0)return[binding]
+  try{const coverage=input.bridge.getManifest(binding.datasetRef).coverage,key=`${coverage.originIds[0]??''}:${coverage.destinationIds[0]??''}`;const current=latestByLeg.get(key);return activeLegKeys.has(key)&&current?[{...binding,datasetRef:current}]:[]}catch{return[]}
  })
 }
 function snapshots(input:ExportInput){

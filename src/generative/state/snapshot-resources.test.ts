@@ -115,15 +115,17 @@ it('exports bounded host-derived leg thresholds and selected facts without brows
 
 it('compacts synthesized grid bindings while retaining an eight-leg selected itinerary',async()=>{
  const bridge=createFareDataBridge({pageSource:async input=>{const index=Number(input.originId.replace('city-',''));return{rows:[FareRowSchema.parse({id:`fare-${input.originId}-${input.destinationId}`,originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',carrierName:'Rail',priceCents:1000+index,durationMinutes:60,departureMinutes:480+index*120,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})],total:1,pages:1,page:input.page,sourceVersion:'v1'}}})
- const store=createUIStateStore(),artifactId=ArtifactIdSchema.parse('eight-leg-grid'),refs=[],selected=[]
+ const store=createUIStateStore(),artifactId=ArtifactIdSchema.parse('eight-leg-grid'),refs=[],seedRefs=[],selected=[]
  const cities=Array.from({length:9},(_,index)=>`city-${index}`)
- for(let index=0;index<8;index++){const manifest=await bridge.load({originIds:[cities[index]!],destinationIds:[cities[index+1]!],dateWindow:{from:'2026-10-26',to:'2026-10-26'},modes:['train'],passengers:1},new AbortController().signal);refs.push(manifest.datasetId);selected.push(FareIdSchema.parse(`fare-${cities[index]}-${cities[index+1]}`))}
+ for(let index=0;index<8;index++){const seed=await bridge.load({originIds:[cities[index]!],destinationIds:[cities[index+1]!],dateWindow:{from:'2026-10-25',to:'2026-10-25'},modes:['train'],passengers:1},new AbortController().signal);const manifest=await bridge.load({originIds:[cities[index]!],destinationIds:[cities[index+1]!],dateWindow:{from:'2026-10-26',to:'2026-10-26'},modes:['train'],passengers:1},new AbortController().signal);seedRefs.push(seed.datasetId);refs.push(manifest.datasetId);selected.push(FareIdSchema.parse(`fare-${cities[index]}-${cities[index+1]}`))}
  store.initializeMissing(artifactId,{datasetRefs:refs,citySequence:cities,dates:{start:'2026-10-26'},stays:cities.slice(1).map(cityId=>({cityId,nights:0})),selectedFareIds:selected})
- const context=await captureAgentContextWithSelectedFares({turnId:'eight-leg',activeArtifactId:artifactId,artifactIds:[artifactId],store,bridge,componentBindings:new Map([[artifactId,[{key:'newest-grid',type:'MultiCityPlanGrid'}]]])})
+ const context=await captureAgentContextWithSelectedFares({turnId:'eight-leg',activeArtifactId:artifactId,artifactIds:[artifactId],store,bridge,componentBindings:new Map([[artifactId,[{key:'newest-grid',type:'MultiCityPlanGrid'},...seedRefs.map((datasetRef,index)=>({key:`authored-${index+1}`,type:'FadeFares',datasetRef}))]]])})
  const active=context.artifacts[0]
  expect(active?.datasetRefs).toHaveLength(8);expect(active?.legThresholds).toHaveLength(8)
  expect(context.plannedFareIds).toHaveLength(8);expect(context.selectedFareFacts).toHaveLength(8)
  expect(active?.componentBindings[0]).toEqual({key:'newest-grid',type:'MultiCityPlanGrid'})
+ expect(active?.componentBindings.find(binding=>binding.key==='authored-1')?.datasetRef).toBe(refs[0])
+ const exportedRefs=new Set(context.datasets.map(dataset=>dataset.datasetId));for(const binding of active?.componentBindings??[])if(binding.datasetRef)expect(exportedRefs.has(binding.datasetRef)).toBe(true)
  expect(new TextEncoder().encode(JSON.stringify(context)).length).toBeLessThanOrEqual(LIMITS.snapshotBytes)
  expect(JSON.stringify(context)).not.toMatch(/"rows"|"fares"/)
 })
