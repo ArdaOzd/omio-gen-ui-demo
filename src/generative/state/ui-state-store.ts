@@ -1,4 +1,7 @@
-import { ArtifactUIStateSchema, CompactArtifactSnapshotSchema, UIStateRevisionSchema, CATALOG_VERSION, type ArtifactId, type ArtifactUIState, type UIStateStore, type UICommand, type DispatchResult } from '../contracts'
+import { ArtifactUIStateSchema, CompactArtifactSnapshotSchema, DateSchema, UIStateRevisionSchema, CATALOG_VERSION, type ArtifactId, type ArtifactUIState, type UIStateStore, type UICommand, type DispatchResult } from '../contracts'
+
+const dayDelta = (from: string, to: string): number => (Date.parse(`${to}T00:00:00.000Z`) - Date.parse(`${from}T00:00:00.000Z`)) / 86_400_000
+const shiftDate = (date: string, days: number): string => DateSchema.parse(new Date(Date.parse(`${date}T00:00:00.000Z`) + days * 86_400_000).toISOString().slice(0, 10))
 
 export function createUIStateStore(options: { now?: () => string } = {}): UIStateStore {
   const states = new Map<ArtifactId, ArtifactUIState>()
@@ -21,7 +24,12 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
     let patch: Partial<ArtifactUIState>
     switch (command.kind) {
       case 'filters': patch={filters:command.filters};break
-      case 'dates': patch={dates:command.dates};break
+      case 'dates': {
+        const startDelta=dayDelta(current.dates.start,command.dates.start)
+        const endDelta=dayDelta(current.dates.end??current.dates.start,command.dates.end??command.dates.start)
+        const displayWindowByLeg=Object.fromEntries(Object.entries(current.displayWindowByLeg).map(([key,window])=>[key,{from:shiftDate(window.from,startDelta),to:shiftDate(window.to,endDelta)}]))
+        patch={dates:command.dates,displayWindowByLeg};break
+      }
       case 'sort': patch={sort:command.sort};break
       case 'sortByLeg':patch={sortByLeg:command.sortByLeg};break
       case 'calendarDateByLeg':patch={calendarDateByLeg:command.calendarDateByLeg};break

@@ -30,4 +30,28 @@ describe('supported route shape', () => {
     store.dispatch({kind:'route',artifactId:id,citySequence:['london','paris']})
     expect(store.exportSnapshot(id)).toMatchObject({citySequence:['london','paris'],stays:[{cityId:'paris',nights:2}],modesByLeg:{'london:paris':['train']},availableModesByLeg:{'london:paris':['train']},displayWindowByLeg:{'london:paris':{from:'2026-10-26',to:'2026-10-27'}},sortByLeg:{},calendarDateByLeg:{}})
   })
+
+  it('moves per-leg display bounds with start and end range edits', () => {
+    const store = createUIStateStore()
+    const id = ArtifactIdSchema.parse('date-window-shift')
+    store.initializeMissing(id, {
+      dates: { start: '2026-10-09', end: '2026-10-11' },
+      displayWindowByLeg: {
+        'london:paris': { from: '2026-10-09', to: '2026-10-11' },
+        'paris:rome': { from: '2026-10-10', to: '2026-10-11' },
+      },
+    })
+
+    store.dispatch({ kind: 'dates', artifactId: id, dates: { start: '2026-10-10', end: '2026-10-11' } })
+    expect(store.get(id).displayWindowByLeg).toEqual({
+      'london:paris': { from: '2026-10-10', to: '2026-10-11' },
+      'paris:rome': { from: '2026-10-11', to: '2026-10-11' },
+    })
+
+    store.dispatch({ kind: 'dates', artifactId: id, dates: { start: '2026-10-10', end: '2026-10-13' } })
+    expect(store.get(id).displayWindowByLeg).toEqual({
+      'london:paris': { from: '2026-10-10', to: '2026-10-13' },
+      'paris:rome': { from: '2026-10-11', to: '2026-10-13' },
+    })
+  })
 })

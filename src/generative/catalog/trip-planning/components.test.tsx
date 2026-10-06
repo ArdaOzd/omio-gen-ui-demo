@@ -5,7 +5,7 @@ import { createFareDataBridge } from '../../data/fare-data-bridge'
 import { createActionRouter } from '../../state/action-router'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { TravelProvider } from '../context'
-import { FareCalendar, sortFares } from './components'
+import { FareCalendar, TravelDate, sortFares } from './components'
 
 const artifactId = ArtifactIdSchema.parse('trip-planning-test')
 
@@ -82,6 +82,38 @@ it('shows only the leg display window and persists a day chosen from selected mo
   fireEvent.click(screen.getByRole('button', { name: 'Choose' }))
   await router.whenIdle(artifactId)
   expect(state.get(artifactId).selectedFareIds).toEqual(['bus-2026-10-10'])
+})
+
+it('shifts the full itinerary window before querying and rendering a new first-leg date', async () => {
+  const loadedDates: string[] = []
+  const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-11' }, modes: ['train'], passengers: 1 })
+  const bridge = createFareDataBridge({ pageSource: async input => {
+    loadedDates.push(input.date)
+    const row = fare({ id: `train-${input.date}`, date: input.date, mode: 'train', price: 5200, duration: 150, departure: 540 })
+    return { rows: [row], total: 1, pages: 1, page: input.page, sourceVersion: 'trip-date-shift-v1' }
+  } })
+  const manifest = await bridge.load(request, new AbortController().signal)
+  const state = createUIStateStore()
+  state.initializeMissing(artifactId, {
+    datasetRefs: [manifest.datasetId],
+    citySequence: ['london', 'paris'],
+    dates: { start: '2026-10-09', end: '2026-10-11' },
+    displayWindowByLeg: { 'london:paris': { from: '2026-10-09', to: '2026-10-11' } },
+    availableModesByLeg: { 'london:paris': ['train'] },
+  })
+  const router = createActionRouter(state, { bridge })
+  const services = { bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }
+  render(<TravelProvider services={services}><TravelDate artifactRef={artifactId} datasetRef={manifest.datasetId} /><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId} /></TravelProvider>)
+
+  fireEvent.change(screen.getByLabelText('Departure'), { target: { value: '2026-10-10' } })
+  await router.whenIdle(artifactId)
+
+  expect(state.get(artifactId).dates).toEqual({ start: '2026-10-10', end: '2026-10-12' })
+  expect(state.get(artifactId).displayWindowByLeg['london:paris']).toEqual({ from: '2026-10-10', to: '2026-10-12' })
+  expect(loadedDates).toContain('2026-10-12')
+  await waitFor(() => expect(screen.getAllByRole('button', { name: /Oct/ })).toHaveLength(3))
+  expect(screen.getByRole('button', { name: /Mon 12 Oct/ })).toBeInTheDocument()
+  router.dispose()
 })
 
 it('excludes coverage margins for a later leg and shows a status when its threshold passes the display end', async () => {
