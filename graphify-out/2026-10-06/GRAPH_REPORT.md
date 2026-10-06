@@ -5,8 +5,8 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1491 nodes · 3249 edges · 150 communities (100 shown, 50 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 93 edges (avg confidence: 0.86)
+- 1487 nodes · 3244 edges · 150 communities (100 shown, 50 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 94 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -21,49 +21,49 @@
 - index.ts
 - createFareDataBridge
 - SearchForm.jsx
-- resource-loader.ts
+- fare-data-bridge.ts
 - dependencies
-- component.tsx
+- browser-tools.ts
 - tree.ts
 - compilerOptions
-- fare-data-bridge.ts
+- planning-tracker.test.tsx
 - cityLabel
-- context.tsx
+- useTravelQuery
 - Deterministic Database Generator
 - browser.ts
 - controls/index.tsx
 - codex-provider.ts
 - SelectedFareCount
 - query-engine.ts
-- ResultsPage.jsx
+- routes.tsx
 - Native Recursive Present Tree
 - worker-client.ts
 - components.json
 - check-shadcn.mjs
-- scene-completion.test.ts
+- descriptors.ts
 - Acceptance Evidence
 - App.jsx
-- LocationField
 - Null-safe Query Predicates
 - toggle-group.tsx
 - scripts
 - LandingPage.jsx
-- transport.ts
+- assertNoBulkData
 - request-schema.ts
 - devDependencies
 - run-state-proof.mjs
-- summarize-fares.test.ts
+- FareRow
 - snapshot-exporter.ts
 - ArtifactIdSchema
 - registration-lifecycle.test.ts
-- routes.tsx
+- thread-shell.tsx
 - verify_pasted_coverage.py
 - Contributing Guide
 - run.mjs
+- runtime-provider.tsx
 - MultiCityPlanGrid
 - planning-tracker.tsx
 - query-engine/package.json
-- action-router.ts
+- context.tsx
 - run-completion.mjs
 - Repository Workflow
 - run.ts
@@ -163,20 +163,20 @@
 4. `createActionRouter()` - 29 edges
 5. `cityLabel()` - 25 edges
 6. `assertNoBulkData()` - 23 edges
-7. `useTravelQuery()` - 20 edges
-8. `FareRowSchema` - 20 edges
+7. `FareRowSchema` - 20 edges
+8. `useTravelQuery()` - 20 edges
 9. `FareDataBridge` - 19 edges
-10. `useTravelAction()` - 18 edges
+10. `validatePresentTree()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `10,000,000 Synthetic Fares` --semantically_similar_to--> `10,000,000-row Default`  [INFERRED] [semantically similar]
   README.md → backend/README.md
 - `Pull Request Template` --semantically_similar_to--> `Contributing Guide`  [INFERRED] [semantically similar]
   .github/pull_request_template.md → CONTRIBUTING.md
-- `handleChat()` --calls--> `assertNoBulkData()`  [EXTRACTED]
-  agent/chat-route.ts → src/generative/contracts/privacy.ts
-- `handleChat()` --calls--> `validatePresentTree()`  [EXTRACTED]
-  agent/chat-route.ts → src/generative/variants/a/tree.ts
+- `runNullableOracle()` --calls--> `parseQuery()`  [EXTRACTED]
+  benchmarks/query-engine/browser.ts → src/generative/contracts/index.ts
+- `runNullableOracle()` --calls--> `createFareDataBridge()`  [EXTRACTED]
+  benchmarks/query-engine/browser.ts → src/generative/data/fare-data-bridge.ts
 - `parseChatRequest()` --calls--> `parseAgentContext()`  [EXTRACTED]
   agent/request-schema.ts → src/generative/contracts/index.ts
 
@@ -212,68 +212,68 @@ Cohesion: 0.06
 Nodes (62): ApiError, _connect(), _date_value(), dispatch(), _fail(), get_locations(), get_metadata(), _integer() (+54 more)
 
 ### Community 1 - "views/index.tsx"
-Cohesion: 0.12
-Nodes (21): Alert(), AlertDescription(), AlertTitle(), alertVariants, Table(), TableBody(), TableCaption(), TableCell() (+13 more)
+Cohesion: 0.10
+Nodes (30): Alert(), alertVariants, Skeleton(), Table(), TableBody(), TableCaption(), TableCell(), TableHead() (+22 more)
 
 ### Community 2 - "trip-planning/components.tsx"
-Cohesion: 0.12
-Nodes (21): DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuTrigger(), CityFields(), cityOptions(), dateRange(), defaultLegSort (+13 more)
+Cohesion: 0.10
+Nodes (33): DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuTrigger(), useItineraryPlan(), CityField(), CityFields(), cityOptions() (+25 more)
 
 ### Community 3 - "index.ts"
-Cohesion: 0.06
-Nodes (38): {decision}, servers, ArtifactUIState, CitySequenceSchema, CompactArtifactSnapshotSchema, CompactSummarySchema, ComponentBindingSchema, DatasetFieldManifestSchema (+30 more)
+Cohesion: 0.07
+Nodes (26): CompactSummarySchema, ComponentBindingSchema, DatasetFieldManifestSchema, dateWindow, ExecutionGuard, ExecutionGuardSchema, FareFieldSchema, LegThresholdSchema (+18 more)
 
 ### Community 4 - "createFareDataBridge"
-Cohesion: 0.09
-Nodes (32): request(), artifactId, fare(), setup(), CatalogNode(), TravelProvider(), id, setup() (+24 more)
+Cohesion: 0.07
+Nodes (40): {decision}, servers, request(), artifactId, fare(), setup(), CatalogNode(), TravelProvider() (+32 more)
 
 ### Community 5 - "SearchForm.jsx"
-Cohesion: 0.13
-Nodes (12): normalizeText(), resolveLocation(), SearchForm(), submit(), Card(), Tabs(), TabsContent(), TabsList() (+4 more)
+Cohesion: 0.15
+Nodes (16): editDistance(), isSubsequence(), LocationField(), handleKeyDown(), selectLocation(), normalizeText(), resolveLocation(), SearchForm() (+8 more)
 
-### Community 6 - "resource-loader.ts"
-Cohesion: 0.11
-Nodes (19): coverageKey(), FarePage, LoadedResource, PageInput, PageSource, stableRef(), createSearchPageSource(), responseSchema (+11 more)
+### Community 6 - "fare-data-bridge.ts"
+Cohesion: 0.09
+Nodes (25): BoundedFareFactSchema, CoverageRequest, DatasetFieldManifest, apiRow, pageSource, request, coverageKey(), FarePage (+17 more)
 
 ### Community 7 - "dependencies"
 Cohesion: 0.06
 Nodes (35): ai, @ai-sdk/react, assistant-stream, @assistant-ui/ai-sdk, @assistant-ui/react, @assistant-ui/react-generative-ui, class-variance-authority, cn (+27 more)
 
-### Community 8 - "component.tsx"
-Cohesion: 0.15
-Nodes (21): Skeleton(), ArtifactErrorBoundary, controls, layouts, statuses, useArtifact(), useItineraryPlan(), useTravelServices() (+13 more)
+### Community 8 - "browser-tools.ts"
+Cohesion: 0.13
+Nodes (15): ArtifactId, DispatchResult, parseQuery(), UICommand, UIStateStore, deferredReleases, releaseDatasetWhenUnowned(), createBrowserTools() (+7 more)
 
 ### Community 9 - "tree.ts"
 Cohesion: 0.11
-Nodes (25): keys, names, scalarLimit(), scalars, scope, validatePresentPrefix(), nodePropsSchema, isLegBoundPlannerComponent() (+17 more)
+Nodes (25): keys, names, scalarLimit(), scalars, scope, validatePresentPrefix(), isLegBoundPlannerComponent(), legBoundPlannerComponents (+17 more)
 
 ### Community 10 - "compilerOptions"
 Cohesion: 0.06
 Nodes (30): agent, benchmarks/query-engine, *.config.ts, DOM, DOM.Iterable, ES2022, node, src (+22 more)
 
-### Community 11 - "fare-data-bridge.ts"
-Cohesion: 0.09
-Nodes (21): artifactId, BoundedFareFactSchema, CoverageRequestSchema, DatasetFieldManifest, DatasetManifest, DatasetManifestSchema, FareFieldSchema, FareRow (+13 more)
+### Community 11 - "planning-tracker.test.tsx"
+Cohesion: 0.25
+Nodes (8): DatasetManifestSchema, booleanFields, datasetId, fact(), fixture(), manifest, numericFields, rows
 
 ### Community 12 - "cityLabel"
-Cohesion: 0.22
-Nodes (28): carrierLabel(), cityLabel(), departure(), duration(), money(), useFareRows(), useTravelAction(), CarrierControl() (+20 more)
+Cohesion: 0.28
+Nodes (22): carrierLabel(), cityLabel(), departure(), duration(), money(), useFareRows(), useTravelAction(), Control() (+14 more)
 
-### Community 13 - "context.tsx"
-Cohesion: 0.20
-Nodes (14): PendingQueryProbe(), calendarSort(), cheapestCalendarSort, chronologicalLegSort, fastestCalendarSort, parsedFareRows(), plannerSort(), TravelContext (+6 more)
+### Community 13 - "useTravelQuery"
+Cohesion: 0.28
+Nodes (13): PendingQueryProbe(), parsedFareRows(), plannerSort(), useFareDayRepresentatives(), useFareRowsForDate(), useLegFareRows(), useTravelQuery(), CarrierControl() (+5 more)
 
 ### Community 14 - "Deterministic Database Generator"
 Cohesion: 0.08
 Nodes (28): Atomic Database Replacement, Requested Seat Availability Constraint, Current Pasted Source Catalog, Daily Route Coverage, Deterministic Database Generator, Duration Authoritative Across Time Zones, European Mode and Gateway Constraints, 50 European and Trans-European Capitals (+20 more)
 
 ### Community 15 - "browser.ts"
-Cohesion: 0.16
-Nodes (19): base, benchmarkRows(), csvRows(), expected(), id, longTasks, Metric, percentile() (+11 more)
+Cohesion: 0.13
+Nodes (22): base, benchmarkRows(), csvRows(), expected(), id, longTasks, Metric, percentile() (+14 more)
 
 ### Community 16 - "controls/index.tsx"
 Cohesion: 0.11
-Nodes (11): Checkbox(), Field(), FieldLegend(), FieldSet(), fieldVariants, Input(), Label(), NativeSelect() (+3 more)
+Nodes (12): Checkbox(), Field(), FieldLegend(), FieldSet(), fieldVariants, Input(), Label(), NativeSelect() (+4 more)
 
 ### Community 17 - "codex-provider.ts"
 Cohesion: 0.12
@@ -284,12 +284,12 @@ Cohesion: 0.09
 Nodes (25): Authored Nodes and Positional Props, ComparisonMatrix, ComparisonTable, Distinct Travel Catalog Primitives, Granular Component Semantics, ModeBreakdown, SelectedFareCount, SelectedItinerary (+17 more)
 
 ### Community 19 - "query-engine.ts"
-Cohesion: 0.16
+Cohesion: 0.15
 Nodes (14): AllowedFareField, DatasetRevision, DatasetRevisionSchema, PredicateTree, compare(), defaults, executeQuery(), matches() (+6 more)
 
-### Community 20 - "ResultsPage.jsx"
-Cohesion: 0.18
-Nodes (12): sortTrips(), companyColors, dateSequence(), formatDate(), formatDuration(), formatPrice(), formatTime(), modeLabels (+4 more)
+### Community 20 - "routes.tsx"
+Cohesion: 0.12
+Nodes (19): sortTrips(), companyColors, dateSequence(), formatDate(), formatDuration(), formatPrice(), formatTime(), modeLabels (+11 more)
 
 ### Community 21 - "Native Recursive Present Tree"
 Cohesion: 0.08
@@ -297,7 +297,7 @@ Nodes (24): PriceCalendar, RouteMap, SplitPane, Backendless assistant-ui Compile
 
 ### Community 22 - "worker-client.ts"
 Cohesion: 0.16
-Nodes (13): BoundedQueryResult, DatasetId, QueryIR, scalar, WorkerRequest, WorkerResponse, WorkerResponseSchema, QueryResource (+5 more)
+Nodes (12): DatasetId, QueryIR, scalar, WorkerRequest, WorkerResponse, WorkerResponseSchema, QueryResource, LocalQueryEngine (+4 more)
 
 ### Community 23 - "components.json"
 Cohesion: 0.09
@@ -307,9 +307,9 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 Cohesion: 0.15
 Nodes (20): assistantInteractiveParts, attributesOf(), componentsPath, interactiveRoles, isDirectShadcnAsChild(), isProductionSource(), jsxName(), location() (+12 more)
 
-### Community 25 - "scene-completion.test.ts"
-Cohesion: 0.22
-Nodes (14): handleChat(), CODEX_DEVELOPER_INSTRUCTIONS, ChatRequest, ack(), artifact, other, acceptTurn(), getAcceptedScenes() (+6 more)
+### Community 25 - "descriptors.ts"
+Cohesion: 0.25
+Nodes (6): descriptors, legRefs, refs, hash, CATALOG_VERSION, ComponentDescriptor
 
 ### Community 26 - "Acceptance Evidence"
 Cohesion: 0.11
@@ -318,10 +318,6 @@ Nodes (20): Acceptance Evidence, API Pagination, Backend Commit b1c8912, Backend
 ### Community 27 - "App.jsx"
 Cohesion: 0.17
 Nodes (17): buildSearchUrl(), displayLocation(), getJson(), locationValue(), minutesFromDuration(), MODE_ORDER, modes, normalizeLocations() (+9 more)
-
-### Community 28 - "LocationField"
-Cohesion: 0.33
-Nodes (5): editDistance(), isSubsequence(), LocationField(), handleKeyDown(), selectLocation()
 
 ### Community 29 - "Null-safe Query Predicates"
 Cohesion: 0.12
@@ -339,29 +335,29 @@ Nodes (17): scripts, agent:dev, benchmark:query, build, check:catalog, check:sha
 Cohesion: 0.19
 Nodes (10): Icon(), paths, LandingPage(), offers, transportModes, Logo(), Badge(), badgeVariants (+2 more)
 
-### Community 33 - "transport.ts"
-Cohesion: 0.22
-Nodes (11): currentMessage(), fits(), olderMessage(), projectNetworkHistory(), splitText(), context(), prepared(), createSnapshotTransport() (+3 more)
+### Community 33 - "assertNoBulkData"
+Cohesion: 0.12
+Nodes (20): currentMessage(), fits(), olderMessage(), projectNetworkHistory(), splitText(), context(), prepared(), createSnapshotTransport() (+12 more)
 
 ### Community 35 - "request-schema.ts"
-Cohesion: 0.10
-Nodes (23): ErrorOutput, id, MessageSchema, parseChatRequest(), parseToolInput(), parseToolOutput(), PartSchema, RequestSchema (+15 more)
+Cohesion: 0.11
+Nodes (28): handleChat(), CODEX_DEVELOPER_INSTRUCTIONS, ChatRequest, ErrorOutput, id, MessageSchema, parseChatRequest(), parseToolInput() (+20 more)
 
 ### Community 36 - "devDependencies"
 Cohesion: 0.13
 Nodes (15): @assistant-ui/vite, devDependencies, @assistant-ui/vite, @types/node, @types/react, @types/react-dom, typescript, vite (+7 more)
 
 ### Community 37 - "run-state-proof.mjs"
-Cohesion: 0.13
-Nodes (12): /src/generative/data/fare-data-bridge.ts, /src/generative/state/persistence.ts, /src/generative/state/ui-state-store.ts, case0, errors, last, parts, requests (+4 more)
+Cohesion: 0.17
+Nodes (9): case0, errors, last, parts, requests, result, secondView, streams (+1 more)
 
-### Community 38 - "summarize-fares.test.ts"
-Cohesion: 0.12
-Nodes (15): artifactId, otherId, CoverageRequest, FareId, FareIdSchema, first, request, second (+7 more)
+### Community 38 - "FareRow"
+Cohesion: 0.17
+Nodes (9): artifactId, otherId, FareIdSchema, FareRow, first, request, second, request (+1 more)
 
 ### Community 39 - "snapshot-exporter.ts"
-Cohesion: 0.07
-Nodes (44): AgentContextEnvelope, BoundedFareFact, CompactArtifactSnapshot, ComponentBinding, Coverage, OlderArtifactSummary, fallbackLegDate(), fareArrivalInstant() (+36 more)
+Cohesion: 0.10
+Nodes (29): AgentContextEnvelope, CompactArtifactSnapshot, OlderArtifactSummary, captureAgentContext(), captureAgentContextWithSelectedFares(), capturePreparedContext(), currentAuthoredBindings(), envelope() (+21 more)
 
 ### Community 40 - "ArtifactIdSchema"
 Cohesion: 0.12
@@ -371,9 +367,9 @@ Nodes (17): ArtifactIdSchema, ArtifactUIStateSchema, CONTRACT_VERSION, createSer
 Cohesion: 0.16
 Nodes (4): deferred(), request, scenario(), createLocalQueryEngine()
 
-### Community 42 - "routes.tsx"
-Cohesion: 0.05
-Nodes (35): openSmartPlanner(), Collapsible(), CollapsibleContent(), CollapsibleTrigger(), Textarea(), descriptors, legRefs, refs (+27 more)
+### Community 42 - "thread-shell.tsx"
+Cohesion: 0.12
+Nodes (13): Textarea(), CanonicalMessagesContext, completedLocalToolIndices(), completedNarrativeIndices(), localToolNames, AssistantNarrative(), assistantWorkingPuns, AssistantWorkingStatus() (+5 more)
 
 ### Community 43 - "verify_pasted_coverage.py"
 Cohesion: 0.44
@@ -387,21 +383,25 @@ Nodes (11): Pull Request Template, Pull Request Branch Target, Pull Request Veri
 Cohesion: 0.22
 Nodes (7): agentPort, apiPort, children, env, start(), stop(), webPort
 
+### Community 46 - "runtime-provider.tsx"
+Cohesion: 0.12
+Nodes (13): openSmartPlanner(), normalizeToolContinuations(), HISTORY_LIMITS, GenerativeChat(), GenerativeChatProps, GenerativeRoute(), io, completeSmartPlannerHandoff() (+5 more)
+
 ### Community 47 - "MultiCityPlanGrid"
 Cohesion: 0.33
 Nodes (9): CityField, CitySequence, FadeFares, FareCalendar, FareOrder, MultiCityPlanGrid, StayDuration, TransportSelect (+1 more)
 
 ### Community 48 - "planning-tracker.tsx"
-Cohesion: 0.18
-Nodes (13): Dialog(), DialogClose(), DialogContent(), DialogDescription(), DialogTitle(), DialogTrigger(), artifactIds(), comparePlannedFares() (+5 more)
+Cohesion: 0.16
+Nodes (14): Dialog(), DialogClose(), DialogContent(), DialogDescription(), DialogTitle(), DialogTrigger(), FareId, artifactIds() (+6 more)
 
 ### Community 49 - "query-engine/package.json"
 Cohesion: 0.29
 Nodes (6): dependencies, @duckdb/duckdb-wasm, name, private, type, @duckdb/duckdb-wasm
 
-### Community 50 - "action-router.ts"
-Cohesion: 0.11
-Nodes (23): artifactId, ArtifactId, FareDataBridge, parseQuery(), UIStateStore, ValidatedQueryIR, CoverageLoadStatus, covers() (+15 more)
+### Community 50 - "context.tsx"
+Cohesion: 0.09
+Nodes (40): calendarSort(), cheapestCalendarSort, chronologicalLegSort, fastestCalendarSort, TravelContext, ArtifactUIState, BoundedFareFact, CitySequenceSchema (+32 more)
 
 ### Community 51 - "run-completion.mjs"
 Cohesion: 0.29
@@ -428,8 +428,8 @@ Cohesion: 0.40
 Nodes (3): response(), summaries, trip()
 
 ### Community 58 - "chat-route.ts"
-Cohesion: 0.18
-Nodes (12): loadLocationCatalog(), locationsSchema, selectLocations(), catalogDescriptors, catalogHash, catalogVersion, componentNames, legBoundPropsSchema (+4 more)
+Cohesion: 0.17
+Nodes (13): loadLocationCatalog(), locationsSchema, selectLocations(), catalogDescriptors, catalogHash, catalogVersion, componentNames, legBoundPropsSchema (+5 more)
 
 ### Community 59 - "package.json"
 Cohesion: 0.40
@@ -564,28 +564,28 @@ Cohesion: 0.67
 Nodes (3): Persisted Fare View, Selected Bus Fare, Text-only State Summary
 
 ### Community 158 - "abortError"
-Cohesion: 0.27
-Nodes (9): load(), cancel(), finish(), abortError(), loadResource(), receive(), request(), cancel() (+1 more)
+Cohesion: 0.30
+Nodes (8): load(), cancel(), finish(), abortError(), loadResource(), request(), cancel(), QueryWorker
 
 ## Knowledge Gaps
-- **487 isolated node(s):** `{decision}`, `servers`, `mocks`, `valid`, `DecisionSchema` (+482 more)
+- **484 isolated node(s):** `layouts`, `controls`, `statuses`, `refs`, `legRefs` (+479 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **50 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `FareDataBridge` connect `action-router.ts` to `views/index.tsx`?**
+- **Why does `createBrowserTools()` connect `browser-tools.ts` to `assertNoBulkData`, `context.tsx`, `useTravelQuery`?**
   _High betweenness centrality (0.000) - this node is a cross-community bridge._
-- **Why does `createFareDataBridge()` connect `createFareDataBridge` to `registration-lifecycle.test.ts`, `abortError`?**
+- **Why does `FareDataBridge` connect `context.tsx` to `views/index.tsx`?**
   _High betweenness centrality (0.000) - this node is a cross-community bridge._
-- **Why does `UIStateStore` connect `action-router.ts` to `cityLabel`?**
+- **Why does `UIStateStore` connect `browser-tools.ts` to `cityLabel`?**
   _High betweenness centrality (0.000) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `createUIStateStore()` (e.g. with `dispatch()` and `get()`) actually correct?**
   _`createUIStateStore()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `createActionRouter()` (e.g. with `.getManifest()` and `.load()`) actually correct?**
   _`createActionRouter()` has 6 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `{decision}`, `servers`, `mocks` to the rest of the system?**
-  _487 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `layouts`, `controls`, `statuses` to the rest of the system?**
+  _484 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `app.py` be split into smaller, more focused modules?**
   _Cohesion score 0.05851619644723093 - nodes in this community are weakly interconnected._
