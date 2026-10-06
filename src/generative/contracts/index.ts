@@ -79,7 +79,7 @@ export const ArtifactUIStateSchema = z.strictObject({
   artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema, runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(LIMITS.artifactDatasets),
   filters: TravelFiltersSchema, dates: z.strictObject({ start: DateSchema, end: DateSchema.optional() }),
   citySequence: CitySequenceSchema.default([]), stays: z.array(StayAllocationSchema).max(8), modesByLeg: z.record(ref, z.array(TransportModeSchema).max(4)),
-  availableModesByLeg:z.record(ref,z.array(TransportModeSchema).min(1).max(4)).default({}),displayWindowByLeg:z.record(ref,dateWindow).default({}),
+  availableModesByLeg:z.record(ref,z.array(TransportModeSchema).max(4)).default({}),displayWindowByLeg:z.record(ref,dateWindow).default({}),
   sortByLeg:z.record(ref,SortSpecSchema).default({}),calendarDateByLeg:z.record(ref,DateSchema).default({}),
   sort: SortSpecSchema, selectedFareIds: z.array(FareIdSchema).max(8),
   pending: z.array(z.strictObject({ requestId: ref, kind: z.enum(['load', 'query']) })).max(8), lastInteractionAt: z.string().datetime(),

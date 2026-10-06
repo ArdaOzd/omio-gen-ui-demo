@@ -1,11 +1,12 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ArtifactIdSchema, CoverageRequestSchema, FareRowSchema, type FareRow } from '../../contracts'
 import { createFareDataBridge } from '../../data/fare-data-bridge'
 import { createActionRouter } from '../../state/action-router'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { TravelProvider } from '../context'
-import { FadeFares, FareCalendar, FareOrder, TravelDate, sortFares } from './components'
+import { FadeFares, FareCalendar, FareOrder, MultiCityPlanGrid, TravelDate, sortFares } from './components'
 
 const artifactId = ArtifactIdSchema.parse('trip-planning-test')
 
@@ -29,7 +30,7 @@ function fare(input: { id: string; date: string; mode: 'train' | 'bus'; price: n
   })
 }
 
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 describe('trip planning fare ordering', () => {
   const laterCheap = fare({ id: 'later-cheap', date: '2026-10-10', mode: 'bus', price: 900, duration: 420, departure: 480 })
@@ -44,6 +45,19 @@ describe('trip planning fare ordering', () => {
     expect(sortFares([earlyLateDeparture, laterCheap], 'cheapest')[0]?.id).toBe('later-cheap')
     expect(sortFares([laterCheap, earlyLateDeparture], 'fastest')[0]?.id).toBe('early-late')
   })
+})
+
+it('uses a compact icon dropdown in the grid and omits zero-count modes', async () => {
+  vi.stubGlobal('fetch',vi.fn(async()=>new Response(JSON.stringify({locations:[{slug:'london',display_name:'London, GB'},{slug:'paris',display_name:'Paris, FR'}]}),{status:200,headers:{'content-type':'application/json'}})))
+  const train=fare({id:'train-only',date:'2026-10-09',mode:'train',price:3200,duration:150,departure:540})
+  const bridge=createFareDataBridge({pageSource:async()=>({rows:[train],total:1,pages:1,page:1,sourceVersion:'grid-dropdown-v1'})})
+  const manifest=await bridge.load(CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train','bus'],passengers:1}),new AbortController().signal)
+  const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09'}})
+  render(<TravelProvider services={{bridge,state,activeId:()=>artifactId,activate:()=>{}}}><MultiCityPlanGrid artifactRef={artifactId}/></TravelProvider>)
+  const trigger=await screen.findByRole('button',{name:'Transport: All available'})
+  await userEvent.click(trigger)
+  expect(await screen.findByRole('menuitemcheckbox',{name:'Train'})).toBeChecked()
+  expect(screen.queryByRole('menuitemcheckbox',{name:'Bus'})).not.toBeInTheDocument()
 })
 
 it('shows only the leg display window and persists a day chosen from selected modes', async () => {

@@ -83,6 +83,16 @@ it('restores the whole seeded mode scope after a narrow outside-date load',async
  const current=bridge.getManifest(resolveBoundDatasetId(store.get(id),bridge,seed.datasetId));expect(current.coverage.dateWindow.from).toBe('2026-11-01');expect(current.coverage.modes).toEqual(['train','bus']);router.dispose()
 })
 
+it('drops zero-count modes while retaining the requested scope for later reloads',async()=>{
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`train-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'})})
+ const seed=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['train','bus']},new AbortController().signal)
+ const store=createUIStateStore();const id=ArtifactIdSchema.parse('actual-modes');store.initializeMissing(id,{datasetRefs:[seed.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-02'},availableModesByLeg:{'london:paris':['train','bus']},modesByLeg:{'london:paris':['bus']}})
+ const router=createActionRouter(store,{bridge});router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await router.whenIdle(id)
+ expect(store.get(id).availableModesByLeg['london:paris']).toEqual(['train'])
+ expect(store.get(id).modesByLeg['london:paris']).toEqual([])
+ const current=bridge.getManifest(resolveBoundDatasetId(store.get(id),bridge,seed.datasetId));expect(current.coverage.modes).toEqual(['train','bus']);router.dispose()
+})
+
 it('keeps the chosen trip start and upstream fare when a valid arrival-derived downstream fare is selected',async()=>{
  const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(input.originId==='london'?'overnight-first':'valid-second'),originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,departureMinutes:input.originId==='london'?1260:1080,durationMinutes:input.originId==='london'?1200:120}],total:1,pages:1,page:input.page,sourceVersion:'v1'})})
  const first=await bridge.load({...request,dateWindow:{from:'2026-10-26',to:'2026-10-26'}},new AbortController().signal)

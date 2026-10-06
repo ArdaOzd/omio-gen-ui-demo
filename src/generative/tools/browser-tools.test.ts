@@ -28,6 +28,14 @@ describe('bounded direct artifact tools',()=>{
   expect(await tools.load_fares.execute({coverage,displayWindow:{from:'2026-10-08',to:'2026-10-10'}})).toMatchObject({status:'error'})
   expect(store.get(artifactId)).toEqual(before)
  });
+ it('advertises only transport modes with fares in the loaded resource',async()=>{
+  const store=createUIStateStore();store.initializeMissing(artifactId,{})
+  const row=FareRowSchema.parse({id:'train-only',originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode:'train',carrierId:'rail',carrierName:'Rail',priceCents:2900,durationMinutes:120,departureMinutes:600,availableSeats:12,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
+  const bridge=createFareDataBridge({pageSource:async()=>({rows:[row],total:1,pages:1,page:1,sourceVersion:'actual-modes-v1'})})
+  const tools=createBrowserTools({store,bridge,activeArtifactId:()=>artifactId})
+  await tools.load_fares.execute({coverage:{...coverage,modes:['train','bus']}})
+  expect(store.get(artifactId).availableModesByLeg['london:paris']).toEqual(['train'])
+ });
 });
 
 it('propagates SDK cancellation and never commits late coverage',async()=>{

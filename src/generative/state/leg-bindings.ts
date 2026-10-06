@@ -1,8 +1,9 @@
-import { DateSchema,type ArtifactUIState,type BoundedFareFact,type Coverage,type FareDataBridge,type DatasetId,type CoverageRequest } from '../contracts'
+import { DateSchema,type ArtifactUIState,type BoundedFareFact,type Coverage,type FareDataBridge,type DatasetId,type CoverageRequest,type DatasetManifest,type TransportMode } from '../contracts'
 import { fallbackLegDate,legThreshold } from './itinerary-schedule'
 const chronologicalLegSort:ArtifactUIState['sort']={field:'departureMinutes',direction:'asc'}
 export function legKey(coverage:Pick<Coverage,'originIds'|'destinationIds'>):string|undefined{return coverage.originIds.length===1&&coverage.destinationIds.length===1?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined}
 export type LegResource={key:string;datasetId:DatasetId;coverage:Coverage}
+export function availableModes(manifest:Pick<DatasetManifest,'coverage'|'compactSummary'>):TransportMode[]{return manifest.coverage.modes.filter(mode=>(manifest.compactSummary.modeCounts[mode]??0)>0)}
 export function orderedLegResources(state:ArtifactUIState,bridge:FareDataBridge):LegResource[]{
  const resources=state.datasetRefs.flatMap(datasetId=>{const coverage=bridge.getManifest(datasetId).coverage,key=legKey(coverage);return key?[{key,datasetId,coverage}]:[]})
  const latest=new Map(resources.map(resource=>[resource.key,resource]))
@@ -31,7 +32,7 @@ export function legRequest(state:ArtifactUIState,coverage:Coverage,selectedFacts
  const fallbackTo=visible?.to??legDate(state,coverage.originIds[0]??'',state.dates.end??state.dates.start)
  const requestedFrom=visible?.from&&visible.from>threshold.date?visible.from:threshold.date
  const from=requestedFrom>fallbackTo?fallbackTo:requestedFrom
- return {originIds:coverage.originIds,destinationIds:coverage.destinationIds,dateWindow:{from,to:fallbackTo},modes:chosen.length?chosen:key?state.availableModesByLeg[key]??coverage.modes:coverage.modes,passengers:coverage.passengers}
+ return {originIds:coverage.originIds,destinationIds:coverage.destinationIds,dateWindow:{from,to:fallbackTo},modes:chosen.length?chosen:coverage.modes,passengers:coverage.passengers}
 }
 export function legState(state:ArtifactUIState,coverage:Coverage,selectedFacts:readonly BoundedFareFact[]=[]):ArtifactUIState{
  const key=legKey(coverage)

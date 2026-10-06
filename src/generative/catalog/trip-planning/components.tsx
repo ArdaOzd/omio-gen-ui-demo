@@ -1,15 +1,16 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
-import { ArrowRight, BusFront, CalendarDays, Clock3, MapPin, Plane, Ship, TrainFront } from 'lucide-react'
+import { ArrowRight, BusFront, CalendarDays, ChevronDown, Clock3, MapPin, Plane, Ship, TrainFront } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { FieldLegend, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DateSchema, DatasetIdSchema, type FareRow, type TransportMode } from '../../contracts'
 import { fareMeetsThreshold, thresholdDateTime } from '../../state/itinerary-schedule'
-import { legDate, tripDatesForLegDeparture } from '../../state/leg-bindings'
+import { availableModes as actualModes, legDate, tripDatesForLegDeparture } from '../../state/leg-bindings'
 import {
   carrierLabel,
   cityLabel,
@@ -291,12 +292,12 @@ function modeIcon(mode: TransportMode): ReactNode {
   return <Ship aria-hidden="true" />
 }
 
-function TransportSelectControl({ plan, leg, title }: { plan: Plan; leg: PlanLeg; title?: string }) {
+function TransportSelectControl({ plan, leg, title, presentation = 'inline' }: { plan: Plan; leg: PlanLeg; title?: string; presentation?: 'inline' | 'dropdown' }) {
   const dispatch = useTravelAction(plan.state.artifactId)
   const explicit = plan.state.modesByLeg[leg.key] ?? []
-  const advertised = plan.state.availableModesByLeg[leg.key] ?? leg.coverage.modes
+  const advertised = plan.state.availableModesByLeg[leg.key] ?? actualModes(plan.services.bridge.getManifest(leg.datasetId))
   const available = modeOrder.filter(mode => advertised.includes(mode))
-  const selected = explicit.length ? explicit : available
+  const selected = explicit.length ? explicit.filter(mode => available.includes(mode)) : available
   const toggle = (mode: TransportMode) => {
     const next = explicit.length === 0
       ? available.filter(candidate => candidate !== mode)
@@ -306,9 +307,13 @@ function TransportSelectControl({ plan, leg, title }: { plan: Plan; leg: PlanLeg
     const canonical = next.length === available.length ? [] : modeOrder.filter(candidate => next.includes(candidate))
     dispatch({ kind: 'modesByLeg', artifactId: plan.state.artifactId, modesByLeg: { ...plan.state.modesByLeg, [leg.key]: canonical } })
   }
-  return <FieldSet className="trip-mode-control">
+  const selectedLabel = selected.length === available.length ? 'All available' : selected.map(cityLabel).join(', ')
+  return <FieldSet className={`trip-mode-control is-${presentation}`}>
     <FieldLegend>{title ?? 'Transport'}</FieldLegend>
-    <div>{available.map(mode => <Button key={mode} type="button" variant="outline" aria-pressed={selected.includes(mode)} onClick={() => toggle(mode)}>{modeIcon(mode)}<span>{cityLabel(mode)}</span></Button>)}</div>
+    {presentation === 'dropdown' ? <DropdownMenu>
+      <DropdownMenuTrigger asChild><Button type="button" variant="outline" className="trip-mode-trigger" aria-label={`Transport: ${selectedLabel || 'No available modes'}`} disabled={!available.length}><span className="trip-mode-trigger-icons">{selected.map(mode => <span key={mode}>{modeIcon(mode)}</span>)}</span><span>{selectedLabel || 'No modes'}</span><ChevronDown aria-hidden="true" /></Button></DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="trip-mode-menu">{available.map(mode => <DropdownMenuCheckboxItem key={mode} checked={selected.includes(mode)} onCheckedChange={() => toggle(mode)} onSelect={event => event.preventDefault()}>{modeIcon(mode)}<span>{cityLabel(mode)}</span></DropdownMenuCheckboxItem>)}</DropdownMenuContent>
+    </DropdownMenu> : <div className="trip-mode-options">{available.map(mode => <Button key={mode} type="button" variant="outline" aria-pressed={selected.includes(mode)} onClick={() => toggle(mode)}>{modeIcon(mode)}<span>{cityLabel(mode)}</span></Button>)}</div>}
   </FieldSet>
 }
 
@@ -484,7 +489,7 @@ function LegRow({ plan, leg, index, locations }: { plan: Plan; leg: PlanLeg; ind
     <div className="trip-leg-number"><span>{index + 1}</span><div><small>LEG</small><strong>{cityLabel(leg.originId)} to {cityLabel(leg.destinationId)}</strong></div></div>
     <CityFields plan={plan} leg={leg} legIndex={index} locations={locations} />
     <TravelDateControl plan={plan} leg={leg} />
-    <TransportSelectControl plan={plan} leg={leg} />
+    <TransportSelectControl plan={plan} leg={leg} presentation="dropdown" />
     <FareOrderControl plan={plan} leg={leg} />
     <FareStrip artifactRef={plan.state.artifactId} datasetRef={leg.datasetId} compact />
   </Card>

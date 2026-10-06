@@ -1,5 +1,5 @@
 import type { ArtifactId,ArtifactUIState,CoverageRequest,DatasetManifest,DispatchResult,FareDataBridge,UICommand,UIStateStore,ValidatedQueryIR,DatasetId,DatasetRevision,FareId } from '../contracts'
-import { legDate,legKey,legRequest,orderedLegResources } from './leg-bindings'
+import { availableModes,legDate,legKey,legRequest,orderedLegResources } from './leg-bindings'
 import { scheduleLegs,staleDownstreamFareIds } from './itinerary-schedule'
 export type QueryFareSelectionScope={
  kind:'query-result';fareIds:readonly FareId[];query:ValidatedQueryIR;currentQuery:()=>ValidatedQueryIR
@@ -16,7 +16,7 @@ function requestsFor(state:ArtifactUIState,bridge:FareDataBridge,selectedFacts:r
  const coverageFor=(origin:string,destination:string)=>{
   const matches=state.datasetRefs.map(id=>bridge.getManifest(id).coverage).filter(coverage=>legKey(coverage)===`${origin}:${destination}`)
   const seed=matches[0]??first.coverage
-  const modes=state.availableModesByLeg[`${origin}:${destination}`]??[...new Set(matches.flatMap(coverage=>coverage.modes))]
+  const modes=[...new Set(matches.flatMap(coverage=>coverage.modes))]
   return{...seed,originIds:[origin],destinationIds:[destination],modes:modes.length?modes:seed.modes}
  }
  const route=state.citySequence.length>1?state.citySequence:state.stays.length?[first.coverage.originIds[0]!,...state.stays.map(stay=>stay.cityId)]:[]
@@ -82,9 +82,10 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
   const bridge=options.bridge;if(!bridge)return Promise.resolve()
   requests.get(artifactId)?.controller.abort();requests.delete(artifactId)
   let state=store.get(artifactId)
-  const availableModesByLeg={...state.availableModesByLeg}
-  for(const id of state.datasetRefs){const coverage=bridge.getManifest(id).coverage,key=legKey(coverage);if(key)availableModesByLeg[key]=[...new Set([...(availableModesByLeg[key]??[]),...coverage.modes])]}
+  const availableModesByLeg={...state.availableModesByLeg},modesByLeg={...state.modesByLeg}
+  for(const id of state.datasetRefs){const manifest=bridge.getManifest(id),key=legKey(manifest.coverage);if(key){const actual=availableModes(manifest);availableModesByLeg[key]=actual;const chosen=modesByLeg[key];if(chosen){const retained=chosen.filter(mode=>actual.includes(mode));modesByLeg[key]=retained.length===actual.length?[]:retained}}}
   if(JSON.stringify(availableModesByLeg)!==JSON.stringify(state.availableModesByLeg)){store.dispatch({kind:'availableModesByLeg',artifactId,availableModesByLeg,expectedRevision:state.revision});state=store.get(artifactId)}
+  if(JSON.stringify(modesByLeg)!==JSON.stringify(state.modesByLeg)){store.dispatch({kind:'modesByLeg',artifactId,modesByLeg,expectedRevision:state.revision});state=store.get(artifactId)}
   const plans=requestsFor(state,bridge,selectedFacts)
   const manifests=state.datasetRefs.map(ref=>bridge.getManifest(ref));const missing=plans.filter(plan=>!manifests.some(manifest=>covers(manifest,plan)))
   if(!missing.length){options.onCoverageStatus?.({artifactId,status:'ready'});return Promise.resolve()}
@@ -102,10 +103,13 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
     if(currentRefs.length>8)throw new Error('Eight-leg limit reached; start another travel view')
     const seedRefs=[...activeKeys].flatMap(key=>{const first=seed.get(key);return first&&latest.get(key)!==first?[first]:[]})
     const refs=[...seedRefs.slice(0,8-currentRefs.length),...currentRefs]
-    const refreshedModes={...current.availableModesByLeg};for(const plan of plans){const key=legKey(plan);if(key&&!refreshedModes[key])refreshedModes[key]=plan.modes}
+    const refreshedModes={...current.availableModesByLeg};for(const id of refs){const manifest=bridge.getManifest(id),key=legKey(manifest.coverage);if(key)refreshedModes[key]=availableModes(manifest)}
     const scopeResult=store.dispatch({kind:'availableModesByLeg',artifactId,availableModesByLeg:refreshedModes,expectedRevision:current.revision})
     if(scopeResult.status==='stale')throw new Error('Stale mode scope')
-    const scoped=store.get(artifactId);store.dispatch({kind:'datasets',artifactId,datasetRefs:refs,expectedRevision:scoped.revision})
+    let scoped=store.get(artifactId);const refreshedSelections={...scoped.modesByLeg}
+    for(const [key,chosen] of Object.entries(refreshedSelections)){const actual=refreshedModes[key];if(actual){const retained=chosen.filter(mode=>actual.includes(mode));refreshedSelections[key]=retained.length===actual.length?[]:retained}}
+    if(JSON.stringify(refreshedSelections)!==JSON.stringify(scoped.modesByLeg)){const selected=store.dispatch({kind:'modesByLeg',artifactId,modesByLeg:refreshedSelections,expectedRevision:scoped.revision});if(selected.status==='stale')throw new Error('Stale selected modes');scoped=store.get(artifactId)}
+    store.dispatch({kind:'datasets',artifactId,datasetRefs:refs,expectedRevision:scoped.revision})
     options.onCoverageStatus?.({artifactId,status:'ready'})
    }catch(error){for(const manifest of loaded)bridge.release(manifest.datasetId);if(!controller.signal.aborted){
      const changed=error instanceof Error&&error.message==='SOURCE_VERSION_CHANGED'

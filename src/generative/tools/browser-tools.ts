@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId,type UICommand,type DispatchResult,LIMITS } from '../contracts';
 import {SummarizeFaresInputSchema} from './summarize-schema';
 import {filterPredicate} from '../state/filter-predicate';
-import {legState,legRequest,resolveBoundDatasetId} from '../state/leg-bindings';
+import {availableModes,legState,legRequest,resolveBoundDatasetId} from '../state/leg-bindings';
 import { coverageKey } from '../data/resource-loader';
 import { assertNoBulkData } from '../contracts/privacy';
 class LocalToolError extends Error{constructor(readonly code:'DATASET_CAPACITY_EXCEEDED'){super(code)}}
@@ -31,7 +31,7 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
    if(before.datasetRefs.length===0 && current.revision===before.revision){const visible=displayWindow??coverage.dateWindow;options.store.dispatch({artifactId,expectedRevision:before.revision,kind:'dates',dates:{start:visible.from,...(visible.to!==visible.from?{end:visible.to}:{})}})}
    const state=options.store.get(artifactId);
    const routeKey=coverage.originIds[0]&&coverage.destinationIds[0]?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined
-   if(routeKey){const current=options.store.get(artifactId),available=[...new Set([...(current.availableModesByLeg[routeKey]??[]),...coverage.modes])];options.store.dispatch({artifactId,kind:'availableModesByLeg',availableModesByLeg:{...current.availableModesByLeg,[routeKey]:available}});if(displayWindow){const updated=options.store.get(artifactId);options.store.dispatch({artifactId,kind:'displayWindowByLeg',displayWindowByLeg:{...updated.displayWindowByLeg,[routeKey]:displayWindow}})}}
+   if(routeKey){const current=options.store.get(artifactId),actual=availableModes(manifest);options.store.dispatch({artifactId,kind:'availableModesByLeg',availableModesByLeg:{...current.availableModesByLeg,[routeKey]:actual}});const scoped=options.store.get(artifactId),chosen=scoped.modesByLeg[routeKey];if(chosen){const retained=chosen.filter(mode=>actual.includes(mode));options.store.dispatch({artifactId,kind:'modesByLeg',modesByLeg:{...scoped.modesByLeg,[routeKey]:retained.length===actual.length?[]:retained}})}if(displayWindow){const updated=options.store.get(artifactId);options.store.dispatch({artifactId,kind:'displayWindowByLeg',displayWindowByLeg:{...updated.displayWindowByLeg,[routeKey]:displayWindow}})}}
    const routedState=options.store.get(artifactId)
    if(routedState.citySequence.length<2&&coverage.originIds[0]&&coverage.destinationIds[0])options.store.dispatch({artifactId,kind:'route',citySequence:[coverage.originIds[0],coverage.destinationIds[0]]})
    else if(coverage.originIds[0]===routedState.citySequence.at(-1)&&coverage.destinationIds[0])options.store.dispatch({artifactId,kind:'route',citySequence:[...routedState.citySequence,coverage.destinationIds[0]]})
