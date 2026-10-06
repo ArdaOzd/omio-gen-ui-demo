@@ -208,6 +208,9 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
   const dispatch = useTravelAction(plan.state.artifactId)
   const [error, setError] = useState('')
   const legIndex = plan.legs.findIndex(candidate => candidate.key === leg.key)
+  const stayIndex = plan.state.stays.findIndex(stay => stay.cityId === leg.originId)
+  const currentNights = stayIndex >= 0 ? plan.state.stays[stayIndex]?.nights ?? 0 : 0
+  const minimumDate = legIndex > 0 ? new Date(Date.parse(`${leg.threshold.date}T00:00:00.000Z`) - currentNights * 86_400_000).toISOString().slice(0, 10) : undefined
   const change = (date: string) => {
     try {
       const valid = DateSchema.parse(date)
@@ -215,11 +218,8 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
         const dates = tripDatesForLegDeparture(plan.state, leg.originId, valid)
         dispatch({ kind: 'dates', artifactId: plan.state.artifactId, dates })
       } else {
-        if (valid < leg.threshold.date) throw new Error('Departure is before the current leg threshold')
-        const offsetDays = (Date.parse(`${valid}T00:00:00.000Z`) - Date.parse(`${leg.threshold.date}T00:00:00.000Z`)) / 86_400_000
-        const stayIndex = plan.state.stays.findIndex(stay => stay.cityId === leg.originId)
-        const currentNights = stayIndex >= 0 ? plan.state.stays[stayIndex]?.nights ?? 0 : 0
-        const nights = currentNights + offsetDays
+        if (!minimumDate || valid < minimumDate) throw new Error('Departure is before the preceding arrival')
+        const nights = (Date.parse(`${valid}T00:00:00.000Z`) - Date.parse(`${minimumDate}T00:00:00.000Z`)) / 86_400_000
         if (!Number.isInteger(nights) || nights < 0 || nights > 30) throw new Error('Unsupported stay duration')
         const stays = stayIndex >= 0
           ? plan.state.stays.map((stay, index) => index === stayIndex ? { ...stay, nights } : stay)
@@ -233,7 +233,7 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
   }
   return <div className="trip-date-control">
     <Label><CalendarDays aria-hidden="true" />{label ?? 'Departure'}
-      <Input type="date" value={leg.threshold.date} min={legIndex > 0 ? leg.threshold.date : undefined} onChange={event => change(event.target.value)} />
+      <Input type="date" value={leg.threshold.date} min={minimumDate} onChange={event => change(event.target.value)} />
     </Label>
     {leg.threshold.minutes > 0 && <small>After {departure(leg.threshold.minutes)} following your previous arrival</small>}
     {error && <Alert>{error}</Alert>}

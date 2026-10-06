@@ -113,6 +113,34 @@ it('shifts the full itinerary window before querying and rendering a new first-l
   expect(loadedDates).toContain('2026-10-12')
   await waitFor(() => expect(screen.getAllByRole('button', { name: /Oct/ })).toHaveLength(3))
   expect(screen.getByRole('button', { name: /Mon 12 Oct/ })).toBeInTheDocument()
+
+  fireEvent.change(screen.getByLabelText('Departure'), { target: { value: '2026-10-09' } })
+  await router.whenIdle(artifactId)
+  expect(state.get(artifactId).dates).toEqual({ start: '2026-10-09', end: '2026-10-11' })
+  expect(state.get(artifactId).displayWindowByLeg['london:paris']).toEqual({ from: '2026-10-09', to: '2026-10-11' })
+  router.dispose()
+})
+
+it('lets a later-leg departure move backward by reducing its stay', async () => {
+  const pageSource = async (input: { originId: string; destinationId: string; date: string; page: number }) => ({ rows: [FareRowSchema.parse({ id: `${input.originId}-${input.destinationId}-${input.date}`, originId: input.originId, destinationId: input.destinationId, serviceDate: input.date, mode: 'train', carrierId: 'rail', carrierName: 'Fixture Rail', priceCents: 3200, durationMinutes: 180, departureMinutes: 600, availableSeats: 12, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true })], total: 1, pages: 1, page: input.page, sourceVersion: 'trip-stay-date-v1' })
+  const bridge = createFareDataBridge({ pageSource })
+  const first = await bridge.load(CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-26', to: '2026-11-02' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
+  const second = await bridge.load(CoverageRequestSchema.parse({ originIds: ['paris'], destinationIds: ['rome'], dateWindow: { from: '2026-10-26', to: '2026-11-02' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
+  const state = createUIStateStore()
+  state.initializeMissing(artifactId, { datasetRefs: [first.datasetId, second.datasetId], citySequence: ['london', 'paris', 'rome'], dates: { start: '2026-10-26', end: '2026-11-02' }, stays: [{ cityId: 'paris', nights: 3 }, { cityId: 'rome', nights: 0 }] })
+  const router = createActionRouter(state, { bridge })
+  render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}><TravelDate artifactRef={artifactId} datasetRef={second.datasetId} /></TravelProvider>)
+  const input = screen.getByLabelText('Departure')
+
+  expect(input).toHaveValue('2026-10-29')
+  expect(input).toHaveAttribute('min', '2026-10-26')
+  fireEvent.change(input, { target: { value: '2026-10-31' } })
+  await router.whenIdle(artifactId)
+  expect(state.get(artifactId).stays.find(stay => stay.cityId === 'paris')?.nights).toBe(5)
+
+  fireEvent.change(screen.getByLabelText('Departure'), { target: { value: '2026-10-30' } })
+  await router.whenIdle(artifactId)
+  expect(state.get(artifactId).stays.find(stay => stay.cityId === 'paris')?.nights).toBe(4)
   router.dispose()
 })
 
