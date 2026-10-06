@@ -12,7 +12,9 @@ export function covers(manifest:DatasetManifest,request:CoverageRequest):boolean
 }
 const signature=(state:ArtifactUIState)=>JSON.stringify({dates:state.dates,citySequence:state.citySequence,stays:state.stays,modes:state.filters.modes,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,displayWindowByLeg:state.displayWindowByLeg})
 function requestsFor(state:ArtifactUIState,bridge:FareDataBridge,selectedFacts:readonly Awaited<ReturnType<FareDataBridge['lookupFare']>>[]=[]):CoverageRequest[]{
- const resources=orderedLegResources(state,bridge);const first=resources[0];if(!first)return []
+ const resources=orderedLegResources(state,bridge)
+ const first=resources[0]??state.datasetRefs.flatMap(datasetId=>{const coverage=bridge.getManifest(datasetId).coverage,key=legKey(coverage);return key?[{key,datasetId,coverage}]:[]})[0]
+ if(!first)return []
  const coverageFor=(origin:string,destination:string)=>{
   const matches=state.datasetRefs.map(id=>bridge.getManifest(id).coverage).filter(coverage=>legKey(coverage)===`${origin}:${destination}`)
   const seed=matches[0]??first.coverage

@@ -60,6 +60,34 @@ it('uses a compact icon dropdown in the grid and omits zero-count modes', async 
   expect(screen.queryByRole('menuitemcheckbox',{name:'Bus'})).not.toBeInTheDocument()
 })
 
+it('hides old-route fares while replacement coverage is loading', async () => {
+  vi.stubGlobal('fetch',vi.fn(async()=>new Response(JSON.stringify({locations:[{slug:'london',display_name:'London, GB'},{slug:'paris',display_name:'Paris, FR'},{slug:'rome',display_name:'Rome, IT'}]}),{status:200,headers:{'content-type':'application/json'}})))
+  let releaseRome: (() => void) | undefined
+  const romeGate = new Promise<void>(resolve => { releaseRome = resolve })
+  const bridge=createFareDataBridge({pageSource:async input=>{
+    if(input.destinationId==='rome')await romeGate
+    const row=fare({id:input.destinationId==='rome'?'new-rome-fare':'old-paris-fare',date:input.date,mode:'train',price:input.destinationId==='rome'?4700:3200,duration:150,departure:540})
+    return{rows:[{...row,destinationId:input.destinationId}],total:1,pages:1,page:input.page,sourceVersion:'route-refresh-v1'}
+  }})
+  const seed=await bridge.load(CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train'],passengers:1}),new AbortController().signal)
+  const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[seed.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09'},displayWindowByLeg:{'london:paris':{from:'2026-10-09',to:'2026-10-09'}}})
+  const router=createActionRouter(state,{bridge})
+  render(<TravelProvider services={{bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}}><MultiCityPlanGrid artifactRef={artifactId}/></TravelProvider>)
+  await screen.findByText('€32.00')
+
+  router({kind:'route',artifactId,citySequence:['london','rome']})
+  await screen.findByText('No route is ready yet')
+  expect(screen.queryByText('€32.00')).not.toBeInTheDocument()
+  expect(screen.queryByRole('button',{name:'Choose fare'})).not.toBeInTheDocument()
+
+  releaseRome?.()
+  await router.whenIdle(artifactId)
+  await screen.findByRole('region',{name:'Multi-city trip planner'})
+  expect(await screen.findByText('€47.00')).toBeInTheDocument()
+  expect(screen.getByRole('region',{name:'Multi-city trip planner'})).toHaveTextContent('London to Rome')
+  router.dispose()
+})
+
 it('shows only the leg display window and persists a day chosen from selected modes', async () => {
   const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-11' }, modes: ['train', 'bus'], passengers: 1 })
   const bridge = createFareDataBridge({ pageSource: async input => {

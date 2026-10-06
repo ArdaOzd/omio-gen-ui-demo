@@ -11,7 +11,7 @@ export function orderedLegResources(state:ArtifactUIState,bridge:FareDataBridge)
  const stops=route.filter((city,index,all):city is string=>!!city&&(index===0||city!==all[index-1]))
  if(stops.length>1){
   const ordered=stops.slice(1).flatMap((destination,index)=>{const resource=latest.get(`${stops[index]}:${destination}`);return resource?[resource]:[]})
-  if(ordered.length)return ordered
+  if(state.citySequence.length>1||ordered.length)return ordered
  }
  const seen=new Set<string>()
  return resources.flatMap(resource=>{if(seen.has(resource.key))return[];seen.add(resource.key);return[latest.get(resource.key)??resource]})
