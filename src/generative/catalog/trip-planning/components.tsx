@@ -98,10 +98,19 @@ function updateRoute(plan: Plan, dispatch: ReturnType<typeof useTravelAction>, c
   const sequence = routeCities(plan)
   if (!sequence[cityIndex] || sequence[cityIndex] === cityId) return
   const citySequence = sequence.map((value, index) => index === cityIndex ? cityId : value)
+  const visits = citySequence.at(-1) === citySequence[0] ? citySequence.slice(0, -1) : citySequence
+  if (new Set(visits).size !== visits.length) return
   const destinations = citySequence.slice(1)
   const stays = destinations.map(destination => plan.state.stays.find(stay => stay.cityId === destination) ?? { cityId: destination, nights: 0 })
   dispatch({ kind: 'route', artifactId: plan.state.artifactId, citySequence })
   dispatch({ kind: 'stays', artifactId: plan.state.artifactId, stays })
+}
+
+function cityOptions(plan: Plan, cityIndex: number, locations: LocationOption[]): LocationOption[] {
+  const sequence = routeCities(plan)
+  const current = sequence[cityIndex]
+  const returnOrigin = cityIndex === sequence.length - 1 ? sequence[0] : undefined
+  return locations.filter(location => location.id === current || location.id === returnOrigin || !sequence.some((city, index) => index !== cityIndex && city === location.id))
 }
 
 function LocationInput({ label, value, locations, readOnly = false, onSelect }: {
@@ -185,9 +194,9 @@ function CityFields({ plan, leg, legIndex, locations, onlyDestination = false }:
 }) {
   const dispatch = useTravelAction(plan.state.artifactId)
   return <div className="trip-city-pair">
-    {!onlyDestination && <LocationInput label="From" value={leg.originId} locations={locations} onSelect={city => updateRoute(plan, dispatch, legIndex, city)} />}
+    {!onlyDestination && <LocationInput label="From" value={leg.originId} locations={cityOptions(plan, legIndex, locations)} onSelect={city => updateRoute(plan, dispatch, legIndex, city)} />}
     {!onlyDestination && <ArrowRight className="trip-route-arrow" aria-hidden="true" />}
-    <LocationInput label="To" value={leg.destinationId} locations={locations} onSelect={city => updateRoute(plan, dispatch, legIndex + 1, city)} />
+    <LocationInput label="To" value={leg.destinationId} locations={cityOptions(plan, legIndex + 1, locations)} onSelect={city => updateRoute(plan, dispatch, legIndex + 1, city)} />
   </div>
 }
 
@@ -415,11 +424,25 @@ function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: str
   const visibleStart = thresholdDate > requestedFrom ? thresholdDate : requestedFrom
   const outsideWindow = visibleStart > requestedTo
   const dates = useMemo(() => outsideWindow ? [] : dateRange(visibleStart, requestedTo), [outsideWindow, visibleStart, requestedTo])
+  const calendarKey = resolved?.leg.key
+  const persistedDate = calendarKey ? result.state.calendarDateByLeg[calendarKey] : undefined
+  const selectedDate = persistedDate && dates.includes(persistedDate) ? persistedDate : dates[0] ?? visibleStart
+  const chooseDate = (date: string) => {
+    if (calendarKey) dispatch({ kind: 'calendarDateByLeg', artifactId: result.state.artifactId, calendarDateByLeg: { ...result.state.calendarDateByLeg, [calendarKey]: date } })
+  }
+  useEffect(() => {
+    if (!calendarKey) return
+    if (dates.length > 0) {
+      if (persistedDate !== selectedDate) chooseDate(selectedDate)
+      return
+    }
+    if (persistedDate) {
+      const { [calendarKey]: _removed, ...calendarDateByLeg } = result.state.calendarDateByLeg
+      dispatch({ kind: 'calendarDateByLeg', artifactId: result.state.artifactId, calendarDateByLeg })
+    }
+  }, [calendarKey, dates.length, persistedDate, selectedDate])
   if (!resolved) return <EmptyPlanningState />
   if (outsideWindow) return <Card className="trip-planning-control trip-fare-calendar"><div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div></div><Alert role="status">No departures fit this trip window; adjust the previous fare or stay.</Alert></Card>
-  const persistedDate = result.state.calendarDateByLeg[resolved.leg.key]
-  const selectedDate = persistedDate && dates.includes(persistedDate) ? persistedDate : dates[0] ?? visibleStart
-  const chooseDate = (date: string) => dispatch({ kind: 'calendarDateByLeg', artifactId: result.state.artifactId, calendarDateByLeg: { ...result.state.calendarDateByLeg, [resolved.leg.key]: date } })
   if (result.status === 'loading') return <Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
   if (result.status === 'error') return <Alert>Calendar fares could not load. Try the date again.</Alert>
   const legRows = result.rows.filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold))
