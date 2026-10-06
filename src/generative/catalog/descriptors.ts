@@ -6,6 +6,14 @@ const refs = [
 ] satisfies ComponentDescriptor['props'];
 const descriptor = (name: string, group: ComponentDescriptor['group'], description: string, children = false): ComponentDescriptor => ({ name, group, description, props: refs, children });
 export const descriptors: ReadonlyArray<ComponentDescriptor> = [
+  descriptor('MultiCityPlanGrid','view','Connected multi-city planner for distinct city stops with an optional final return to the origin. Reads the ordered citySequence and leg datasets for one artifact; composes CityField, TravelDate, TransportSelect, FareOrder and FadeFares per leg, inserts StayDuration for each destination, and cascades selected arrival plus stay into the next leg minimum departure'),
+  descriptor('FareCalendar','view','Same-leg calendar within the exact display date window. Uses the datasetRef leg, its multi-selected transport modes and host-derived minimum departure; shows local cheapest and fastest synthetic representatives per day, then opens that day fares without sending rows to the model'),
+  descriptor('FadeFares','view','Same-leg horizontally scrolling synthetic fare chooser with edge fades. datasetRef binds the leg; TransportSelect, FareOrder, TravelDate and the preceding selected arrival plus StayDuration all filter and rank this local list; selections flow to the shared PlanningTracker'),
+  descriptor('FareOrder','control','Same-leg fare ordering control. datasetRef binds the leg list and calendar; cheapest orders price, fastest orders duration, and none orders service date then departure time'),
+  descriptor('TransportSelect','control','Same-leg multi-select transport dropdown for train, bus, flight and ferry with vector icons. Writes modesByLeg for the datasetRef route and filters its FadeFares and FareCalendar'),
+  descriptor('StayDuration','control','Destination stay slider from 0 to 30 days. datasetRef identifies the arriving leg; its destination becomes the next leg origin, and selected arrival plus this stay sets the next minimum departure'),
+  descriptor('TravelDate','control','Same-leg local departure date. datasetRef identifies the leg; the first leg changes the trip display window and later legs preserve route offsets while the host enforces any preceding arrival threshold'),
+  descriptor('CityField','control','Editable origin and destination city fields backed by host location suggestions. datasetRef identifies the route positions; changes write the artifact citySequence, where each destination connects to its stay and the next leg origin'),
   descriptor('TravelHero','layout','Travel artifact headline and introduction',true),
   descriptor('Carousel','layout','Accessible horizontal panels',true),
   descriptor('DateWindow','control','Bounded local date window'),

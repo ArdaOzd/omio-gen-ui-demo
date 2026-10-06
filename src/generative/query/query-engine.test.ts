@@ -23,6 +23,14 @@ describe('bounded local queries',()=>{
   const result=await executeQuery(query({project:['id'],where:{all:[{field:'mode',op:'in',value:['bus']},{field:'durationMinutes',op:'between',value:[350,390]}]}}),resources,new AbortController().signal)
   expect(result.rows).toEqual([{id:'b'}]);const controller=new AbortController();controller.abort();await expect(executeQuery(query({}),resources,controller.signal)).rejects.toMatchObject({name:'AbortError'})
  })
+ it('executes the exact-minute threshold day plus following-day predicate used after a selected arrival',async()=>{
+  const where={all:[{any:[{all:[{field:'serviceDate' as const,op:'eq' as const,value:'2026-10-02'},{field:'departureMinutes' as const,op:'gte' as const,value:700}]},{field:'serviceDate' as const,op:'between' as const,value:['2026-10-03','2026-10-04']}]}]}
+  const manifest={datasetId,revision:DatasetRevisionSchema.parse(1),schemaVersion:'1.0.0' as const,coverage:{originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-04'},modes:['train' as const,'bus' as const],passengers:1,complete:true,truncated:false},rowCount:rows.length,fields:Object.keys(rows[0]!).map(name=>({name:name as keyof FareRow,type:typeof rows[0]![name as keyof FareRow] as 'string'|'number'|'boolean',nullable:false,filterable:true,groupable:true,joinKey:['originId','destinationId'].includes(name)})),compactSummary:{modeCounts:{}},source:{kind:'synthetic-fixture' as const,descriptorId:'fixture',sourceVersion:'v1'}}
+  const parsed=parseQuery(query({where,project:['id']}),[manifest])
+  const future={...rows[0]!,id:FareIdSchema.parse('future'),serviceDate:'2026-10-03',departureMinutes:100}
+  const result=await executeQuery(parsed,new Map([[datasetId,{rows:[...rows,future],revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]]),new AbortController().signal)
+  expect(result.rows).toEqual([{id:'a'},{id:'b'},{id:'future'}])
+ })
  it('rejects mixed source versions and join expansion before any result',async()=>{
   const other=DatasetIdSchema.parse('other');const multi=new Map(resources);multi.set(other,{rows,revision:DatasetRevisionSchema.parse(2),sourceVersion:'v2'})
   await expect(executeQuery(query({sources:[{datasetRef:datasetId,alias:'left'},{datasetRef:other,alias:'right'}],joins:[{rightAlias:'right',leftKey:'destinationId',rightKey:'destinationId',kind:'inner'}]}),multi,new AbortController().signal)).rejects.toThrow(/source version/i)

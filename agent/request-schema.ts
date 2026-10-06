@@ -58,7 +58,7 @@ export function parseToolOutput(name:string,input:unknown):unknown {
 
 export function parseToolInput(name:string,input:unknown):unknown {
  assertNoBulkData(input);
- if(name==='load_fares')return z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}).parse(input);
+ if(name==='load_fares')return z.strictObject({coverage:CoverageRequestSchema,displayWindow:CoverageRequestSchema.shape.dateWindow.optional(),artifactRef:ArtifactIdSchema.optional()}).parse(input);
  if(name==='summarize_fares')return SummarizeFaresInputSchema.parse(input);
  if(name==='get_top_fares')return z.strictObject({datasetRef:DatasetIdSchema,objective:z.enum(['cheapest','fastest'])}).parse(input);
  if(name==='get_fare')return z.strictObject({fareId:FareIdSchema}).parse(input);

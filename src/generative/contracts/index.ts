@@ -63,11 +63,24 @@ export const SortSpecSchema = z.strictObject({ field: z.enum(['priceCents', 'dur
 export type SortSpec = z.infer<typeof SortSpecSchema>;
 export const StayAllocationSchema = z.strictObject({ cityId: ref, nights: z.number().int().min(0).max(30) });
 export type StayAllocation = z.infer<typeof StayAllocationSchema>;
+export const CitySequenceSchema = z.array(ref).max(9).refine(sequence => {
+  const visits = sequence.at(-1) === sequence[0] ? sequence.slice(0, -1) : sequence
+  return new Set(visits).size === visits.length
+}, 'A route may visit each city once, with an optional final return to the origin');
+export const LegThresholdSchema = z.strictObject({
+  legKey: ref, originId: ref, destinationId: ref, earliestDeparture: z.string().datetime(),
+  source: z.enum(['trip-date','selected-arrival']), precedingFareId: FareIdSchema.optional(), selectedFareId: FareIdSchema.optional(),
+});
+export type LegThresholdSummary = z.infer<typeof LegThresholdSchema>;
+export const ComponentBindingSchema=z.strictObject({key:ref.optional(),type:ref,legKey:ref.optional(),datasetRef:DatasetIdSchema.optional(),actionRef:ref.optional(),selectorRef:ref.optional()});
+export type ComponentBinding=z.infer<typeof ComponentBindingSchema>;
 export const RuntimeVariablesSchema=z.record(z.string().regex(/^\$[A-Za-z][A-Za-z0-9_]{0,39}$/),z.union([z.string().max(160),z.number().finite(),z.boolean(),z.null()])).refine(value=>Object.keys(value).length<=16,'Runtime variable count exceeded');
 export const ArtifactUIStateSchema = z.strictObject({
   artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema, runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(LIMITS.artifactDatasets),
   filters: TravelFiltersSchema, dates: z.strictObject({ start: DateSchema, end: DateSchema.optional() }),
-  stays: z.array(StayAllocationSchema).max(8), modesByLeg: z.record(ref, z.array(TransportModeSchema).max(4)),
+  citySequence: CitySequenceSchema.default([]), stays: z.array(StayAllocationSchema).max(8), modesByLeg: z.record(ref, z.array(TransportModeSchema).max(4)),
+  availableModesByLeg:z.record(ref,z.array(TransportModeSchema).min(1).max(4)).default({}),displayWindowByLeg:z.record(ref,dateWindow).default({}),
+  sortByLeg:z.record(ref,SortSpecSchema).default({}),calendarDateByLeg:z.record(ref,DateSchema).default({}),
   sort: SortSpecSchema, selectedFareIds: z.array(FareIdSchema).max(8),
   pending: z.array(z.strictObject({ requestId: ref, kind: z.enum(['load', 'query']) })).max(8), lastInteractionAt: z.string().datetime(),
 });
@@ -82,9 +95,11 @@ export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: Tr
 export type BoundedFareFact = z.infer<typeof BoundedFareFactSchema>;
 export const CompactArtifactSnapshotSchema = z.strictObject({ artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema,
   runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(LIMITS.artifactDatasets), selectedFareIds: z.array(FareIdSchema).max(8), filters: TravelFiltersSchema,
-  dates: ArtifactUIStateSchema.shape.dates, stays: z.array(StayAllocationSchema).max(8), sort: SortSpecSchema,
+  dates: ArtifactUIStateSchema.shape.dates, citySequence: ArtifactUIStateSchema.shape.citySequence, stays: z.array(StayAllocationSchema).max(8), sort: SortSpecSchema,
+  sortByLeg:ArtifactUIStateSchema.shape.sortByLeg,calendarDateByLeg:ArtifactUIStateSchema.shape.calendarDateByLeg,
+  availableModesByLeg:ArtifactUIStateSchema.shape.availableModesByLeg,displayWindowByLeg:ArtifactUIStateSchema.shape.displayWindowByLeg,
   modesByLeg: ArtifactUIStateSchema.shape.modesByLeg, pending: ArtifactUIStateSchema.shape.pending,
-  layoutSummary: z.string().max(600), catalogVersion: z.literal(CATALOG_VERSION) });
+  legThresholds: z.array(LegThresholdSchema).max(8).default([]), componentBindings:z.array(ComponentBindingSchema).max(LIMITS.treeNodes).default([]), layoutSummary: z.string().max(600), catalogVersion: z.literal(CATALOG_VERSION) });
 export type CompactArtifactSnapshot = z.infer<typeof CompactArtifactSnapshotSchema>;
 export const OlderArtifactSummarySchema=z.strictObject({artifactId:ArtifactIdSchema,variant:z.literal('a'),label:z.string().max(160),revision:UIStateRevisionSchema,lastInteractionAt:z.string().datetime()});
 export type OlderArtifactSummary=z.infer<typeof OlderArtifactSummarySchema>;
@@ -132,8 +147,8 @@ export type ValidatedQueryIR = QueryIR;
 export type BoundedQueryResult = { rows: Array<Record<string, JsonScalar>>; total: number; truncated: boolean; datasetRevision: DatasetRevision; requestId: string };
 export type UICommand = { artifactId: ArtifactId; expectedRevision?: UIStateRevision } & (
   { kind: 'filters'; filters: TravelFilters } | { kind: 'dates'; dates: ArtifactUIState['dates'] } |
-  { kind: 'sort'; sort: SortSpec } | { kind: 'select'; fareId: FareId; selected: boolean } |
-  { kind: 'runtimeVariables'; runtimeVariables: ArtifactUIState['runtimeVariables'] } | { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
+  { kind: 'sort'; sort: SortSpec } | {kind:'sortByLeg';sortByLeg:ArtifactUIState['sortByLeg']} | {kind:'calendarDateByLeg';calendarDateByLeg:ArtifactUIState['calendarDateByLeg']} | { kind: 'select'; fareId: FareId; selected: boolean } |
+  { kind: 'runtimeVariables'; runtimeVariables: ArtifactUIState['runtimeVariables'] } | { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | {kind:'availableModesByLeg';availableModesByLeg:ArtifactUIState['availableModesByLeg']} | {kind:'displayWindowByLeg';displayWindowByLeg:ArtifactUIState['displayWindowByLeg']} | { kind: 'route'; citySequence: ArtifactUIState['citySequence'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[] });
 export type DispatchResult = { status: 'applied'; revision: UIStateRevision } | { status: 'stale'; revision: UIStateRevision };
 export interface FareDataBridge {
   load(request: CoverageRequest, signal: AbortSignal): Promise<DatasetManifest>;
@@ -164,7 +179,7 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   }
   let leaves = 0;
   const visit = (predicate: PredicateTree, depth: number): void => {
-    if (depth > 3) throw new Error('Predicate depth exceeded');
+    if (depth > 4) throw new Error('Predicate depth exceeded');
     if ('all' in predicate) { predicate.all.forEach(child => visit(child, depth + 1)); return; }
     if ('any' in predicate) { predicate.any.forEach(child => visit(child, depth + 1)); return; }
     if (++leaves > 16) throw new Error('Predicate leaf budget exceeded');
@@ -202,10 +217,15 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
 export const UICommandPatchSchema = z.discriminatedUnion('kind', [
  z.strictObject({kind:z.literal('filters'),filters:TravelFiltersSchema}),
  z.strictObject({kind:z.literal('dates'),dates:ArtifactUIStateSchema.shape.dates}),
+ z.strictObject({kind:z.literal('route'),citySequence:ArtifactUIStateSchema.shape.citySequence}),
  z.strictObject({kind:z.literal('sort'),sort:SortSpecSchema}),
+ z.strictObject({kind:z.literal('sortByLeg'),sortByLeg:ArtifactUIStateSchema.shape.sortByLeg}),
+ z.strictObject({kind:z.literal('calendarDateByLeg'),calendarDateByLeg:ArtifactUIStateSchema.shape.calendarDateByLeg}),
  z.strictObject({kind:z.literal('stays'),stays:ArtifactUIStateSchema.shape.stays}),
  z.strictObject({kind:z.literal('runtimeVariables'),runtimeVariables:RuntimeVariablesSchema}),
  z.strictObject({kind:z.literal('modesByLeg'),modesByLeg:ArtifactUIStateSchema.shape.modesByLeg}),
+ z.strictObject({kind:z.literal('availableModesByLeg'),availableModesByLeg:ArtifactUIStateSchema.shape.availableModesByLeg}),
+ z.strictObject({kind:z.literal('displayWindowByLeg'),displayWindowByLeg:ArtifactUIStateSchema.shape.displayWindowByLeg}),
  z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.boolean()}),
 ]);
 export const EditArtifactInputSchema=z.strictObject({artifactRef:ArtifactIdSchema,expectedRevision:UIStateRevisionSchema,commands:z.array(UICommandPatchSchema).min(1).max(8)});

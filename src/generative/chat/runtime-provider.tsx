@@ -13,6 +13,7 @@ import {CanonicalMessagesContext} from './narrative-disclosure'
 import { completeSmartPlannerHandoff } from '../smart-planner-handoff'
 import { PlanningTracker } from '../variants/a/planning-tracker'
 import '../catalog/tokens.css'
+import '../catalog/trip-planning/trip-planning.css'
 export type GenerativeChatProps={services:TravelServices;capture:()=>AgentContextEnvelope|Promise<AgentContextEnvelope>;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];initialRunMessageId?:string;onMessages?:(messages:UIMessage[])=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand'}
 export function GenerativeChat(props:GenerativeChatProps){
  const toolkit=useMemo(()=>{

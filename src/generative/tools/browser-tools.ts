@@ -21,15 +21,21 @@ export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateS
    await options.whenIdle?.(artifactRef);
    return {artifactId:artifactRef,status:'applied',revision:options.store.get(artifactRef).revision};
   }),
-  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest. Coverage originIds/destinationIds use actual city slugs from the host location catalog (for example london, paris, barcelona), never dataset IDs.',async({coverage,artifactRef},signal)=>{
+  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,displayWindow:CoverageRequestSchema.shape.dateWindow.optional(),artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest. coverage.dateWindow includes the chosen search margin. displayWindow is the exact user-facing trip range and excludes margin days. Coverage originIds/destinationIds use actual city slugs from the host location catalog, never dataset IDs.',async({coverage,displayWindow,artifactRef},signal)=>{
+   if(displayWindow&&(displayWindow.from<coverage.dateWindow.from||displayWindow.to>coverage.dateWindow.to))throw new Error('Display window must be inside loaded coverage')
    const artifactId=artifactRef??options.activeArtifactId();const before=options.store.get(artifactId);
    if(before.datasetRefs.length>=LIMITS.artifactDatasets&&!before.datasetRefs.some(id=>{const {complete:_complete,truncated:_truncated,...request}=options.bridge.getManifest(id).coverage;return coverageKey(request)===coverageKey(coverage)}))throw new LocalToolError('DATASET_CAPACITY_EXCEEDED');
    const manifest=DatasetManifestSchema.parse(await options.bridge.load(coverage,signal));if(signal.aborted){options.bridge.release(manifest.datasetId);signal.throwIfAborted()}
    const current=options.store.get(artifactId);
    if(!current.datasetRefs.includes(manifest.datasetId)&&current.datasetRefs.length>=LIMITS.artifactDatasets){options.bridge.release(manifest.datasetId);throw new LocalToolError('DATASET_CAPACITY_EXCEEDED')}
-   if(before.datasetRefs.length===0 && current.revision===before.revision)options.store.dispatch({artifactId,expectedRevision:before.revision,kind:'dates',dates:{start:coverage.dateWindow.from}});
+   if(before.datasetRefs.length===0 && current.revision===before.revision){const visible=displayWindow??coverage.dateWindow;options.store.dispatch({artifactId,expectedRevision:before.revision,kind:'dates',dates:{start:visible.from,...(visible.to!==visible.from?{end:visible.to}:{})}})}
    const state=options.store.get(artifactId);
-   options.store.dispatch({artifactId,kind:'datasets',datasetRefs:[...new Set([...state.datasetRefs,manifest.datasetId])]});
+   const routeKey=coverage.originIds[0]&&coverage.destinationIds[0]?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined
+   if(routeKey){const current=options.store.get(artifactId),available=[...new Set([...(current.availableModesByLeg[routeKey]??[]),...coverage.modes])];options.store.dispatch({artifactId,kind:'availableModesByLeg',availableModesByLeg:{...current.availableModesByLeg,[routeKey]:available}});if(displayWindow){const updated=options.store.get(artifactId);options.store.dispatch({artifactId,kind:'displayWindowByLeg',displayWindowByLeg:{...updated.displayWindowByLeg,[routeKey]:displayWindow}})}}
+   const routedState=options.store.get(artifactId)
+   if(routedState.citySequence.length<2&&coverage.originIds[0]&&coverage.destinationIds[0])options.store.dispatch({artifactId,kind:'route',citySequence:[coverage.originIds[0],coverage.destinationIds[0]]})
+   else if(coverage.originIds[0]===routedState.citySequence.at(-1)&&coverage.destinationIds[0])options.store.dispatch({artifactId,kind:'route',citySequence:[...routedState.citySequence,coverage.destinationIds[0]]})
+   const routed=options.store.get(artifactId);options.store.dispatch({artifactId,kind:'datasets',datasetRefs:[...new Set([...routed.datasetRefs,manifest.datasetId])]});
    return manifest;
   }),
   summarize_fares:wrap(SummarizeFaresInputSchema,'Return at most30 grouped counts. Include artifactRef for the current artifact filters, leg dates and modes; omit artifactRef explicitly for a dataset-wide summary.',async({datasetRef,groupBy,artifactRef},signal)=>{

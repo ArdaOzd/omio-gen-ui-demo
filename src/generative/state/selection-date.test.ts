@@ -43,14 +43,16 @@ it('preserves an explicit inclusive window for an in-window choice and rejects a
  expect(state.get(id).dates).toEqual({start:'2026-10-09',end:'2026-10-11'});expect(state.get(id).selectedFareIds).not.toContain(fare('2026-10-12'))
  router.dispose()
 })
-it('aligns a later leg by its stay offset and lets the latest same-leg choice win', async () => {
+it('keeps the trip start for a later leg and lets the latest same-leg choice win', async () => {
  const {state,router,fare,scope}=await fixture('paris','barcelona')
- state.dispatch({kind:'stays',artifactId:id,stays:[{cityId:'london',nights:0},{cityId:'paris',nights:2},{cityId:'barcelona',nights:4}]})
+ state.dispatch({kind:'route',artifactId:id,citySequence:['london','paris','barcelona']})
+ state.dispatch({kind:'stays',artifactId:id,stays:[{cityId:'paris',nights:2},{cityId:'barcelona',nights:4}]})
+ state.dispatch({kind:'displayWindowByLeg',artifactId:id,displayWindowByLeg:{'paris:barcelona':{from:'2026-10-11',to:'2026-10-15'}}})
  const first=fare('2026-10-12'),second=fare('2026-10-13')
  router.selectFromQuery({kind:'select',artifactId:id,fareId:first,selected:true},scope([first,second]));await router.whenIdle(id)
- expect(state.get(id).dates.start).toBe('2026-10-10')
+ expect(state.get(id).dates.start).toBe('2026-10-09')
  router.selectFromQuery({kind:'select',artifactId:id,fareId:second,selected:true},scope([first,second]));await router.whenIdle(id)
- expect(state.exportSnapshot(id)).toMatchObject({dates:{start:'2026-10-11'},selectedFareIds:[second]})
+ expect(state.exportSnapshot(id)).toMatchObject({dates:{start:'2026-10-09'},selectedFareIds:[second]})
  router.dispose()
 })
 it('rejects IDs absent from the completed query and source generations replaced afterward', async () => {

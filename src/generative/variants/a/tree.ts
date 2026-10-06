@@ -4,8 +4,8 @@ import { assertNoBulkData } from '../../contracts/privacy'
 import { catalogDescriptors, sharedPropsSchema } from '../../catalog/generated/catalog'
 export type PresentNode=z.infer<typeof sharedPropsSchema>&{$type:string;$key?:string;children?:PresentNode|PresentNode[]|string}
 const names=new Set<string>(catalogDescriptors.map(d=>d.name));const layouts=new Set<string>(catalogDescriptors.filter(d=>d.children).map(d=>d.name))
-export const registeredActions=new Set(['filters','dates','sort','select','stays','activate','retry'])
-export const registeredSelectors=new Set(['visibleFares','priceByDay','modeCounts','carrierCounts','cheapestFastest','selectedItinerary','syntheticTotal','coverage','route','timeline'])
+export const registeredActions=new Set(['filters','dates','sort','sortByLeg','calendarDateByLeg','modesByLeg','select','stays','route','activate','retry'])
+export const registeredSelectors=new Set(['visibleFares','priceByDay','modeCounts','carrierCounts','cheapestFastest','selectedItinerary','syntheticTotal','coverage','route','timeline','legSchedule'])
 const nodeSchema:z.ZodType<PresentNode>=z.lazy(()=>sharedPropsSchema.extend({$type:z.string().refine(name=>names.has(name),'Unregistered component'),$key:z.string().max(96).optional(),children:z.union([z.string().max(160),nodeSchema,z.array(nodeSchema).max(LIMITS.treeNodes)]).optional()}))
 export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string>;datasetIds:Set<string>}):PresentNode {
  assertNoBulkData(input)

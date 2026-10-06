@@ -31,13 +31,13 @@ it('loads adjacent legs at stay offsets, routes leg modes, and replaces alternat
  router({kind:'select',artifactId:id,fareId:FareIdSchema.parse('london-paris-2026-10-02-train'),selected:true});await router.whenIdle(id)
  router({kind:'select',artifactId:id,fareId:FareIdSchema.parse('london-paris-2026-10-02-bus'),selected:true});await router.whenIdle(id)
  router({kind:'select',artifactId:id,fareId:FareIdSchema.parse('paris-barcelona-2026-10-04-bus'),selected:true});await router.whenIdle(id)
- expect(store.get(id).selectedFareIds).toEqual(['london-paris-2026-10-02-bus','paris-barcelona-2026-10-04-bus'])
+ expect(store.get(id).selectedFareIds).toEqual(['london-paris-2026-10-02-bus'])
  router({kind:'stays',artifactId:id,stays:[{cityId:'paris',nights:3},{cityId:'barcelona',nights:4}]});await router.whenIdle(id)
  expect(calls).toContainEqual({origin:'paris',destination:'barcelona',date:'2026-10-05'});expect(store.get(id).selectedFareIds).toEqual(['london-paris-2026-10-02-bus'])
  expect(()=>bridge.getManifest(manifest.datasetId)).not.toThrow();router.dispose()
 })
 
-it('resolves old scene refs to new covered handles only inside the interacted artifact',async()=>{
+it('resolves old scene refs to new covered handles while retaining a full-scope seed inside the interacted artifact',async()=>{
  const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'})});const seed=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'}},new AbortController().signal)
  const store=createUIStateStore();const a=ArtifactIdSchema.parse('a');const b=ArtifactIdSchema.parse('b');for(const id of[a,b])store.initializeMissing(id,{datasetRefs:[seed.datasetId],dates:{start:'2026-10-02'}})
  const router=createActionRouter(store,{bridge});router({kind:'dates',artifactId:a,dates:{start:'2026-11-01'}});await router.whenIdle(a)
@@ -58,4 +58,15 @@ it('restores the whole seeded mode scope after a narrow outside-date load',async
  router({kind:'modesByLeg',artifactId:id,modesByLeg:{'london:paris':['bus']}});await router.whenIdle(id);router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await router.whenIdle(id)
  router({kind:'modesByLeg',artifactId:id,modesByLeg:{'london:paris':[]}});await router.whenIdle(id)
  const current=bridge.getManifest(resolveBoundDatasetId(store.get(id),bridge,seed.datasetId));expect(current.coverage.dateWindow.from).toBe('2026-11-01');expect(current.coverage.modes).toEqual(['train','bus']);router.dispose()
+})
+
+it('keeps the chosen trip start and upstream fare when a valid arrival-derived downstream fare is selected',async()=>{
+ const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(input.originId==='london'?'overnight-first':'valid-second'),originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,departureMinutes:input.originId==='london'?1260:1080,durationMinutes:input.originId==='london'?1200:120}],total:1,pages:1,page:input.page,sourceVersion:'v1'})})
+ const first=await bridge.load({...request,dateWindow:{from:'2026-10-26',to:'2026-10-26'}},new AbortController().signal)
+ const second=await bridge.load({...request,originIds:['paris'],destinationIds:['rome'],dateWindow:{from:'2026-10-30',to:'2026-10-30'}},new AbortController().signal)
+ const store=createUIStateStore();const id=ArtifactIdSchema.parse('arrival-chain');store.initializeMissing(id,{datasetRefs:[first.datasetId,second.datasetId],citySequence:['london','paris','rome'],dates:{start:'2026-10-26'},stays:[{cityId:'paris',nights:3}]})
+ const router=createActionRouter(store,{bridge});const firstId=FareIdSchema.parse('overnight-first'),secondId=FareIdSchema.parse('valid-second')
+ router({kind:'select',artifactId:id,fareId:firstId,selected:true});await router.whenIdle(id)
+ router({kind:'select',artifactId:id,fareId:secondId,selected:true});await router.whenIdle(id)
+ expect(store.get(id).dates.start).toBe('2026-10-26');expect(store.get(id).selectedFareIds).toEqual([firstId,secondId]);router.dispose()
 })

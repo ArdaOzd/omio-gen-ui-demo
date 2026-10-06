@@ -19,6 +19,15 @@ describe('bounded direct artifact tools',()=>{
  it('sets the first resource date from coverage and returns no rows',async()=>{
   const {store,tools}=setup();const result=await tools.load_fares.execute({coverage});expect(result).toMatchObject({rowCount:0,coverage:{complete:true}});expect(store.get(artifactId).dates.start).toBe('2026-10-09');expect(result).not.toHaveProperty('rows');
  });
+ it('keeps the exact display window separate from the wider browser coverage margin',async()=>{
+  const {store,tools}=setup()
+  const result=await tools.load_fares.execute({coverage:{...coverage,dateWindow:{from:'2026-10-06',to:'2026-10-12'}},displayWindow:{from:'2026-10-09',to:'2026-10-10'}})
+  expect(result).toMatchObject({coverage:{dateWindow:{from:'2026-10-06',to:'2026-10-12'}}})
+  expect(store.get(artifactId).dates).toEqual({start:'2026-10-09',end:'2026-10-10'})
+  const before=store.get(artifactId)
+  expect(await tools.load_fares.execute({coverage,displayWindow:{from:'2026-10-08',to:'2026-10-10'}})).toMatchObject({status:'error'})
+  expect(store.get(artifactId)).toEqual(before)
+ });
 });
 
 it('propagates SDK cancellation and never commits late coverage',async()=>{

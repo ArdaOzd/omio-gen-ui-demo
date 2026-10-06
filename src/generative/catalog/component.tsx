@@ -8,6 +8,7 @@ import { Layout, type WidgetProps } from './layout'
 import { Control } from './controls'
 import { Status } from './status'
 import { FareCards, FarePicker, CitySequence, PriceCalendar, Comparison, ComparisonTable, ModeBreakdown, SelectedItinerary, Total, Coverage, Route, Timeline, Plot, CheapestFastest, SelectedFareCount } from './views'
+import { CityField, TravelDate, StayDuration, TransportSelect, FareOrder, FadeFares, FareCalendar, MultiCityPlanGrid } from './trip-planning/components'
 const layouts=new Set(['TravelSurface','TravelHero','Section','Stack','Inline','ResponsiveGrid','SplitPane','StickySummary','Tabs','Carousel','Callout'])
 const controls=new Set(['ModeChips','CarrierFilter','PriceRange','DurationRange','DirectToggle','SortSelect','DateStrip','DateWindow','StayAllocation'])
 const statuses=new Set(['ArtifactSkeleton','CoverageNotice','EmptyState','InlineError','StaleBadge','RetryAction'])
@@ -26,6 +27,14 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  else if(controls.has(kind))content=<Control kind={kind} {...props}/>
  else if(statuses.has(kind))content=<Status kind={kind} {...props}/>
  else switch(kind){
+ case 'CityField':content=<CityField {...props}/>;break
+ case 'TravelDate':content=<TravelDate {...props}/>;break
+ case 'StayDuration':content=<StayDuration {...props}/>;break
+ case 'TransportSelect':content=<TransportSelect {...props}/>;break
+ case 'FareOrder':content=<FareOrder {...props}/>;break
+ case 'FadeFares':content=<FadeFares {...props}/>;break
+ case 'FareCalendar':content=<FareCalendar {...props}/>;break
+ case 'MultiCityPlanGrid':content=<MultiCityPlanGrid {...props}/>;break
  case 'FareCards':content=<FareCards {...props}/>;break
  case 'FarePicker':content=<FarePicker {...props}/>;break
  case 'PriceCalendar':content=<PriceCalendar {...props}/>;break

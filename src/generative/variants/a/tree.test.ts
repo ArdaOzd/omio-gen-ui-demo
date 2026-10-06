@@ -10,6 +10,11 @@ describe('native present boundary',()=>{
   expect(scenes.map(scene=>validatePresentTree(scene,scope).children)).toHaveLength(3)
   expect(new Set(scenes.map(scene=>JSON.stringify(scene))).size).toBe(3)
  })
+ it('accepts every modular trip-planning node through the production present schema',()=>{
+  const names=['MultiCityPlanGrid','FareCalendar','FadeFares','FareOrder','TransportSelect','StayDuration','TravelDate','CityField']
+  const scene=tree(names.map((name,index)=>({...leaf(name,`trip-${index}`),selectorRef:'legSchedule'})))
+  expect(validatePresentTree(scene,scope)).toEqual(scene)
+ })
  it('rejects executable sources, raw rows, invented refs, unknown components and props',()=>{
   for(const input of [tree([{...leaf('FareCards','f'),rows:[{secret:LEAKAGE_SENTINEL}]}]),tree([leaf('Iframe','x')]),tree([{...leaf('ModeChips','m'),actionRef:'fetch'}]),tree([{...leaf('FareCards','f'),datasetRef:'unknown'}]),tree([{...leaf('Section','s'),html:'<script>alert(1)</script>'}]),tree([{...leaf('FareCards','f'),title:LEAKAGE_SENTINEL}])])expect(()=>validatePresentTree(input,scope)).toThrow()
  })
