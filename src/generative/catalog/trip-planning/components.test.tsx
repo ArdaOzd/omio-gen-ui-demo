@@ -175,7 +175,7 @@ it('queries leg fares chronologically by default and restores that order after p
   await screen.findByText('€999.00')
 })
 
-it('builds complete daily representatives and keeps fastest card details from one fare', async () => {
+it('defaults calendar days to complete cheapest representatives and keeps fastest card details from one fare', async () => {
   const firstDay = Array.from({ length: 100 }, (_, index) => fare({ id: `filler-${index}`, date: '2026-10-09', mode: 'bus', price: 2_000 + index, duration: 400 + index, departure: 200 + index }))
   firstDay.push(fare({ id: 'true-cheapest', date: '2026-10-09', mode: 'bus', price: 500, duration: 700, departure: 900 }))
   firstDay.push(fare({ id: 'true-fastest', date: '2026-10-09', mode: 'train', price: 99_900, duration: 60, departure: 1_000 }))
@@ -184,14 +184,14 @@ it('builds complete daily representatives and keeps fastest card details from on
   const manifest = await bridge.load(CoverageRequestSchema.parse({ originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-10'},modes:['train','bus'],passengers:1 }),new AbortController().signal)
   const state=createUIStateStore()
   state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09',end:'2026-10-10'},availableModesByLeg:{'london:paris':['train','bus']}})
-  render(<TravelProvider services={{bridge,state,activeId:()=>artifactId,activate:()=>{}}}><FareOrder artifactRef={artifactId} datasetRef={manifest.datasetId}/><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
+  render(<TravelProvider services={{bridge,state,activeId:()=>artifactId,activate:()=>{}}}><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
 
-  fireEvent.click(await screen.findByRole('button',{name:'Cheapest'}))
   const cheapestDay=await screen.findByRole('button',{name:/Fri 9 Oct.*€5\.00.*Bus.*11h 40m/})
   expect(cheapestDay).toBeInTheDocument()
+  expect(screen.getByRole('radio',{name:'Cheapest'})).toBeChecked()
   expect(screen.getByRole('button',{name:/Sat 10 Oct/})).toBeInTheDocument()
 
-  fireEvent.click(screen.getByRole('button',{name:'Fastest'}))
+  fireEvent.click(screen.getByRole('radio',{name:'Fastest'}))
   await screen.findByRole('button',{name:/Fri 9 Oct.*€999\.00.*Train.*1h 0m/})
   expect(screen.queryByRole('button',{name:/Fri 9 Oct.*€5\.00.*1h 0m/})).not.toBeInTheDocument()
 })

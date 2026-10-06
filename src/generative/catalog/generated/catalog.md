@@ -1,13 +1,13 @@
 # Shared catalog 1.0.0
 
-Manifest hash: ff71ed8c87eb5169b8fc4914232fec3d626d39ff7d620ab221509547f574aa83
+Manifest hash: e90e063576c8f8b11103f8c526cd62d8f5f4b93be0ebcf418d027a435446c860
 
 Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
 - MultiCityPlanGrid: Connected multi-city planner for distinct city stops with an optional final return to the origin. Reads the ordered citySequence and leg datasets for one artifact; composes CityField, TravelDate, TransportSelect, FareOrder and FadeFares per leg, inserts StayDuration for each destination, and cascades selected arrival plus stay into the next leg minimum departure.
-- FareCalendar: Same-leg calendar within the exact display date window. Uses the datasetRef leg, its multi-selected transport modes and host-derived minimum departure; shows local cheapest and fastest synthetic representatives per day, then opens that day fares without sending rows to the model.
+- FareCalendar: Same-leg calendar within the exact display date window. Uses the datasetRef leg, its multi-selected transport modes and host-derived minimum departure; defaults each day to its local cheapest synthetic fare, offers cheapest or fastest comparison, then opens that day fares without sending rows to the model.
 - FadeFares: Same-leg horizontally scrolling synthetic fare chooser with edge fades. datasetRef binds the leg; TransportSelect, FareOrder, TravelDate and the preceding selected arrival plus StayDuration all filter and rank this local list; selections flow to the shared PlanningTracker.
-- FareOrder: Same-leg fare ordering control. datasetRef binds the leg list and calendar; cheapest orders price, fastest orders duration, and none orders service date then departure time.
+- FareOrder: Same-leg fare ordering control. datasetRef binds the leg list; cheapest orders price, fastest orders duration, and departure orders service date then departure time. Cheapest and fastest also set the matching FareCalendar objective; departure leaves its default cheapest objective.
 - TransportSelect: Same-leg transport selector for modes with available fares. Uses a compact multi-select dropdown with vector icons inside MultiCityPlanGrid and inline toggles when rendered alone; writes modesByLeg for the datasetRef route and filters its FadeFares and FareCalendar.
 - StayDuration: Destination stay slider from 0 to 30 days. datasetRef identifies the arriving leg; its destination becomes the next leg origin, and selected arrival plus this stay sets the next minimum departure.
 - TravelDate: Same-leg local departure date. datasetRef identifies the leg; the first leg changes the trip display window and later legs preserve route offsets while the host enforces any preceding arrival threshold.

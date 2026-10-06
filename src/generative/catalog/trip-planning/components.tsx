@@ -435,8 +435,14 @@ function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: str
   const selectedDate = persistedDate && dates.includes(persistedDate) ? persistedDate : dates[0] ?? visibleStart
   const representatives = useFareDayRepresentatives(artifactRef, datasetRef)
   const selectedResult = useFareRowsForDate(artifactRef, datasetRef, selectedDate)
+  const calendarOrder: Extract<FareOrderKind, 'cheapest' | 'fastest'> = calendarKey && plan.state.sortByLeg[calendarKey]?.field === 'durationMinutes' ? 'fastest' : 'cheapest'
   const chooseDate = (date: string) => {
     if (calendarKey) dispatch({ kind: 'calendarDateByLeg', artifactId: plan.state.artifactId, calendarDateByLeg: { ...plan.state.calendarDateByLeg, [calendarKey]: date } })
+  }
+  const chooseCalendarOrder = (order: typeof calendarOrder) => {
+    if (!calendarKey) return
+    const sort: Plan['state']['sort'] = order === 'fastest' ? { field: 'durationMinutes', direction: 'asc' } : { field: 'priceCents', direction: 'asc' }
+    dispatch({ kind: 'sortByLeg', artifactId: plan.state.artifactId, sortByLeg: { ...plan.state.sortByLeg, [calendarKey]: sort } })
   }
   useEffect(() => {
     if (!calendarKey) return
@@ -457,6 +463,10 @@ function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: str
   const selectedRows = selectedResult.rows
   return <Card className="trip-planning-control trip-fare-calendar">
     <div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div><p>{cityLabel(resolved.leg.originId)} <ArrowRight aria-hidden="true" /> {cityLabel(resolved.leg.destinationId)}</p></div>
+    <FieldSet className="trip-order-control">
+      <FieldLegend>Compare each day by</FieldLegend>
+      <div role="radiogroup" aria-label="Calendar fare objective">{(['cheapest', 'fastest'] satisfies ReadonlyArray<typeof calendarOrder>).map(order => <Button key={order} type="button" role="radio" variant="outline" aria-checked={calendarOrder === order} onClick={() => chooseCalendarOrder(order)}>{order === 'cheapest' ? 'Cheapest' : 'Fastest'}</Button>)}</div>
+    </FieldSet>
     <div className="trip-calendar-grid">{dates.map(date => {
       const representative = byDate.get(date)
       return <Button key={date} type="button" variant="outline" className="trip-calendar-day" aria-pressed={selectedDate === date} onClick={() => chooseDate(date)}>

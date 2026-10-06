@@ -82,12 +82,15 @@ export function useFareRowsForDate(ref:string,datasetRef:string|undefined,date:s
  return{...result,rows}
 }
 export function useFareDayRepresentatives(ref:string,datasetRef?:string){
- const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=plannerSort(state,coverage);return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),groupBy:['serviceDate'],project:FareRowSchema.keyof().options,groupTop:{by:sort.field,direction:sort.direction},orderBy:[{field:'serviceDate',direction:'asc'}],limit:62}})
+ const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=calendarSort(state,coverage);return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),groupBy:['serviceDate'],project:FareRowSchema.keyof().options,groupTop:{by:sort.field,direction:sort.direction},orderBy:[{field:'serviceDate',direction:'asc'}],limit:62}})
  const rows=useMemo(()=>parsedFareRows(result),[result.data])
   return{...result,rows}
 }
 const chronologicalLegSort:ArtifactUIState['sort']={field:'departureMinutes',direction:'asc'}
+const cheapestCalendarSort:ArtifactUIState['sort']={field:'priceCents',direction:'asc'}
+const fastestCalendarSort:ArtifactUIState['sort']={field:'durationMinutes',direction:'asc'}
 function plannerSort(state:ArtifactUIState,coverage:Coverage):ArtifactUIState['sort']{const key=legKey(coverage);return key?state.sortByLeg[key]??chronologicalLegSort:chronologicalLegSort}
+function calendarSort(state:ArtifactUIState,coverage:Coverage):ArtifactUIState['sort']{const key=legKey(coverage),sort=key?state.sortByLeg[key]:undefined;return sort?.field==='durationMinutes'?fastestCalendarSort:cheapestCalendarSort}
 export function useLegFareRows(ref:string,datasetRef?:string){
  const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=plannerSort(state,coverage),orderBy:NonNullable<QueryIR['orderBy']>=sort.field==='departureMinutes'&&sort.direction==='asc'?[{field:'serviceDate',direction:'asc'},{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}]:[sort,{field:'serviceDate',direction:'asc'},{field:'departureMinutes',direction:'asc'}];return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),project:FareRowSchema.keyof().options,orderBy,limit:100}})
  const rows=useMemo(()=>parsedFareRows(result),[result.data])
