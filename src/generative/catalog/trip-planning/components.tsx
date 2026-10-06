@@ -17,7 +17,9 @@ import {
   duration,
   legKey,
   money,
+  useFareDayRepresentatives,
   useFareRows,
+  useFareRowsForDate,
   useItineraryPlan,
   useTravelAction,
 } from '../context'
@@ -413,11 +415,10 @@ function dateRange(start: string, end: string): string[] {
 function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: string; datasetRef: string; title?: string }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
-  const result = useFareRows(artifactRef, datasetRef)
   const resolved = resolveLeg(plan, datasetRef)
-  const displayWindow = resolved ? result.state.displayWindowByLeg[resolved.leg.key] : undefined
-  const legacyFrom = resolved ? legDate(result.state, resolved.leg.originId, result.state.dates.start) : result.state.dates.start
-  const legacyTo = resolved ? legDate(result.state, resolved.leg.originId, result.state.dates.end ?? result.state.dates.start) : legacyFrom
+  const displayWindow = resolved ? plan.state.displayWindowByLeg[resolved.leg.key] : undefined
+  const legacyFrom = resolved ? legDate(plan.state, resolved.leg.originId, plan.state.dates.start) : plan.state.dates.start
+  const legacyTo = resolved ? legDate(plan.state, resolved.leg.originId, plan.state.dates.end ?? plan.state.dates.start) : legacyFrom
   const requestedFrom = displayWindow?.from ?? legacyFrom
   const requestedTo = displayWindow?.to ?? legacyTo
   const thresholdDate = resolved?.leg.threshold.date ?? requestedFrom
@@ -425,10 +426,12 @@ function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: str
   const outsideWindow = visibleStart > requestedTo
   const dates = useMemo(() => outsideWindow ? [] : dateRange(visibleStart, requestedTo), [outsideWindow, visibleStart, requestedTo])
   const calendarKey = resolved?.leg.key
-  const persistedDate = calendarKey ? result.state.calendarDateByLeg[calendarKey] : undefined
+  const persistedDate = calendarKey ? plan.state.calendarDateByLeg[calendarKey] : undefined
   const selectedDate = persistedDate && dates.includes(persistedDate) ? persistedDate : dates[0] ?? visibleStart
+  const representatives = useFareDayRepresentatives(artifactRef, datasetRef)
+  const selectedResult = useFareRowsForDate(artifactRef, datasetRef, selectedDate)
   const chooseDate = (date: string) => {
-    if (calendarKey) dispatch({ kind: 'calendarDateByLeg', artifactId: result.state.artifactId, calendarDateByLeg: { ...result.state.calendarDateByLeg, [calendarKey]: date } })
+    if (calendarKey) dispatch({ kind: 'calendarDateByLeg', artifactId: plan.state.artifactId, calendarDateByLeg: { ...plan.state.calendarDateByLeg, [calendarKey]: date } })
   }
   useEffect(() => {
     if (!calendarKey) return
@@ -437,38 +440,33 @@ function FareCalendarView({ artifactRef, datasetRef, title }: { artifactRef: str
       return
     }
     if (persistedDate) {
-      const { [calendarKey]: _removed, ...calendarDateByLeg } = result.state.calendarDateByLeg
-      dispatch({ kind: 'calendarDateByLeg', artifactId: result.state.artifactId, calendarDateByLeg })
+      const { [calendarKey]: _removed, ...calendarDateByLeg } = plan.state.calendarDateByLeg
+      dispatch({ kind: 'calendarDateByLeg', artifactId: plan.state.artifactId, calendarDateByLeg })
     }
   }, [calendarKey, dates.length, persistedDate, selectedDate])
   if (!resolved) return <EmptyPlanningState />
   if (outsideWindow) return <Card className="trip-planning-control trip-fare-calendar"><div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div></div><Alert role="status">No departures fit this trip window; adjust the previous fare or stay.</Alert></Card>
-  if (result.status === 'loading') return <Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
-  if (result.status === 'error') return <Alert>Calendar fares could not load. Try the date again.</Alert>
-  const legRows = result.rows.filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold))
-  const byDate = new Map(dates.map(date => [date, legRows.filter(row => row.serviceDate === date)]))
-  const currentSort = result.state.sortByLeg[resolved.leg.key] ?? defaultLegSort
-  const selectedRows = sortFares(byDate.get(selectedDate) ?? [], fareOrderFromState(currentSort.field, currentSort.direction))
+  if (representatives.status === 'loading' || selectedResult.status === 'loading') return <Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
+  if (representatives.status === 'error' || selectedResult.status === 'error') return <Alert>Calendar fares could not load. Try the date again.</Alert>
+  const byDate = new Map(representatives.rows.map(row => [row.serviceDate, row]))
+  const selectedRows = selectedResult.rows
   return <Card className="trip-planning-control trip-fare-calendar">
     <div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div><p>{cityLabel(resolved.leg.originId)} <ArrowRight aria-hidden="true" /> {cityLabel(resolved.leg.destinationId)}</p></div>
     <div className="trip-calendar-grid">{dates.map(date => {
-      const rows = byDate.get(date) ?? []
-      const cheapest = sortFares(rows, 'cheapest')[0]
-      const fastest = sortFares(rows, 'fastest')[0]
-      const modes = modeOrder.filter(mode => rows.some(row => row.mode === mode))
+      const representative = byDate.get(date)
       return <Button key={date} type="button" variant="outline" className="trip-calendar-day" aria-pressed={selectedDate === date} onClick={() => chooseDate(date)}>
         <span>{new Date(`${date}T12:00:00.000Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
-        <strong>{cheapest ? money(cheapest.priceCents) : 'No fares'}</strong>
-        <small>{fastest ? `Fastest ${duration(fastest.durationMinutes)}` : 'Try another day'}</small>
-        {modes.length > 0 && <i aria-label={modes.map(cityLabel).join(', ')}>{modes.map(mode => <span key={mode}>{modeIcon(mode)}</span>)}</i>}
+        <strong>{representative ? money(representative.priceCents) : 'No fares'}</strong>
+        <small>{representative ? `${cityLabel(representative.mode)} · ${duration(representative.durationMinutes)}` : 'Try another day'}</small>
+        {representative && <i aria-label={cityLabel(representative.mode)}>{modeIcon(representative.mode)}</i>}
       </Button>
     })}</div>
     <div className="trip-calendar-results" aria-live="polite">
       <h4>{new Date(`${selectedDate}T12:00:00.000Z`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}</h4>
       <p className="trip-fare-caption">Synthetic fares per passenger</p>
       {selectedRows.length > 0 ? <div>{selectedRows.slice(0, 8).map(row => {
-        const selected = result.state.selectedFareIds.includes(row.id)
-        return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, result.services.bridge, result.datasetId)}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: result.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose'}</Button></div>
+        const selected = selectedResult.state.selectedFareIds.includes(row.id)
+        return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, selectedResult.services.bridge, selectedResult.datasetId)}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: selectedResult.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose'}</Button></div>
       })}</div> : <p role="status">No synthetic fares match this day and transport selection.</p>}
     </div>
   </Card>

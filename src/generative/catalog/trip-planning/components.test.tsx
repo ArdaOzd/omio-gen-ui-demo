@@ -161,6 +161,27 @@ it('queries leg fares chronologically by default and restores that order after p
   await screen.findByText('€999.00')
 })
 
+it('builds complete daily representatives and keeps fastest card details from one fare', async () => {
+  const firstDay = Array.from({ length: 100 }, (_, index) => fare({ id: `filler-${index}`, date: '2026-10-09', mode: 'bus', price: 2_000 + index, duration: 400 + index, departure: 200 + index }))
+  firstDay.push(fare({ id: 'true-cheapest', date: '2026-10-09', mode: 'bus', price: 500, duration: 700, departure: 900 }))
+  firstDay.push(fare({ id: 'true-fastest', date: '2026-10-09', mode: 'train', price: 99_900, duration: 60, departure: 1_000 }))
+  const rows = [...firstDay, fare({ id: 'second-day', date: '2026-10-10', mode: 'train', price: 4_000, duration: 120, departure: 400 })]
+  const bridge = createFareDataBridge({ pageSource: async input => { const dated=rows.filter(row=>row.serviceDate===input.date),pages=Math.max(1,Math.ceil(dated.length/100));return{rows:dated.slice((input.page-1)*100,input.page*100),total:dated.length,pages,page:input.page,sourceVersion:'calendar-groups-v1'} } })
+  const manifest = await bridge.load(CoverageRequestSchema.parse({ originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-10'},modes:['train','bus'],passengers:1 }),new AbortController().signal)
+  const state=createUIStateStore()
+  state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09',end:'2026-10-10'},availableModesByLeg:{'london:paris':['train','bus']}})
+  render(<TravelProvider services={{bridge,state,activeId:()=>artifactId,activate:()=>{}}}><FareOrder artifactRef={artifactId} datasetRef={manifest.datasetId}/><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
+
+  fireEvent.click(await screen.findByRole('button',{name:'Cheapest'}))
+  const cheapestDay=await screen.findByRole('button',{name:/Fri 9 Oct.*€5\.00.*Bus.*11h 40m/})
+  expect(cheapestDay).toBeInTheDocument()
+  expect(screen.getByRole('button',{name:/Sat 10 Oct/})).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button',{name:'Fastest'}))
+  await screen.findByRole('button',{name:/Fri 9 Oct.*€999\.00.*Train.*1h 0m/})
+  expect(screen.queryByRole('button',{name:/Fri 9 Oct.*€5\.00.*1h 0m/})).not.toBeInTheDocument()
+})
+
 it('excludes coverage margins for a later leg and shows a status when its threshold passes the display end', async () => {
   const pageSource = async (input: { originId: string; destinationId: string; date: string; page: number }) => {
     const row = FareRowSchema.parse({
@@ -202,6 +223,8 @@ it('excludes coverage margins for a later leg and shows a status when its thresh
 
   const current = state.get(artifactId)
   state.dispatch({ kind: 'stays', artifactId, expectedRevision: current.revision, stays: [{ cityId: 'paris', nights: 8 }, { cityId: 'rome', nights: 0 }] })
+  const shifted = state.get(artifactId)
+  state.dispatch({ kind: 'displayWindowByLeg', artifactId, expectedRevision: shifted.revision, displayWindowByLeg: { ...shifted.displayWindowByLeg, 'paris:rome': { from: '2026-10-30', to: '2026-11-01' } } })
   await screen.findByText('No departures fit this trip window; adjust the previous fare or stay.')
   expect(document.querySelectorAll('.trip-calendar-day')).toHaveLength(0)
 })

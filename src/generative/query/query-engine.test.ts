@@ -19,6 +19,14 @@ describe('bounded local queries',()=>{
   const result=await executeQuery(query({groupBy:['mode'],metrics:[{as:'offers',op:'count'},{as:'total',op:'sum',field:'priceCents'},{as:'average',op:'avg',field:'durationMinutes'}],orderBy:[{field:'mode',direction:'asc'}]}),resources,new AbortController().signal)
   expect(result.rows).toEqual([{mode:'bus',offers:2,total:2000,average:390},{mode:'train',offers:1,total:3000,average:140}])
  })
+ it('returns one complete representative from every group before applying the result limit',async()=>{
+  const nextDay={...rows[0]!,id:FareIdSchema.parse('next-day'),serviceDate:'2026-10-03',priceCents:9000,durationMinutes:80}
+  const result=await executeQuery(query({groupBy:['serviceDate'],project:['id','serviceDate','mode','priceCents','durationMinutes','departureMinutes'],groupTop:{by:'durationMinutes',direction:'asc'},orderBy:[{field:'serviceDate',direction:'asc'}]}),new Map([[datasetId,{rows:[...rows,nextDay],revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]]),new AbortController().signal)
+  expect(result.rows).toEqual([
+   {id:'c',serviceDate:'2026-10-02',mode:'train',priceCents:3000,durationMinutes:140,departureMinutes:600},
+   {id:'next-day',serviceDate:'2026-10-03',mode:'train',priceCents:9000,durationMinutes:80,departureMinutes:600},
+  ])
+ })
  it('filters nested predicates and honors cancellation',async()=>{
   const result=await executeQuery(query({project:['id'],where:{all:[{field:'mode',op:'in',value:['bus']},{field:'durationMinutes',op:'between',value:[350,390]}]}}),resources,new AbortController().signal)
   expect(result.rows).toEqual([{id:'b'}]);const controller=new AbortController();controller.abort();await expect(executeQuery(query({}),resources,controller.signal)).rejects.toMatchObject({name:'AbortError'})

@@ -137,6 +137,7 @@ export const PredicateTreeSchema: z.ZodType<PredicateTree> = z.lazy(() => z.unio
 export const QueryIRSchema = z.strictObject({ version: z.literal(1), sources: z.array(z.strictObject({ datasetRef: DatasetIdSchema, alias: ref })).min(1).max(3),
   where: PredicateTreeSchema.optional(), project: z.array(FareFieldSchema).max(16).optional(), groupBy: z.array(FareFieldSchema).max(3).optional(),
   metrics: z.array(z.strictObject({ as: ref, op: z.enum(['count','sum','min','max','avg']), field: FareFieldSchema.optional() })).max(8).optional(),
+  groupTop: z.strictObject({ by: FareFieldSchema, direction: z.enum(['asc','desc']) }).optional(),
   orderBy: z.array(z.strictObject({ field: ref, direction: z.enum(['asc','desc']) })).max(3).optional(),
   topK: z.strictObject({ k: z.number().int().min(1).max(5), by: ref, direction: z.enum(['asc','desc']) }).optional(),
   joins: z.array(z.strictObject({ rightAlias: ref, leftKey: FareFieldSchema, rightKey: FareFieldSchema, kind: z.enum(['inner','left']) })).max(2).optional(),
@@ -197,7 +198,9 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   if (query.where) visit(query.where, 1);
   query.project?.forEach(field => { if (!fields.has(field)) throw new Error('Undeclared projection'); });
   query.groupBy?.forEach(field => { if (!fields.get(field)?.groupable) throw new Error('Undeclared grouping'); });
-  const outputNames = new Set<string>(query.groupBy ?? query.project ?? [...fields.keys()]);
+  if (query.groupTop && (!query.groupBy?.length || !query.project?.length)) throw new Error('Grouped representative requires grouping and projection');
+  if (query.groupTop && !fields.has(query.groupTop.by)) throw new Error('Unknown grouped representative field');
+  const outputNames = new Set<string>([...(query.groupBy ?? []), ...(query.project ?? (query.groupBy ? [] : [...fields.keys()]))]);
   query.metrics?.forEach(metric => {
     if (outputNames.has(metric.as) || ['__proto__','constructor','prototype','rows','fares'].includes(metric.as)) throw new Error('Reserved metric alias');
     if (metric.op !== 'count' && (!metric.field || fields.get(metric.field)?.type !== 'number')) throw new Error('Metric requires numeric field');

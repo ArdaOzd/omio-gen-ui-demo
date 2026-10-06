@@ -50,11 +50,18 @@ export async function executeQuery(query:QueryIR,resources:QueryResources,signal
  let output:Array<Record<string,JsonScalar|undefined>>=[]
  let projection:AllowedFareField[]|undefined
  if(query.groupBy?.length||query.metrics?.length){
+  projection=query.groupTop?query.project:undefined
   const groups=new Map<string,FareRow[]>()
   for(const row of filtered){const key=JSON.stringify((query.groupBy??[]).map(field=>row[field]));const group=groups.get(key)??[];group.push(row);groups.set(key,group);if(groups.size>limits.maxGroups)throw new Error('Grouping budget exceeded')}
   if(!filtered.length&&!query.groupBy?.length)groups.set('[]',[])
   output=[...groups.values()].map(group=>{
    const result:Record<string,JsonScalar>={}
+   const representative=query.groupTop?[...group].sort((left,right)=>{
+    const primary=compare(left[query.groupTop!.by]??null,right[query.groupTop!.by]??null)
+    if(primary)return query.groupTop!.direction==='desc'?-primary:primary
+    return left.departureMinutes-right.departureMinutes||left.durationMinutes-right.durationMinutes||left.priceCents-right.priceCents||left.id.localeCompare(right.id)
+   })[0]:group[0]
+   if(query.groupTop)for(const field of query.project??[])if(representative)result[field]=representative[field]??null
    const example=group[0];for(const field of query.groupBy??[])if(example)result[field]=example[field]??null
    for(const metric of query.metrics??[]){
     const values=metric.field?group.map(row=>row[metric.field??'priceCents']).filter((value):value is number=>typeof value==='number'):[]

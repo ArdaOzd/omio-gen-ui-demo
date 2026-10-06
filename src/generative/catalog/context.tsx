@@ -71,6 +71,21 @@ export function useFareRows(ref: string, datasetRef?: string) {
   const rows = useMemo(() => { const parsed: FareRow[]=[]; for (const row of result.data?.rows ?? []) { const valid=FareRowSchema.safeParse(row); if (valid.success) parsed.push(valid.data) } return parsed }, [result.data])
   return {...result,rows}
 }
+function parsedFareRows(result: ReturnType<typeof useTravelQuery>): FareRow[] {
+  const parsed: FareRow[]=[]
+  for (const row of result.data?.rows ?? []) { const valid=FareRowSchema.safeParse(row); if(valid.success)parsed.push(valid.data) }
+  return parsed
+}
+export function useFareRowsForDate(ref:string,datasetRef:string|undefined,date:string){
+ const result=useTravelQuery(ref,datasetRef,(state,id)=>{const filtered=filterPredicate(state),day={field:'serviceDate' as const,op:'eq' as const,value:date};return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filtered&&'all'in filtered?{all:[...filtered.all,day]}:filtered?{all:[filtered,day]}:day,project:FareRowSchema.keyof().options,orderBy:[state.sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:100}})
+ const rows=useMemo(()=>parsedFareRows(result),[result.data])
+ return{...result,rows}
+}
+export function useFareDayRepresentatives(ref:string,datasetRef?:string){
+ const result=useTravelQuery(ref,datasetRef,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),groupBy:['serviceDate'],project:FareRowSchema.keyof().options,groupTop:{by:state.sort.field,direction:state.sort.direction},orderBy:[{field:'serviceDate',direction:'asc'}],limit:62}))
+ const rows=useMemo(()=>parsedFareRows(result),[result.data])
+ return{...result,rows}
+}
 export const money = (cents:number) => new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(cents/100)
 export const duration = (minutes:number) => `${Math.floor(minutes/60)}h ${minutes%60}m`
 export const cityLabel = (id:string) => id.replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
