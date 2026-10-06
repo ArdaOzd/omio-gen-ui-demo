@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from '../state/ui-state-store'
 import { ArtifactIdSchema, FareRowSchema, type FareRow, type BoundedQueryResult } from '../contracts'
@@ -30,6 +30,21 @@ describe('shared direct travel controls',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Bus'}));const revision=state.get(artifactId).revision
   view.rerender(<TravelProvider services={services}><CatalogNode kind="ModeChips" artifactRef={artifactId} $status="done"/></TravelProvider>)
   expect(screen.getByRole('button',{name:'Bus'})).toHaveAttribute('aria-pressed','true');expect(state.get(artifactId).revision).toBe(revision)
+ })
+ it('applies the global sort control to legacy fare views',async()=>{
+  const rows=[
+   {...fare('lowest','bus',1000),durationMinutes:500,departureMinutes:700},
+   {...fare('highest','train',9000),durationMinutes:300,departureMinutes:500},
+   {...fare('fastest','train',5000),durationMinutes:60,departureMinutes:900},
+  ]
+  const{services}=await setup({pageSource:async()=>({rows,total:rows.length,page:1,pages:1,sourceVersion:'sort-v1'})})
+  render(<TravelProvider services={services}><CatalogNode kind="SortSelect" artifactRef={artifactId}/><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
+  const first=()=>within(screen.getAllByRole('article')[0]!)
+  await waitFor(()=>expect(first().getByText('€10.00')).toBeInTheDocument())
+  fireEvent.change(screen.getByLabelText('Sort options'),{target:{value:'priceCents:desc'}})
+  await waitFor(()=>expect(first().getByText('€90.00')).toBeInTheDocument())
+  fireEvent.change(screen.getByLabelText('Sort options'),{target:{value:'durationMinutes:asc'}})
+  await waitFor(()=>expect(first().getByText('1h 0m',{exact:false})).toBeInTheDocument())
  })
 })
 

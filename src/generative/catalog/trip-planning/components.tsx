@@ -19,7 +19,7 @@ import {
   legKey,
   money,
   useFareDayRepresentatives,
-  useFareRows,
+  useLegFareRows,
   useFareRowsForDate,
   useItineraryPlan,
   useTravelAction,
@@ -378,7 +378,7 @@ export function FareOrder(props: WidgetProps) {
 function FareStrip({ artifactRef, datasetRef, compact = false }: { artifactRef: string; datasetRef: string; compact?: boolean }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
-  const result = useFareRows(artifactRef, datasetRef)
+  const result = useLegFareRows(artifactRef, datasetRef)
   const resolved = resolveLeg(plan, datasetRef)
   if (!resolved) return <EmptyPlanningState />
   if (result.status === 'loading') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
