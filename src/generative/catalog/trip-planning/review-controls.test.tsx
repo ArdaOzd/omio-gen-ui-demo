@@ -70,8 +70,8 @@ it('excludes an adjacent duplicate city while allowing the final leg to return t
   const router = createActionRouter(state, { bridge })
   const services = { bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }
   render(<TravelProvider services={services}>
-    <CityField artifactRef={artifactId} datasetRef={first.datasetId} />
-    <CityField artifactRef={artifactId} datasetRef={second.datasetId} />
+    <CityField artifactRef={artifactId} datasetRef={first.datasetId} legIndex={0} />
+    <CityField artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1} />
   </TravelProvider>)
 
   await waitFor(() => expect(screen.getAllByRole('combobox')).toHaveLength(4))
@@ -106,8 +106,8 @@ it('moves the first-leg date and its complete display window forward and backwar
   })
   const router = createActionRouter(state, { bridge })
   render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}>
-    <TravelDate artifactRef={artifactId} datasetRef={manifest.datasetId} />
-    <FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId} />
+    <TravelDate artifactRef={artifactId} datasetRef={manifest.datasetId} legIndex={0} />
+    <FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId} legIndex={0} />
   </TravelProvider>)
 
   const input = await screen.findByLabelText('Departure')
@@ -151,7 +151,7 @@ it('moves a selected-arrival later leg forward and backward by changing only its
   })
   const router = createActionRouter(state, { bridge })
   render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}>
-    <TravelDate artifactRef={artifactId} datasetRef={second.datasetId} />
+    <TravelDate artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1} />
   </TravelProvider>)
 
   const input = await screen.findByLabelText('Departure')
@@ -195,8 +195,8 @@ it('moves a later-leg display window earlier when its explicit date moves before
   })
   const router = createActionRouter(state, { bridge })
   render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}>
-    <TravelDate artifactRef={artifactId} datasetRef={second.datasetId} />
-    <FareCalendar artifactRef={artifactId} datasetRef={second.datasetId} />
+    <TravelDate artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1} />
+    <FareCalendar artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1} />
   </TravelProvider>)
 
   const input = await screen.findByLabelText('Departure')
@@ -240,7 +240,7 @@ it('keeps the stored calendar selection equal to the visible valid day after a t
   })
   const router = createActionRouter(state, { bridge })
   render(<TravelProvider services={{ bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} }}>
-    <FareCalendar artifactRef={artifactId} datasetRef={second.datasetId} />
+    <FareCalendar artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1} />
   </TravelProvider>)
 
   const initiallyPressed = await screen.findByRole('button', { pressed: true })
