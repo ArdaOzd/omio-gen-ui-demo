@@ -200,7 +200,7 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   query.groupBy?.forEach(field => { if (!fields.get(field)?.groupable) throw new Error('Undeclared grouping'); });
   if (query.groupTop && (!query.groupBy?.length || !query.project?.length)) throw new Error('Grouped representative requires grouping and projection');
   if (query.groupTop && !fields.has(query.groupTop.by)) throw new Error('Unknown grouped representative field');
-  const outputNames = new Set<string>([...(query.groupBy ?? []), ...(query.project ?? (query.groupBy ? [] : [...fields.keys()]))]);
+  const outputNames = new Set<string>(query.groupBy ? [...query.groupBy, ...(query.groupTop ? query.project ?? [] : [])] : query.project ?? [...fields.keys()]);
   query.metrics?.forEach(metric => {
     if (outputNames.has(metric.as) || ['__proto__','constructor','prototype','rows','fares'].includes(metric.as)) throw new Error('Reserved metric alias');
     if (metric.op !== 'count' && (!metric.field || fields.get(metric.field)?.type !== 'number')) throw new Error('Metric requires numeric field');

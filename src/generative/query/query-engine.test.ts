@@ -55,4 +55,5 @@ it('executes authored inclusive date-window queries through manifest validation'
  const result=await bridge.query(parseQuery(input,[manifest]),new AbortController().signal)
  expect(result.rows).toEqual([{mode:'bus',minimum:1000,fastest:380,count:2}])
  expect(()=>parseQuery({...input,where:{field:'carrierId',op:'between',value:['a','z']}},[manifest])).toThrow(/Comparison requires/)
+ expect(()=>parseQuery({...input,project:['priceCents'],orderBy:[{field:'priceCents',direction:'asc'}]},[manifest])).toThrow(/Unknown ordering/)
 })
