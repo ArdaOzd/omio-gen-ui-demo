@@ -1,5 +1,6 @@
 import { DateSchema,type ArtifactUIState,type BoundedFareFact,type Coverage,type FareDataBridge,type DatasetId,type CoverageRequest } from '../contracts'
 import { fallbackLegDate,legThreshold } from './itinerary-schedule'
+const chronologicalLegSort:ArtifactUIState['sort']={field:'departureMinutes',direction:'asc'}
 export function legKey(coverage:Pick<Coverage,'originIds'|'destinationIds'>):string|undefined{return coverage.originIds.length===1&&coverage.destinationIds.length===1?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined}
 export type LegResource={key:string;datasetId:DatasetId;coverage:Coverage}
 export function orderedLegResources(state:ArtifactUIState,bridge:FareDataBridge):LegResource[]{
@@ -40,7 +41,7 @@ export function legState(state:ArtifactUIState,coverage:Coverage,selectedFacts:r
  const requestedStart=visible?.from&&visible.from>threshold.date?visible.from:threshold.date
  const outside=!!requestedEnd&&requestedStart>requestedEnd
  const earliestMinutes=requestedStart===threshold.date?threshold.minutes:0
- return {...state,runtimeVariables:{...state.runtimeVariables,$earliestDepartureMinutes:earliestMinutes,$outsideDisplayWindow:outside},dates:outside?{start:requestedEnd,end:requestedEnd}:{start:requestedStart,...(requestedEnd&&requestedEnd>=requestedStart?{end:requestedEnd}:{})},sort:key&&state.sortByLeg[key]?state.sortByLeg[key]:state.sort,filters:{...state.filters,modes:key&&state.modesByLeg[key]!==undefined?state.modesByLeg[key]??[]:state.filters.modes}}
+ return {...state,runtimeVariables:{...state.runtimeVariables,$earliestDepartureMinutes:earliestMinutes,$outsideDisplayWindow:outside},dates:outside?{start:requestedEnd,end:requestedEnd}:{start:requestedStart,...(requestedEnd&&requestedEnd>=requestedStart?{end:requestedEnd}:{})},sort:key?state.sortByLeg[key]??chronologicalLegSort:state.sort,filters:{...state.filters,modes:key&&state.modesByLeg[key]!==undefined?state.modesByLeg[key]??[]:state.filters.modes}}
 }
 
 export function resolveBoundDatasetId(state:ArtifactUIState,bridge:FareDataBridge,seedRef:DatasetId,selectedFacts:readonly BoundedFareFact[]=[]):DatasetId{

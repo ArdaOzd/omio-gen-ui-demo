@@ -5,7 +5,7 @@ import { createFareDataBridge } from '../../data/fare-data-bridge'
 import { createActionRouter } from '../../state/action-router'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { TravelProvider } from '../context'
-import { FareCalendar, TravelDate, sortFares } from './components'
+import { FadeFares, FareCalendar, FareOrder, TravelDate, sortFares } from './components'
 
 const artifactId = ArtifactIdSchema.parse('trip-planning-test')
 
@@ -114,6 +114,23 @@ it('shifts the full itinerary window before querying and rendering a new first-l
   await waitFor(() => expect(screen.getAllByRole('button', { name: /Oct/ })).toHaveLength(3))
   expect(screen.getByRole('button', { name: /Mon 12 Oct/ })).toBeInTheDocument()
   router.dispose()
+})
+
+it('queries leg fares chronologically by default and restores that order after price sorting', async () => {
+  const rows = [fare({ id: 'expensive-earliest', date: '2026-10-09', mode: 'train', price: 99_900, duration: 160, departure: 60 })]
+  for (let index = 0; index < 100; index += 1) rows.push(fare({ id: `cheap-later-${index}`, date: '2026-10-10', mode: 'train', price: 1_000 + index, duration: 160, departure: 120 + index }))
+  const bridge = createFareDataBridge({ pageSource: async input => { const dated = rows.filter(row => row.serviceDate === input.date); return { rows: dated, total: dated.length, pages: 1, page: input.page, sourceVersion: 'trip-order-v1' } } })
+  const manifest = await bridge.load(CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-10' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
+  const state = createUIStateStore()
+  state.initializeMissing(artifactId, { datasetRefs: [manifest.datasetId], citySequence: ['london', 'paris'], dates: { start: '2026-10-09', end: '2026-10-10' } })
+  const services = { bridge, state, activeId: () => artifactId, activate: () => {} }
+  render(<TravelProvider services={services}><FareOrder artifactRef={artifactId} datasetRef={manifest.datasetId} /><FadeFares artifactRef={artifactId} datasetRef={manifest.datasetId} /></TravelProvider>)
+
+  await screen.findByText('€999.00')
+  fireEvent.click(screen.getByRole('button', { name: 'Cheapest' }))
+  await waitFor(() => expect(screen.queryByText('€999.00')).not.toBeInTheDocument())
+  fireEvent.click(screen.getByRole('button', { name: 'Departure' }))
+  await screen.findByText('€999.00')
 })
 
 it('excludes coverage margins for a later leg and shows a status when its threshold passes the display end', async () => {
