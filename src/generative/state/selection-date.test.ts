@@ -55,6 +55,24 @@ it('keeps the trip start for a later leg and lets the latest same-leg choice win
  expect(state.exportSnapshot(id)).toMatchObject({dates:{start:'2026-10-09'},selectedFareIds:[second]})
  router.dispose()
 })
+it('moves later leg display windows with changed stays while preserving each span', () => {
+ const state=createUIStateStore()
+ state.initializeMissing(id,{
+  citySequence:['london','paris','rome','vienna'],
+  stays:[{cityId:'paris',nights:3},{cityId:'rome',nights:2}],
+  displayWindowByLeg:{
+   'london:paris':{from:'2026-10-10',to:'2026-10-16'},
+   'paris:rome':{from:'2026-10-13',to:'2026-10-19'},
+   'rome:vienna':{from:'2026-10-15',to:'2026-10-21'},
+  },
+ })
+ state.dispatch({kind:'stays',artifactId:id,stays:[{cityId:'paris',nights:1},{cityId:'rome',nights:3}]})
+ expect(state.get(id).displayWindowByLeg).toEqual({
+  'london:paris':{from:'2026-10-10',to:'2026-10-16'},
+  'paris:rome':{from:'2026-10-11',to:'2026-10-17'},
+  'rome:vienna':{from:'2026-10-14',to:'2026-10-20'},
+ })
+})
 it('rejects IDs absent from the completed query and source generations replaced afterward', async () => {
  const {state,bridge,router,request,fare,scope,setVersion}=await fixture(),selected=fare('2026-10-10'),captured=scope([selected])
  expect(router.selectFromQuery({kind:'select',artifactId:id,fareId:selected,selected:true},scope([])).status).toBe('stale')
