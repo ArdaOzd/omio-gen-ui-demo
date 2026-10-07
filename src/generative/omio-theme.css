@@ -71,9 +71,20 @@ html .travel-variant-nav + [data-slot='alert'] {
 }
 
 html .travel-app .travel-workspace {
-  width: min(1440px, 100%);
+  width: 100%;
   gap: 24px;
-  padding: 0 20px 28px;
+  padding: 0 20px 0 0;
+}
+
+html .travel-app .travel-session-sidebar {
+  top: 52px;
+  height: calc(100vh - 52px);
+  height: calc(100dvh - 52px);
+  max-height: calc(100vh - 52px);
+  max-height: calc(100dvh - 52px);
+  margin: 0;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
 }
 
 html .travel-app .travel-chat {
@@ -641,6 +652,18 @@ html .travel-app .travel-dialog [data-slot='button'] {
     padding-inline: 12px;
   }
 
+  html .travel-app .travel-session-sidebar {
+    top: auto;
+    width: calc(100% + 12px);
+    height: auto;
+    max-height: 240px;
+    margin-left: -12px;
+  }
+
+  html .travel-app .travel-session-sidebar[data-collapsed] {
+    max-height: none;
+  }
+
   html .travel-app .travel-planning-tracker {
     position: static;
     order: -1;
@@ -730,6 +753,11 @@ html .travel-app .travel-dialog [data-slot='button'] {
 
   html .travel-app .travel-workspace {
     padding-inline: 8px;
+  }
+
+  html .travel-app .travel-session-sidebar {
+    width: calc(100% + 8px);
+    margin-left: -8px;
   }
 
   html .travel-app .travel-chat {
