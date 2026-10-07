@@ -87,6 +87,14 @@ html .travel-app .travel-session-sidebar {
   border-radius: 0 8px 8px 0;
 }
 
+html .travel-app .travel-session-collapse {
+  align-self: flex-end;
+}
+
+html .travel-app .travel-session-sidebar[data-collapsed] .travel-session-collapse {
+  align-self: center;
+}
+
 html .travel-app .travel-chat {
   width: min(1136px, 100%);
   height: calc(100vh - 52px);

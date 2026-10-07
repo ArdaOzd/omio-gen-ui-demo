@@ -15,10 +15,6 @@ export type SessionSidebarProps = {
 export function SessionSidebar(props: SessionSidebarProps) {
   return <aside className="travel-session-sidebar" aria-label="Chat sessions" data-collapsed={props.collapsed || undefined}>
     <div className="travel-session-sidebar-header">
-      <Button type="button" className="travel-session-new" onClick={props.onNew} disabled={props.switching} aria-label="Start new chat">
-        <Plus aria-hidden="true" />
-        <span>New chat</span>
-      </Button>
       <Button
         type="button"
         variant="ghost"
@@ -29,6 +25,10 @@ export function SessionSidebar(props: SessionSidebarProps) {
         onClick={() => props.onCollapsedChange(!props.collapsed)}
       >
         {props.collapsed ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
+      </Button>
+      <Button type="button" className="travel-session-new" onClick={props.onNew} disabled={props.switching} aria-label="Start new chat">
+        <Plus aria-hidden="true" />
+        <span>New chat</span>
       </Button>
     </div>
     <nav className="travel-session-list" aria-label="Previous chats">
