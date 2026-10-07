@@ -13,7 +13,7 @@ test('smart planner opens chat with the prompt and starts one initial submission
  await page.getByRole('textbox',{name:'Describe your trip'}).fill(prompt)
  await page.getByRole('button',{name:'Plan my trip'}).click()
  await expect(page).toHaveURL(/\/a$/)
- await expect(page.getByText(prompt,{exact:true})).toBeVisible()
+ await expect(page.locator('.travel-chat').getByText(prompt,{exact:true})).toBeVisible()
  await expect.poll(()=>requests.length).toBe(1)
  expect(requests[0]).toMatchObject({trigger:'regenerate-message',messages:[{role:'user',parts:[{type:'text',text:prompt}]}]})
 })
