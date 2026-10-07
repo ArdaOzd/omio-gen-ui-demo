@@ -8,6 +8,7 @@ vi.mock('node:child_process',()=>({spawn:mocks.spawn}));
 vi.mock('node:fs/promises',()=>({mkdtemp:mocks.mkdtemp,readFile:mocks.readFile,rm:mocks.rm}));
 import { codexDecision } from './codex-provider';
 import { InvalidModelOutputError, withOneRepair } from './repair';
+import { validationReason } from './validation-reason';
 
 const valid={intro:'Ready.',toolName:'none',toolInput:'{}',outro:''};
 class ModelProcess extends EventEmitter {
@@ -38,8 +39,9 @@ describe('isolated model provider failure classification and cancellation',()=>{
   child.onTurn=()=>child.decision(output);await expect(codexDecision(options())).rejects.toBeInstanceOf(InvalidModelOutputError);expect(mocks.rm).toHaveBeenCalledOnce();
  });
  it('classifies invalid partial output without accepting later completion',async()=>{
-  const input=options();input.onDelta.mockImplementation(()=>{throw new Error('FORBIDDEN_TEXT')});
-  await expect(codexDecision(input)).rejects.toBeInstanceOf(InvalidModelOutputError);expect(child.kill).toHaveBeenCalledWith('SIGTERM');expect(input.onDelta).toHaveBeenCalledTimes(1);
+  const input=options();input.onDelta.mockImplementation(()=>{throw new Error('Unknown partial tree field')});let failure:unknown;
+  try{await codexDecision(input)}catch(error){failure=error}
+  expect(failure).toBeInstanceOf(InvalidModelOutputError);expect(validationReason(failure)).toBe('Error: Unknown partial tree field');expect(child.kill).toHaveBeenCalledWith('SIGTERM');expect(input.onDelta).toHaveBeenCalledTimes(1);
  });
  it.each(['oversize','capability'])('classifies generated %s failures as repairable',async kind=>{
   child.onTurn=()=>kind==='oversize'?child.decision('x'.repeat(40_001)):child.message({method:'item/tool/call',params:{}});

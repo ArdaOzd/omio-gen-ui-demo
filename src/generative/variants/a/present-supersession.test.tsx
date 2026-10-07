@@ -25,6 +25,10 @@ it('retains the last usable native scene while the replacement is pending or fai
  mount([accepted('first','art-1','Usable scene'),{type:'tool-present',toolCallId:'failed',state:'output-error',input:{},errorText:'Invalid generated tree'}])
  expect(screen.getByText('Usable scene')).toBeVisible()
 })
+it('does not render a rejected partial scene as a view failure while repair continues',()=>{
+ mount([{type:'tool-present',toolCallId:'failed',state:'output-error',input:{$type:'TravelSurface',artifactRef:'art-1',children:[{$type:'FareCalendar',artifactRef:'art-1',datasetRef:'expired',legIndex:0}]},errorText:'Invalid generated tree'}])
+ expect(screen.queryByText('This view could not be displayed. Retry with the current travel state.')).toBeNull()
+})
 it('keeps the usable native scene when a later input is still streaming',()=>{
  mount([accepted('first','art-1','Usable scene'),{type:'tool-present',toolCallId:'pending',state:'input-streaming',input:{$type:'TravelSurface',artifactRef:'art-1',title:'Pending scene'}}])
  expect(screen.getByText('Usable scene')).toBeVisible()

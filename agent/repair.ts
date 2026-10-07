@@ -1,7 +1,9 @@
 import { validationReason } from './validation-reason';
 
 export const MODEL_REQUEST_TIMEOUT_MS = 120_000;
-export class InvalidModelOutputError extends Error {}
+export class InvalidModelOutputError extends Error {
+ constructor(message:string,cause?:unknown){super(message,{cause});this.name='InvalidModelOutputError'}
+}
 export type ModelAttemptObservation = {
  attempt:0|1;
  elapsedMs:number;
