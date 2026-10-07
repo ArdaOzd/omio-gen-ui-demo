@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildSearchUrl, getJson, modes, normalizeLocations, normalizeSearch } from './api.js'
 import LandingPage from './components/LandingPage.jsx'
 import ResultsPage from './components/ResultsPage.jsx'
-import { storeSmartPlannerHandoff } from './generative/smart-planner-handoff.ts'
+import {
+  storeEmptyChatHandoff,
+  storeSmartPlannerHandoff,
+} from './generative/smart-planner-handoff.ts'
 
 function localDate(date = new Date()) {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
@@ -113,7 +116,9 @@ export default function App() {
   }
 
   function openSmartPlanner(prompt) {
-    const { id } = storeSmartPlannerHandoff(prompt)
+    const { id } = typeof prompt === 'string'
+      ? storeSmartPlannerHandoff(prompt)
+      : storeEmptyChatHandoff()
     window.location.assign(`/a?handoff=${encodeURIComponent(id)}`)
   }
 

@@ -19,6 +19,19 @@ function scenario(){
 function query(datasetRef:DatasetId):QueryIR{return{version:1,sources:[{datasetRef,alias:'fares'}],project:['id','priceCents'],limit:10}}
 
 describe('registration commit preserves published resources',()=>{
+ it('disposes the bridge-owned worker but leaves an injected engine under caller ownership',()=>{
+  const terminate=vi.fn(),handlers=new Set<(event:MessageEvent<unknown>)=>void>()
+  class WorkerStub implements QueryWorker{
+   postMessage(_message:WorkerRequest){}
+   addEventListener(_type:'message',handler:(event:MessageEvent<unknown>)=>void){handlers.add(handler)}
+   removeEventListener(_type:'message',handler:(event:MessageEvent<unknown>)=>void){handlers.delete(handler)}
+   terminate(){terminate();handlers.clear()}
+  }
+  vi.stubGlobal('Worker',WorkerStub)
+  const owned=createFareDataBridge();owned.dispose?.();expect(terminate).toHaveBeenCalledOnce()
+  const external=createLocalQueryEngine(),dispose=vi.spyOn(external,'dispose'),shared=createFareDataBridge({queryEngine:external});shared.dispose?.();expect(dispose).not.toHaveBeenCalled()
+  external.dispose();vi.unstubAllGlobals()
+ })
  it('keeps the old partial view queryable during and after canceled registration ACK',async()=>{
   const {bridge,registered,ack,cleaned}=scenario(),old=await bridge.load(request,new AbortController().signal),cancel=new AbortController()
   const retry=bridge.load(request,cancel.signal),rejected=expect(retry).rejects.toMatchObject({name:'AbortError'})

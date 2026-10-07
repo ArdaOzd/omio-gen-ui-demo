@@ -238,6 +238,10 @@ export default function SearchForm({
 
   function submitPlan(event) {
     event.preventDefault()
+    startPlan()
+  }
+
+  function startPlan() {
     if (plannerSubmitted.current) return
     if (!plannerPrompt.trim()) {
       setMessage('Tell the planner what kind of trip you want.')
@@ -246,6 +250,17 @@ export default function SearchForm({
     plannerSubmitted.current = true
     setMessage('')
     onPlan(plannerPrompt)
+  }
+
+  function handlePlannerKeyDown(event) {
+    if (event.key !== 'Enter' || !event.shiftKey) return
+    event.preventDefault()
+    startPlan()
+  }
+
+  function openEmptyChat() {
+    setMessage('')
+    onPlan()
   }
 
   const smartPlanner = !compact && planningMode === 'planner'
@@ -262,9 +277,15 @@ export default function SearchForm({
           autoFocus
           placeholder="Plan a five-day train trip from Prague to the Italian coast in June…"
           onChange={(event) => setPlannerPrompt(event.target.value)}
+          onKeyDown={handlePlannerKeyDown}
         />
       </Label>
-      <Button className="search-button" type="submit">Plan my trip</Button>
+      <div className="search-form__planner-actions">
+        <Button className="search-button" type="submit">Plan my trip</Button>
+        <Button className="search-form__chat-button" type="button" onClick={openEmptyChat}>
+          Go to chat
+        </Button>
+      </div>
     </div>
   )
 

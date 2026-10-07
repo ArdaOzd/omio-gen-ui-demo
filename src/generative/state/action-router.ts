@@ -131,5 +131,6 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
   })()
   requests.set(artifactId,{controller,promise});return promise
  }
- return Object.assign(route,{retry,selectFromQuery:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>route(command,scope),whenIdle:async(id:ArtifactId)=>{await Promise.all([requests.get(id)?.promise,selections.get(id)?.promise])},dispose:()=>{for(const request of requests.values())request.controller.abort();requests.clear();selections.clear()}})
+ const cancelPending=()=>{for(const request of requests.values())request.controller.abort();requests.clear();selections.clear()}
+ return Object.assign(route,{retry,selectFromQuery:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>route(command,scope),whenIdle:async(id:ArtifactId)=>{await Promise.all([requests.get(id)?.promise,selections.get(id)?.promise])},cancelPending,dispose:cancelPending})
 }

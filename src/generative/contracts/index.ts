@@ -158,6 +158,7 @@ export interface FareDataBridge {
   lookupFare(id: FareId, fields: AllowedFareField[]): Promise<BoundedFareFact>;
   subscribe(datasetId: DatasetId, listener: () => void): () => void;
   release(datasetId: DatasetId): void;
+  dispose?(): void;
   getCarrierLabel?(carrierId:string,datasetId?:DatasetId):string|undefined;
 }
 export interface UIStateStore {

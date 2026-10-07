@@ -34,6 +34,12 @@ describe('descriptor-only thread persistence',()=>{
  it('serializes saves from the same tab while advancing its record revision',async()=>{
   const item=await fixture(),io=memory(),persistence=createThreadPersistence(io.storage);await Promise.all([persistence.save('local',item.record),persistence.save('local',{...item.record,messages:[{id:'latest',role:'user',parts:[]}]})]);const loaded=await persistence.load('local');expect(loaded?.recordRevision).toBe(2);expect(loaded?.messages).toEqual([{id:'latest',role:'user',parts:[]}]);
  })
+ it('round-trips complete browser history beyond the compact model-history limit',async()=>{
+  const item=await fixture(),io=memory(),persistence=createThreadPersistence(io.storage)
+  const messages=Array.from({length:250},(_,index)=>({id:`message-${index}`,role:index%2?'assistant':'user',parts:[{type:'text',text:`Message ${index}`}] }))
+  await persistence.save('long-history',{...item.record,messages})
+  expect((await persistence.load('long-history'))?.messages).toEqual(messages)
+ })
  it('exports one coherent current revision and allowlisted manifests without rows',async()=>{
   const item=await fixture();item.store.dispatch({kind:'filters',artifactId:item.id,filters:{modes:['train'],carrierIds:[],directOnly:true}})
   const snapshot=exportAgentContext({turnId:'turn-1',activeArtifactId:item.id,artifactIds:[item.id],store:item.store,bridge:item.bridge});expect(snapshot.artifacts[0]?.revision).toBe(1);expect(snapshot.artifacts[0]?.filters.directOnly).toBe(true);expect(snapshot.datasets[0]?.rowCount).toBe(2);expect(JSON.stringify(snapshot)).not.toContain('availableSeats":3')

@@ -180,7 +180,7 @@ select:focus-visible {
 
 .search-form__planner textarea {
   width: 100%;
-  min-height: 64px;
+  min-height: 112px;
   resize: vertical;
   border: 1px solid #d7dce8;
   border-radius: 6px;
@@ -188,6 +188,26 @@ select:focus-visible {
   color: var(--navy);
   background: #f7f8fb;
   font: inherit;
+}
+
+.search-form__planner-actions {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+.search-form__chat-button {
+  min-height: 50px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.search-form__chat-button:hover {
+  background: #397fcf;
 }
 
 .search-form__tab--active {

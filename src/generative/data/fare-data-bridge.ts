@@ -5,6 +5,7 @@ import { createSearchPageSource } from './search-client'
 
 export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:number;maxPages?:number;queryEngine?:LocalQueryEngine}={}):FareDataBridge {
   const engine=options.queryEngine??createLocalQueryEngine()
+  const ownsEngine=options.queryEngine===undefined
   const resources=new Map<DatasetId,{manifest:DatasetManifest;engineId:DatasetId;rows:FareRow[];byId:Map<string,FareRow>;carrierNames:Map<string,string>;references:number}>()
   const pending=new Map<string,{promise:Promise<DatasetManifest>;controller:AbortController;subscribers:number}>()
   const listeners=new Map<DatasetId,Set<()=>void>>()
@@ -62,5 +63,6 @@ export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:nu
     async lookupFare(id,_fields){for(const resource of resources.values()){const row=resource.byId.get(id);if(row){const {availableSeats:_seats,direct:_direct,...fact}=row;return BoundedFareFactSchema.parse(fact)}}throw new Error('Expired fare reference')},
     subscribe(id,listener){const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
     release(id){const resource=resources.get(id);if(resource&&--resource.references<=0){resources.delete(id);engine.release(resource.engineId);listeners.delete(id)}},
+    dispose(){for(const item of pending.values())item.controller.abort();pending.clear();for(const resource of resources.values())engine.release(resource.engineId);resources.clear();listeners.clear();if(ownsEngine)engine.dispose()},
   }
 }

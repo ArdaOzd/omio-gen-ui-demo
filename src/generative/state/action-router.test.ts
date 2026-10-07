@@ -16,6 +16,18 @@ describe('direct action coverage routing',()=>{
   const bridge=createFareDataBridge({pageSource:async input=>{if(input.date==='2026-11-01')await new Promise<void>(resolve=>{oldFinish=resolve});return{rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'}}});const manifest=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'}},new AbortController().signal);const store=createUIStateStore();const id=ArtifactIdSchema.parse('a');store.initializeMissing(id,{dates:{start:'2026-10-02'},datasetRefs:[manifest.datasetId]});const router=createActionRouter(store,{bridge})
   router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});router({kind:'dates',artifactId:id,dates:{start:'2026-11-02'}});await router.whenIdle(id);oldFinish?.();await new Promise(resolve=>setTimeout(resolve,0));expect(store.get(id).dates.start).toBe('2026-11-02');const ref=store.get(id).datasetRefs.at(-1);if(!ref)throw new Error('Missing coverage');expect(bridge.getManifest(ref).coverage.dateWindow.from).toBe('2026-11-02');router.dispose()
  })
+ it('cancels held coverage so navigation can continue and ignores its late result',async()=>{
+  let started:(()=>void)|undefined,finish:(()=>void)|undefined
+  const held=new Promise<void>(resolve=>{finish=resolve}),observed=new Promise<void>(resolve=>{started=resolve})
+  const bridge=createFareDataBridge({pageSource:async input=>{if(input.date==='2026-11-01'){started?.();await held}return{rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'}}})
+  const manifest=await bridge.load({...request,dateWindow:{from:'2026-10-02',to:'2026-10-02'}},new AbortController().signal),store=createUIStateStore(),id=ArtifactIdSchema.parse('cancel-held')
+  store.initializeMissing(id,{dates:{start:'2026-10-02'},datasetRefs:[manifest.datasetId]})
+  const router=createActionRouter(store,{bridge});router({kind:'dates',artifactId:id,dates:{start:'2026-11-01'}});await observed
+  router.cancelPending();await router.whenIdle(id)
+  expect(store.get(id).datasetRefs).toEqual([manifest.datasetId])
+  finish?.();await new Promise(resolve=>setTimeout(resolve,0))
+  expect(store.get(id).datasetRefs).toEqual([manifest.datasetId]);router.dispose();bridge.dispose?.()
+ })
 })
 
 it('loads adjacent legs at stay offsets, routes leg modes, and replaces alternative selections',async()=>{
