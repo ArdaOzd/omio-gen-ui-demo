@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { sharedPropsSchema,catalogDescriptors } from '../src/generative/catalog/generated/catalog';
+import { nodePropsSchema,catalogDescriptors } from '../src/generative/catalog/generated/catalog';
 import { registeredActions,registeredSelectors,validatePresentTree } from '../src/generative/variants/a/tree';
-const scalars=new Map(Object.entries(sharedPropsSchema.shape));
+const scalars=new Map(Object.entries(nodePropsSchema.shape));
 const keys=new Set(['$type','$key','children',...scalars.keys()]);
-const specifications=z.toJSONSchema(sharedPropsSchema).properties??{};
+const specifications=z.toJSONSchema(nodePropsSchema).properties??{};
 function scalarLimit(key:string):number {
  const field=specifications[key];
  if(field&&typeof field==='object'){if(typeof field.maxLength==='number')return field.maxLength;if(Array.isArray(field.enum))return Math.max(...field.enum.map(value=>typeof value==='string'?value.length:0));}
@@ -27,7 +27,6 @@ export function validatePresentPrefix(source:string,scope:{artifactIds:Set<strin
     if(value.length>scalarLimit(key)||scalars.has(key)&&!scalars.get(key)?.safeParse(value).success)throw new Error('Partial scalar limit');
     if(key==='$type'&&!names.has(value))throw new Error('Unknown partial component');
     if(key==='artifactRef'&&!scope.artifactIds.has(value))throw new Error('Unknown partial artifact');
-    if(key==='datasetRef'&&value&&!scope.datasetIds.has(value))throw new Error('Unknown partial dataset');
     if(key==='actionRef'&&value&&!registeredActions.has(value))throw new Error('Unknown partial action');
     if(key==='selectorRef'&&value&&!registeredSelectors.has(value))throw new Error('Unknown partial selector');
    }

@@ -3,6 +3,12 @@ import { validatePresentPrefix } from './present-prefix';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
 const scope={artifactIds:new Set(['a']),datasetIds:new Set(['d'])};
 it('allows a genuinely incomplete but bounded native tree',()=>{expect(()=>validatePresentPrefix('{"$type":"TravelSurface","artifactRef":"a","children":[{"$type":"FareCards","artifactRef":"a","datasetRef":"d"',scope)).not.toThrow()});
+it('accepts every prefix of a valid leg-bound planner tree with a rebindable dataset handle',()=>{
+ const tree={$type:'TravelSurface',artifactRef:'a',children:[{$type:'FareCalendar',artifactRef:'a',datasetRef:'expired',legIndex:0}]}
+ const encoded=JSON.stringify(tree)
+ expect(()=>validatePresentTree(tree,scope)).not.toThrow()
+ for(let cut=1;cut<=encoded.length;cut++)expect(()=>validatePresentPrefix(encoded.slice(0,cut),scope),`prefix ${cut}`).not.toThrow()
+})
 it('rejects unknown row-shaped aliases before complete props or rendering',()=>{expect(()=>validatePresentPrefix('{"$type":"TravelSurface","artifactRef":"a","payload":[',scope)).toThrow('Unknown partial')});
 it('enforces plan depth and node budgets before completion',()=>{expect(()=>validatePresentPrefix('{"children":'.repeat(9),scope)).toThrow('structural');expect(()=>validatePresentPrefix('{'.repeat(81),scope)).toThrow()});
 
@@ -23,5 +29,5 @@ it.each(['datasetRef','actionRef','selectorRef'])('matches canonical empty optio
  const encoded=JSON.stringify(tree)
  expect(()=>validatePresentTree(tree,scope)).not.toThrow()
  for(let cut=1;cut<=encoded.length;cut++)expect(()=>validatePresentPrefix(encoded.slice(0,cut),scope)).not.toThrow()
- expect(()=>validatePresentPrefix(JSON.stringify({...tree,children:[{...callout,[field]:'unknown'}]}),scope)).toThrow('Unknown partial')
+ expect(()=>validatePresentPrefix(JSON.stringify({...tree,children:[{...callout,[field]:'unknown'}]}),scope)).toThrow(field==='datasetRef'?'Unknown dataset reference':'Unknown partial')
 })
