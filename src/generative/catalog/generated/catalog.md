@@ -1,6 +1,6 @@
 # Shared catalog 1.1.0
 
-Manifest hash: 3892c2e737c794e8ecb77a2cfe7ba163a218f6ac57cb8520d77cb33bcec52156
+Manifest hash: 3a2d4adcc2138f9d854642275fb6e7006403c1bb09a05745fa41107cc2b14ae0
 
 Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. The seven same-leg planner primitives also require legIndex, a zero-based integer from 0 through 7, to keep their logical leg identity through route edits. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
@@ -16,7 +16,7 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - Carousel: Accessible horizontal panels. May contain catalog children.
 - DateWindow: Bounded local date window.
 - FarePicker: Compact direct fare selector for one leg.
-- CheapestFastest: Local cheapest and fastest comparison.
+- CheapestFastest: Local cheapest and fastest individual fares with carrier, departure and arrival details plus direct add or remove actions for the shared PlanningTracker.
 - TravelSurface: Root travel artifact with subscribed local state. May contain catalog children.
 - Section: Named story section. May contain catalog children.
 - Stack: Vertical arrangement. May contain catalog children.
@@ -34,17 +34,17 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - DirectToggle: Direct-only local filter.
 - SortSelect: Price duration or departure sorting.
 - StayAllocation: Multi-city stay nights allocation.
-- FareCards: Expanded fare detail cards for one leg.
-- ComparisonTable: Locally resolved ranked fare comparison.
+- FareCards: Expanded individual fare detail cards for one leg with direct PlanningTracker selection.
+- ComparisonTable: Locally resolved ranked individual fare comparison with direct PlanningTracker selection.
 - ComparisonMatrix: Locally grouped mode comparison.
-- PriceCalendar: Locally grouped price-by-day view.
+- PriceCalendar: Locally grouped price-by-day view with separate date browsing and cheapest-fare PlanningTracker actions.
 - ModeBreakdown: Locally grouped option counts by transport mode.
 - SyntheticTotal: Selected synthetic EUR total for all passengers.
 - CoverageSummary: Resource completeness and bounds.
 - CitySequence: Ordered stop strip with stay nights.
 - RouteMap: Schematic connection chart.
-- ItineraryTimeline: Selected adjacent-leg chronology.
-- DurationPricePlot: Local duration and price comparison.
+- ItineraryTimeline: Individual fare chronology with direct PlanningTracker selection.
+- DurationPricePlot: Local duration and price comparison whose individual fare points toggle PlanningTracker selection.
 - SelectedItinerary: Selected fare route, date, mode and per-passenger facts; pair with SyntheticTotal for price summary.
 - ArtifactSkeleton: Loading artifact placeholder.
 - CoverageNotice: Partial resource notice.

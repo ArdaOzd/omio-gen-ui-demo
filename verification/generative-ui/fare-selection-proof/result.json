@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-10-07T17:57:02.215Z",
+  "status": "pass",
+  "sourceVersion": "sqlite-demo-v2-aa65e0b-5f489000-18dad574e0d82bc6",
+  "route": {
+    "originIds": [
+      "london"
+    ],
+    "destinationIds": [
+      "paris"
+    ],
+    "dateWindow": {
+      "from": "2026-10-12",
+      "to": "2026-10-12"
+    },
+    "modes": [
+      "train",
+      "bus",
+      "flight",
+      "ferry"
+    ],
+    "passengers": 1
+  },
+  "cheapest": {
+    "id": "fare_003929206",
+    "company": "Blablacar Bus",
+    "mode": "bus",
+    "priceCents": 1792,
+    "departure": "12 Oct 2026 · 13:06",
+    "arrival": "12 Oct 2026 · 23:07"
+  },
+  "fastest": {
+    "id": "fare_003929250",
+    "company": "easyJet",
+    "mode": "flight",
+    "priceCents": 6400,
+    "departure": "12 Oct 2026 · 06:31",
+    "arrival": "12 Oct 2026 · 07:45"
+  },
+  "assertions": {
+    "chronologicalTranscript": true,
+    "internalChromeAbsent": true,
+    "rightRail": true,
+    "persistedAfterReload": true,
+    "demoBuy": true,
+    "mobileNoOverflow": true,
+    "clearAll": true,
+    "modelRequests": 0
+  },
+  "screenshots": {
+    "desktop": "verification/generative-ui/fare-selection-proof/desktop.png",
+    "buy": "verification/generative-ui/fare-selection-proof/desktop-buy.png",
+    "mobile": "verification/generative-ui/fare-selection-proof/mobile.png"
+  }
+}
