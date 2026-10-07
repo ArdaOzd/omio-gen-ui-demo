@@ -14,6 +14,8 @@ npm install
 npm run dev
 ```
 
+On macOS, you can instead double-click `Start Omio Demo.command`. It installs project packages when needed and opens the landing page. When it starts the demo, keep the Terminal window open and press Control-C there to stop it; if the demo is already running, the launcher opens it and exits.
+
 Open [generative travel](http://127.0.0.1:5173/generative), [the direct route](http://127.0.0.1:5173/a), or [classic search](http://127.0.0.1:5173/). The launcher starts three owned processes: Python fare API on 8000, model agent on 8010, and Vite on 5173. It generates the full fixture if missing and stops its children together. Occupied ports fail explicitly; existing unrelated servers are not reused. Old `/b` and `/study` bookmarks redirect to `/a`.
 
 The agent uses your already signed-in local Codex CLI. No separate API key is needed. On macOS its default binary is the bundled Codex executable in `/Applications/ChatGPT.app`; set `CODEX_BINARY` to another installed Codex executable when needed. Model execution runs in an empty temporary directory with read-only isolation and shell, web, apps, plugins, MCP and delegation disabled. The service binds to loopback.
