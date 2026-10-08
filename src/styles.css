@@ -248,8 +248,10 @@ select:focus-visible {
 
 .location-field input,
 .search-control,
-.add-return {
+.add-return,
+.search-button {
   width: 100%;
+  height: 57px;
   min-height: 50px;
   border: 0;
   background: #f1f2f6;
