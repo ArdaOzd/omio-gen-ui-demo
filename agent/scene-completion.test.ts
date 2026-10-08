@@ -5,9 +5,10 @@ import { ArtifactIdSchema,UIStateRevisionSchema } from '../src/generative/contra
 import { createUIStateStore } from '../src/generative/state/ui-state-store'
 import { createFareDataBridge } from '../src/generative/data/fare-data-bridge'
 import { exportAgentContext } from '../src/generative/state/snapshot-exporter'
+import { createDisplayContextStore } from '../src/generative/state/display-context'
 import type { ChatRequest } from './request-schema'
 const artifact=ArtifactIdSchema.parse('completion-artifact'),other=ArtifactIdSchema.parse('other-artifact')
-function request():ChatRequest{const store=createUIStateStore();store.initializeMissing(artifact,{});store.initializeMissing(other,{});return{id:crypto.randomUUID(),currentContext:exportAgentContext({turnId:'completion',activeArtifactId:artifact,artifactIds:[artifact,other],store,bridge:createFareDataBridge()}),messages:[{id:'user',role:'user',parts:[{type:'text',text:'Compose both views.'}]}]}}
+function request():ChatRequest{const store=createUIStateStore();store.initializeMissing(artifact,{});store.initializeMissing(other,{});return{id:crypto.randomUUID(),currentContext:exportAgentContext({turnId:'completion',activeArtifactId:artifact,artifactIds:[artifact,other],store,bridge:createFareDataBridge(),displayStore:createDisplayContextStore()}),messages:[{id:'user',role:'user',parts:[{type:'text',text:'Compose both views.'}]}]}}
 function ack(input:ChatRequest){const key=acceptTurn(input);spendTool(key,'present');recordScene(key,'scene','present',artifact,UIStateRevisionSchema.parse(0));input.messages.push({id:'assistant',role:'assistant',parts:[{type:'tool-present',toolCallId:'scene',state:'output-available',input:{artifactRef:artifact},output:{}}]});return key}
 it('none finalizes fulfilled tool-backed requests, not only text-only requests',()=>{expect(CODEX_DEVELOPER_INSTRUCTIONS).toContain('fulfilled tool-backed');expect(CODEX_DEVELOPER_INSTRUCTIONS).toContain('different requested artifact');expect(CODEX_DEVELOPER_INSTRUCTIONS).toContain('new UI revision')})
 it('reports current-turn accepted scenes at the captured UI revision',()=>{const input=request(),key=ack(input);expect(getAcceptedScenes(key,input)).toEqual([{artifactRef:artifact,uiStateRevision:0,toolName:'present'}]);expect(getAcceptedScenes(key,input).some(scene=>scene.artifactRef===other)).toBe(false)})
