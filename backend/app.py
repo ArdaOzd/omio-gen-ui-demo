@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import socket
 import sqlite3
 from contextlib import closing
 from dataclasses import dataclass
@@ -15,8 +17,17 @@ from pathlib import Path
 from typing import Never
 from urllib.parse import parse_qs, urlparse
 
+from backend.query_groups import (
+    QueryApiError,
+    execute_lookup,
+    execute_query_groups,
+)
+
 
 DEFAULT_DATABASE = Path(__file__).resolve().parents[1] / "data" / "omio.sqlite3"
+MAX_REQUEST_BODY_BYTES = 256 * 1024
+REQUEST_READ_TIMEOUT_SECONDS = 10
+REQUEST_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_.:-]{1,96}$")
 MODES = ("train", "bus", "flight", "ferry")
 SORTS = {
     "price_asc": "f.price_cents ASC, f.id ASC",
@@ -139,9 +150,10 @@ def _connect(database: Path) -> sqlite3.Connection:
             "database_unavailable",
             f"database not found at {database}; run the generator first",
         )
-    connection = sqlite3.connect(f"file:{database}?mode=ro", uri=True)
+    connection = sqlite3.connect(f"file:{database}?mode=ro", uri=True, timeout=5.0)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA query_only = ON")
+    connection.execute("PRAGMA busy_timeout = 5000")
     return connection
 
 
@@ -474,6 +486,30 @@ def dispatch(
     raise ApiError(HTTPStatus.NOT_FOUND, "not_found", f"unknown endpoint {path}")
 
 
+def dispatch_post(
+    database: Path, path: str, payload: object
+) -> tuple[HTTPStatus, dict[str, object]]:
+    source_version = _source_version(database)
+    with closing(_connect(database)) as connection:
+        if path == "/api/query-groups":
+            response = execute_query_groups(connection, payload, source_version)
+        elif path == "/api/lookup":
+            response = execute_lookup(connection, payload, source_version)
+        else:
+            raise QueryApiError(
+                HTTPStatus.NOT_FOUND,
+                "invalidRequest",
+                f"Unknown endpoint {path}.",
+            )
+    if _source_version(database) != source_version:
+        raise QueryApiError(
+            HTTPStatus.CONFLICT,
+            "sourceChanged",
+            "The fare source changed. Refresh the displayed results.",
+        )
+    return HTTPStatus.OK, response
+
+
 def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def do_OPTIONS(self) -> None:
@@ -503,11 +539,92 @@ def make_handler(database: Path) -> type[BaseHTTPRequestHandler]:
             self.end_headers()
             self.wfile.write(body)
 
+        def do_POST(self) -> None:
+            parsed = urlparse(self.path)
+            request_id = "unknown"
+            try:
+                raw_length = self.headers.get("Content-Length")
+                if raw_length is None:
+                    raise QueryApiError(
+                        HTTPStatus.BAD_REQUEST,
+                        "invalidRequest",
+                        "Content-Length is required.",
+                    )
+                try:
+                    content_length = int(raw_length)
+                except ValueError:
+                    raise QueryApiError(
+                        HTTPStatus.BAD_REQUEST,
+                        "invalidRequest",
+                        "Content-Length must be an integer.",
+                    ) from None
+                if not 0 < content_length <= MAX_REQUEST_BODY_BYTES:
+                    raise QueryApiError(
+                        HTTPStatus.BAD_REQUEST,
+                        "invalidRequest",
+                        f"Request body must be between 1 and {MAX_REQUEST_BODY_BYTES} bytes.",
+                    )
+                content_type = self.headers.get_content_type()
+                if content_type != "application/json":
+                    raise QueryApiError(
+                        HTTPStatus.BAD_REQUEST,
+                        "invalidRequest",
+                        "Content-Type must be application/json.",
+                    )
+                self.connection.settimeout(REQUEST_READ_TIMEOUT_SECONDS)
+                try:
+                    payload = json.loads(self.rfile.read(content_length).decode("utf-8"))
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    raise QueryApiError(
+                        HTTPStatus.BAD_REQUEST,
+                        "invalidRequest",
+                        "Request body must be valid UTF-8 JSON.",
+                    ) from None
+                if (
+                    isinstance(payload, dict)
+                    and isinstance(payload.get("requestId"), str)
+                    and REQUEST_ID_PATTERN.fullmatch(payload["requestId"]) is not None
+                ):
+                    request_id = payload["requestId"]
+                status, response = dispatch_post(database, parsed.path, payload)
+            except QueryApiError as error:
+                status = error.status
+                response = {
+                    "version": 1,
+                    "requestId": request_id,
+                    "error": {"code": error.code, "message": error.message},
+                }
+            except ApiError as error:
+                status = error.status
+                code = "databaseUnavailable" if error.code == "database_unavailable" else "internalError"
+                message = "The fare database is unavailable." if code == "databaseUnavailable" else "The server could not complete the request."
+                response = {"version": 1, "requestId": request_id, "error": {"code": code, "message": message}}
+            except socket.timeout:
+                status = HTTPStatus.BAD_REQUEST
+                response = {
+                    "version": 1,
+                    "requestId": request_id,
+                    "error": {"code": "invalidRequest", "message": "The request body timed out."},
+                }
+            except Exception as error:
+                self.log_error("unhandled backend POST error: %s", error)
+                status = HTTPStatus.INTERNAL_SERVER_ERROR
+                response = {
+                    "version": 1,
+                    "requestId": request_id,
+                    "error": {"code": "internalError", "message": "The server could not complete the request."},
+                }
+            body = json.dumps(response, separators=(",", ":")).encode("utf-8")
+            self.send_response(status)
+            self._headers("application/json; charset=utf-8", len(body))
+            self.end_headers()
+            self.wfile.write(body)
+
         def _headers(self, content_type: str, content_length: int) -> None:
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(content_length))
             self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
             self.send_header("Access-Control-Allow-Headers", "Content-Type")
             self.send_header("Cache-Control", "no-store")
 

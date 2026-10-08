@@ -715,7 +715,7 @@ Keep one owner for each shared file. Workers use separate worktrees and return s
 | Milestone | Owner | Status |
 | --- | --- | --- |
 | 0. Clean base and plan | `/root/plan_branch` | complete at `a29b55e` |
-| 1. Fixed SQL projections | `/root/plan_branch` | in progress |
+| 1. Fixed SQL projections | `/root/plan_branch` | complete; 26 backend tests and real database smoke passed |
 | 2. Query contracts and coordinator | `/root/query_composition_design` | in progress |
 | 3. Catalog function bindings | `/root/query_composition_design` | foundation validated; production migration pending |
 | 4. Display ledger and inspection capture | `/root/runtime_composition` | in progress |
@@ -854,7 +854,7 @@ Current checklist:
 - [x] Create `feature/server-driven-generative-ui-review` in the managed worktree.
 - [x] Write and verify this implementation plan.
 - [x] Commit this plan alone as `a29b55e`.
-- [ ] Implement and commit fixed backend projections.
+- [x] Implement and commit fixed backend projections.
 - [ ] Implement and commit query contracts and coordinator.
 - [ ] Implement and commit component function bindings.
 - [ ] Implement and commit display ledger and inspection capture.
@@ -869,6 +869,8 @@ Implementation entries:
 - 2026-10-08: The public protocol is accepted as written above. Backend responses use the clean committed `FareItem`; fields observed only in the original dirty checkout, including transfers and legs, are excluded. Group and projection fingerprints depend on normalized query inputs rather than global `uiRevision`.
 - 2026-10-08: Three workers began from the same clean managed worktree: `/root/plan_branch` owns `backend/**` and this journal, `/root/query_composition_design` owns the query contract/coordinator and catalog functions, and `/root/runtime_composition` owns the display ledger and runtime instrumentation. `/root/plan_branch` is the sole commit steward and stages only explicitly reported owner paths.
 - 2026-10-08: The query worker validated the self-contained query protocol, HTTP client, batching coordinator, immutable bounded results, and 49-component static registry with focused tests and typecheck. This is the milestone 3 foundation; production catalog migration remains pending.
+- 2026-10-08: The query foundation was isolated in local commit `dbd321c`; its three focused test files pass six tests. Unfinished index, context, bridge, runtime, backend, and dependency-link changes were excluded.
+- 2026-10-08: Backend milestone 1 implements strict POST query groups and lookup, fixed parameterized projections, read-only batch transactions, chronological multi-day cursors, complete zero-count calendar rows, exclude-self facets, explicit mode baselines, stable pin lookup, body and query timeouts, source replacement rejection, and versioned errors while retaining classic GET search. The full backend suite passes 26 tests. A read-only smoke against the preserved 10-million-row database returned 238 available London-to-Paris fares across 11 days in 0.013 seconds and resolved a selected pin in 0.001 seconds.
 - 2026-10-08: The managed worktree initially lacked a code-review graph. The required full build completed at plan HEAD `a29b55e`; both code-review graph and Graphify still require a final refresh after integration.
 - 2026-10-08: Candidate isolated preview ports are backend `8003`, agent `8013`, and frontend `5175`. Confirm availability before starting processes and preserve any user-owned process already bound there.
 - 2026-10-08: No source edit is made in the original dirty checkout after isolation. Its state and `/tmp/server-driven-generative-ui-baseline.FcThYk` remain read-only diagnostics.

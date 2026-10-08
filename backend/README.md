@@ -62,6 +62,8 @@ Endpoints:
 - `GET /api/locations` returns locations plus reachable destinations and modes.
 - `GET /api/metadata` returns timetable range, totals, providers, and routes.
 - `GET /api/search` searches outbound and optional return legs.
+- `POST /api/query-groups` executes one to eight fixed generative-UI query groups.
+- `POST /api/lookup` resolves up to 160 source-scoped selected-fare pins.
 
 Search parameters are `origin`, `destination`, `departure_date`, optional
 `return_date`, `passengers` (1-8), `mode` (`all`, `train`, `bus`, `flight`, or
@@ -80,6 +82,24 @@ prices, and results. Sold-out fares are excluded, and every returned fare has at
 least the requested number of available seats. Times are local scheduled times at
 their origin and destination; `duration_minutes` remains authoritative across time
 zones.
+
+The generative UI endpoints accept JSON only. `/api/query-groups` supports the
+closed projection kinds `farePage`, `calendarDays`, `carrierFacets`,
+`modeSummary`, and `fareHighlights`. It validates every field strictly, executes
+the full request in one read-only SQLite transaction, and either returns every
+group or a versioned error. An empty `projections` array returns only the complete
+logical scope manifest. Page cursors are opaque and bind the source version,
+normalized scope, filters, ordering, and page size.
+
+`/api/lookup` accepts `{version, requestId, sourceVersion, pins}` and returns
+`items` plus explicit `missingPins`. A selected pin contains only `fareId` and
+`resourceKey`; the source version is supplied once for the whole lookup. Source
+mismatches return HTTP 409 `sourceChanged`, so a fare is never silently resolved
+against a replacement database.
+
+Both endpoints return fare scalars with local `serviceDate` and
+`departureMinutes`. They do not infer a timezone or arrival instant. The response
+omits routes, legs, transfers, and arbitrary query or SQL structures.
 
 ## Test
 
