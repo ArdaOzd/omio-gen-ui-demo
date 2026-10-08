@@ -106,6 +106,14 @@ export function createFareDataBridge(options: ServerFareDataBridgeOptions = {}):
     const datasetRevision = DatasetRevisionSchema.parse(existing
       ? existing.signature === signature ? existing.datasetRevision : existing.datasetRevision + 1
       : 1)
+    if (existing && existing.manifest.source.sourceVersion !== manifest.source.sourceVersion) {
+      for (const [key, cached] of projectionItemsByKey) {
+        if (cached.resourceKey === resourceKey) projectionItemsByKey.delete(key)
+      }
+      for (const [key, cached] of pinnedItemsByKey) {
+        if (cached.resourceKey === resourceKey) pinnedItemsByKey.delete(key)
+      }
+    }
     const stored: StoredResource = {
       resourceKey,
       datasetId,

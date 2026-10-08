@@ -232,4 +232,58 @@ describe('server fare data bridge', () => {
       current: { sourceVersion: 'source-2', datasetRevision: 2 },
     })
   })
+
+  it('invalidates cached projection rows and pins when a stable resource moves to a new source', async () => {
+    let sourceVersion = 'source-1'
+    const refreshedItem = FareItemSchema.parse({ ...item, priceCents: 3100 })
+    const client: ServerQueryClient = {
+      queryGroups: async request => response(request, sourceVersion),
+      lookupPins: async input => ({
+        version: 1,
+        requestId: input.requestId,
+        sourceVersion: input.sourceVersion,
+        items: [refreshedItem],
+        missingPins: [],
+      }),
+    }
+    const bridge = createFareDataBridge({ client })
+    const manifest = await bridge.loadScope(scope, new AbortController().signal)
+    await bridge.executeGroup({
+      groupId: 'cache-source-transition',
+      scope,
+      projections: [{
+        projectionId: 'page',
+        kind: 'farePage',
+        filters: { modes: [], carrierIds: [], directOnly: false },
+        serviceDate: null,
+        sort: { field: 'departureMinutes', direction: 'asc' },
+        after: null,
+        limit: 10,
+      }],
+    }, new AbortController().signal)
+    await bridge.lookupPins({
+      version: 1,
+      requestId: 'pin-source-1',
+      sourceVersion,
+      pins: [{ fareId: item.id, resourceKey: manifest.resourceKey }],
+    }, new AbortController().signal)
+    expect(bridge.findCachedFare(item.id, manifest.resourceKey)).toBeDefined()
+
+    sourceVersion = 'source-2'
+    const refreshed = await bridge.refreshScope(scope, new AbortController().signal)
+    expect(refreshed.resourceKey).toBe(manifest.resourceKey)
+    expect(bridge.getBinding(manifest.resourceKey)).toMatchObject({
+      datasetRevision: 2,
+      manifest: { source: { sourceVersion: 'source-2' } },
+    })
+    expect(bridge.findCachedFare(item.id, manifest.resourceKey)).toBeUndefined()
+
+    await bridge.lookupPins({
+      version: 1,
+      requestId: 'pin-source-2',
+      sourceVersion,
+      pins: [{ fareId: item.id, resourceKey: manifest.resourceKey }],
+    }, new AbortController().signal)
+    expect(bridge.findCachedFare(item.id, manifest.resourceKey)).toMatchObject({ priceCents: 3100 })
+  })
 })
