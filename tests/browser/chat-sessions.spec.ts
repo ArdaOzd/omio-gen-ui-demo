@@ -173,11 +173,12 @@ async function seedLegacySession(page: Page): Promise<void> {
   }, threadRecord(alpha))
 }
 
-async function mockFareSearch(page: Page): Promise<void> {
+async function mockFareSearch(page: Page, counts: { alpha?: number; beta?: number } = {}): Promise<void> {
   await page.route('**/api/search?**', async route => {
     const url = new URL(route.request().url())
     const origin = url.searchParams.get('origin')
     const item = origin === alpha.origin ? alpha : beta
+    const count = item === alpha ? counts.alpha ?? 1 : counts.beta ?? 1
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -187,19 +188,19 @@ async function mockFareSearch(page: Page): Promise<void> {
           date: item.date,
           page: 1,
           pages: 1,
-          total: 1,
-          results: [{
-            id: item.fareId,
+          total: count,
+          results: Array.from({ length: count }, (_, index) => ({
+            id: index === 0 ? item.fareId : `${item.fareId}-${index + 1}`,
             mode: 'train',
-            company: item.carrier,
-            departure_time: `${item.date}T09:00:00`,
-            duration_minutes: 150,
+            company: index === 0 ? item.carrier : `${item.carrier} ${index + 1}`,
+            departure_time: `${item.date}T${String(9 + index).padStart(2, '0')}:00:00`,
+            duration_minutes: 150 + index,
             origin: { id: item.origin },
             destination: { id: item.destination },
-            price_cents: item === alpha ? 4900 : 5900,
+            price_cents: (item === alpha ? 4900 : 5900) + index * 100,
             currency: 'EUR',
             available_seats: 8,
-          }],
+          })),
         },
       }),
     })
@@ -332,6 +333,43 @@ test('two sessions restore their own generated layout and selected fare across s
   await page.getByRole('button', { name: alpha.prompt }).click()
   await expectSession(page, alpha)
   await expect(page.locator('.travel-chat').getByText(beta.prompt, { exact: true })).toHaveCount(0)
+})
+
+for (const width of [360, 1280]) test(`fare lists show seven complete rows before scrolling at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 })
+  await mockFareSearch(page, { alpha: 8, beta: 7 })
+  await seedSessions(page)
+  await page.goto('/a')
+
+  const list = page.getByRole('region', { name: 'Fare options' })
+  const rows = list.getByRole('article')
+  await expect(rows).toHaveCount(8)
+  await expect(list).toHaveAttribute('data-scrollable', 'true')
+  const overflow = await list.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    const rowBounds = Array.from(element.children, child => child.getBoundingClientRect())
+    return {
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      seventhBottom: rowBounds[6]?.bottom,
+      eighthTop: rowBounds[7]?.top,
+      viewportBottom: bounds.bottom,
+    }
+  })
+  expect(overflow.scrollHeight).toBeGreaterThan(overflow.clientHeight)
+  expect(Math.abs((overflow.seventhBottom ?? 0) - overflow.viewportBottom)).toBeLessThanOrEqual(1)
+  expect(overflow.eighthTop).toBeGreaterThan(overflow.viewportBottom)
+
+  const eighth = rows.nth(7)
+  await eighth.getByRole('button').click()
+  await expect(eighth.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText('Alpha Rail 8')
+
+  await page.getByRole('button', { name: beta.title }).click()
+  const shortList = page.getByRole('region', { name: 'Fare options' })
+  await expect(shortList.getByRole('article')).toHaveCount(7)
+  await expect(shortList).toHaveAttribute('data-scrollable', 'false')
+  expect(await shortList.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true)
 })
 
 test('the legacy travel-a conversation becomes an accessible session without losing its state', async ({ page }) => {

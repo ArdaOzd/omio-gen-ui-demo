@@ -46,6 +46,24 @@ describe('shared direct travel controls',()=>{
   fireEvent.change(screen.getByLabelText('Sort options'),{target:{value:'durationMinutes:asc'}})
   await waitFor(()=>expect(first().getByText('1h 0m',{exact:false})).toBeInTheDocument())
  })
+ it('keeps every fare available while limiting the keyboard-scrollable list to seven visible rows',async()=>{
+  const rows=Array.from({length:21},(_,index)=>fare(`fare-${index+1}`,'train',1000+index*100))
+  const{services,state}=await setup({pageSource:async()=>({rows,total:rows.length,page:1,pages:1,sourceVersion:'fare-list-v1'})})
+  render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
+  await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(21))
+  const list=screen.getByRole('region',{name:'Fare options'})
+  expect(list).toHaveAttribute('data-scrollable','true');expect(list).toHaveAttribute('tabindex','0')
+  fireEvent.click(screen.getByRole('button',{name:/Select Train Eurostar 10:00 €17.00/}))
+  expect(state.get(artifactId).selectedFareIds).toEqual(['fare-8'])
+ })
+ it('does not make a seven-fare list a separate scroll stop',async()=>{
+  const rows=Array.from({length:7},(_,index)=>fare(`fare-${index+1}`,'train',1000+index*100))
+  const{services}=await setup({pageSource:async()=>({rows,total:rows.length,page:1,pages:1,sourceVersion:'short-fare-list-v1'})})
+  render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
+  await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(7))
+  const list=screen.getByRole('region',{name:'Fare options'})
+  expect(list).toHaveAttribute('data-scrollable','false');expect(list).not.toHaveAttribute('tabindex')
+ })
 })
 
 it('moves tab focus with arrow keys and keeps roving focus in the selected tab',async()=>{
