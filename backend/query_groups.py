@@ -615,7 +615,11 @@ def _manifest(
 
 
 def _cursor_hash(scope: dict[str, object], projection: dict[str, object]) -> str:
-    definition = {key: value for key, value in projection.items() if key != "after"}
+    definition = {
+        key: value
+        for key, value in projection.items()
+        if key not in {"after", "projectionId"}
+    }
     return _fingerprint("cursor-input", {"scope": scope, "projection": definition})
 
 

@@ -95,6 +95,31 @@ describe('projection coordinator', () => {
     expect(coordinator.getState(first.intent.queryKey)?.intent.uiRevision).toBe(2)
   })
 
+  it('keeps the wire projection identity stable when a fare page advances its cursor', async () => {
+    const requests: QueryGroupsRequest[] = []
+    const client: ServerQueryClient = {
+      queryGroups: async request => {
+        requests.push(request)
+        return response(request)
+      },
+      lookupPins: async () => { throw new Error('unused') },
+    }
+    const coordinator = createProjectionCoordinator(client)
+    const initial = coordinator.request(requirement('calendar-active-day'))
+    await tick()
+    const firstProjectionId = requests[0]?.groups[0]?.projections[0]?.projectionId
+    const pageTwo = requirement('calendar-active-day', 2)
+    if (pageTwo.projection.kind !== 'farePage') throw new Error('Expected a fare-page requirement')
+    pageTwo.projection = { ...pageTwo.projection, after: 'server-cursor-page-2' }
+    coordinator.request(pageTwo)
+    await tick()
+
+    expect(requests).toHaveLength(2)
+    expect(requests[1]?.groups[0]?.projections[0]?.projectionId).toBe(firstProjectionId)
+    expect(coordinator.getState(initial.intent.queryKey)?.status).toBe('ready')
+    coordinator.dispose()
+  })
+
   it('keeps the committed result while new inputs refresh and rejects superseded completion', async () => {
     const pending: Array<{ request: QueryGroupsRequest; resolve: (value: QueryGroupsResponse) => void }> = []
     const client: ServerQueryClient = { queryGroups: request => new Promise(resolve => pending.push({ request, resolve })), lookupPins: async () => { throw new Error('unused') } }

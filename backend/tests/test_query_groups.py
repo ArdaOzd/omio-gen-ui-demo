@@ -152,7 +152,9 @@ class QueryGroupsTestCase(unittest.TestCase):
         first = self.execute([self.fare_page(limit=3)])["groups"][0]["projections"][0]
         self.assertTrue(first["pageInfo"]["hasNextPage"])
         second_projection = self.fare_page(limit=3, after=first["pageInfo"]["nextCursor"])
+        second_projection["projectionId"] = "page-two"
         second = self.execute([second_projection])["groups"][0]["projections"][0]
+        self.assertEqual(second["projectionId"], "page-two")
         self.assertTrue({fare["id"] for fare in first["items"]}.isdisjoint(fare["id"] for fare in second["items"]))
 
         changed_filter = self.fare_page(

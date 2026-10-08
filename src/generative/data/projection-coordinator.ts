@@ -217,7 +217,7 @@ export function createProjectionCoordinator(client: ServerQueryClient, options: 
         const existing = deduplicated.get(fingerprint)
         if (existing) existing.members.push(entry)
         else {
-          const projectionId = stableFingerprint({ groupId, fingerprint }, 'wire')
+          const projectionId = stableFingerprint({ groupId, projectionKey: entry[1].state.intent.projectionKey }, 'wire')
           deduplicated.set(fingerprint, { projectionId, projection: { ...projection, projectionId }, members: [entry] })
         }
       }

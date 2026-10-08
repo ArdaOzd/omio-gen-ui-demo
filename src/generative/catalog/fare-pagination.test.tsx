@@ -47,7 +47,7 @@ async function renderSelector(component: 'picker'|'strip'|'calendar') {
 
 describe('FareCards keyset pagination', () => {
   it('requests exactly the seven rendered rows and preserves a prior-page selection', async () => {
-    const requests: Array<{ after: string | null; limit: number }> = []
+    const requests: Array<{ after: string | null; limit: number; projectionId: string }> = []
     const client: ServerQueryClient = {
       queryGroups: async request => QueryGroupsResponseSchema.parse({
         version: 1,
@@ -58,7 +58,7 @@ describe('FareCards keyset pagination', () => {
           manifest: { kind: 'fareScopeManifest', resourceKey: 'scope-1', source: { kind: 'search', descriptorId: 'scope-1', sourceVersion: 'source-1' }, coverage: group.scope, totalAvailable: items.length, availableModes: ['train'], availableDateWindow: group.scope.dateWindow, complete: true },
           projections: group.projections.map(projection => {
             if (projection.kind !== 'farePage') throw new Error('Unexpected projection')
-            requests.push({ after: projection.after, limit: projection.limit })
+            requests.push({ after: projection.after, limit: projection.limit, projectionId: projection.projectionId })
             const offset = projection.after === 'cursor-7' ? 7 : 0
             const page = items.slice(offset, offset + projection.limit)
             return { projectionId: projection.projectionId, kind: 'farePage', inputHash: `input-${offset}`, resultFingerprint: `result-${offset}`, items: page, pageInfo: { total: items.length, returned: page.length, hasNextPage: offset + page.length < items.length, nextCursor: offset + page.length < items.length ? 'cursor-7' : null } }
@@ -77,12 +77,13 @@ describe('FareCards keyset pagination', () => {
     render(<DisplayContextProvider store={displayStore}><TravelProvider services={services}><DisplayNodeProvider identity={{ componentRef: { value: 'artifact-pages:present:fares', keySource: 'authored-key' }, componentType: 'FareCards', scope: { kind: 'leg', artifactId, legIndex: 0, legKey: 'london:paris', resourceKey: 'scope-1' }, authored: {} }}><FareCards artifactRef={artifactId} datasetRef={datasetId} /></DisplayNodeProvider></TravelProvider></DisplayContextProvider>)
 
     await screen.findByText('Rail 1')
-    expect(requests.at(-1)).toEqual({ after: null, limit: 7 })
+    expect(requests.at(-1)).toMatchObject({ after: null, limit: 7 })
+    const firstProjectionId = requests.at(-1)?.projectionId
     fireEvent.click(screen.getByRole('button', { name: /Select Train Rail 1/i }))
     expect(state.get(artifactId).selectedFareIds).toEqual([items[0]!.id])
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
     await screen.findByText('Rail 8')
-    await waitFor(() => expect(requests.at(-1)).toEqual({ after: 'cursor-7', limit: 7 }))
+    await waitFor(() => expect(requests.at(-1)).toMatchObject({ after: 'cursor-7', limit: 7, projectionId: firstProjectionId }))
     expect(state.get(artifactId).selectedFareIds).toEqual([items[0]!.id])
     expect(screen.getByText('Page 2')).toBeVisible()
 
