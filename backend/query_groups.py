@@ -9,9 +9,11 @@ import json
 import re
 import sqlite3
 import time
+from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import date, timedelta
 from http import HTTPStatus
+from threading import Lock
 from typing import Never
 
 
@@ -25,10 +27,14 @@ MAX_GROUPS = 8
 MAX_PROJECTIONS = 8
 MAX_CALENDAR_DAYS = 732
 MAX_LOOKUP_PINS = 160
+MAX_REGISTERED_SCOPES = 4_096
 MAX_CURSOR_LENGTH = 2_048
 QUERY_TIMEOUT_SECONDS = 8.0
 REF_PATTERN = re.compile(r"^[a-zA-Z0-9_.:-]+$")
 MAX_SAFE_INTEGER = 9_007_199_254_740_991
+
+_REGISTERED_SCOPES: OrderedDict[tuple[str, str], dict[str, object]] = OrderedDict()
+_REGISTERED_SCOPES_LOCK = Lock()
 
 
 @dataclass(frozen=True)
@@ -100,6 +106,24 @@ def _canonical(value: object) -> str:
 def _fingerprint(prefix: str, value: object) -> str:
     digest = hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
     return f"{prefix}-{digest[:32]}"
+
+
+def _register_scope(source_version: str, resource_key: str, scope: dict[str, object]) -> None:
+    key = (source_version, resource_key)
+    with _REGISTERED_SCOPES_LOCK:
+        _REGISTERED_SCOPES.pop(key, None)
+        _REGISTERED_SCOPES[key] = scope
+        while len(_REGISTERED_SCOPES) > MAX_REGISTERED_SCOPES:
+            _REGISTERED_SCOPES.popitem(last=False)
+
+
+def _registered_scope(source_version: str, resource_key: str) -> dict[str, object] | None:
+    key = (source_version, resource_key)
+    with _REGISTERED_SCOPES_LOCK:
+        scope = _REGISTERED_SCOPES.get(key)
+        if scope is not None:
+            _REGISTERED_SCOPES.move_to_end(key)
+        return scope
 
 
 def _stable_fingerprint(prefix: str, value: object) -> str:
@@ -614,6 +638,22 @@ def _manifest(
     }
 
 
+def _fare_matches_scope(item: dict[str, object], scope: dict[str, object]) -> bool:
+    window = scope["dateWindow"]
+    threshold = scope["earliestDeparture"]
+    assert isinstance(window, dict) and isinstance(threshold, dict)
+    service_date = str(item["serviceDate"])
+    return (
+        item["originId"] == scope["originId"]
+        and item["destinationId"] == scope["destinationId"]
+        and str(window["from"]) <= service_date <= str(window["to"])
+        and int(item["availableSeats"]) >= int(scope["passengers"])
+        and int(item["availableSeats"]) > 0
+        and (service_date, int(item["departureMinutes"]))
+        >= (str(threshold["date"]), int(threshold["minutes"]))
+    )
+
+
 def _cursor_hash(scope: dict[str, object], projection: dict[str, object]) -> str:
     definition = {
         key: value
@@ -1017,6 +1057,12 @@ def execute_query_groups(connection: sqlite3.Connection, value: object, source_v
                 projections.append(result)
             groups.append({"groupId": group["groupId"], "manifest": manifest, "projections": projections})
         connection.commit()
+        for group in groups:
+            manifest = group["manifest"]
+            assert isinstance(manifest, dict)
+            coverage = manifest["coverage"]
+            assert isinstance(coverage, dict)
+            _register_scope(source_version, str(manifest["resourceKey"]), coverage)
         return {"version": 1, "requestId": request["requestId"], "sourceVersion": source_version, "groups": groups}
     except sqlite3.OperationalError as error:
         connection.rollback()
@@ -1034,13 +1080,16 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
     pins = request["pins"]
     assert isinstance(pins, list)
     integer_ids: list[int] = []
-    valid_pin_ids: dict[str, int] = {}
+    pin_ids: list[int | None] = []
+    pin_scopes: list[dict[str, object] | None] = []
     for pin in pins:
         fare_id = pin["fareId"]
+        integer_id = None
         if fare_id.startswith("fare_") and fare_id[5:].isdigit():
             integer_id = int(fare_id[5:])
             integer_ids.append(integer_id)
-            valid_pin_ids[fare_id] = integer_id
+        pin_ids.append(integer_id)
+        pin_scopes.append(_registered_scope(source_version, str(pin["resourceKey"])))
     by_id: dict[int, dict[str, object]] = {}
     deadline = time.monotonic() + QUERY_TIMEOUT_SECONDS
     connection.set_progress_handler(lambda: int(time.monotonic() >= deadline), 10_000)
@@ -1062,13 +1111,22 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
         raise
     finally:
         connection.set_progress_handler(None, 0)
+    resolved: list[dict[str, object] | None] = []
+    invalid_fare_ids: set[str] = set()
+    for pin, integer_id, scope in zip(pins, pin_ids, pin_scopes, strict=True):
+        item = by_id.get(integer_id) if integer_id is not None else None
+        if item is None or scope is None or not _fare_matches_scope(item, scope):
+            resolved.append(None)
+            invalid_fare_ids.add(str(pin["fareId"]))
+        else:
+            resolved.append(item)
+
     items: list[dict[str, object]] = []
     emitted: set[str] = set()
     missing: list[dict[str, str]] = []
-    for pin in pins:
-        fare_id = pin["fareId"]
-        item = by_id.get(valid_pin_ids.get(fare_id, -1))
-        if item is None:
+    for pin, item in zip(pins, resolved, strict=True):
+        fare_id = str(pin["fareId"])
+        if item is None or fare_id in invalid_fare_ids:
             missing.append(pin)
         elif fare_id not in emitted:
             emitted.add(fare_id)

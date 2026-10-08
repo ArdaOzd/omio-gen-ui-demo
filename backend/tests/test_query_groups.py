@@ -251,6 +251,57 @@ class QueryGroupsTestCase(unittest.TestCase):
         self.assertEqual([item["id"] for item in payload["items"]], [fare["id"]])
         self.assertEqual(payload["missingPins"], [{"fareId": "fare_999999999", "resourceKey": resource_key}])
 
+        wrong_scope = self.scope(
+            originId="paris",
+            destinationId="london",
+        )
+        wrong_scope_request = self.request(
+            [],
+            groups=[{
+                "groupId": "artifact-2:leg:paris:london",
+                "scope": wrong_scope,
+                "projections": [],
+            }],
+        )
+        _, wrong_scope_payload = dispatch_post(
+            self.database,
+            "/api/query-groups",
+            wrong_scope_request,
+        )
+        wrong_pin = {
+            "fareId": fare["id"],
+            "resourceKey": wrong_scope_payload["groups"][0]["manifest"]["resourceKey"],
+        }
+        wrong_lookup = {
+            "version": 1,
+            "requestId": "lookup-wrong-resource",
+            "sourceVersion": self.source_version,
+            "pins": [wrong_pin],
+        }
+        status, wrong_payload = dispatch_post(
+            self.database,
+            "/api/lookup",
+            wrong_lookup,
+        )
+        self.assertEqual(status, HTTPStatus.OK)
+        self.assertEqual(wrong_payload["items"], [])
+        self.assertEqual(wrong_payload["missingPins"], [wrong_pin])
+
+        correct_pin = {"fareId": fare["id"], "resourceKey": resource_key}
+        mixed_lookup = {
+            **wrong_lookup,
+            "requestId": "lookup-mixed-resources",
+            "pins": [correct_pin, wrong_pin],
+        }
+        status, mixed_payload = dispatch_post(
+            self.database,
+            "/api/lookup",
+            mixed_lookup,
+        )
+        self.assertEqual(status, HTTPStatus.OK)
+        self.assertEqual(mixed_payload["items"], [])
+        self.assertEqual(mixed_payload["missingPins"], [correct_pin, wrong_pin])
+
         request["sourceVersion"] = "sqlite-demo-v2-stale"
         with self.assertRaises(QueryApiError) as raised:
             dispatch_post(self.database, "/api/lookup", request)
