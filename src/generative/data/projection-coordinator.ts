@@ -205,9 +205,8 @@ export function createProjectionCoordinator(client: ServerQueryClient, options: 
   }
 
   async function executeBatch(expectedSourceVersion: string | null, groups: Array<Array<[string, ActiveRequirement]>>) {
-    const requestId = `request-${crypto.randomUUID()}`
     const responseMembers = new Map<string, Array<[string, ActiveRequirement]>>()
-    const requestGroups = groups.map(entries => {
+    const preparedGroups = groups.map(entries => {
       const first = entries[0]
       if (!first) throw new Error('Empty projection group')
       const groupId = first[1].state.intent.groupKey
@@ -226,10 +225,21 @@ export function createProjectionCoordinator(client: ServerQueryClient, options: 
         responseMembers.set(`${groupId}\u0000${item.projectionId}`, item.members)
         return item.projection
       })
-      if (projections.length > 8) throw new Error('Query group projection limit exceeded')
       return { groupId, scope: first[1].requirement.scope, projections }
     })
-    const request = QueryGroupsRequestSchema.parse({ version: 1, requestId, expectedSourceVersion, groups: requestGroups })
+    const maximumProjectionCount = Math.max(...preparedGroups.map(group => group.projections.length))
+    const requests = Array.from({ length: Math.ceil(maximumProjectionCount / 8) }, (_, index) => {
+      const start = index * 8
+      return QueryGroupsRequestSchema.parse({
+        version: 1,
+        requestId: `request-${crypto.randomUUID()}`,
+        expectedSourceVersion,
+        groups: preparedGroups.flatMap(group => {
+          const projections = group.projections.slice(start, start + 8)
+          return projections.length ? [{ groupId: group.groupId, scope: group.scope, projections }] : []
+        }),
+      })
+    })
     const controller = new AbortController()
     const batch: Batch = {
       controller,
@@ -240,39 +250,60 @@ export function createProjectionCoordinator(client: ServerQueryClient, options: 
     }
     batches.add(batch)
     try {
-      const response = await client.queryGroups(request, controller.signal)
-      for (const group of response.groups) {
-        for (const projection of group.projections) {
-          const members = responseMembers.get(`${group.groupId}\u0000${projection.projectionId}`) ?? []
-          for (const [queryKey, requested] of members) {
-            const item = active.get(queryKey)
-            if (!item) continue
-            const intent = item.state.intent
-            if (intent.desiredInputHash !== requested.state.intent.desiredInputHash
-              || intent.desiredInputVersion !== requested.state.intent.desiredInputVersion) continue
-            const resultKey = `result-${crypto.randomUUID()}`
-            const projectionForCaller = { ...projection, projectionId: requested.requirement.projection.projectionId }
-            const identity = {
-              resultKey,
-              inputHash: intent.desiredInputHash,
-              inputVersion: intent.desiredInputVersion,
-              requestId: response.requestId,
-              resourceKey: group.manifest.resourceKey,
-              datasetId: requested.requirement.datasetId,
-              datasetRevision: requested.requirement.datasetRevision,
-              sourceVersion: response.sourceVersion,
-              resultFingerprint: projection.resultFingerprint,
-              total: total(projection),
-              truncated: truncated(projection),
+      const responses = await Promise.all(requests.map(request => client.queryGroups(request, controller.signal)))
+      const sourceVersions = new Set(responses.map(response => response.sourceVersion))
+      if (sourceVersions.size !== 1) {
+        throw new ServerQueryError(409, 'sourceChanged', 'The fare source changed while refreshing a query group.', requests[0]?.requestId ?? 'query-group')
+      }
+      const sourceVersion = responses[0]?.sourceVersion
+      if (!sourceVersion) throw new Error('Fare query batch returned no source version')
+      const resourceKeys = new Map<string, string>()
+      const staged: Array<{ queryKey: string; requested: ActiveRequirement; snapshot: ProjectionResultSnapshot }> = []
+      for (const response of responses) {
+        for (const group of response.groups) {
+          const previousResourceKey = resourceKeys.get(group.groupId)
+          if (previousResourceKey && previousResourceKey !== group.manifest.resourceKey) {
+            throw new ServerQueryError(409, 'sourceChanged', 'The fare scope changed while refreshing a query group.', response.requestId)
+          }
+          resourceKeys.set(group.groupId, group.manifest.resourceKey)
+          for (const projection of group.projections) {
+            const members = responseMembers.get(`${group.groupId}\u0000${projection.projectionId}`) ?? []
+            for (const [queryKey, requested] of members) {
+              const intent = requested.state.intent
+              const resultKey = `result-${crypto.randomUUID()}`
+              const projectionForCaller = { ...projection, projectionId: requested.requirement.projection.projectionId }
+              const identity = {
+                resultKey,
+                inputHash: intent.desiredInputHash,
+                inputVersion: intent.desiredInputVersion,
+                requestId: response.requestId,
+                resourceKey: group.manifest.resourceKey,
+                datasetId: requested.requirement.datasetId,
+                datasetRevision: requested.requirement.datasetRevision,
+                sourceVersion,
+                resultFingerprint: projection.resultFingerprint,
+                total: total(projection),
+                truncated: truncated(projection),
+              }
+              const snapshot = ProjectionResultSnapshotSchema.parse({ identity, projection: projectionForCaller })
+              staged.push({ queryKey, requested, snapshot })
             }
-            const snapshot = ProjectionResultSnapshotSchema.parse({ identity, projection: projectionForCaller })
-            remember(snapshot)
-            item.state = { status: 'ready', intent, current: snapshot.identity }
-            item.requirement = { ...item.requirement, sourceVersion: response.sourceVersion }
-            notify(queryKey)
           }
         }
       }
+      const committed: string[] = []
+      for (const { queryKey, requested, snapshot } of staged) {
+        const item = active.get(queryKey)
+        if (!item) continue
+        const intent = item.state.intent
+        if (intent.desiredInputHash !== requested.state.intent.desiredInputHash
+          || intent.desiredInputVersion !== requested.state.intent.desiredInputVersion) continue
+        remember(snapshot)
+        item.state = { status: 'ready', intent, current: snapshot.identity }
+        item.requirement = { ...item.requirement, sourceVersion }
+        committed.push(queryKey)
+      }
+      committed.forEach(notify)
     } catch (error) {
       if (isAbort(error)) return
       const sourceChanged = error instanceof ServerQueryError && error.code === 'sourceChanged'
@@ -372,7 +403,7 @@ export function createProjectionCoordinator(client: ServerQueryClient, options: 
         ? { status: 'refreshing', intent, current }
         : { status: 'loading', intent }
       active.set(parsed.queryKey, { requirement, state, inputVersion, queued: true, sourceRefreshAttempts: 0 })
-      notify(parsed.queryKey)
+      queueMicrotask(() => notify(parsed.queryKey))
       cancelFullySupersededBatches()
       schedule()
       return state

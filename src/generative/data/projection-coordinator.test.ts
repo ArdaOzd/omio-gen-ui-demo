@@ -32,6 +32,51 @@ function response(request: QueryGroupsRequest, price = 2500): QueryGroupsRespons
 const tick = () => new Promise(resolve => setTimeout(resolve, 0))
 
 describe('projection coordinator', () => {
+  it('defers changed-input notifications until after the caller finishes rendering', async () => {
+    const pending: Array<{ request: QueryGroupsRequest; resolve: (value: QueryGroupsResponse) => void }> = []
+    const client: ServerQueryClient = {
+      queryGroups: request => new Promise(resolve => pending.push({ request, resolve })),
+      lookupPins: async () => { throw new Error('unused') },
+    }
+    const coordinator = createProjectionCoordinator(client)
+    const initial = coordinator.request(requirement('cards'))
+    await Promise.resolve()
+    const notified: string[] = []
+    coordinator.subscribe(initial.intent.queryKey, () => notified.push('notified'))
+
+    coordinator.request(requirement('cards', 2, 10))
+    expect(notified).toEqual([])
+    await Promise.resolve()
+    expect(notified).toEqual(['notified'])
+    coordinator.dispose()
+  })
+
+  it('chunks wide legal groups and commits them only after every server-bounded wave succeeds', async () => {
+    const pending: Array<{ request: QueryGroupsRequest; resolve: (value: QueryGroupsResponse) => void }> = []
+    const client: ServerQueryClient = {
+      queryGroups: request => new Promise(resolve => pending.push({ request, resolve })),
+      lookupPins: async () => { throw new Error('unused') },
+    }
+    const coordinator = createProjectionCoordinator(client)
+    const requested = Array.from({ length: 9 }, (_, index) => coordinator.request(requirement(`view-${index + 1}`, 1, index + 1)))
+
+    await tick()
+    expect(pending).toHaveLength(2)
+    expect(pending.map(call => call.request.groups[0]?.projections.length)).toEqual([8, 1])
+
+    const first = pending[0]
+    const second = pending[1]
+    if (!first || !second) throw new Error('Missing projection wave')
+    first.resolve(response(first.request))
+    await tick()
+    expect(requested.map(item => coordinator.getState(item.intent.queryKey)?.status)).toEqual(Array(9).fill('loading'))
+
+    second.resolve(response(second.request))
+    await tick()
+    expect(requested.map(item => coordinator.getState(item.intent.queryKey)?.status)).toEqual(Array(9).fill('ready'))
+    coordinator.dispose()
+  })
+
   it('coalesces compatible requirements and ignores unrelated UI revisions', async () => {
     const requests: QueryGroupsRequest[] = []
     const client: ServerQueryClient = { queryGroups: async request => { requests.push(request); return response(request) }, lookupPins: async () => { throw new Error('unused') } }
