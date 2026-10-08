@@ -8,7 +8,7 @@ import { FieldGroup, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DatasetIdSchema, DateSchema, type FareRow, type TransportMode } from '../../contracts'
+import { DatasetIdSchema, DateSchema, type FareRow, type ResultKey, type TransportMode } from '../../contracts'
 import { fareMeetsThreshold, thresholdDateTime } from '../../state/itinerary-schedule'
 import { legDate, tripDatesForLegDeparture } from '../../state/leg-bindings'
 import {
@@ -22,6 +22,7 @@ import {
   useDayFares,
   useItineraryPlan,
   useOrderedFares,
+  useQueryFareSelection,
   useTravelAction,
 } from '../context'
 import type { WidgetProps } from '../layout'
@@ -414,13 +415,14 @@ type OrderedFaresQuery = ReturnType<typeof useOrderedFares>
 type OrderedFaresData = NonNullable<OrderedFaresQuery['data']>
 type FareStripPage = {
   cursor: string | null
-  resultKey: string
+  resultKey: ResultKey
   rankOffset: number
   rows: OrderedFaresData['items']
   source: {
     requirement: OrderedFaresQuery['requirement']
     queryState: OrderedFaresQuery['queryState']
     data: OrderedFaresData
+    currentResultKey: OrderedFaresQuery['currentResultKey']
   }
 }
 
@@ -454,7 +456,7 @@ function FareStripPagePublisher({ artifactRef, baseRef, legIndex, legKey: resolv
 
 function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = false }: { artifactRef: string; datasetRef: string; legIndex?: number; componentRef?: string; compact?: boolean }) {
   const plan = useItineraryPlan(artifactRef)
-  const dispatch = useTravelAction(artifactRef)
+  const selection = useQueryFareSelection(artifactRef)
   const resolved = resolveLeg(plan, datasetRef, legIndex)
   const displayNode=useDisplayNode()
   const loadSentinelRef=useRef<HTMLDivElement>(null)
@@ -482,7 +484,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
   useEffect(()=>{
     if(!resolved||!result.data||!committedDesiredResult||result.queryState.status!=='ready'||result.requirement.projection.kind!=='farePage'||result.requirement.projection.after!==cursor)return
     const rows=sortFares(result.data.items.filter(row=>row.originId===resolved.leg.originId&&row.destinationId===resolved.leg.destinationId&&fareMeetsThreshold(row,resolved.leg.threshold)),fareOrderFromState((plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).field,(plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).direction))
-    const page:FareStripPage={cursor,resultKey:result.queryState.current.resultKey,rankOffset:0,rows,source:{requirement:result.requirement,queryState:result.queryState,data:result.data}}
+    const page:FareStripPage={cursor,resultKey:result.queryState.current.resultKey,rankOffset:0,rows,source:{requirement:result.requirement,queryState:result.queryState,data:result.data,currentResultKey:result.currentResultKey}}
     setAccumulated(current=>{
       const pages=current.identity===pagingIdentity?current.pages:[]
       if(pages.some(candidate=>candidate.cursor===cursor))return current.identity===pagingIdentity?current:{identity:pagingIdentity,pages}
@@ -495,6 +497,8 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
     })
   },[cursor,pagingIdentity,readyResultKey,resolved?.leg.key,resolved?.leg.originId,resolved?.leg.destinationId,resolved?.leg.threshold.date,resolved?.leg.threshold.minutes])
   const pages=accumulated.identity===pagingIdentity?accumulated.pages:[]
+  const visiblePagesRef=useRef({identity:pagingIdentity,pages})
+  visiblePagesRef.current={identity:pagingIdentity,pages}
   const shown=pages.flatMap(page=>page.rows)
   const total=pages.at(-1)?.source.data.pageInfo.total??0
   const serialized=shown.slice(0,DISPLAY_LIMITS.orderedFareRefs)
@@ -531,6 +535,17 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
     return()=>observer.disconnect()
   },[appendFailed,canLoadMore,requestNext])
   const loadStatus=loadingMore?'Loading more fares…':appendFailed?'More fares could not load.':canLoadMore?'Scroll down to load more fares.':`All ${shown.length} matching fares loaded.`
+  const toggleFare=(row:FareStripPage['rows'][number])=>{
+    const page=pages.find(candidate=>candidate.rows.some(candidateRow=>candidateRow.id===row.id))
+    if(!page)return
+    selection.toggle(row,{
+      queryState:page.source.queryState,
+      currentResultKey:()=>{
+        const visible=visiblePagesRef.current
+        return visible.identity===pagingIdentity&&visible.pages.some(candidate=>candidate.resultKey===page.resultKey&&candidate.rows.some(candidateRow=>candidateRow.id===row.id))?page.resultKey:undefined
+      },
+    },page.rows.map(candidate=>candidate.id))
+  }
   if (!resolved) return <EmptyPlanningState />
   if (!pages.length&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
   if (!pages.length&&result.queryState.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
@@ -545,7 +560,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
         <p>{departure(row.departureMinutes)} · {duration(row.durationMinutes)}</p>
         <small>{carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.serviceDate} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small>
         <FareRouteDetails row={row} compact />
-        <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => {recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:selected?'deselect':'select'});dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}}>{selected ? 'Selected' : 'Choose fare'}</Button>
+        <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => {recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:selected?'deselect':'select'});toggleFare(row)}}>{selected ? 'Selected' : 'Choose fare'}</Button>
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}
       <div ref={loadSentinelRef} className="trip-fare-load-sentinel"><span className="trip-fare-load-status" role="status">{loadStatus}</span>{appendFailed?<Button type="button" variant="outline" onClick={requestNext}>Retry loading fares</Button>:null}</div>
@@ -583,6 +598,7 @@ function ActiveDayPublisher({result,rows,total,omitted,rankOffset,cursor}:{resul
 function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifactRef: string; datasetRef: string; legIndex: number; title?: string }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
+  const selection = useQueryFareSelection(artifactRef)
   const displayNode=useDisplayNode()
   const resolved = resolveLeg(plan, datasetRef, legIndex)
   const displayWindow = resolved ? plan.state.displayWindowByLeg[resolved.leg.key] : undefined
@@ -609,7 +625,10 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   const activePagingIdentity=JSON.stringify({selectedDate,datasetRevision:selectedResult.requirement.datasetRevision,sourceVersion:selectedResult.requirement.sourceVersion,filters:plan.state.filters,sort:calendarKey?plan.state.sortByLeg[calendarKey]:undefined,threshold:resolved?.leg.threshold})
   useEffect(()=>{setActiveCursor(null);setActiveCursorHistory([])},[activePagingIdentity])
   const cells=dates.map(date=>{const day=days.find(candidate=>candidate.date===date),representative=day?.representative;return{key:date,label:date,value:representative?.priceCents,unit:(representative?'priceCents':'count') as 'priceCents'|'count',fareId:representative?.id,available:(day?.count??0)>0}})
-  useProjectionDisplay(representatives,{payload:{kind:'calendar',selectedDate,cells},totalDisplayed:cells.length,includedCount:cells.length,complete:true,omittedCount:0},fareInspectionItems(days.flatMap(day=>day.representative?[day.representative]:[])))
+  const totalCalendarDays=Math.max(days.length,cells.length)
+  const omittedDays=Math.max(0,totalCalendarDays-cells.length)
+  const visibleRepresentatives=dates.flatMap(date=>{const representative=days.find(day=>day.date===date)?.representative;return representative?[representative]:[]})
+  useProjectionDisplay(representatives,{payload:{kind:'calendar',selectedDate,cells},totalDisplayed:totalCalendarDays,includedCount:cells.length,complete:omittedDays===0,omittedCount:omittedDays},fareInspectionItems(visibleRepresentatives))
   const setCalendarDate = (date: string | undefined) => {
     if (!calendarKey) return
     const current=representatives.queryState.status==='ready'||representatives.queryState.status==='refreshing'?representatives.queryState.current:representatives.queryState.status==='error'?representatives.queryState.previous:undefined
@@ -617,7 +636,7 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     const calendarDateByLeg={...plan.state.calendarDateByLeg}
     if(date)calendarDateByLeg[calendarKey]=date;else delete calendarDateByLeg[calendarKey]
     const command={kind:'calendarDateByLeg' as const,artifactId:plan.state.artifactId,calendarDateByLeg,expectedRevision:plan.state.revision}
-    const scope={legKey:calendarKey,date,availableDates:[...availableDates],resourceKey:current.resourceKey,datasetId:current.datasetId,datasetRevision:current.datasetRevision,sourceVersion:current.sourceVersion,resultKey:current.resultKey,currentResultKey:()=>representatives.captureResult()?.identity.resultKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
+    const scope={legKey:calendarKey,date,availableDates:[...availableDates],resourceKey:current.resourceKey,datasetId:current.datasetId,datasetRevision:current.datasetRevision,sourceVersion:current.sourceVersion,resultKey:current.resultKey,currentResultKey:representatives.currentResultKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
     return plan.services.dispatch?.calendarDateFromQuery?.(command,scope)??plan.services.state.dispatch(command)
   }
   const chooseDate = (date: string) => {
@@ -651,6 +670,7 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   if (!representatives.data || !selectedResult.data) return representatives.queryState.status==='error'||selectedResult.queryState.status==='error'?<Alert>Calendar fares could not load. Try the date again.</Alert>:<Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
   const byDate = new Map(days.flatMap(day=>day.representative?[[day.date,day.representative] as const]:[]))
   const selectedRows = selectedResult.data.items
+  const selectedFareIds=selectedRows.map(row=>row.id)
   const activePageIndex=activeCursorHistory.length,activeRankOffset=activePageIndex*activePageSize
   const activeIdentity:ComponentIdentity={componentRef:{value:activeRef,keySource:'tree-path'},componentType:'FareCalendarActiveDay',scope:{kind:'leg',artifactId:artifactRef,legIndex,legKey:resolved.leg.key,resourceKey:resolved.leg.resourceKey},authored:{title:'Active calendar day'}}
   return <Card className="trip-planning-control trip-fare-calendar">
@@ -674,7 +694,7 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
       <p className="trip-fare-caption">Synthetic fares per passenger</p>
       {selectedRows.length > 0 ? <div>{selectedRows.map(row => {
         const selected = plan.state.selectedFareIds.includes(row.id)
-        return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose'}</Button></div>
+        return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => selection.toggle(row,selectedResult,selectedFareIds)}>{selected ? 'Selected' : 'Choose'}</Button></div>
       })}</div> : <p role="status">No synthetic fares match this day and transport selection.</p>}
       <div className="travel-pagination" aria-label={`Calendar fare pages for ${selectedDate}`}><Button type="button" variant="outline" disabled={!activeCursorHistory.length} onClick={()=>{recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:activeRef,action:'input',inputFields:['cursor']});const previous=activeCursorHistory.at(-1)??null;setActiveCursorHistory(history=>history.slice(0,-1));setActiveCursor(previous)}}>Previous</Button><span>Page {activePageIndex+1}</span><Button type="button" variant="outline" disabled={!selectedResult.data.pageInfo.hasNextPage||!selectedResult.data.pageInfo.nextCursor} onClick={()=>{const next=selectedResult.data?.pageInfo.nextCursor;if(next){recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:activeRef,action:'input',inputFields:['cursor']});setActiveCursorHistory(history=>[...history,activeCursor]);setActiveCursor(next)}}}>Next</Button></div>
     </div>

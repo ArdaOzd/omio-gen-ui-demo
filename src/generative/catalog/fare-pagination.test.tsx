@@ -373,3 +373,46 @@ describe('interactive selector pagination',()=>{
     router.dispose()
   })
 })
+
+it('reports omitted FareCalendar days when a window exceeds the 62-day display cap',async()=>{
+  const start=Date.parse('2026-10-01T00:00:00.000Z')
+  const calendarRows=Array.from({length:63},(_,index)=>{
+    const serviceDate=new Date(start+index*86_400_000).toISOString().slice(0,10)
+    return FareItemSchema.parse({
+      ...items[0],
+      id:`long-calendar-${serviceDate}`,
+      serviceDate,
+      carrierName:`Calendar Rail ${index+1}`,
+      legs:[{...items[0]!.legs[0],carrierName:`Calendar Rail ${index+1}`}],
+    })
+  })
+  const fixture=createFixedProjectionFixture({rows:calendarRows,sourceVersion:'long-calendar-source-1',sourceDateWindow:{from:'2026-10-01',to:'2026-12-02'}})
+  const requestedScope:FareScope={...scope,dateWindow:{from:'2026-10-01',to:'2026-12-02'},earliestDeparture:{date:'2026-10-01',minutes:0}}
+  const manifest=await fixture.bridge.loadScope(requestedScope,new AbortController().signal)
+  const binding=fixture.bridge.getBinding(manifest.resourceKey)
+  const artifactId=ArtifactIdSchema.parse('artifact-long-calendar')
+  const state=createUIStateStore()
+  state.initializeMissing(artifactId,{
+    datasetRefs:[binding.datasetId],
+    citySequence:['london','paris'],
+    dates:{start:'2026-10-01',end:'2026-12-02'},
+    displayWindowByLeg:{'london:paris':{from:'2026-10-01',to:'2026-12-02'}},
+    availableModesByLeg:{'london:paris':['train']},
+  })
+  const router=createActionRouter(state,{bridge:fixture.bridge})
+  const displayStore=createDisplayContextStore()
+  render(<DisplayContextProvider store={displayStore}><TravelProvider services={{bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}}><DisplayNodeProvider identity={{componentRef:{value:'artifact-long-calendar:present:calendar',keySource:'authored-key'},componentType:'FareCalendar',scope:{kind:'leg',artifactId,legIndex:0,legKey:'london:paris',resourceKey:binding.resourceKey},authored:{}}}><FareCalendar artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></DisplayNodeProvider></TravelProvider></DisplayContextProvider>)
+
+  await waitFor(()=>expect(document.querySelectorAll('.trip-calendar-day')).toHaveLength(62))
+  await waitFor(()=>{
+    const capture=displayStore.capture({captureId:'long-calendar',artifactIds:[artifactId]})
+    const calendar=capture.components.find(component=>component.identity.componentType==='FareCalendar')
+    expect(calendar?.display).toMatchObject({totalDisplayed:63,includedCount:62,complete:false,omittedCount:1})
+    expect(calendar?.display?.payload.kind).toBe('calendar')
+    if(calendar?.display?.payload.kind==='calendar'){
+      expect(calendar.display.payload.cells).toHaveLength(62)
+      expect(calendar.display.payload.cells.at(-1)?.key).toBe('2026-12-01')
+    }
+  })
+  router.dispose()
+})

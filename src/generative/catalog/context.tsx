@@ -10,12 +10,14 @@ import {
   type DatasetId,
   type DispatchResult,
   type FareScopeBinding,
+  type FareId,
   type ProjectionFilters,
   type ProjectionRequest,
   type ProjectionResult,
   type ProjectionResultSnapshot,
   type QueryExecutionState,
   type QueryGroupScope,
+  type ResultKey,
   type SortSpec,
   type UICommand,
   type UIStateStore,
@@ -99,7 +101,10 @@ export type ComponentQueryResult<T extends ProjectionResult> = {
   error: Error | undefined
   refresh: () => void
   captureResult: () => ProjectionResultSnapshot | undefined
+  currentResultKey: () => ResultKey | undefined
 }
+
+export type QueryFareSelectionSource = Pick<ComponentQueryResult<ProjectionResult>, 'queryState' | 'currentResultKey'>
 
 type FarePageResult = Extract<ProjectionResult, { kind: 'farePage' }>
 type CalendarDaysResult = Extract<ProjectionResult, { kind: 'calendarDays' }>
@@ -246,6 +251,11 @@ function committedResultKey(state: QueryExecutionState) {
   return undefined
 }
 
+function currentResultKey(state: QueryExecutionState): ResultKey | undefined {
+  const current = state.status === 'ready' || state.status === 'refreshing' ? state.current : undefined
+  return current?.inputHash === state.intent.desiredInputHash ? current.resultKey : undefined
+}
+
 function committedDatasetId(state: QueryExecutionState): DatasetId | undefined {
   if (state.status === 'ready' || state.status === 'refreshing') return state.current.datasetId
   if (state.status === 'error') return state.previous?.datasetId
@@ -280,6 +290,42 @@ function useProjection<T extends ProjectionResult>(
       const current = services.bridge.coordinator.getState(queryKey) ?? queryState
       const currentResultKey = committedResultKey(current)
       return currentResultKey ? services.bridge.coordinator.captureProjectionResult(currentResultKey) : undefined
+    },
+    currentResultKey: () => currentResultKey(services.bridge.coordinator.getState(queryKey) ?? queryState),
+  }
+}
+
+function committedResult(state: QueryExecutionState) {
+  if (state.status === 'ready' || state.status === 'refreshing') return state.current
+  if (state.status === 'error') return state.previous
+  return undefined
+}
+
+export function useQueryFareSelection(ref: string) {
+  const { services, state } = useArtifact(ref)
+  const dispatch = useTravelAction(ref)
+  return {
+    state,
+    toggle(item: { id: FareId }, source: QueryFareSelectionSource, fareIds: readonly FareId[]) {
+      const selected = state.selectedFareIds.includes(item.id)
+      const command = { kind: 'select' as const, artifactId: state.artifactId, fareId: item.id, selected: !selected }
+      if (selected || !services.dispatch?.selectFromQuery) return dispatch(command)
+      const captured = committedResult(source.queryState)
+      if (!captured) return { status: 'stale' as const, revision: services.state.get(state.artifactId).revision }
+      services.activate(ref)
+      return services.dispatch.selectFromQuery({
+        ...command,
+        expectedRevision: services.state.get(state.artifactId).revision,
+      }, {
+        kind: 'query-result',
+        fareIds,
+        resultKey: captured.resultKey,
+        currentResultKey: source.currentResultKey,
+        resourceKey: captured.resourceKey,
+        datasetId: captured.datasetId,
+        datasetRevision: captured.datasetRevision,
+        sourceVersion: captured.sourceVersion,
+      })
     },
   }
 }
