@@ -74,12 +74,18 @@ export function createServerQueryClient(options: { fetch?: Fetch; baseUrl?: stri
       }
       if (response.groups.length !== request.groups.length) throw new Error('Fare query group count mismatch')
       const requests = new Map(request.groups.map(group => [group.groupId, group]))
+      const responseGroupIds = new Set(response.groups.map(group => group.groupId))
+      if (responseGroupIds.size !== requests.size || [...requests.keys()].some(groupId => !responseGroupIds.has(groupId))) {
+        throw new Error('Fare query group identity mismatch')
+      }
       for (const group of response.groups) {
         const expected = requests.get(group.groupId)
         if (!expected) throw new Error('Unexpected fare query group')
         if (group.manifest.source.sourceVersion !== response.sourceVersion) throw new Error('Mixed fare source version')
         const projectionIds = new Set(expected.projections.map(projection => projection.projectionId))
-        if (group.projections.length !== projectionIds.size || group.projections.some(projection => !projectionIds.has(projection.projectionId))) {
+        const responseProjectionIds = new Set(group.projections.map(projection => projection.projectionId))
+        if (group.projections.length !== projectionIds.size || responseProjectionIds.size !== projectionIds.size
+          || [...projectionIds].some(projectionId => !responseProjectionIds.has(projectionId))) {
           throw new Error('Fare query projection identity mismatch')
         }
       }
@@ -95,8 +101,19 @@ export function createServerQueryClient(options: { fetch?: Fetch; baseUrl?: stri
         throw new ServerQueryError(409, 'sourceChanged', 'The fare source changed. Refresh the displayed results.', request.requestId)
       }
       const requested = new Set(request.pins.map(pin => `${pin.resourceKey}\u0000${pin.fareId}`))
-      if (response.missingPins.some(pin => !requested.has(`${pin.resourceKey}\u0000${pin.fareId}`))) {
+      const requestedFareIds = new Set(request.pins.map(pin => pin.fareId))
+      const returnedFareIds = response.items.map(item => item.id)
+      const missingKeys = response.missingPins.map(pin => `${pin.resourceKey}\u0000${pin.fareId}`)
+      if (new Set(returnedFareIds).size !== returnedFareIds.length || returnedFareIds.some(fareId => !requestedFareIds.has(fareId))) {
+        throw new Error('Unexpected looked-up fare')
+      }
+      if (new Set(missingKeys).size !== missingKeys.length || missingKeys.some(key => !requested.has(key))) {
         throw new Error('Unexpected missing fare pin')
+      }
+      const returned = new Set(returnedFareIds)
+      const missing = new Set(missingKeys)
+      if (request.pins.some(pin => !returned.has(pin.fareId) && !missing.has(`${pin.resourceKey}\u0000${pin.fareId}`))) {
+        throw new Error('Fare lookup omitted a requested pin')
       }
       return response
     },

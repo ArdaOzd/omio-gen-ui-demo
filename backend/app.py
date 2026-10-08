@@ -133,7 +133,18 @@ def _source_version(database: Path) -> str:
         stat = database.stat()
     except FileNotFoundError:
         raise ApiError(HTTPStatus.SERVICE_UNAVAILABLE, "database_unavailable", "The fare database is unavailable.") from None
-    return f"sqlite-demo-v2-{stat.st_ino:x}-{stat.st_size:x}-{stat.st_mtime_ns:x}"
+    try:
+        with closing(_connect(database)) as connection:
+            row = connection.execute("SELECT value FROM metadata WHERE key = 'generator_version'").fetchone()
+    except sqlite3.Error:
+        raise ApiError(
+            HTTPStatus.SERVICE_UNAVAILABLE,
+            "database_unavailable",
+            "The fare database metadata is unavailable.",
+        ) from None
+    raw_generator_version = str(row["value"]) if row is not None else "2"
+    generator_version = raw_generator_version if raw_generator_version.isdigit() else "unknown"
+    return f"sqlite-demo-v{generator_version}-{stat.st_ino:x}-{stat.st_size:x}-{stat.st_mtime_ns:x}"
 
 
 def _verified_source_version(database: Path, expected: str) -> str:

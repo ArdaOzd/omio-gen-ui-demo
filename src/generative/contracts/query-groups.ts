@@ -29,6 +29,18 @@ export type ResourceKey = z.infer<typeof ResourceKeySchema>
 export const ResultKeySchema = ref.brand<'ResultKey'>()
 export type ResultKey = z.infer<typeof ResultKeySchema>
 
+export const FareLegSchema = z.strictObject({
+  legIndex: z.number().int().min(0).max(7),
+  mode: transportMode,
+  carrierName: z.string().trim().min(1).max(120),
+  durationMinutes: z.number().int().positive(),
+  originId: ref,
+  destinationId: ref,
+  originLabel: z.string().trim().min(1).max(160),
+  destinationLabel: z.string().trim().min(1).max(160),
+})
+export type FareLeg = z.infer<typeof FareLegSchema>
+
 export const FareItemSchema = z.strictObject({
   id: fareId,
   originId: ref,
@@ -45,6 +57,14 @@ export const FareItemSchema = z.strictObject({
   synthetic: z.literal(true),
   priceBasis: z.literal('per-passenger-including-demo-fees'),
   direct: z.boolean(),
+  legs: z.array(FareLegSchema).max(8),
+}).superRefine((fare, context) => {
+  if (fare.legs.some((leg, index) => leg.legIndex !== index)) {
+    context.addIssue({ code: 'custom', path: ['legs'], message: 'Fare legs must use consecutive ordered indices' })
+  }
+  if (fare.direct !== (fare.legs.length <= 1)) {
+    context.addIssue({ code: 'custom', path: ['direct'], message: 'Direct flag must match the ordered fare legs' })
+  }
 })
 export type FareItem = z.infer<typeof FareItemSchema>
 
@@ -85,9 +105,31 @@ export const FareScopeManifestSchema = z.strictObject({
   coverage: FareScopeSchema,
   totalAvailable: z.number().int().nonnegative(),
   availableModes: z.array(transportMode).max(4),
-  complete: z.literal(true),
+  availableDateWindow: DateWindowSchema.nullable(),
+  complete: z.boolean(),
+}).superRefine((manifest, context) => {
+  const requested = manifest.coverage.dateWindow
+  const available = manifest.availableDateWindow
+  const coversRequest = available?.from === requested.from && available.to === requested.to
+  if (manifest.complete !== coversRequest) {
+    context.addIssue({ code: 'custom', path: ['complete'], message: 'Complete scope must cover the full requested date window' })
+  }
+  if (available && (available.from < requested.from || available.to > requested.to)) {
+    context.addIssue({ code: 'custom', path: ['availableDateWindow'], message: 'Available date window must be inside the requested scope' })
+  }
+  if (available === null && (manifest.totalAvailable !== 0 || manifest.availableModes.length !== 0)) {
+    context.addIssue({ code: 'custom', path: ['availableDateWindow'], message: 'Unavailable scope cannot report fares or modes' })
+  }
 })
 export type FareScopeManifest = z.infer<typeof FareScopeManifestSchema>
+
+export const FareScopeBindingSchema = z.strictObject({
+  resourceKey: ResourceKeySchema,
+  datasetId,
+  datasetRevision,
+  manifest: FareScopeManifestSchema,
+}).refine(binding => binding.resourceKey === binding.manifest.resourceKey, { path: ['resourceKey'], message: 'Binding resource key must match its manifest' })
+export type FareScopeBinding = z.infer<typeof FareScopeBindingSchema>
 
 export const ProjectionFiltersSchema = travelFilters.superRefine((filters, context) => {
   if (new Set(filters.modes).size !== filters.modes.length) {

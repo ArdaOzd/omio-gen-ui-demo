@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import sqlite3
 import tempfile
 import threading
 import unittest
@@ -105,6 +106,7 @@ class QueryGroupsTestCase(unittest.TestCase):
         manifest = group["manifest"]
         self.assertTrue(manifest["complete"])
         self.assertEqual(manifest["coverage"], self.scope())
+        self.assertEqual(manifest["availableDateWindow"], self.scope()["dateWindow"])
         self.assertEqual(manifest["source"]["descriptorId"], manifest["resourceKey"])
         projections = {projection["projectionId"]: projection for projection in group["projections"]}
         page = projections["ordered"]
@@ -113,11 +115,13 @@ class QueryGroupsTestCase(unittest.TestCase):
         fare_keys = {
             "id", "originId", "destinationId", "serviceDate", "mode", "carrierId",
             "carrierName", "priceCents", "durationMinutes", "departureMinutes",
-            "availableSeats", "currency", "synthetic", "priceBasis", "direct",
+            "availableSeats", "currency", "synthetic", "priceBasis", "direct", "legs",
         }
         self.assertEqual(set(page["items"][0]), fare_keys)
         self.assertNotIn("arrivalMinutes", page["items"][0])
         self.assertNotIn("transfers", page["items"][0])
+        self.assertEqual(len(page["items"][0]["legs"]), 1)
+        self.assertEqual(page["items"][0]["legs"][0]["legIndex"], 0)
         self.assertEqual(
             page["items"][0]["carrierId"],
             f'carrier-{stable_ref(page["items"][0]["carrierName"])}',
@@ -242,10 +246,48 @@ class QueryGroupsTestCase(unittest.TestCase):
             dispatch_post(self.database, "/api/query-groups", stale)
         self.assertEqual((raised.exception.status, raised.exception.code), (HTTPStatus.CONFLICT, "sourceChanged"))
 
-        outside = self.request([], groups=[{"groupId": "outside", "scope": self.scope(dateWindow={"from": "2026-10-05", "to": "2026-10-05"}, earliestDeparture={"date": "2026-10-05", "minutes": 0}), "projections": []}])
-        with self.assertRaises(QueryApiError) as raised:
-            dispatch_post(self.database, "/api/query-groups", outside)
-        self.assertEqual(raised.exception.code, "unknownScope")
+        outside_scope = self.scope(
+            dateWindow={"from": "2026-10-05", "to": "2026-10-05"},
+            earliestDeparture={"date": "2026-10-05", "minutes": 0},
+        )
+        calendar = {
+            "projectionId": "calendar",
+            "kind": "calendarDays",
+            "filters": self.filters(),
+            "objective": "cheapest",
+        }
+        outside = self.request(
+            [self.fare_page(), calendar],
+            groups=[{"groupId": "outside", "scope": outside_scope, "projections": [self.fare_page(), calendar]}],
+        )
+        _, outside_payload = dispatch_post(self.database, "/api/query-groups", outside)
+        outside_group = outside_payload["groups"][0]
+        self.assertEqual(outside_group["manifest"]["availableDateWindow"], None)
+        self.assertFalse(outside_group["manifest"]["complete"])
+        self.assertEqual(outside_group["manifest"]["totalAvailable"], 0)
+        self.assertEqual(outside_group["projections"][0]["items"], [])
+        self.assertEqual(outside_group["projections"][1]["days"], [])
+
+        partial_scope = self.scope(
+            dateWindow={"from": "2026-10-01", "to": "2026-10-03"},
+            earliestDeparture={"date": "2026-10-01", "minutes": 0},
+        )
+        partial = self.request(
+            [self.fare_page(limit=100), calendar],
+            groups=[{"groupId": "partial", "scope": partial_scope, "projections": [self.fare_page(limit=100), calendar]}],
+        )
+        _, partial_payload = dispatch_post(self.database, "/api/query-groups", partial)
+        partial_group = partial_payload["groups"][0]
+        self.assertEqual(partial_group["manifest"]["availableDateWindow"], {"from": "2026-10-02", "to": "2026-10-03"})
+        self.assertFalse(partial_group["manifest"]["complete"])
+        self.assertEqual(
+            {fare["serviceDate"] for fare in partial_group["projections"][0]["items"]},
+            {"2026-10-02", "2026-10-03"},
+        )
+        self.assertEqual(
+            [day["date"] for day in partial_group["projections"][1]["days"]],
+            ["2026-10-02", "2026-10-03"],
+        )
 
     def test_filters_are_deterministic_and_direct_is_true_for_clean_routes(self) -> None:
         all_page = self.execute([self.fare_page(limit=100)])["groups"][0]["projections"][0]
@@ -266,6 +308,103 @@ class QueryGroupsTestCase(unittest.TestCase):
             self.assertLessEqual(fare["durationMinutes"], selected["durationMinutes"])
         direct_page = self.execute([self.fare_page(limit=100, filters=self.filters(directOnly=True))])["groups"][0]["projections"][0]
         self.assertEqual(direct_page["pageInfo"]["total"], all_page["pageInfo"]["total"])
+
+    def test_connected_route_legs_and_direct_filter_follow_v3_source(self) -> None:
+        database = Path(self.temporary_directory.name) / "connected-routes.sqlite3"
+        shutil.copy2(self.database, database)
+        with sqlite3.connect(database) as connection:
+            connection.execute("ALTER TABLE routes ADD COLUMN transfer_count INTEGER NOT NULL DEFAULT 0")
+            connection.execute(
+                """
+                CREATE TABLE route_legs (
+                    route_id INTEGER NOT NULL REFERENCES routes(id),
+                    leg_index INTEGER NOT NULL,
+                    mode TEXT NOT NULL,
+                    origin_location_id INTEGER NOT NULL REFERENCES locations(id),
+                    destination_location_id INTEGER NOT NULL REFERENCES locations(id),
+                    origin_point TEXT NOT NULL,
+                    destination_point TEXT NOT NULL,
+                    duration_minutes INTEGER NOT NULL,
+                    company_id INTEGER NOT NULL REFERENCES companies(id),
+                    PRIMARY KEY (route_id, leg_index)
+                )
+                """
+            )
+            connection.execute(
+                """
+                INSERT INTO route_legs
+                    (route_id, leg_index, mode, origin_location_id, destination_location_id,
+                     origin_point, destination_point, duration_minutes, company_id)
+                SELECT r.id, 0, r.mode, r.origin_location_id, r.destination_location_id,
+                       r.origin_point, r.destination_point, r.base_duration_minutes, MIN(rc.company_id)
+                FROM routes r JOIN route_companies rc ON rc.route_id = r.id
+                GROUP BY r.id
+                """
+            )
+            route = connection.execute(
+                """
+                SELECT r.id, r.origin_location_id, r.destination_location_id,
+                       r.origin_point, r.destination_point, r.base_duration_minutes,
+                       MIN(rc.company_id)
+                FROM routes r
+                JOIN route_companies rc ON rc.route_id = r.id
+                JOIN locations origin ON origin.id = r.origin_location_id
+                JOIN locations destination ON destination.id = r.destination_location_id
+                WHERE origin.slug = 'london' AND destination.slug = 'paris' AND r.mode = 'flight'
+                GROUP BY r.id
+                """
+            ).fetchone()
+            midpoint = connection.execute(
+                "SELECT id, city FROM locations WHERE id NOT IN (?, ?) ORDER BY id LIMIT 1",
+                (route[1], route[2]),
+            ).fetchone()
+            connection.execute("UPDATE routes SET transfer_count = 1 WHERE id = ?", (route[0],))
+            connection.execute("DELETE FROM route_legs WHERE route_id = ?", (route[0],))
+            connection.executemany(
+                """
+                INSERT INTO route_legs
+                    (route_id, leg_index, mode, origin_location_id, destination_location_id,
+                     origin_point, destination_point, duration_minutes, company_id)
+                VALUES (?, ?, 'flight', ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (route[0], 0, route[1], midpoint[0], route[3], midpoint[1], route[5] // 2, route[6]),
+                    (route[0], 1, midpoint[0], route[2], midpoint[1], route[4], route[5] - route[5] // 2, route[6]),
+                ],
+            )
+            connection.execute("UPDATE metadata SET value = '3' WHERE key = 'schema_version'")
+            connection.execute("UPDATE metadata SET value = '4' WHERE key = 'generator_version'")
+
+        projection = self.fare_page(limit=100, filters=self.filters(modes=["flight"]))
+        _, payload = dispatch_post(database, "/api/query-groups", self.request([projection]))
+        page = payload["groups"][0]["projections"][0]
+        connected = [fare for fare in page["items"] if not fare["direct"]]
+        self.assertTrue(connected)
+        for fare in connected:
+            self.assertEqual([leg["legIndex"] for leg in fare["legs"]], [0, 1])
+            self.assertEqual(fare["legs"][0]["originId"], fare["originId"])
+            self.assertEqual(fare["legs"][-1]["destinationId"], fare["destinationId"])
+
+        lookup_request = {
+            "version": 1,
+            "requestId": "connected-lookup",
+            "sourceVersion": payload["sourceVersion"],
+            "pins": [{
+                "fareId": connected[0]["id"],
+                "resourceKey": payload["groups"][0]["manifest"]["resourceKey"],
+            }],
+        }
+        _, lookup = dispatch_post(database, "/api/lookup", lookup_request)
+        self.assertEqual(lookup["items"][0]["legs"], connected[0]["legs"])
+
+        direct_projection = self.fare_page(
+            limit=100,
+            filters=self.filters(modes=["flight"], directOnly=True),
+        )
+        _, direct_payload = dispatch_post(database, "/api/query-groups", self.request([direct_projection]))
+        direct_page = direct_payload["groups"][0]["projections"][0]
+        self.assertTrue(all(fare["direct"] and len(fare["legs"]) == 1 for fare in direct_page["items"]))
+        self.assertLess(direct_page["pageInfo"]["total"], page["pageInfo"]["total"])
 
     def test_source_replacement_after_read_cannot_return_a_committable_batch(self) -> None:
         source = Path(self.temporary_directory.name) / "query-source-race.sqlite3"

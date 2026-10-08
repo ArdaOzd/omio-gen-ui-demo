@@ -38,6 +38,13 @@ class QueryApiError(Exception):
     message: str
 
 
+@dataclass(frozen=True)
+class FareSourceShape:
+    """The two supported immutable demo database layouts."""
+
+    has_route_legs: bool
+
+
 def _fail(code: str, message: str, status: HTTPStatus = HTTPStatus.BAD_REQUEST) -> Never:
     raise QueryApiError(status, code, message)
 
@@ -333,11 +340,33 @@ def _minute_expression(alias: str = "f") -> str:
     return f"(CAST(substr({alias}.departure_time, 12, 2) AS INTEGER) * 60 + CAST(substr({alias}.departure_time, 15, 2) AS INTEGER))"
 
 
-FARE_SELECT = f"""
-SELECT f.id, origin.slug AS origin_id, destination.slug AS destination_id,
+def _source_shape(connection: sqlite3.Connection) -> FareSourceShape:
+    route_columns = {row["name"] for row in connection.execute("PRAGMA table_info(routes)")}
+    leg_columns = {row["name"] for row in connection.execute("PRAGMA table_info(route_legs)")}
+    required_leg_columns = {
+        "route_id",
+        "leg_index",
+        "mode",
+        "origin_location_id",
+        "destination_location_id",
+        "duration_minutes",
+        "company_id",
+    }
+    has_transfer_count = "transfer_count" in route_columns
+    has_route_legs = required_leg_columns <= leg_columns
+    if has_transfer_count != has_route_legs:
+        raise sqlite3.DatabaseError("fare database has an incomplete connected-route schema")
+    return FareSourceShape(has_route_legs=has_route_legs)
+
+
+def _fare_select(shape: FareSourceShape) -> str:
+    transfer_count = "r.transfer_count" if shape.has_route_legs else "0"
+    return f"""
+SELECT f.id, r.id AS route_id, origin.slug AS origin_id, origin.city AS origin_label,
+       destination.slug AS destination_id, destination.city AS destination_label,
        f.service_date, r.mode, c.name AS carrier_name, f.price_cents,
        f.duration_minutes, {_minute_expression()} AS departure_minutes,
-       f.available_seats
+       f.available_seats, {transfer_count} AS transfer_count
 FROM fares f
 JOIN routes r ON r.id = f.route_id
 JOIN locations origin ON origin.id = r.origin_location_id
@@ -346,7 +375,69 @@ JOIN companies c ON c.id = f.company_id
 """
 
 
-def _fare_item(row: sqlite3.Row) -> dict[str, object]:
+def _route_legs(
+    connection: sqlite3.Connection,
+    rows: list[sqlite3.Row],
+    shape: FareSourceShape,
+) -> dict[int, list[dict[str, object]]]:
+    route_ids = sorted({int(row["route_id"]) for row in rows})
+    if not route_ids:
+        return {}
+    if not shape.has_route_legs:
+        return {}
+    placeholders = ",".join("?" for _ in route_ids)
+    leg_rows = connection.execute(
+        f"""
+        SELECT leg.route_id, leg.leg_index, leg.mode, company.name AS carrier_name,
+               leg.duration_minutes, origin.slug AS origin_id, origin.city AS origin_label,
+               destination.slug AS destination_id, destination.city AS destination_label
+        FROM route_legs leg
+        JOIN companies company ON company.id = leg.company_id
+        JOIN locations origin ON origin.id = leg.origin_location_id
+        JOIN locations destination ON destination.id = leg.destination_location_id
+        WHERE leg.route_id IN ({placeholders})
+        ORDER BY leg.route_id, leg.leg_index
+        """,
+        route_ids,
+    ).fetchall()
+    by_route: dict[int, list[dict[str, object]]] = {}
+    for row in leg_rows:
+        by_route.setdefault(int(row["route_id"]), []).append(
+            {
+                "legIndex": int(row["leg_index"]),
+                "mode": row["mode"],
+                "carrierName": row["carrier_name"],
+                "durationMinutes": int(row["duration_minutes"]),
+                "originId": row["origin_id"],
+                "destinationId": row["destination_id"],
+                "originLabel": row["origin_label"],
+                "destinationLabel": row["destination_label"],
+            }
+        )
+    for row in rows:
+        route_id = int(row["route_id"])
+        legs = by_route.get(route_id, [])
+        if [leg["legIndex"] for leg in legs] != list(range(len(legs))):
+            raise sqlite3.DatabaseError(f"route {route_id} has non-sequential legs")
+        if len(legs) != int(row["transfer_count"]) + 1:
+            raise sqlite3.DatabaseError(f"route {route_id} transfer count does not match its legs")
+    return by_route
+
+
+def _fallback_leg(row: sqlite3.Row) -> dict[str, object]:
+    return {
+        "legIndex": 0,
+        "mode": row["mode"],
+        "carrierName": row["carrier_name"],
+        "durationMinutes": int(row["duration_minutes"]),
+        "originId": row["origin_id"],
+        "destinationId": row["destination_id"],
+        "originLabel": row["origin_label"],
+        "destinationLabel": row["destination_label"],
+    }
+
+
+def _fare_item(row: sqlite3.Row, legs: list[dict[str, object]]) -> dict[str, object]:
     carrier_name = row["carrier_name"]
     return {
         "id": f'fare_{int(row["id"]):09d}',
@@ -363,8 +454,20 @@ def _fare_item(row: sqlite3.Row) -> dict[str, object]:
         "currency": "EUR",
         "synthetic": True,
         "priceBasis": "per-passenger-including-demo-fees",
-        "direct": True,
+        "direct": len(legs) <= 1,
+        "legs": legs,
     }
+
+
+def _fare_items(
+    connection: sqlite3.Connection,
+    rows: list[sqlite3.Row],
+    shape: FareSourceShape,
+) -> list[dict[str, object]]:
+    if not shape.has_route_legs:
+        return [_fare_item(row, [_fallback_leg(row)]) for row in rows]
+    legs_by_route = _route_legs(connection, rows, shape)
+    return [_fare_item(row, legs_by_route[int(row["route_id"])]) for row in rows]
 
 
 def _company_ids(connection: sqlite3.Connection, carrier_ids: list[str]) -> list[int]:
@@ -382,7 +485,9 @@ def _where(
     connection: sqlite3.Connection,
     scope: dict[str, object],
     filters: dict[str, object] | None,
+    shape: FareSourceShape,
     *,
+    available_date_window: dict[str, str] | None,
     service_date: str | None = None,
     ignore_carriers: bool = False,
     ignore_modes: bool = False,
@@ -408,6 +513,11 @@ def _where(
         threshold["date"],
         threshold["minutes"],
     ]
+    if available_date_window is None:
+        clauses.append("0 = 1")
+    else:
+        clauses.append("f.service_date BETWEEN ? AND ?")
+        parameters.extend((available_date_window["from"], available_date_window["to"]))
     if service_date is not None:
         clauses.append("f.service_date = ?")
         parameters.append(service_date)
@@ -434,15 +544,12 @@ def _where(
             if field in filters:
                 clauses.append(sql)
                 parameters.append(filters[field])
-        # All clean-source routes are direct. directOnly is therefore already satisfied.
+        if filters["directOnly"] and shape.has_route_legs:
+            clauses.append("r.transfer_count = 0")
     return " AND ".join(clauses), parameters
 
 
-def _scope_exists(connection: sqlite3.Connection, scope: dict[str, object], metadata: dict[str, str]) -> None:
-    window = scope["dateWindow"]
-    assert isinstance(window, dict)
-    if window["from"] < metadata["start_date"] or window["to"] > metadata["end_date"]:
-        _fail("unknownScope", "The requested date window is outside the fare source coverage.")
+def _scope_exists(connection: sqlite3.Connection, scope: dict[str, object]) -> None:
     route = connection.execute(
         """
         SELECT 1 FROM routes r
@@ -456,8 +563,31 @@ def _scope_exists(connection: sqlite3.Connection, scope: dict[str, object], meta
         _fail("unknownScope", "The requested origin and destination are not a known fare scope.")
 
 
-def _manifest(connection: sqlite3.Connection, scope: dict[str, object], source_version: str) -> dict[str, object]:
-    where, parameters = _where(connection, scope, None)
+def _available_date_window(
+    scope: dict[str, object],
+    metadata: dict[str, str],
+) -> dict[str, str] | None:
+    requested = scope["dateWindow"]
+    assert isinstance(requested, dict)
+    start = max(str(requested["from"]), metadata["start_date"])
+    end = min(str(requested["to"]), metadata["end_date"])
+    return {"from": start, "to": end} if start <= end else None
+
+
+def _manifest(
+    connection: sqlite3.Connection,
+    scope: dict[str, object],
+    source_version: str,
+    shape: FareSourceShape,
+    available_date_window: dict[str, str] | None,
+) -> dict[str, object]:
+    where, parameters = _where(
+        connection,
+        scope,
+        None,
+        shape,
+        available_date_window=available_date_window,
+    )
     rows = connection.execute(
         f"""
         SELECT r.mode, COUNT(*) AS count
@@ -477,9 +607,10 @@ def _manifest(connection: sqlite3.Connection, scope: dict[str, object], source_v
         "resourceKey": resource_key,
         "source": {"kind": "search", "descriptorId": resource_key, "sourceVersion": source_version},
         "coverage": scope,
+        "availableDateWindow": available_date_window,
         "totalAvailable": sum(counts.values()),
         "availableModes": [mode for mode in MODES if counts.get(mode, 0) > 0],
-        "complete": True,
+        "complete": available_date_window == scope["dateWindow"],
     }
 
 
@@ -564,12 +695,21 @@ def _fare_page(
     scope: dict[str, object],
     projection: dict[str, object],
     source_version: str,
+    shape: FareSourceShape,
+    available_date_window: dict[str, str] | None,
 ) -> dict[str, object]:
     filters = projection["filters"]
     assert isinstance(filters, dict)
     service_date = projection["serviceDate"]
     assert service_date is None or isinstance(service_date, str)
-    where, parameters = _where(connection, scope, filters, service_date=service_date)
+    where, parameters = _where(
+        connection,
+        scope,
+        filters,
+        shape,
+        service_date=service_date,
+        available_date_window=available_date_window,
+    )
     total = int(connection.execute(
         f"""
         SELECT COUNT(*) FROM fares f
@@ -609,12 +749,12 @@ def _fare_page(
         query_parameters.extend(cursor_parameters)
     limit = int(projection["limit"])
     rows = connection.execute(
-        FARE_SELECT
+        _fare_select(shape)
         + f" WHERE {query_where} ORDER BY {order_by} LIMIT ?",
         (*query_parameters, limit + 1),
     ).fetchall()
     visible = rows[:limit]
-    items = [_fare_item(row) for row in visible]
+    items = _fare_items(connection, visible, shape)
     has_next = len(rows) > limit
     next_cursor = None
     if has_next and visible:
@@ -639,19 +779,32 @@ def _fare_page(
     )
 
 
-def _calendar_days(connection: sqlite3.Connection, scope: dict[str, object], projection: dict[str, object]) -> dict[str, object]:
+def _calendar_days(
+    connection: sqlite3.Connection,
+    scope: dict[str, object],
+    projection: dict[str, object],
+    shape: FareSourceShape,
+    available_date_window: dict[str, str] | None,
+) -> dict[str, object]:
     filters = projection["filters"]
     assert isinstance(filters, dict)
-    where, parameters = _where(connection, scope, filters)
+    where, parameters = _where(
+        connection,
+        scope,
+        filters,
+        shape,
+        available_date_window=available_date_window,
+    )
     objective = str(projection["objective"])
     primary = "f.price_cents" if objective == "cheapest" else "f.duration_minutes"
     rows = connection.execute(
         f"""
         WITH ranked AS (
-            SELECT f.id, origin.slug AS origin_id, destination.slug AS destination_id,
+            SELECT f.id, r.id AS route_id, origin.slug AS origin_id, origin.city AS origin_label,
+                   destination.slug AS destination_id, destination.city AS destination_label,
                    f.service_date, r.mode, c.name AS carrier_name, f.price_cents,
                    f.duration_minutes, {_minute_expression()} AS departure_minutes,
-                   f.available_seats,
+                   f.available_seats, {"r.transfer_count" if shape.has_route_legs else "0"} AS transfer_count,
                    COUNT(*) OVER (PARTITION BY f.service_date) AS day_count,
                    ROW_NUMBER() OVER (
                        PARTITION BY f.service_date
@@ -669,11 +822,12 @@ def _calendar_days(connection: sqlite3.Connection, scope: dict[str, object], pro
         parameters,
     ).fetchall()
     by_date = {row["service_date"]: row for row in rows}
-    window = scope["dateWindow"]
-    assert isinstance(window, dict)
-    current = date.fromisoformat(str(window["from"]))
-    end = date.fromisoformat(str(window["to"]))
+    legs_by_route = _route_legs(connection, rows, shape)
     days: list[dict[str, object]] = []
+    if available_date_window is None:
+        return _with_identity(projection, scope, {"days": days})
+    current = date.fromisoformat(available_date_window["from"])
+    end = date.fromisoformat(available_date_window["to"])
     while current <= end:
         service_date = current.isoformat()
         row = by_date.get(service_date)
@@ -681,17 +835,33 @@ def _calendar_days(connection: sqlite3.Connection, scope: dict[str, object], pro
             {
                 "date": service_date,
                 "count": int(row["day_count"]) if row is not None else 0,
-                "representative": _fare_item(row) if row is not None else None,
+                "representative": _fare_item(
+                    row,
+                    legs_by_route[int(row["route_id"])] if shape.has_route_legs else [_fallback_leg(row)],
+                ) if row is not None else None,
             }
         )
         current += timedelta(days=1)
     return _with_identity(projection, scope, {"days": days})
 
 
-def _carrier_facets(connection: sqlite3.Connection, scope: dict[str, object], projection: dict[str, object]) -> dict[str, object]:
+def _carrier_facets(
+    connection: sqlite3.Connection,
+    scope: dict[str, object],
+    projection: dict[str, object],
+    shape: FareSourceShape,
+    available_date_window: dict[str, str] | None,
+) -> dict[str, object]:
     filters = projection["filters"]
     assert isinstance(filters, dict)
-    where, parameters = _where(connection, scope, filters, ignore_carriers=True)
+    where, parameters = _where(
+        connection,
+        scope,
+        filters,
+        shape,
+        available_date_window=available_date_window,
+        ignore_carriers=True,
+    )
     rows = connection.execute(
         f"""
         SELECT c.name AS carrier_name, COUNT(*) AS count
@@ -713,11 +883,24 @@ def _carrier_facets(connection: sqlite3.Connection, scope: dict[str, object], pr
     return _with_identity(projection, scope, {"options": options})
 
 
-def _mode_summary(connection: sqlite3.Connection, scope: dict[str, object], projection: dict[str, object]) -> dict[str, object]:
+def _mode_summary(
+    connection: sqlite3.Connection,
+    scope: dict[str, object],
+    projection: dict[str, object],
+    shape: FareSourceShape,
+    available_date_window: dict[str, str] | None,
+) -> dict[str, object]:
     filters = projection["filters"]
     assert isinstance(filters, dict)
     baseline = str(projection["baseline"])
-    where, parameters = _where(connection, scope, filters, ignore_modes=baseline == "withoutModeFilter")
+    where, parameters = _where(
+        connection,
+        scope,
+        filters,
+        shape,
+        available_date_window=available_date_window,
+        ignore_modes=baseline == "withoutModeFilter",
+    )
     rows = connection.execute(
         f"""
         SELECT r.mode, COUNT(*) AS count, MIN(f.price_cents) AS min_price,
@@ -745,23 +928,44 @@ def _mode_summary(connection: sqlite3.Connection, scope: dict[str, object], proj
     return _with_identity(projection, scope, {"baseline": baseline, "modes": modes})
 
 
-def _highlight(connection: sqlite3.Connection, where: str, parameters: list[object], field: str) -> dict[str, object] | None:
+def _highlight(
+    connection: sqlite3.Connection,
+    where: str,
+    parameters: list[object],
+    field: str,
+    shape: FareSourceShape,
+) -> dict[str, object] | None:
     primary = "f.price_cents" if field == "cheapest" else "f.duration_minutes"
     row = connection.execute(
-        FARE_SELECT + f" WHERE {where} ORDER BY {primary} ASC, f.service_date ASC, departure_minutes ASC, f.id ASC LIMIT 1",
+        _fare_select(shape) + f" WHERE {where} ORDER BY {primary} ASC, f.service_date ASC, departure_minutes ASC, f.id ASC LIMIT 1",
         parameters,
     ).fetchone()
-    return _fare_item(row) if row is not None else None
+    return _fare_items(connection, [row], shape)[0] if row is not None else None
 
 
-def _fare_highlights(connection: sqlite3.Connection, scope: dict[str, object], projection: dict[str, object]) -> dict[str, object]:
+def _fare_highlights(
+    connection: sqlite3.Connection,
+    scope: dict[str, object],
+    projection: dict[str, object],
+    shape: FareSourceShape,
+    available_date_window: dict[str, str] | None,
+) -> dict[str, object]:
     filters = projection["filters"]
     assert isinstance(filters, dict)
-    where, parameters = _where(connection, scope, filters)
+    where, parameters = _where(
+        connection,
+        scope,
+        filters,
+        shape,
+        available_date_window=available_date_window,
+    )
     return _with_identity(
         projection,
         scope,
-        {"cheapest": _highlight(connection, where, parameters, "cheapest"), "fastest": _highlight(connection, where, parameters, "fastest")},
+        {
+            "cheapest": _highlight(connection, where, parameters, "cheapest", shape),
+            "fastest": _highlight(connection, where, parameters, "fastest", shape),
+        },
     )
 
 
@@ -774,27 +978,36 @@ def execute_query_groups(connection: sqlite3.Connection, value: object, source_v
     try:
         connection.execute("BEGIN")
         metadata = {row["key"]: row["value"] for row in connection.execute("SELECT key, value FROM metadata")}
+        shape = _source_shape(connection)
         groups: list[dict[str, object]] = []
         raw_groups = request["groups"]
         assert isinstance(raw_groups, list)
         for group in raw_groups:
             scope = group["scope"]
             assert isinstance(scope, dict)
-            _scope_exists(connection, scope, metadata)
-            manifest = _manifest(connection, scope, source_version)
+            _scope_exists(connection, scope)
+            available_date_window = _available_date_window(scope, metadata)
+            manifest = _manifest(connection, scope, source_version, shape, available_date_window)
             projections: list[dict[str, object]] = []
             for projection in group["projections"]:
                 kind = projection["kind"]
                 if kind == "farePage":
-                    result = _fare_page(connection, scope, projection, source_version)
+                    result = _fare_page(
+                        connection,
+                        scope,
+                        projection,
+                        source_version,
+                        shape,
+                        available_date_window,
+                    )
                 elif kind == "calendarDays":
-                    result = _calendar_days(connection, scope, projection)
+                    result = _calendar_days(connection, scope, projection, shape, available_date_window)
                 elif kind == "carrierFacets":
-                    result = _carrier_facets(connection, scope, projection)
+                    result = _carrier_facets(connection, scope, projection, shape, available_date_window)
                 elif kind == "modeSummary":
-                    result = _mode_summary(connection, scope, projection)
+                    result = _mode_summary(connection, scope, projection, shape, available_date_window)
                 elif kind == "fareHighlights":
-                    result = _fare_highlights(connection, scope, projection)
+                    result = _fare_highlights(connection, scope, projection, shape, available_date_window)
                 else:
                     raise AssertionError(f"unhandled projection {kind}")
                 projections.append(result)
@@ -829,12 +1042,14 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
     connection.set_progress_handler(lambda: int(time.monotonic() >= deadline), 10_000)
     try:
         connection.execute("BEGIN")
+        shape = _source_shape(connection)
         if integer_ids:
             rows = connection.execute(
-                FARE_SELECT + f" WHERE f.id IN ({','.join('?' for _ in integer_ids)})",
+                _fare_select(shape) + f" WHERE f.id IN ({','.join('?' for _ in integer_ids)})",
                 integer_ids,
             ).fetchall()
-            by_id = {int(row["id"]): _fare_item(row) for row in rows}
+            items = _fare_items(connection, rows, shape)
+            by_id = {int(row["id"]): item for row, item in zip(rows, items, strict=True)}
         connection.commit()
     except sqlite3.OperationalError as error:
         connection.rollback()

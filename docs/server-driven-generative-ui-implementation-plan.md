@@ -216,7 +216,7 @@ Use separate version numbers for query-group and display-context wire formats. B
 
 Implement these names and shapes in strict Zod 4 schemas and identical camelCase backend JSON. Only the query worker edits `src/generative/contracts/index.ts` to re-export them. The backend worker implements the matching request parser and serializer under `backend/**`.
 
-The fare scalar matches the clean-base committed `FareRow` fields. It has no transfer, route-leg, arrival, timestamp, or time-zone fields:
+The fare scalar keeps the clean-base committed fare fields and adds bounded, source-authored route legs. It has no redundant transfer count, arrival instant, timestamp, or time-zone fields:
 
 ```ts
 type FareItem = {
@@ -226,7 +226,7 @@ type FareItem = {
   serviceDate: Date;
   mode: "train" | "bus" | "flight" | "ferry";
   carrierId: string;
-  carrierName: string | null;
+  carrierName: string;
   priceCents: number;
   durationMinutes: number;
   departureMinutes: number;
@@ -235,6 +235,18 @@ type FareItem = {
   synthetic: true;
   priceBasis: "per-passenger-including-demo-fees";
   direct: boolean;
+  legs: FareLeg[];
+};
+
+type FareLeg = {
+  legIndex: number;
+  mode: "train" | "bus" | "flight" | "ferry";
+  carrierName: string;
+  durationMinutes: number;
+  originId: string;
+  destinationId: string;
+  originLabel: string;
+  destinationLabel: string;
 };
 
 type FareSource = {
@@ -257,13 +269,14 @@ type FareScopeManifest = {
   resourceKey: ResourceKey;
   source: FareSource;
   coverage: FareScope;
+  availableDateWindow: { from: Date; to: Date } | null;
   totalAvailable: number;
   availableModes: TransportMode[];
-  complete: true;
+  complete: boolean;
 };
 ```
 
-`passengers` is 1 through 8. `earliestDeparture.minutes` is 0 through 1439. `complete` means the server source covers the logical scope. It never claims the browser materialized every row. The backend emits `carrierId` as `carrier-${stableRef(companyName)}` using the same unsigned 32-bit FNV-1a algorithm as `resource-loader.ts`.
+`passengers` is 1 through 8. `earliestDeparture.minutes` is 0 through 1439. Leg indices are sequential from zero, and `direct === (legs.length <= 1)`. `complete` is true only when `availableDateWindow` equals the requested `coverage.dateWindow`. A partial overlap reports the intersection and `complete: false`; a fully unavailable window reports `availableDateWindow: null`, zero availability, and bounded empty projections. It never claims the browser materialized every row. The backend emits `carrierId` as `carrier-${stableRef(companyName)}` using the same unsigned 32-bit FNV-1a algorithm as `resource-loader.ts`.
 
 `POST /api/query-groups` accepts:
 
@@ -410,6 +423,7 @@ Representative JSON keeps the same camelCase field names:
         "passengers": 1,
         "earliestDeparture": { "date": "2026-10-26", "minutes": 1020 }
       },
+      "availableDateWindow": { "from": "2026-10-26", "to": "2026-11-05" },
       "totalAvailable": 1234,
       "availableModes": ["train", "bus"],
       "complete": true
@@ -434,7 +448,17 @@ Representative JSON keeps the same camelCase field names:
         "currency": "EUR",
         "synthetic": true,
         "priceBasis": "per-passenger-including-demo-fees",
-        "direct": true
+        "direct": true,
+        "legs": [{
+          "legIndex": 0,
+          "mode": "train",
+          "carrierName": "Example Rail",
+          "durationMinutes": 160,
+          "originId": "london",
+          "destinationId": "paris",
+          "originLabel": "London",
+          "destinationLabel": "Paris"
+        }]
       }],
       "pageInfo": {
         "total": 82,
@@ -499,7 +523,17 @@ The response is `{ version: 1, requestId, sourceVersion, items: FareItem[], miss
     "currency": "EUR",
     "synthetic": true,
     "priceBasis": "per-passenger-including-demo-fees",
-    "direct": true
+    "direct": true,
+    "legs": [{
+      "legIndex": 0,
+      "mode": "train",
+      "carrierName": "Example Rail",
+      "durationMinutes": 160,
+      "originId": "london",
+      "destinationId": "paris",
+      "originLabel": "London",
+      "destinationLabel": "Paris"
+    }]
   }],
   "missingPins": []
 }
@@ -878,10 +912,14 @@ Implementation entries:
 - 2026-10-08: No source edit is made in the original dirty checkout after isolation. Its state and `/tmp/server-driven-generative-ui-baseline.FcThYk` remain read-only diagnostics.
 - 2026-10-08: Provenance that is not captured by a worker report may be recorded as unknown or restored. Do not attribute an edit to a worker without evidence.
 - 2026-10-08: The backend contract is all-or-nothing for query-group batches. User testing begins only after the populated render is open. The branch remains local, unmerged, and unpushed.
+- 2026-10-08: A trusted delegated report identified the replacement source as commits `7030173a6d4d4c4d6b19988d80ba105d9ca1609f` and `71545ad40ef485438b4926350e66fcdcf2524806` from source chat `01a11a95-3269-72a0-9dcc-9ac4545f0905`. The read-only database is generator v4, schema v3, 50,000,000 fares, 120 cities, all ordered pairs, and date coverage 2026-10-08 through 2027-12-31. This branch did not merge or cherry-pick those source commits; it inspected their committed schema and the database metadata read-only.
+- 2026-10-08: The earlier clean-base decision excluding route legs is superseded by the verified v3 source. `FareItem` now carries only the bounded ordered leg fields listed in the frozen contract. `direct` is derived from leg count, and `directOnly` is executed from `routes.transfer_count`. There is no redundant public transfer count. Preserved v2 sources synthesize one truthful leg from their fare row.
+- 2026-10-08: Scope manifests now distinguish the requested window from `availableDateWindow`. Full overlap is complete, partial overlap returns the bounded intersection with `complete: false`, and a fully unavailable date window returns null availability plus empty projections instead of provoking an unbounded client retry.
+- 2026-10-08: Backend source compatibility passes 27 backend tests. A read-only v3 smoke returned six London-to-Paris flight fares on 2026-10-08, all with two ordered legs, while the direct-only projection returned zero. The updated API is running on `127.0.0.1:8003` as PID `78220` with source version `sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b`. Four strict live TypeScript tests pass against it, covering every projection, cursor continuation, lookup, source mismatch, connected legs, direct filtering, partial coverage, and fully unavailable coverage.
 
 Resume pointer:
 
-> Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on `feature/server-driven-generative-ui-review`. The plan is committed at `a29b55e`. Before doing work again, check the live status of `/root/plan_branch`, `/root/query_composition_design`, and `/root/runtime_composition`; they are implementing backend milestone 1, query/catalog milestones 2-3, and display milestone 4 respectively. Do not redo their work. The next actions are to finish and test those owned slices, have `/root/plan_branch` create isolated commits from each reported path list, integrate milestone 5, run the real preview on available candidate ports `8003`/`8013`/`5175`, perform desktop and mobile user tests, refresh both graphs, and hand off without merge or push. Treat the original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` as read-only evidence.
+> Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on `feature/server-driven-generative-ui-review`. The plan is committed at `a29b55e`. Before doing work again, check the live status of `/root/plan_branch`, `/root/query_composition_design`, and `/root/runtime_composition`; they are finishing the v3 backend source adapter, the query bridge/catalog migration, and the display/runtime migration respectively. Do not redo their work. PID `78220` serves the updated read-only backend on port `8003`; four strict live TypeScript tests already pass. Commit only the backend adapter and journal, migrate remaining legacy tests through a test-only fixed-projection client, integrate milestone 5, run the real preview on available ports `8003`/`8013`/`5175`, perform desktop and mobile user tests, refresh both graphs, and hand off without merge or push. Treat the original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` as read-only evidence.
 
 Decision record:
 
@@ -898,6 +936,8 @@ Decision record:
 | Use one commit steward in the shared managed worktree | Concurrent `git add` and `git commit` operations would race the shared index and `HEAD` | root orchestration decision and live shared checkout | decided |
 | Keep group fingerprints independent of global UI revision | Only normalized query dependencies should invalidate a server result | accepted coordinator identity contract | decided |
 | Reserve candidate preview ports 8003, 8013, and 5175 | The isolated render must not replace user-owned services | root orchestration decision | decided |
+| Expose bounded ordered legs and derive directness | The verified v3 source contains connected routes, and claiming every fare was direct was false | v3 metadata, `routes.transfer_count`, and `route_legs` read-only inspection | decided |
+| Represent unavailable requested dates in manifests | A bounded unavailable result prevents repeated coverage loading outside the source horizon | accepted query contract and backend coverage tests | decided |
 
 ## Source citations
 

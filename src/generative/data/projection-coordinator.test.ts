@@ -20,10 +20,10 @@ function requirement(projectionKey: string, uiRevision = 1, limit = 20): Project
 function response(request: QueryGroupsRequest, price = 2500): QueryGroupsResponse {
   return QueryGroupsResponseSchema.parse({ version: 1, requestId: request.requestId, sourceVersion: 'source-1', groups: request.groups.map(item => ({
     groupId: item.groupId,
-    manifest: { kind: 'fareScopeManifest', resourceKey: 'scope-1', source: { kind: 'search', descriptorId: 'scope-1', sourceVersion: 'source-1' }, coverage: scope, totalAvailable: 1, availableModes: ['train'], complete: true },
+    manifest: { kind: 'fareScopeManifest', resourceKey: 'scope-1', source: { kind: 'search', descriptorId: 'scope-1', sourceVersion: 'source-1' }, coverage: scope, totalAvailable: 1, availableModes: ['train'], availableDateWindow: scope.dateWindow, complete: true },
     projections: item.projections.map(projection => ({
       projectionId: projection.projectionId, kind: 'farePage' as const, inputHash: 'server-input', resultFingerprint: `result-${price}`,
-      items: [{ id: `fare-${price}`, originId: 'london', destinationId: 'paris', serviceDate: '2026-10-26', mode: 'train' as const, carrierId: 'carrier-rail', carrierName: 'Rail', priceCents: price, durationMinutes: 160, departureMinutes: 1080, availableSeats: 4, currency: 'EUR' as const, synthetic: true as const, priceBasis: 'per-passenger-including-demo-fees' as const, direct: true }],
+      items: [{ id: `fare-${price}`, originId: 'london', destinationId: 'paris', serviceDate: '2026-10-26', mode: 'train' as const, carrierId: 'carrier-rail', carrierName: 'Rail', priceCents: price, durationMinutes: 160, departureMinutes: 1080, availableSeats: 4, currency: 'EUR' as const, synthetic: true as const, priceBasis: 'per-passenger-including-demo-fees' as const, direct: true, legs: [{ legIndex: 0, mode: 'train' as const, carrierName: 'Rail', durationMinutes: 160, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }] }],
       pageInfo: { total: 1, returned: 1, hasNextPage: false, nextCursor: null },
     })),
   })) })

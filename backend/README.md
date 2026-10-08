@@ -87,8 +87,10 @@ The generative UI endpoints accept JSON only. `/api/query-groups` supports the
 closed projection kinds `farePage`, `calendarDays`, `carrierFacets`,
 `modeSummary`, and `fareHighlights`. It validates every field strictly, executes
 the full request in one read-only SQLite transaction, and either returns every
-group or a versioned error. An empty `projections` array returns only the complete
-logical scope manifest. Page cursors are opaque and bind the source version,
+group or a versioned error. An empty `projections` array returns only the logical
+scope manifest. Its `availableDateWindow` is the intersection with the source
+horizon; `complete` is false for partial or unavailable windows, and a fully
+unavailable window returns bounded empty results. Page cursors are opaque and bind the source version,
 normalized scope, filters, ordering, and page size.
 
 `/api/lookup` accepts `{version, requestId, sourceVersion, pins}` and returns
@@ -98,8 +100,12 @@ mismatches return HTTP 409 `sourceChanged`, so a fare is never silently resolved
 against a replacement database.
 
 Both endpoints return fare scalars with local `serviceDate` and
-`departureMinutes`. They do not infer a timezone or arrival instant. The response
-omits routes, legs, transfers, and arbitrary query or SQL structures.
+`departureMinutes`. They do not infer a timezone or arrival instant. Each fare
+contains only bounded ordered leg facts from the source: leg index, mode, carrier,
+duration, and endpoint IDs and labels. `direct` is derived from the leg count, and
+`directOnly` is applied by the server. The response omits a redundant transfer
+count and all arbitrary query or SQL structures. Preserved version2 fixtures,
+which have no route-leg table, receive one fare-derived direct leg.
 
 ## Test
 
