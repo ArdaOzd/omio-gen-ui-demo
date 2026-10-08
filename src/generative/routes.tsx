@@ -18,6 +18,7 @@ import { createIndexedDBStorage, createThreadPersistence, ThreadConflictError, t
 import { assertNoBulkData } from './contracts/privacy'
 import { GenerativeChat } from './chat/runtime-provider'
 import type { TravelServices } from './catalog/context'
+import { createRuntimePresentValidationScope } from './variants/a/present-scope'
 import { completeSmartPlannerHandoff, readSmartPlannerHandoff, type SmartPlannerHandoff } from './smart-planner-handoff'
 import {
   createLegacySessionSummary,
@@ -114,7 +115,7 @@ function SessionConversation(props: SessionConversationProps) {
 
   const buildRecord = useCallback((next: UIMessage[]): PersistedThread => {
     assertNoBulkData(next)
-    const { sources } = getSceneMetadata(next)
+    const { sources } = getSceneMetadata(next,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
     const states = runtime.artifacts.getIds().map(id => runtime.services.state.get(id))
     const refs = [...new Set(states.flatMap(state => state.datasetRefs))]
     return {
@@ -261,7 +262,7 @@ function SessionConversation(props: SessionConversationProps) {
   }, [ready, registryRevision, runtime, save])
 
   const capture = (): Promise<AgentContextEnvelope> => {
-    const { layouts, bindings } = getSceneMetadata(messagesRef.current)
+    const { layouts, bindings } = getSceneMetadata(messagesRef.current,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
     return captureAgentContextWithSelectedFares({
       turnId: `turn-${crypto.randomUUID()}`,
       activeArtifactId: runtime.artifacts.getActiveId(),
@@ -276,7 +277,7 @@ function SessionConversation(props: SessionConversationProps) {
 
   const readDiagnostics = async () => {
     const persisted = await createIndexedDBStorage().read(props.session.id)
-    const metadata = getSceneMetadata(messagesRef.current)
+    const metadata = getSceneMetadata(messagesRef.current,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
     const artifactRecords = runtime.artifacts.getIds().map(id => ({
       state: runtime.services.state.get(id),
       source: metadata.sources.get(id),

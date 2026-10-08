@@ -11,12 +11,14 @@ import { validatePresentPrefix } from './present-prefix';
 import { loadLocationCatalog } from './location-catalog';
 import { aPrompt } from '../src/generative/variants/a/prompt';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
+import { createAgentPresentValidationScope } from './present-scope';
 import { withOneRepair } from './repair';
 import { validationReason } from './validation-reason';
 import { acceptTurn,spendTool,recordScene,getAcceptedScenes } from './turn-budget';
 export async function handleChat(request:ChatRequest,response:ServerResponse,signal:AbortSignal):Promise<void>{
  const traceId=randomUUID(),key=acceptTurn(request);const tools=request.tools??{};
  const locations=await loadLocationCatalog(request.messages);
+ const presentScope=createAgentPresentValidationScope(request.currentContext);
  const prompt=JSON.stringify({locations,locationPolicy:'Coverage originIds/destinationIds use these actual location IDs. Translate natural city names to their IDs; do not invent resource refs. The host loads bounded server scopes before composing a view.',catalogVersion,catalogHash,components:catalogDescriptors,policy:'Components use fixed host functions backed by bounded server projections; the model never supplies SQL or query expressions. Requested modes are not evidence that a transport mode has results. Claim displayed availability only from committed display records, nonzero aggregates or bounded facts. If a requested demo leg or mode is absent, explain the missing synthetic coverage and do not make a real-world availability claim. Only supplied scalar refs, compact display records and bounded facts can enter tools. Local edits do not need model requests. Native present uses $type plus scalar props and children.',frontendInstructions:aPrompt+'\n'+(request.system??''),tools,context:request.currentContext,completion:{acceptedScenes:getAcceptedScenes(key,request),policy:'Successful tool acknowledgments fulfill the corresponding work. Finalize fulfilled requests with toolName none and a useful travel-guide explanation grounded in bounded facts. Compare the options, recommend a fit for the user and suggest relevant next steps. Do not merely say the view is ready, and do not restate prose already emitted in this visible turn. Do not repeat an accepted scene for the same artifact and UI revision. Continue only unmet requested work, distinct requested artifacts, changed UI state, missing coverage or real errors.'},history:request.messages.slice(-20)});
  const stream=createUIMessageStream({originalMessages:request.messages.map(({id,role})=>({id,role,parts:[]})),execute:async({writer})=>{
   writer.write({type:'start'});writer.write({type:'start-step'});
@@ -25,7 +27,7 @@ export async function handleChat(request:ChatRequest,response:ServerResponse,sig
    currentTool=toolName;
    if(field==='toolInput'){
     if(toolName==='none' || !Object.hasOwn(tools,toolName))return;
-    toolPrefix+=value;if(toolName==='present')validatePresentPrefix(toolPrefix,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});
+    toolPrefix+=value;if(toolName==='present')validatePresentPrefix(toolPrefix,presentScope);
     if(!toolStarted){writer.write({type:'tool-input-start',toolCallId:callId,toolName});toolStarted=true;}
     writer.write({type:'tool-input-delta',toolCallId:callId,inputTextDelta:value});return;
    }
@@ -35,13 +37,13 @@ export async function handleChat(request:ChatRequest,response:ServerResponse,sig
   let decision:Decision;
   if(request.provider==='fixture'){
    decision={intro:'Fixture response. This deterministic message is not a live model result.',toolName:'none',toolInput:'{}',outro:''};delta('intro',decision.intro,'none');
-  }else decision=await withOneRepair({prompt,signal,onAttempt:data=>writer.write({type:'data-model-attempt',data,transient:true}),run:async(repairPrompt,index,attemptSignal)=>{attempt=index;callId=randomUUID();toolStarted=false;toolPrefix='';return codexDecision({prompt:repairPrompt,toolNames:Object.keys(tools),signal:attemptSignal,onDelta:delta});},validate:value=>{if(value.toolName==='none')return;const tool=tools[value.toolName];if(!tool)throw new Error('Unregistered tool');const input=parseToolInput(value.toolName,JSON.parse(value.toolInput));z.fromJSONSchema(tool.parameters).parse(input);if(value.toolName==='present')validatePresentTree(input,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});},failed:(failedAttempt,error)=>{const reason=validationReason(error);console.warn(JSON.stringify({event:'omio-agent-attempt-failed',traceId,attempt:failedAttempt,tool:Object.hasOwn(tools,currentTool)?currentTool:'unknown',reason}));for(const id of textStarted)writer.write({type:'text-end',id});textStarted.clear();if(toolStarted)writer.write({type:'tool-input-error',toolCallId:callId,toolName:currentTool,input:{},errorText:reason});}});
+  }else decision=await withOneRepair({prompt,signal,onAttempt:data=>writer.write({type:'data-model-attempt',data,transient:true}),run:async(repairPrompt,index,attemptSignal)=>{attempt=index;callId=randomUUID();toolStarted=false;toolPrefix='';return codexDecision({prompt:repairPrompt,toolNames:Object.keys(tools),signal:attemptSignal,onDelta:delta});},validate:value=>{if(value.toolName==='none')return;const tool=tools[value.toolName];if(!tool)throw new Error('Unregistered tool');const input=parseToolInput(value.toolName,JSON.parse(value.toolInput));z.fromJSONSchema(tool.parameters).parse(input);if(value.toolName==='present')validatePresentTree(input,presentScope);},failed:(failedAttempt,error)=>{const reason=validationReason(error);console.warn(JSON.stringify({event:'omio-agent-attempt-failed',traceId,attempt:failedAttempt,tool:Object.hasOwn(tools,currentTool)?currentTool:'unknown',reason}));for(const id of textStarted)writer.write({type:'text-end',id});textStarted.clear();if(toolStarted)writer.write({type:'tool-input-error',toolCallId:callId,toolName:currentTool,input:{},errorText:reason});}});
   for(const field of textStarted)writer.write({type:'text-end',id:field});
   if(decision.toolName!=='none'){
    const tool=tools[decision.toolName];if(!tool)throw new Error('Model selected an unregistered tool');
    const input:unknown=parseToolInput(decision.toolName,JSON.parse(decision.toolInput));assertNoBulkData(input);
    z.fromJSONSchema(tool.parameters).parse(input);
-   if(decision.toolName==='present')validatePresentTree(input,{artifactIds:new Set(request.currentContext.artifacts.map(a=>a.artifactId)),datasetIds:new Set(request.currentContext.datasets.map(d=>d.datasetId))});
+   if(decision.toolName==='present')validatePresentTree(input,presentScope);
    spendTool(key,decision.toolName);
    if(typeof input==='object'&&input!==null&&'artifactRef' in input){const artifact=request.currentContext.artifacts.find(artifact=>artifact.artifactId===input.artifactRef);if(artifact)recordScene(key,callId,decision.toolName,artifact.artifactId,artifact.revision);}
    writer.write({type:'tool-input-available',toolCallId:callId,toolName:decision.toolName,input});

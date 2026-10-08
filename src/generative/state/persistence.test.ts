@@ -131,6 +131,16 @@ function bridgeWithStableResource(sourceVersion: string, resourceKey: ResourceKe
 }
 
 describe('descriptor-only thread persistence', () => {
+  it('continues loading saved 1.1.0 conversations after additive catalog metadata changes', async () => {
+    const item = await fixture()
+    const io = memory()
+    io.values.set('existing', { ...item.record, catalogVersion: '1.1.0' })
+    const loaded = await createThreadPersistence(io.storage).load('existing')
+    expect(CATALOG_VERSION).toBe('1.1.0')
+    expect(loaded?.messages).toEqual(item.record.messages)
+    expect(loaded?.artifacts).toEqual(item.record.artifacts)
+  })
+
   it.each([false, true])('restores messages, compact state, and coverage by reloading descriptors (partial=%s)', async partial => {
     const item = await fixture(partial)
     const io = memory()

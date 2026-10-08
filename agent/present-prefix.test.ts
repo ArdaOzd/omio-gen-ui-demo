@@ -9,6 +9,15 @@ it('accepts every prefix of a valid leg-bound planner tree with a rebindable dat
  expect(()=>validatePresentTree(tree,scope)).not.toThrow()
  for(let cut=1;cut<=encoded.length;cut++)expect(()=>validatePresentPrefix(encoded.slice(0,cut),scope),`prefix ${cut}`).not.toThrow()
 })
+it('allows missing booking legs while streaming and requires complete distinct-leg coverage at completion',()=>{
+ const bookingScope={...scope,bookingLegIndexesByArtifact:new Map([['a',new Set([0,1])]]),bookingLegIndexByArtifactDataset:new Map([['a',new Map([['d',0],['d2',1]])]])}
+ const incomplete={$type:'TravelSurface',artifactRef:'a',children:[{$type:'FareCalendar',artifactRef:'a',datasetRef:'d',legIndex:0}]}
+ const encoded=JSON.stringify(incomplete)
+ for(let cut=1;cut<encoded.length;cut++)expect(()=>validatePresentPrefix(encoded.slice(0,cut),bookingScope),`prefix ${cut}`).not.toThrow()
+ expect(()=>validatePresentPrefix(encoded,bookingScope)).toThrow('Incomplete booking workflow leg coverage')
+ const complete={...incomplete,children:[...incomplete.children,{$type:'FareCalendar',artifactRef:'a',datasetRef:'d2',legIndex:1}]}
+ expect(()=>validatePresentPrefix(JSON.stringify(complete),bookingScope)).not.toThrow()
+})
 it('rejects unknown row-shaped aliases before complete props or rendering',()=>{expect(()=>validatePresentPrefix('{"$type":"TravelSurface","artifactRef":"a","payload":[',scope)).toThrow('Unknown partial')});
 it('enforces plan depth and node budgets before completion',()=>{expect(()=>validatePresentPrefix('{"children":'.repeat(9),scope)).toThrow('structural');expect(()=>validatePresentPrefix('{'.repeat(81),scope)).toThrow()});
 

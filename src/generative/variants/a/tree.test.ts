@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { prunePresentTree, validatePresentTree } from './tree'
+import { createPresentValidationScope, presentTreesOverlapForSupersession, prunePresentTree, validatePresentTree } from './tree'
 import { LEAKAGE_SENTINEL } from '../../contracts/privacy'
 const leaf=(name:string,key:string)=>({$type:name,$key:key,artifactRef:'artifact-1',datasetRef:'dataset-1'})
 const tree=(children:unknown[])=>({$type:'TravelSurface',artifactRef:'artifact-1',children})
@@ -12,8 +12,10 @@ describe('native present boundary',()=>{
  })
  it('accepts every modular trip-planning node through the production present schema',()=>{
   const names=['MultiCityPlanGrid','FareCalendar','FadeFares','FareOrder','TransportSelect','StayDuration','TravelDate','CityField']
-  const scene=tree(names.map((name,index)=>({...leaf(name,`trip-${index}`),...(name==='MultiCityPlanGrid'?{}:{legIndex:0}),selectorRef:'legSchedule'})))
-  expect(validatePresentTree(scene,scope)).toEqual(scene)
+  for(const [index,name] of names.entries()){
+   const node=name==='MultiCityPlanGrid'?{$type:name,$key:`trip-${index}`,artifactRef:'artifact-1',selectorRef:'legSchedule'}:{...leaf(name,`trip-${index}`),legIndex:0,selectorRef:'legSchedule'}
+   expect(validatePresentTree(tree([node]),scope)).toBeTruthy()
+  }
  })
  it('accepts stable leg bindings for every dataset view and still requires them for planner datasets',()=>{
   expect(validatePresentTree(tree([{...leaf('FareCalendar','calendar'),legIndex:0}]),{artifactIds:new Set(['artifact-1']),datasetIds:new Set()})).toBeTruthy()
@@ -28,6 +30,39 @@ describe('native present boundary',()=>{
   expect(()=>validatePresentTree(tree([leaf('FareCards','same'),leaf('FareCards','same')]),scope)).toThrow('Duplicate')
   let node:unknown=leaf('FareCards','f');for(let i=0;i<10;i++)node={...leaf('Stack',`stack-${i}`),children:[node]}
   expect(()=>validatePresentTree(tree([node]),scope)).toThrow('budget')
+ })
+})
+
+describe('booking workflow ownership',()=>{
+ const bookingScope=createPresentValidationScope([{artifactId:'artifact-1',legDatasetIds:[new Set(['dataset-0']),new Set(['dataset-1']),new Set(['dataset-2'])]}],['dataset-0','dataset-1','dataset-2'])
+ const calendar=(index:number,datasetRef=`dataset-${index}`)=>({$type:'FareCalendar',$key:`calendar-${index}`,artifactRef:'artifact-1',datasetRef,legIndex:index})
+ const comparison=(index:number)=>({$type:'CheapestFastest',$key:`compare-${index}`,artifactRef:'artifact-1',datasetRef:`dataset-${index}`,legIndex:index})
+ const multiCity={$type:'MultiCityPlanGrid',$key:'multi-city',artifactRef:'artifact-1'}
+ it('accepts one all-leg owner plus supplemental comparisons for a three-leg return trip',()=>{
+  expect(()=>validatePresentTree(tree([multiCity,comparison(0),comparison(1),comparison(2)]),bookingScope)).not.toThrow()
+ })
+ it('accepts one calendar per distinct resolved leg plus supplemental comparisons',()=>{
+  expect(()=>validatePresentTree(tree([calendar(0),calendar(1),calendar(2),comparison(0)]),bookingScope)).not.toThrow()
+ })
+ it('rejects overlapping, incomplete, and inconsistent booking ownership',()=>{
+  expect(()=>validatePresentTree(tree([multiCity,calendar(0)]),bookingScope)).toThrow('Overlapping')
+  expect(()=>validatePresentTree(tree([calendar(0),{...calendar(0),$key:'duplicate'}]),bookingScope)).toThrow('Overlapping')
+  expect(()=>validatePresentTree(tree([calendar(0),calendar(1)]),bookingScope)).toThrow('Incomplete')
+  expect(()=>validatePresentTree(tree([calendar(0),calendar(1,'dataset-0'),calendar(2)]),bookingScope)).toThrow('Inconsistent')
+  expect(()=>validatePresentTree(tree([{...multiCity,datasetRef:'dataset-0'}]),bookingScope)).toThrow('cannot bind one leg')
+ })
+ it('keeps missing streamed legs pending but rejects streamed conflicts and inconsistent resolved bindings',()=>{
+  expect(prunePresentTree(tree([calendar(0)]),bookingScope)?.children).toEqual([calendar(0)])
+  expect(prunePresentTree(tree([calendar(0),{...calendar(0),$key:'duplicate'}]),bookingScope)).toBeUndefined()
+  expect(prunePresentTree(tree([calendar(0),calendar(1,'dataset-0')]),bookingScope)).toBeUndefined()
+ })
+ it('supersedes only overlapping booking owners while preserving supplementary scenes',()=>{
+  const all=validatePresentTree(tree([multiCity]),bookingScope)
+  const leg0=validatePresentTree(tree([calendar(0),calendar(1),calendar(2)]),bookingScope)
+  const supplementary=validatePresentTree(tree([comparison(0)]),{artifactIds:new Set(['artifact-1']),datasetIds:new Set(['dataset-0'])})
+  expect(presentTreesOverlapForSupersession(all,leg0)).toBe(true)
+  expect(presentTreesOverlapForSupersession(all,supplementary)).toBe(false)
+  expect(presentTreesOverlapForSupersession(supplementary,all)).toBe(false)
  })
 })
 

@@ -112,6 +112,43 @@ it('keeps the committed route visible while replacement coverage is loading', as
   router.dispose()
 })
 
+it('renders one flexible-date calendar for each distinct trip leg', async () => {
+  const fixture=scopedFixture(scope=>{
+    const route=`${scope.originId}-${scope.destinationId}`
+    const base=fare({id:`${route}-${scope.dateWindow.from}`,date:scope.dateWindow.from,mode:'train',price:route==='london-paris'?3200:4700,duration:150,departure:540})
+    const carrierName=route==='london-paris'?'First Leg Rail':'Second Leg Rail'
+    return[{...base,originId:scope.originId,destinationId:scope.destinationId,carrierId:route,carrierName,legs:[{...base.legs[0]!,carrierName,originId:scope.originId,destinationId:scope.destinationId,originLabel:scope.originId,destinationLabel:scope.destinationId}]}]
+  },'all-leg-flexible-dates-v1'),bridge=fixture.bridge
+  const first=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-09'})
+  const second=await fixture.load('paris','rome',{from:'2026-10-12',to:'2026-10-12'})
+  const state=createUIStateStore()
+  state.initializeMissing(artifactId,{
+    datasetRefs:[first.datasetId,second.datasetId],
+    citySequence:['london','paris','rome'],
+    dates:{start:'2026-10-09',end:'2026-10-12'},
+    stays:[{cityId:'paris',nights:3},{cityId:'rome',nights:0}],
+    displayWindowByLeg:{'london:paris':{from:'2026-10-09',to:'2026-10-09'},'paris:rome':{from:'2026-10-12',to:'2026-10-12'}},
+    availableModesByLeg:{'london:paris':['train'],'paris:rome':['train']},
+  })
+  const router=createActionRouter(state,{bridge})
+  const {container}=render(<TravelProvider services={{bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}}>
+    <FareCalendar artifactRef={artifactId} datasetRef={first.datasetId} legIndex={0}/>
+    <FareCalendar artifactRef={artifactId} datasetRef={second.datasetId} legIndex={1}/>
+  </TravelProvider>)
+
+  await screen.findAllByText('€32.00')
+  await screen.findAllByText('€47.00')
+  const calendars=[...container.querySelectorAll('.trip-fare-calendar')]
+  expect(calendars).toHaveLength(2)
+  expect(calendars[0]).toHaveTextContent('London Paris')
+  expect(calendars[0]).toHaveTextContent('€32.00')
+  expect(calendars[0]).not.toHaveTextContent('€47.00')
+  expect(calendars[1]).toHaveTextContent('Paris Rome')
+  expect(calendars[1]).toHaveTextContent('€47.00')
+  expect(calendars[1]).not.toHaveTextContent('€32.00')
+  router.dispose()
+})
+
 it('keeps a standalone authored calendar bound by leg position after every endpoint changes', async () => {
   const fixture=scopedFixture(scope=>{const base=fare({id:scope.originId+'-'+scope.destinationId+'-'+scope.dateWindow.from,date:scope.dateWindow.from,mode:'train',price:4700,duration:150,departure:540});return[{...base,originId:scope.originId,destinationId:scope.destinationId,carrierId:'rail',carrierName:'Fixture Rail',legs:[{...base.legs[0]!,carrierName:'Fixture Rail',originId:scope.originId,destinationId:scope.destinationId,originLabel:scope.originId,destinationLabel:scope.destinationId}]}]},'authored-binding-v1'),bridge=fixture.bridge
   const load=async(originId:string,destinationId:string)=>fixture.load(originId,destinationId,{from:'2026-10-09',to:'2026-10-09'})

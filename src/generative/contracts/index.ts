@@ -215,7 +215,8 @@ export interface UIStateStore {
   getIds?(): ArtifactId[];
   setDatasetBindings?(artifactId:ArtifactId,bindings:ArtifactUIState['datasetBindings']):void;
 }
-export type ComponentDescriptor = { name: string; description: string; group: 'layout'|'status'|'control'|'view'; props: ReadonlyArray<{ name: string; kind: 'ref'|'text'|'variant'|'number'; required: boolean }>; children: boolean };
+export type BookingOwnership = { scope: 'all-legs' } | { scope: 'bound-leg' };
+export type ComponentDescriptor = { name: string; description: string; group: 'layout'|'status'|'control'|'view'; props: ReadonlyArray<{ name: string; kind: 'ref'|'text'|'variant'|'number'; required: boolean }>; children: boolean; bookingOwnership?: BookingOwnership };
 
 export * from './query-groups';
 export * from './display-context';

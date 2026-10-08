@@ -4,11 +4,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useAuiState,type ToolCallMessagePartProps } from '@assistant-ui/react'
 import { hasLaterAcceptedScene } from '../../chat/tool-supersession'
 import { getPartialJsonObjectMeta } from 'assistant-stream/utils'
-import { useTravelServices } from '../../catalog/context'
+import { useTravelServices,type TravelServices } from '../../catalog/context'
 import { ArtifactIdSchema,DatasetIdSchema,type ArtifactUIState } from '../../contracts'
-import { prunePresentTree, validatePresentTree, type PresentNode } from './tree'
+import { presentTreesOverlapForSupersession,prunePresentTree,validatePresentTree,type PresentNode } from './tree'
 import { isDatasetBoundComponent,resolvePlannerDatasetRef } from '../../catalog/trip-planning/binding'
 import { legKey } from '../../state/leg-bindings'
+import { createRuntimePresentValidationScopeForTree } from './present-scope'
 import type { ComponentRef } from '../../contracts/display-context'
 type Props=ToolCallMessagePartProps<Record<string,unknown>,Record<string,never>>
 export type DisplayRenderNode=Omit<PresentNode,'children'>&{__displayComponent:{componentRef:ComponentRef;childRefs:string[]};children?:DisplayRenderNode|DisplayRenderNode[]|string}
@@ -28,12 +29,19 @@ function AcceptedSceneBindings({entries,children}:{entries:ReadonlyArray<{artifa
  useEffect(()=>{for(const entry of entries)services.state.setDatasetBindings?.(entry.artifactId,entry.bindings)},[services.state,signature])
  return children
 }
+function validateRuntimePresent(input:unknown,services:TravelServices):PresentNode{
+ const tree=validatePresentTree(input)
+ return validatePresentTree(input,createRuntimePresentValidationScopeForTree(tree,services))
+}
 export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}){
- const superseded=useAuiState(state=>hasLaterAcceptedScene(state.message.parts,props.toolCallId,'present',typeof props.args.artifactRef==='string'?props.args.artifactRef:undefined,part=>{if(part.isError||typeof part.result!=='object'||part.result===null||Object.keys(part.result).length)return false;try{validatePresentTree(part.args);return true}catch{return false}}))
- const services=useTravelServices();if(superseded||props.isError||props.status.type==='incomplete')return null;const meta=getPartialJsonObjectMeta(props.args)
+ const services=useTravelServices()
+ const superseded=useAuiState(state=>hasLaterAcceptedScene(state.thread.messages.flatMap(message=>message.parts),props.toolCallId,'present',typeof props.args.artifactRef==='string'?props.args.artifactRef:undefined,part=>{if(part.isError||typeof part.result!=='object'||part.result===null||Object.keys(part.result).length)return false;try{validateRuntimePresent(part.args,services);return true}catch{return false}},(current,later)=>{try{return presentTreesOverlapForSupersession(validateRuntimePresent(current.args,services),validateRuntimePresent(later.args,services))}catch{return false}}))
+ if(superseded||props.isError||props.status.type==='incomplete')return null;const meta=getPartialJsonObjectMeta(props.args)
  const partial=props.status.type!=='complete'&&(props.status.type!=='requires-action'||meta?.state==='partial')
  try{
-  let tree=partial?prunePresentTree(props.args,undefined,meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args)
+  const candidate=partial?prunePresentTree(props.args,undefined,meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args)
+  if(!candidate)return <Skeleton className="travel-skeleton" role="status">Preparing your view…</Skeleton>
+  let tree=partial?prunePresentTree(props.args,createRuntimePresentValidationScopeForTree(candidate,services),meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args,createRuntimePresentValidationScopeForTree(candidate,services))
   if(!tree)return <Skeleton className="travel-skeleton" role="status">Preparing your view…</Skeleton>
   const sceneRef=`present-${props.toolCallId.replace(/[^a-zA-Z0-9_.:-]/g,'_').slice(-96)}`
   const normalize=(node:PresentNode)=>withDisplayComponentIdentity(node,'root',current=>{
@@ -42,13 +50,7 @@ export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}
   },sceneRef)
   tree=normalize(tree)
   const refs=(node:PresentNode):void=>{services.state.get(ArtifactIdSchema.parse(node.artifactRef));if(node.datasetRef&&!resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge))throw new Error('Unavailable dataset binding');if(Array.isArray(node.children))node.children.forEach(refs);else if(node.children&&typeof node.children!=='string')refs(node.children)}
-  if(partial){
-   const artifactIds=new Set<string>();const datasetIds=new Set<string>()
-   const collect=(node:typeof tree):void=>{if(!node)return;try{services.state.get(ArtifactIdSchema.parse(node.artifactRef));artifactIds.add(node.artifactRef)}catch{}if(node.datasetRef){try{if(resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge))datasetIds.add(node.datasetRef)}catch{}}if(Array.isArray(node.children))node.children.forEach(collect);else if(node.children&&typeof node.children!=='string')collect(node.children)}
-   collect(tree);tree=prunePresentTree(props.args,{artifactIds,datasetIds},meta?.state==='partial'?meta.partialPath:undefined)
-   if(!tree)return <Skeleton className="travel-skeleton" role="status">Preparing your view…</Skeleton>
-   tree=normalize(tree)
-  }else refs(tree)
+  if(!partial)refs(tree)
   const NativeRender=props.nativeRender
   if(!NativeRender)throw new Error("Native present renderer unavailable")
   if(partial)return <NativeRender {...props} args={tree}/>
