@@ -99,6 +99,8 @@ export function createFareDataBridge(options: ServerFareDataBridgeOptions = {}):
   function rememberManifest(manifest: FareScopeManifest, addReference = false): StoredResource {
     const resourceKey = manifest.resourceKey
     const existing = resources.get(resourceKey)
+    const previousScopeKey = existing ? scopeIdentity(existing.manifest.coverage) : undefined
+    const nextScopeKey = scopeIdentity(manifest.coverage)
     const signature = stableFingerprint(manifest, 'manifest')
     const datasetId = DatasetIdSchema.parse(resourceKey)
     const datasetRevision = DatasetRevisionSchema.parse(existing
@@ -114,7 +116,12 @@ export function createFareDataBridge(options: ServerFareDataBridgeOptions = {}):
     }
     resources.set(resourceKey, stored)
     resourcesByDataset.set(datasetId, resourceKey)
-    resourcesByScope.set(scopeIdentity(manifest.coverage), resourceKey)
+    if (previousScopeKey !== undefined
+      && previousScopeKey !== nextScopeKey
+      && resourcesByScope.get(previousScopeKey) === resourceKey) {
+      resourcesByScope.delete(previousScopeKey)
+    }
+    resourcesByScope.set(nextScopeKey, resourceKey)
     if (!existing || existing.signature !== signature) listeners.get(resourceKey)?.forEach(listener => listener())
     return stored
   }

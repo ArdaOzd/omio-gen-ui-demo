@@ -147,6 +147,34 @@ describe('server fare data bridge', () => {
     expect(second).toEqual(first)
   })
 
+  it('removes a resource old scope identity when refreshed metadata changes coverage', async () => {
+    const requests: QueryGroupsRequest[] = []
+    const client: ServerQueryClient = {
+      queryGroups: async request => {
+        requests.push(request)
+        const requestedScope = request.groups[0]?.scope ?? scope
+        const result = response(request)
+        return QueryGroupsResponseSchema.parse({
+          ...result,
+          groups: result.groups.map(group => ({
+            ...group,
+            manifest: { ...group.manifest, coverage: requestedScope },
+          })),
+        })
+      },
+      lookupPins: async () => { throw new Error('unused') },
+    }
+    const bridge = createFareDataBridge({ client })
+    const later = { ...scope, earliestDeparture: { date: scope.earliestDeparture.date, minutes: 720 } }
+
+    await bridge.loadScope(scope, new AbortController().signal)
+    await bridge.refreshScope(later, new AbortController().signal)
+    const restored = await bridge.loadScope(scope, new AbortController().signal)
+
+    expect(requests).toHaveLength(3)
+    expect(restored.coverage.earliestDeparture).toEqual(scope.earliestDeparture)
+  })
+
   it('refreshes stale source metadata once before rerunning the fixed projection', async () => {
     const requests: QueryGroupsRequest[] = []
     let rejectedStaleProjection = false
