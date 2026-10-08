@@ -20,6 +20,13 @@ const modeLabels = {
   ferry: 'Ferries',
 }
 
+const modeNames = {
+  train: 'Train',
+  bus: 'Bus',
+  flight: 'Flight',
+  ferry: 'Ferry',
+}
+
 const companyColors = {
   FlixBus: '#73d700',
   easyJet: '#f76b00',
@@ -110,13 +117,28 @@ function ResultCard({ trip, selected, onSelect }) {
       </Button>
       </CollapsibleTrigger>
         <CollapsibleContent className="result-card__details">
-          <span>
-            <Icon name={trip.mode} size={19} /> {modeLabels[trip.mode] || trip.mode}
-          </span>
-          <span>
-            <Icon name="seat" size={19} /> {trip.available_seats} empty seats
-          </span>
-          <span>Fare generated for this travel demo</span>
+          <div className="result-card__summary">
+            <span>
+              <Icon name={trip.mode} size={19} /> Dominant mode: {modeNames[trip.mode] || trip.mode}
+            </span>
+            <span>
+              <Icon name="seat" size={19} /> {trip.available_seats} empty seats
+            </span>
+            <span>Fare generated for this travel demo</span>
+          </div>
+          {trip.legs?.length > 0 && (
+            <ol className="result-card__legs" aria-label="Journey legs">
+              {trip.legs.map((leg) => (
+                <li key={`${trip.id}-${leg.leg_index}`}>
+                  <Icon name={leg.mode} size={18} />
+                  <strong>{modeNames[leg.mode] || leg.mode}</strong>
+                  <span>{leg.company}</span>
+                  <span>{leg.origin} → {leg.destination}</span>
+                  <span>{formatDuration(leg.duration_minutes)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
         </CollapsibleContent>
       </Collapsible>
     </Card>

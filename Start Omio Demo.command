@@ -63,9 +63,17 @@ health_matches() {
   printf '%s' "$response" | /usr/bin/grep -Eq "\"service\"[[:space:]]*:[[:space:]]*\"${service}\""
 }
 
+fare_api_is_current() {
+  local response
+  response="$(/usr/bin/curl --fail --silent --max-time 1 "${APP_URL}api/health" 2>/dev/null)" || return 1
+  printf '%s' "$response" | /usr/bin/grep -Eq '"service"[[:space:]]*:[[:space:]]*"omio-fare-api"' &&
+    printf '%s' "$response" | /usr/bin/grep -Eq '"schema_version"[[:space:]]*:[[:space:]]*3' &&
+    printf '%s' "$response" | /usr/bin/grep -Eq '"coverage_model"[[:space:]]*:[[:space:]]*"all_ordered_pairs_daily"'
+}
+
 demo_is_ready() {
   /usr/bin/curl --fail --silent --max-time 1 "$APP_URL" >/dev/null 2>&1 &&
-    health_matches "${APP_URL}api/health" "omio-fare-api" &&
+    fare_api_is_current &&
     health_matches "${APP_URL}api/agent/health" "omio-generative-agent"
 }
 

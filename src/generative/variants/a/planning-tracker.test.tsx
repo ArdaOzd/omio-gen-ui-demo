@@ -13,6 +13,7 @@ import {
   FareRowSchema,
   type FareDataBridge,
   type FareRow,
+  type JsonScalar,
 } from '../../contracts'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { createActionRouter } from '../../state/action-router'
@@ -52,7 +53,7 @@ function fixture(selected = true) {
   const bridge: FareDataBridge = {
     async load() { return manifest },
     getManifest() { return manifest },
-    async query() { return { rows, total: rows.length, truncated: false, datasetRevision: manifest.revision, requestId: 'tracker-query' } },
+    async query() { return { rows: rows.map(({legs:_legs,...row})=>row) as Array<Record<string,JsonScalar>>, total: rows.length, truncated: false, datasetRevision: manifest.revision, requestId: 'tracker-query' } },
     async lookupFare(id) { const value = facts.get(id); if (!value) throw new Error('Missing fare'); return value },
     subscribe() { return () => {} },
     release() {},

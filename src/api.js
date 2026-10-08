@@ -57,6 +57,17 @@ function normalizeTrip(row, leg = 'outbound') {
       row.amount ??
       (row.price_cents !== undefined ? row.price_cents / 100 : 0),
   )
+  const routeLegs = Array.isArray(row.legs)
+    ? row.legs.map((routeLeg, index) => ({
+        ...routeLeg,
+        leg_index: Number(routeLeg.leg_index ?? index),
+        mode: String(routeLeg.mode || 'train').toLowerCase(),
+        company: routeLeg.company || 'Travel partner',
+        duration_minutes: minutesFromDuration(routeLeg.duration_minutes),
+        origin: displayLocation(routeLeg.origin),
+        destination: displayLocation(routeLeg.destination),
+      }))
+    : []
 
   return {
     ...row,
@@ -80,6 +91,7 @@ function normalizeTrip(row, leg = 'outbound') {
       row.available_seats ?? row.empty_seat_count ?? row.empty_seats ?? row.seats ?? 0,
     ),
     transfers: Number(row.transfers ?? row.stops ?? 0),
+    legs: routeLegs,
   }
 }
 

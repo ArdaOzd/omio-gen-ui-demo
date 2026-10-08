@@ -17,6 +17,12 @@ export type UIStateRevision = z.infer<typeof UIStateRevisionSchema>;
 export type FareId = z.infer<typeof FareIdSchema>;
 export const TransportModeSchema = z.enum(['train', 'bus', 'flight', 'ferry']);
 export type TransportMode = z.infer<typeof TransportModeSchema>;
+export const FareLegSchema = z.strictObject({
+  legIndex: z.number().int().nonnegative(), mode: TransportModeSchema,
+  carrierName: z.string().trim().min(1).max(120), durationMinutes: z.number().int().positive(),
+  originId: ref, destinationId: ref, originLabel: z.string().trim().min(1).max(160), destinationLabel: z.string().trim().min(1).max(160),
+});
+export type FareLeg = z.infer<typeof FareLegSchema>;
 export const DateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().startsWith(value), 'Invalid calendar date');
 const dateWindow = z.strictObject({ from: DateSchema, to: DateSchema }).refine(value => value.to >= value.from, 'Invalid date order');
 export const CoverageRequestSchema = z.strictObject({
@@ -31,10 +37,11 @@ export const FareRowSchema = z.strictObject({
   carrierId: ref, carrierName: z.string().trim().min(1).max(120).nullish(), priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(),
   departureMinutes: z.number().int().min(0).max(1439), availableSeats: z.number().int().nonnegative(),
   currency: z.literal('EUR'), synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees'),
-  direct: z.boolean(),
+  direct: z.boolean(), legs: z.array(FareLegSchema).max(8).default([]),
 });
-export type FareRow = z.infer<typeof FareRowSchema>;
-export const FareFieldSchema = FareRowSchema.keyof();
+type ParsedFareRow = z.infer<typeof FareRowSchema>;
+export type FareRow = Omit<ParsedFareRow, 'legs'> & Partial<Pick<ParsedFareRow, 'legs'>>;
+export const FareFieldSchema = FareRowSchema.omit({ legs: true }).keyof();
 export type AllowedFareField = z.infer<typeof FareFieldSchema>;
 export const DatasetFieldManifestSchema = z.strictObject({
   name: FareFieldSchema, type: z.enum(['string', 'number', 'boolean']), nullable: z.boolean(),
@@ -161,6 +168,7 @@ export interface FareDataBridge {
   release(datasetId: DatasetId): void;
   dispose?(): void;
   getCarrierLabel?(carrierId:string,datasetId?:DatasetId):string|undefined;
+  getFareItinerary?(id:FareId,datasetId:DatasetId):{transfers:number;legs:FareLeg[]}|undefined;
 }
 export interface UIStateStore {
   get(artifactId: ArtifactId): ArtifactUIState;

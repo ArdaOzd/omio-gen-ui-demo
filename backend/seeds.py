@@ -1,4 +1,4 @@
-"""Curated route and company inputs for the deterministic fare generator."""
+"""Strict-European city and physically coherent itinerary seeds."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ from math import asin, cos, radians, sin, sqrt
 
 
 SOURCE_URL = "https://www.omio.com/"
+MODE_PRIORITY = {"flight": 0, "ferry": 1, "train": 2, "bus": 3}
+TRANSFER_BUFFER_MINUTES = 45
 
 
 @dataclass(frozen=True)
@@ -19,6 +21,17 @@ class LocationSeed:
 
 
 @dataclass(frozen=True)
+class RouteLegSeed:
+    mode: str
+    origin: str
+    destination: str
+    origin_point: str
+    destination_point: str
+    duration_minutes: int
+    company: str
+
+
+@dataclass(frozen=True)
 class RouteSeed:
     mode: str
     origin: str
@@ -28,674 +41,561 @@ class RouteSeed:
     duration_minutes: int
     base_price_cents: int
     companies: tuple[str, ...]
-    source_kind: str = "homepage"
+    source_kind: str = "coverage"
+    legs: tuple[RouteLegSeed, ...] = ()
 
 
 _LOCATION_ROWS = (
-    ("rome", "Rome", "IT", 41.9028, 12.4964),
-    ("naples", "Naples", "IT", 40.8518, 14.2681),
-    ("berlin", "Berlin", "DE", 52.5200, 13.4050),
-    ("prague", "Prague", "CZ", 50.0755, 14.4378),
-    ("budapest", "Budapest", "HU", 47.4979, 19.0402),
-    ("vienna", "Vienna", "AT", 48.2082, 16.3738),
-    ("florence", "Florence", "IT", 43.7696, 11.2558),
-    ("amsterdam", "Amsterdam", "NL", 52.3676, 4.9041),
-    ("venice", "Venice", "IT", 45.4408, 12.3155),
-    ("london", "London", "GB", 51.5072, -0.1276),
-    ("paris", "Paris", "FR", 48.8566, 2.3522),
-    ("valencia", "Valencia", "ES", 39.4699, -0.3763),
-    ("madrid", "Madrid", "ES", 40.4168, -3.7038),
-    ("san-sebastian", "San Sebastian", "ES", 43.3183, -1.9812),
-    ("bilbao", "Bilbao", "ES", 43.2630, -2.9350),
-    ("lisbon", "Lisbon", "PT", 38.7223, -9.1393),
-    ("lagos", "Lagos", "PT", 37.1028, -8.6730),
-    ("vilnius", "Vilnius", "LT", 54.6872, 25.2797),
-    ("minsk", "Minsk", "BY", 53.9006, 27.5590),
-    ("bari", "Bari", "IT", 41.1171, 16.8719),
-    ("alberobello", "Alberobello", "IT", 40.7845, 17.2366),
-    ("porto", "Porto", "PT", 41.1579, -8.6291),
-    ("seville", "Seville", "ES", 37.3891, -5.9845),
-    ("brussels", "Brussels", "BE", 50.8503, 4.3517),
-    ("sorrento", "Sorrento", "IT", 40.6263, 14.3758),
-    ("malaga", "Malaga", "ES", 36.7213, -4.4214),
-    ("barcelona", "Barcelona", "ES", 41.3874, 2.1686),
-    ("milan", "Milan", "IT", 45.4642, 9.1900),
-    ("nice", "Nice", "FR", 43.7102, 7.2620),
-    ("zurich", "Zurich", "CH", 47.3769, 8.5417),
-    ("hvar", "Hvar", "HR", 43.1729, 16.4411),
-    ("split", "Split", "HR", 43.5081, 16.4402),
-    ("palermo", "Palermo", "IT", 38.1157, 13.3615),
-    ("positano", "Positano", "IT", 40.6281, 14.4850),
-    ("praiano", "Praiano", "IT", 40.6129, 14.5247),
-    ("corfu", "Corfu", "GR", 39.6243, 19.9217),
-    ("ksamil", "Ksamil", "AL", 39.7680, 19.9996),
-    ("oslo", "Oslo", "NO", 59.9139, 10.7522),
-    ("copenhagen", "Copenhagen", "DK", 55.6761, 12.5683),
-    ("palma", "Palma", "ES", 39.5696, 2.6502),
-    ("ibiza", "Ibiza", "ES", 38.9067, 1.4206),
-    ("dublin", "Dublin", "IE", 53.3498, -6.2603),
-    ("holyhead", "Holyhead", "GB", 53.3095, -4.6330),
-    ("stockholm", "Stockholm", "SE", 59.3293, 18.0686),
-    ("gothenburg", "Gothenburg", "SE", 57.7089, 11.9746),
-    ("helsinki", "Helsinki", "FI", 60.1699, 24.9384),
-    ("tampere", "Tampere", "FI", 61.4978, 23.7610),
-    ("malmo", "Malmo", "SE", 55.6050, 13.0038),
-    ("toronto", "Toronto", "CA", 43.6532, -79.3832),
-    ("montreal", "Montreal", "CA", 45.5019, -73.5674),
-    ("munich", "Munich", "DE", 48.1351, 11.5820),
-    ("athens", "Athens", "GR", 37.9838, 23.7275),
-    ("santorini", "Santorini", "GR", 36.3932, 25.4615),
-    ("krakow", "Krakow", "PL", 50.0647, 19.9450),
-    ("frankfurt", "Frankfurt am Main", "DE", 50.1109, 8.6821),
-    ("bratislava", "Bratislava", "SK", 48.1486, 17.1077),
-    ("granada", "Granada", "ES", 37.1773, -3.5986),
-    ("lyon", "Lyon", "FR", 45.7640, 4.8357),
-    ("alicante", "Alicante", "ES", 38.3452, -0.4810),
-    ("cologne", "Cologne", "DE", 50.9375, 6.9603),
-    ("geneva", "Geneva", "CH", 46.2044, 6.1432),
-    ("hamburg", "Hamburg", "DE", 53.5511, 9.9937),
-    ("edinburgh", "Edinburgh", "GB", 55.9533, -3.1883),
-    ("london-heathrow-airport", "London Heathrow Airport", "GB", 51.4700, -0.4543),
-    ("london-gatwick-airport", "London Gatwick Airport", "GB", 51.1537, -0.1821),
-    ("skegness", "Skegness", "GB", 53.1437, 0.3363),
-    ("warsaw", "Warsaw", "PL", 52.2297, 21.0122),
-    ("zaragoza", "Zaragoza", "ES", 41.6488, -0.8891),
-    ("birmingham", "Birmingham", "GB", 52.4862, -1.8904),
-    ("zagreb", "Zagreb", "HR", 45.8150, 15.9819),
-    ("bologna", "Bologna", "IT", 44.4949, 11.3426),
-    ("catania", "Catania", "IT", 37.5079, 15.0830),
-    ("manchester", "Manchester", "GB", 53.4808, -2.2426),
-    ("dubai", "Dubai", "AE", 25.2048, 55.2708),
-    ("tangier", "Tangier", "MA", 35.7595, -5.8340),
-    ("olbia", "Olbia", "IT", 40.9236, 9.4964),
-    ("kalamata", "Kalamata", "GR", 37.0389, 22.1142),
-    ("genoa", "Genoa", "IT", 44.4056, 8.9463),
-    ("pisa", "Pisa", "IT", 43.7228, 10.4017),
-    ("pescara", "Pescara", "IT", 42.4618, 14.2161),
-    ("sardinia-island", "Sardinia (Island)", "IT", 40.1209, 9.0129),
-    ("algeciras", "Algeciras", "ES", 36.1408, -5.4562),
-    ("cagliari", "Cagliari", "IT", 39.2238, 9.1217),
-    ("almeria", "Almeria", "ES", 36.8340, -2.4637),
-    ("civitavecchia", "Civitavecchia", "IT", 42.0924, 11.7954),
-    ("capri", "Capri", "IT", 40.5532, 14.2222),
-    ("amalfi", "Amalfi", "IT", 40.6340, 14.6027),
-    ("tokyo", "Tokyo", "JP", 35.6762, 139.6503),
-    ("kyoto", "Kyoto", "JP", 35.0116, 135.7681),
-    ("osaka", "Osaka", "JP", 34.6937, 135.5023),
-    ("hiroshima", "Hiroshima", "JP", 34.3853, 132.4553),
-    ("chamonix", "Chamonix", "FR", 45.9237, 6.8694),
-    ("tossa-de-mar", "Tossa de Mar", "ES", 41.7202, 2.9316),
-    ("le-grand-saconnex", "Le Grand-Saconnex", "CH", 46.2333, 6.1167),
-    ("faro", "Faro", "PT", 37.0194, -7.9304),
-    ("andorra-la-vella", "Andorra la Vella", "AD", 42.5063, 1.5218),
-    ("disneyland-paris", "Disneyland Paris", "FR", 48.8674, 2.7836),
-    ("bristol", "Bristol", "GB", 51.4545, -2.5879),
-    ("bath", "Bath", "GB", 51.3811, -2.3590),
-    ("biarritz", "Biarritz", "FR", 43.4832, -1.5586),
-    ("glasgow", "Glasgow", "GB", 55.8642, -4.2518),
-    ("saint-tropez", "Saint-Tropez", "FR", 43.2677, 6.6407),
-    ("monaco", "Monaco", "MC", 43.7384, 7.4246),
-    ("marbella", "Marbella", "ES", 36.5101, -4.8824),
-    ("dusseldorf", "Dusseldorf", "DE", 51.2277, 6.7735),
-    ("antwerp", "Antwerp", "BE", 51.2194, 4.4025),
-    ("zakynthos", "Zakynthos", "GR", 37.7870, 20.8999),
-    ("antiparos", "Antiparos", "GR", 37.0394, 25.0826),
-    ("st-malo", "St-Malo", "FR", 48.6493, -2.0257),
-    ("brunnen", "Brunnen", "CH", 46.9936, 8.6051),
-    ("lucerne", "Lucerne", "CH", 47.0502, 8.3093),
-    ("los-cristianos", "Los Cristianos", "ES", 28.0500, -16.7170),
-    ("las-palmas", "Las Palmas", "ES", 28.1235, -15.4363),
-    ("piraeus", "Piraeus", "GR", 37.9420, 23.6465),
-    ("hydra", "Hydra", "GR", 37.3499, 23.4650),
-    ("cairnryan", "Cairnryan", "GB", 54.9656, -5.0166),
-    ("belfast", "Belfast", "GB", 54.5973, -5.9301),
-    ("luxembourg", "Luxembourg", "LU", 49.6116, 6.1319),
-    ("como", "Como", "IT", 45.8081, 9.0852),
-    ("segovia", "Segovia", "ES", 40.9429, -4.1088),
-    ("istanbul", "Istanbul", "TR", 41.0082, 28.9784),
-    ("antalya", "Antalya", "TR", 36.8969, 30.7133),
-    ("gibraltar", "Gibraltar", "GI", 36.1408, -5.3536),
-    ("igoumenitsa", "Igoumenitsa", "GR", 39.5034, 20.2673),
-    ("stranraer", "Stranraer", "GB", 54.9021, -5.0276),
-    ("larne", "Larne", "GB", 54.8578, -5.8236),
-    ("benidorm", "Benidorm", "ES", 38.5411, -0.1225),
-    ("mykonos", "Mykonos", "GR", 37.4467, 25.3289),
-    ("paros", "Paros", "GR", 37.0856, 25.1488),
-    ("chania", "Chania", "GR", 35.5138, 24.0180),
-    ("dunkirk", "Dunkirk", "FR", 51.0344, 2.3768),
-    ("dover", "Dover", "GB", 51.1279, 1.3134),
-    ("kos", "Kos", "GR", 36.8915, 27.2877),
-    ("rhodes", "Rhodes", "GR", 36.4341, 28.2176),
-    ("rotterdam", "Rotterdam", "NL", 51.9244, 4.4777),
-    ("colchester", "Colchester", "GB", 51.8959, 0.8919),
-    # Broad European-capital coverage. Cyprus and Türkiye are included as
-    # trans-European service-region extensions to the UN M49 Europe baseline.
     ("tirana", "Tirana", "AL", 41.3275, 19.8187),
-    ("ankara", "Ankara", "TR", 39.9334, 32.8597),
+    ("durres", "Durres", "AL", 41.3231, 19.4414),
+    ("andorra-la-vella", "Andorra la Vella", "AD", 42.5063, 1.5218),
+    ("vienna", "Vienna", "AT", 48.2082, 16.3738),
+    ("graz", "Graz", "AT", 47.0707, 15.4395),
+    ("minsk", "Minsk", "BY", 53.9006, 27.559),
+    ("brussels", "Brussels", "BE", 50.8503, 4.3517),
+    ("antwerp", "Antwerp", "BE", 51.2194, 4.4025),
+    ("bruges", "Bruges", "BE", 51.2093, 3.2247),
     ("sarajevo", "Sarajevo", "BA", 43.8563, 18.4131),
     ("sofia", "Sofia", "BG", 42.6977, 23.3219),
-    ("skopje", "Skopje", "MK", 41.9973, 21.4280),
-    ("nicosia", "Nicosia", "CY", 35.1856, 33.3823),
-    ("tallinn", "Tallinn", "EE", 59.4370, 24.7536),
-    ("vatican-city", "Vatican City", "VA", 41.9029, 12.4534),
+    ("varna", "Varna", "BG", 43.2141, 27.9147),
+    ("zagreb", "Zagreb", "HR", 45.815, 15.9819),
+    ("split", "Split", "HR", 43.5081, 16.4402),
+    ("rijeka", "Rijeka", "HR", 45.3271, 14.4422),
+    ("prague", "Prague", "CZ", 50.0755, 14.4378),
+    ("brno", "Brno", "CZ", 49.1951, 16.6068),
+    ("copenhagen", "Copenhagen", "DK", 55.6761, 12.5683),
+    ("aarhus", "Aarhus", "DK", 56.1629, 10.2039),
+    ("tallinn", "Tallinn", "EE", 59.437, 24.7536),
+    ("helsinki", "Helsinki", "FI", 60.1699, 24.9384),
+    ("turku", "Turku", "FI", 60.4518, 22.2666),
+    ("tampere", "Tampere", "FI", 61.4978, 23.761),
+    ("paris", "Paris", "FR", 48.8566, 2.3522),
+    ("marseille", "Marseille", "FR", 43.2965, 5.3698),
+    ("lyon", "Lyon", "FR", 45.764, 4.8357),
+    ("nice", "Nice", "FR", 43.7102, 7.262),
+    ("bordeaux", "Bordeaux", "FR", 44.8378, -0.5792),
+    ("toulouse", "Toulouse", "FR", 43.6047, 1.4442),
+    ("strasbourg", "Strasbourg", "FR", 48.5734, 7.7521),
+    ("berlin", "Berlin", "DE", 52.52, 13.405),
+    ("hamburg", "Hamburg", "DE", 53.5511, 9.9937),
+    ("munich", "Munich", "DE", 48.1351, 11.582),
+    ("frankfurt", "Frankfurt am Main", "DE", 50.1109, 8.6821),
+    ("cologne", "Cologne", "DE", 50.9375, 6.9603),
+    ("dresden", "Dresden", "DE", 51.0504, 13.7373),
+    ("athens", "Athens", "GR", 37.9838, 23.7275),
+    ("thessaloniki", "Thessaloniki", "GR", 40.6401, 22.9444),
+    ("piraeus", "Piraeus", "GR", 37.942, 23.6465),
+    ("patras", "Patras", "GR", 38.2466, 21.7346),
+    ("heraklion", "Heraklion", "GR", 35.3387, 25.1442),
+    ("budapest", "Budapest", "HU", 47.4979, 19.0402),
     ("reykjavik", "Reykjavik", "IS", 64.1466, -21.9426),
+    ("dublin", "Dublin", "IE", 53.3498, -6.2603),
+    ("cork", "Cork", "IE", 51.8985, -8.4756),
+    ("rome", "Rome", "IT", 41.9028, 12.4964),
+    ("milan", "Milan", "IT", 45.4642, 9.19),
+    ("naples", "Naples", "IT", 40.8518, 14.2681),
+    ("florence", "Florence", "IT", 43.7696, 11.2558),
+    ("venice", "Venice", "IT", 45.4408, 12.3155),
+    ("genoa", "Genoa", "IT", 44.4056, 8.9463),
+    ("bari", "Bari", "IT", 41.1171, 16.8719),
+    ("palermo", "Palermo", "IT", 38.1157, 13.3615),
+    ("cagliari", "Cagliari", "IT", 39.2238, 9.1217),
+    ("bologna", "Bologna", "IT", 44.4949, 11.3426),
+    ("turin", "Turin", "IT", 45.0703, 7.6869),
+    ("pristina", "Pristina", "XK", 42.6629, 21.1655),
     ("riga", "Riga", "LV", 56.9496, 24.1052),
-    ("vaduz", "Vaduz", "LI", 47.1410, 9.5209),
+    ("vaduz", "Vaduz", "LI", 47.141, 9.5209),
+    ("vilnius", "Vilnius", "LT", 54.6872, 25.2797),
+    ("klaipeda", "Klaipeda", "LT", 55.7033, 21.1443),
+    ("luxembourg", "Luxembourg", "LU", 49.6116, 6.1319),
     ("valletta", "Valletta", "MT", 35.8989, 14.5146),
     ("chisinau", "Chisinau", "MD", 47.0105, 28.8638),
+    ("monaco", "Monaco", "MC", 43.7384, 7.4246),
     ("podgorica", "Podgorica", "ME", 42.4304, 19.2594),
+    ("amsterdam", "Amsterdam", "NL", 52.3676, 4.9041),
+    ("rotterdam", "Rotterdam", "NL", 51.9244, 4.4777),
+    ("utrecht", "Utrecht", "NL", 52.0907, 5.1214),
+    ("skopje", "Skopje", "MK", 41.9973, 21.428),
+    ("oslo", "Oslo", "NO", 59.9139, 10.7522),
+    ("bergen", "Bergen", "NO", 60.3913, 5.3221),
+    ("kristiansand", "Kristiansand", "NO", 58.1467, 7.9956),
+    ("warsaw", "Warsaw", "PL", 52.2297, 21.0122),
+    ("krakow", "Krakow", "PL", 50.0647, 19.945),
+    ("gdansk", "Gdansk", "PL", 54.352, 18.6466),
+    ("wroclaw", "Wroclaw", "PL", 51.1079, 17.0385),
+    ("poznan", "Poznan", "PL", 52.4064, 16.9252),
+    ("lisbon", "Lisbon", "PT", 38.7223, -9.1393),
+    ("porto", "Porto", "PT", 41.1579, -8.6291),
     ("bucharest", "Bucharest", "RO", 44.4268, 26.1025),
+    ("constanta", "Constanta", "RO", 44.1598, 28.6348),
+    ("cluj-napoca", "Cluj-Napoca", "RO", 46.7712, 23.6236),
+    ("timisoara", "Timisoara", "RO", 45.7489, 21.2087),
     ("moscow", "Moscow", "RU", 55.7558, 37.6173),
+    ("saint-petersburg", "Saint Petersburg", "RU", 59.9311, 30.3609),
     ("san-marino", "San Marino", "SM", 43.9424, 12.4578),
-    ("rimini", "Rimini", "IT", 44.0678, 12.5695),
     ("belgrade", "Belgrade", "RS", 44.7866, 20.4489),
+    ("novi-sad", "Novi Sad", "RS", 45.2671, 19.8335),
+    ("bratislava", "Bratislava", "SK", 48.1486, 17.1077),
     ("ljubljana", "Ljubljana", "SI", 46.0569, 14.5058),
-    ("bern", "Bern", "CH", 46.9480, 7.4474),
-    ("sargans", "Sargans", "CH", 47.0484, 9.4410),
+    ("madrid", "Madrid", "ES", 40.4168, -3.7038),
+    ("barcelona", "Barcelona", "ES", 41.3874, 2.1686),
+    ("valencia", "Valencia", "ES", 39.4699, -0.3763),
+    ("seville", "Seville", "ES", 37.3891, -5.9845),
+    ("malaga", "Malaga", "ES", 36.7213, -4.4214),
+    ("bilbao", "Bilbao", "ES", 43.263, -2.935),
+    ("santander", "Santander", "ES", 43.4623, -3.81),
+    ("palma", "Palma", "ES", 39.5696, 2.6502),
+    ("stockholm", "Stockholm", "SE", 59.3293, 18.0686),
+    ("gothenburg", "Gothenburg", "SE", 57.7089, 11.9746),
+    ("malmo", "Malmo", "SE", 55.605, 13.0038),
+    ("bern", "Bern", "CH", 46.948, 7.4474),
+    ("zurich", "Zurich", "CH", 47.3769, 8.5417),
+    ("geneva", "Geneva", "CH", 46.2044, 6.1432),
     ("kyiv", "Kyiv", "UA", 50.4501, 30.5234),
-    ("pristina", "Pristina", "XK", 42.6629, 21.1655),
-    ("yerevan", "Yerevan", "AM", 40.1872, 44.5152),
-    ("baku", "Baku", "AZ", 40.4093, 49.8671),
-    ("tbilisi", "Tbilisi", "GE", 41.7151, 44.8271),
+    ("lviv", "Lviv", "UA", 49.8397, 24.0297),
+    ("odesa", "Odesa", "UA", 46.4825, 30.7233),
+    ("london", "London", "GB", 51.5072, -0.1276),
+    ("edinburgh", "Edinburgh", "GB", 55.9533, -3.1883),
+    ("glasgow", "Glasgow", "GB", 55.8642, -4.2518),
+    ("cardiff", "Cardiff", "GB", 51.4816, -3.1791),
+    ("manchester", "Manchester", "GB", 53.4808, -2.2426),
+    ("birmingham", "Birmingham", "GB", 52.4862, -1.8904),
+    ("liverpool", "Liverpool", "GB", 53.4084, -2.9916),
+    ("portsmouth", "Portsmouth", "GB", 50.8198, -1.088),
+    ("belfast", "Belfast", "GB", 54.5973, -5.9301),
+    ("leeds", "Leeds", "GB", 53.8008, -1.5491),
+    ("vatican-city", "Vatican City", "VA", 41.9029, 12.4534),
+    ("istanbul", "Istanbul", "TR", 41.0082, 28.9784),
 )
 
 LOCATIONS = tuple(LocationSeed(*row) for row in _LOCATION_ROWS)
+_LOCATION_BY_SLUG = {location.slug: location for location in LOCATIONS}
 
 
-_BASE_ROUTES = (
-    # Routes visible on the referenced Omio landing page.
-    RouteSeed("train", "rome", "naples", "Roma Termini", "Napoli Centrale", 70, 1990, ("Italo", "Frecciarossa", "Trenitalia")),
-    RouteSeed("train", "berlin", "prague", "Berlin Hbf", "Praha hlavni nadrazi", 250, 2990, ("Deutsche Bahn", "České dráhy")),
-    RouteSeed("train", "budapest", "vienna", "Budapest Keleti", "Wien Hbf", 150, 1790, ("ÖBB", "České dráhy")),
-    RouteSeed("train", "florence", "rome", "Firenze Santa Maria Novella", "Roma Termini", 95, 1790, ("Italo", "Frecciarossa", "Trenitalia")),
-    RouteSeed("train", "berlin", "amsterdam", "Berlin Hbf", "Amsterdam Centraal", 390, 3990, ("Deutsche Bahn", "NS")),
-    RouteSeed("train", "rome", "venice", "Roma Termini", "Venezia Santa Lucia", 230, 3290, ("Italo", "Frecciarossa", "Trenitalia")),
-    RouteSeed("train", "london", "paris", "London St Pancras International", "Paris Gare du Nord", 140, 4990, ("Eurostar",)),
-    RouteSeed("train", "florence", "venice", "Firenze Santa Maria Novella", "Venezia Santa Lucia", 125, 2290, ("Italo", "Frecciarossa", "Trenitalia")),
-    RouteSeed("train", "vienna", "prague", "Wien Hbf", "Praha hlavni nadrazi", 240, 1990, ("ÖBB", "České dráhy")),
-    RouteSeed("train", "valencia", "madrid", "Valencia Joaquin Sorolla", "Madrid Chamartin", 115, 1890, ("Renfe", "iryo", "Ouigo Spain")),
-    RouteSeed("bus", "san-sebastian", "bilbao", "San Sebastian Donostia Bus Station", "Bilbao Intermodal", 85, 850, ("Alsa", "Costa Verde")),
-    RouteSeed("bus", "lisbon", "lagos", "Lisboa Oriente", "Lagos Bus Terminal", 240, 1290, ("FlixBus", "Blablacar Bus")),
-    RouteSeed("bus", "vilnius", "minsk", "Vilnius Bus Station", "Minsk Central Bus Station", 260, 1990, ("Infobus",)),
-    RouteSeed("bus", "bari", "alberobello", "Bari Centrale Bus Stop", "Alberobello Via Cavour", 75, 690, ("FlixBus",)),
-    RouteSeed("bus", "porto", "lisbon", "Porto Campanha Bus Terminal", "Lisboa Oriente", 195, 1090, ("FlixBus", "Blablacar Bus")),
-    RouteSeed("bus", "seville", "lagos", "Sevilla Plaza de Armas", "Lagos Bus Terminal", 270, 1690, ("Alsa", "FlixBus")),
-    RouteSeed("bus", "madrid", "seville", "Madrid Estacion Sur", "Sevilla Plaza de Armas", 390, 1890, ("Alsa", "FlixBus")),
-    RouteSeed("bus", "madrid", "lisbon", "Madrid Estacion Sur", "Lisboa Oriente", 500, 2590, ("Alsa", "FlixBus")),
-    RouteSeed("bus", "brussels", "london", "Brussels North Bus Station", "London Victoria Coach Station", 420, 2490, ("FlixBus", "National Express", "Blablacar Bus")),
-    RouteSeed("bus", "sorrento", "rome", "Sorrento Corso Italia", "Rome Tiburtina Bus Station", 240, 1690, ("FlixBus",)),
-    RouteSeed("flight", "malaga", "paris", "Malaga Airport", "Paris Orly Airport", 155, 4590, ("Vueling", "easyJet", "Ryanair")),
-    RouteSeed("flight", "berlin", "london", "Berlin Brandenburg Airport", "London Gatwick Airport", 120, 3990, ("easyJet", "Ryanair", "British Airways")),
-    RouteSeed("flight", "rome", "barcelona", "Rome Fiumicino Airport", "Barcelona El Prat Airport", 115, 4490, ("Vueling", "Ryanair", "Iberia")),
-    RouteSeed("flight", "lisbon", "paris", "Lisbon Humberto Delgado Airport", "Paris Orly Airport", 150, 4990, ("Vueling", "easyJet", "Air France")),
-    RouteSeed("flight", "milan", "paris", "Milan Malpensa Airport", "Paris Charles de Gaulle Airport", 90, 3990, ("easyJet", "Ryanair", "Air France")),
-    RouteSeed("flight", "nice", "paris", "Nice Cote d'Azur Airport", "Paris Orly Airport", 90, 3490, ("easyJet", "Air France")),
-    RouteSeed("flight", "zurich", "berlin", "Zurich Airport", "Berlin Brandenburg Airport", 95, 6990, ("Lufthansa", "easyJet")),
-    RouteSeed("flight", "rome", "london", "Rome Fiumicino Airport", "London Gatwick Airport", 170, 4990, ("Ryanair", "Malta Air", "British Airways")),
-    RouteSeed("ferry", "hvar", "split", "Hvar Port", "Split Ferry Port", 60, 1990, ("TP Line", "Kapetan Luka")),
-    RouteSeed("ferry", "palermo", "naples", "Palermo Ferry Terminal", "Naples Beverello Port", 630, 4590, ("Grandi Navi Veloci", "Tirrenia")),
-    RouteSeed("ferry", "positano", "naples", "Positano Ferry Port", "Naples Beverello Port", 75, 2390, ("NLG", "Alilauro", "Positano Jet")),
-    RouteSeed("ferry", "naples", "praiano", "Naples Beverello Port", "Praiano Ferry Pier", 105, 2590, ("NLG", "Alilauro Gruson", "Positano Jet")),
-    RouteSeed("ferry", "corfu", "ksamil", "Corfu Port", "Ksamil Ferry Pier", 55, 1990, ("Finikas Lines", "Ionian Seaways")),
-    RouteSeed("ferry", "oslo", "copenhagen", "Oslo Ferry Terminal", "Copenhagen Ferry Terminal", 1080, 6990, ("DFDS",)),
-    RouteSeed("ferry", "palma", "ibiza", "Palma de Mallorca Port", "Ibiza Port", 130, 3990, ("Balearia", "Trasmed")),
-    RouteSeed("ferry", "dublin", "holyhead", "Dublin Port", "Holyhead Port", 195, 4290, ("Irish Ferries", "Stena Line")),
-    # Supplementary synthetic routes cover providers and useful multi-mode searches.
-    RouteSeed("bus", "london", "paris", "London Victoria Coach Station", "Paris Bercy Seine", 540, 2490, ("FlixBus", "National Express", "Blablacar Bus"), "supplementary"),
-    RouteSeed("flight", "london", "paris", "London Gatwick Airport", "Paris Charles de Gaulle Airport", 80, 4490, ("easyJet", "British Airways", "Air France"), "supplementary"),
-    RouteSeed("train", "zurich", "berlin", "Zurich HB", "Berlin Hbf", 500, 4990, ("SBB", "Deutsche Bahn"), "supplementary"),
-    RouteSeed("train", "paris", "amsterdam", "Paris Gare du Nord", "Amsterdam Centraal", 210, 3990, ("SNCF", "NS"), "supplementary"),
-    RouteSeed("train", "brussels", "paris", "Bruxelles-Midi", "Paris Gare du Nord", 85, 2990, ("SNCB", "SNCF"), "supplementary"),
-    RouteSeed("train", "stockholm", "gothenburg", "Stockholm Central", "Goteborg Central", 185, 2490, ("SJ",), "supplementary"),
-    RouteSeed("train", "helsinki", "tampere", "Helsinki Central", "Tampere Station", 110, 1990, ("VR Finland",), "supplementary"),
-    RouteSeed("train", "copenhagen", "malmo", "Kobenhavn H", "Malmo Central", 40, 1290, ("Öresundståg",), "supplementary"),
-    RouteSeed("train", "toronto", "montreal", "Toronto Union Station", "Montreal Central Station", 305, 4490, ("Via Rail Canada",), "supplementary"),
-    RouteSeed("train", "porto", "lisbon", "Porto Campanha", "Lisboa Santa Apolonia", 170, 1690, ("Comboios",), "supplementary"),
-    RouteSeed("bus", "prague", "vienna", "Prague Florenc", "Vienna Erdberg", 250, 1490, ("Regiojet", "FlixBus"), "supplementary"),
-    RouteSeed("bus", "zurich", "munich", "Zurich Bus Station", "Munich Central Bus Station", 240, 1890, ("Swiss Tours", "FlixBus"), "supplementary"),
-    RouteSeed("bus", "barcelona", "rome", "Barcelona Nord Bus Station", "Rome Tiburtina Bus Station", 1320, 5990, ("FlixBus", "Blablacar Bus"), "supplementary"),
-    RouteSeed("flight", "amsterdam", "paris", "Amsterdam Schiphol Airport", "Paris Charles de Gaulle Airport", 80, 4990, ("KLM", "Air France"), "supplementary"),
-    RouteSeed("flight", "madrid", "paris", "Madrid Barajas Airport", "Paris Orly Airport", 125, 4990, ("Iberia", "Air France"), "supplementary"),
-    RouteSeed("ferry", "piraeus", "santorini", "Piraeus Port", "Santorini Athinios Port", 330, 4490, ("Seajets", "Blue Star Ferries"), "supplementary"),
-)
+CAPITAL_SLUGS = frozenset({
+    "tirana", "andorra-la-vella", "vienna", "minsk", "brussels", "sarajevo",
+    "sofia", "zagreb", "prague", "copenhagen", "tallinn", "helsinki", "paris",
+    "berlin", "athens", "budapest", "reykjavik", "dublin", "rome", "pristina",
+    "riga", "vaduz", "vilnius", "luxembourg", "valletta", "chisinau", "monaco",
+    "podgorica", "amsterdam", "skopje", "oslo", "warsaw", "lisbon", "bucharest",
+    "moscow", "san-marino", "belgrade", "bratislava", "ljubljana", "madrid",
+    "stockholm", "bern", "kyiv", "london", "vatican-city",
+})
 
 
-# Mode headings in the pasted source apply to every pair until the next heading.
-# Reverse service is generated automatically, so each undirected pair appears once.
-_PASTED_TRAIN_PAIRS = (
-    ("berlin", "london"), ("london", "madrid"), ("frankfurt", "london"),
-    ("hamburg", "london"), ("edinburgh", "london"), ("london", "barcelona"),
-    ("london", "munich"), ("bari", "london"), ("venice", "london"),
-    ("vienna", "london"), ("london", "rome"), ("london", "brussels"),
-    ("london", "lyon"), ("milan", "london"),
-    ("amsterdam", "london"), ("london", "florence"),
-    ("london-heathrow-airport", "london"), ("zurich", "london"),
-    ("london", "stockholm"), ("london", "cologne"),
-    ("lisbon", "porto"), ("madrid", "barcelona"), ("copenhagen", "stockholm"),
-    ("paris", "amsterdam"), ("milan", "paris"), ("vienna", "bratislava"),
-    ("barcelona", "paris"),
-    ("madrid", "seville"), ("barcelona", "valencia"),
-    ("stockholm", "copenhagen"),
-    ("naples", "sorrento"), ("brussels", "paris"),
-    # Added so both airport express companies pasted from the homepage have fares.
-    ("london-gatwick-airport", "london"),
-    ("tokyo", "kyoto"), ("tokyo", "osaka"), ("osaka", "kyoto"),
-    ("osaka", "hiroshima"),
-)
-
-_PASTED_BUS_PAIRS = (
-    ("skegness", "london"),
-    ("london", "madrid"), ("london", "paris"), ("rome", "london"),
-    ("milan", "london"), ("barcelona", "london"),
-    ("london", "lisbon"), ("warsaw", "london"), ("zaragoza", "london"),
-    ("london", "oslo"), ("berlin", "london"), ("london", "munich"),
-    ("prague", "london"), ("birmingham", "london"), ("zagreb", "london"),
-    ("bologna", "london"), ("catania", "london"), ("naples", "london"),
-    ("lyon", "london"), ("manchester", "london"), ("london", "frankfurt"),
-    ("madrid", "barcelona"), ("paris", "amsterdam"),
-    ("barcelona", "valencia"), ("brussels", "paris"),
-    ("lisbon", "porto"), ("geneva", "chamonix"),
-    ("barcelona", "tossa-de-mar"), ("chamonix", "le-grand-saconnex"),
-    ("naples", "positano"), ("naples", "sorrento"), ("seville", "faro"),
-    ("paris", "lisbon"), ("barcelona", "andorra-la-vella"),
-    ("seville", "granada"),
-)
-
-_PASTED_FLIGHT_PAIRS = (
-    ("london", "paris"), ("london", "madrid"),
-    ("madrid", "paris"), ("berlin", "london"),
-    ("london", "barcelona"), ("paris", "berlin"), ("london", "rome"),
-    ("london", "milan"), ("dubai", "london"),
-    ("berlin", "rome"), ("rome", "paris"), ("milan", "amsterdam"),
-    ("paris", "barcelona"), ("paris", "naples"),
-    ("berlin", "barcelona"), ("berlin", "venice"), ("berlin", "athens"),
-    ("berlin", "helsinki"),
-    ("rome", "munich"), ("vienna", "lisbon"), ("dusseldorf", "berlin"),
-    ("paris", "prague"), ("faro", "paris"), ("antwerp", "london"),
-    ("milan", "berlin"), ("paris", "warsaw"), ("milan", "lisbon"),
-    ("berlin", "vienna"), ("bologna", "paris"),
-)
-
-_PASTED_FERRY_PAIRS = (
-    # Explicit port corridors only. Ferry routes are never inferred by distance.
-    ("barcelona", "palma"), ("barcelona", "ibiza"),
-    ("barcelona", "civitavecchia"), ("barcelona", "olbia"),
-    ("amalfi", "praiano"), ("naples", "capri"),
-    ("piraeus", "hydra"), ("cairnryan", "belfast"),
-    ("igoumenitsa", "venice"), ("sorrento", "capri"),
-    ("benidorm", "ibiza"), ("mykonos", "paros"),
-    ("chania", "santorini"), ("naples", "positano"),
-    ("mykonos", "santorini"), ("dunkirk", "dover"),
-    ("kos", "rhodes"),
-)
-
-# These pasted corridors did not state a mode. They receive a plausible train or
-# flight below and are excluded from mode-specific source assertions.
-_PASTED_GENERAL_PAIRS = (
-    ("madrid", "barcelona"), ("madrid", "valencia"), ("lisbon", "porto"),
-    ("budapest", "vienna"), ("madrid", "seville"), ("rome", "florence"),
-    ("prague", "vienna"), ("berlin", "london"), ("berlin", "paris"),
-    ("rome", "berlin"), ("rome", "london"), ("milan", "berlin"),
-    ("rome", "paris"), ("london", "milan"), ("madrid", "berlin"),
-    ("paris", "milan"), ("madrid", "london"), ("berlin", "frankfurt"),
-    ("barcelona", "berlin"), ("madrid", "paris"), ("vienna", "berlin"),
-    ("berlin", "amsterdam"), ("berlin", "munich"), ("frankfurt", "london"),
-    ("london", "barcelona"), ("berlin", "stockholm"), ("london", "vienna"),
-    ("berlin", "cologne"),
-    ("madrid", "segovia"),
-    ("london", "amsterdam"), ("london", "edinburgh"),
-    ("istanbul", "antalya"), ("malaga", "gibraltar"),
-)
-
-
-# Explicit synthetic corridors broaden capital coverage without inventing modes
-# from distance alone. Airportless microstates use nearby rail or bus gateways;
-# island capitals use flights; ferries are limited to established port pairs.
-CAPITAL_MODE_PAIRS = (
-    ("train", "bern", "zurich"),
-    ("train", "vienna", "ljubljana"),
-    ("train", "ljubljana", "zagreb"),
-    ("train", "budapest", "zagreb"),
-    ("train", "budapest", "belgrade"),
-    ("train", "belgrade", "podgorica"),
-    ("train", "bucharest", "budapest"),
-    ("train", "sofia", "bucharest"),
-    ("train", "warsaw", "kyiv"),
-    ("train", "vilnius", "riga"),
-    ("train", "paris", "luxembourg"),
-    ("train", "brussels", "luxembourg"),
-    ("train", "stockholm", "oslo"),
-    ("train", "monaco", "nice"),
-    ("train", "moscow", "minsk"),
-    ("train", "ankara", "istanbul"),
-    ("bus", "tirana", "podgorica"),
-    ("bus", "sarajevo", "zagreb"),
-    ("bus", "sarajevo", "belgrade"),
-    ("bus", "sofia", "belgrade"),
-    ("bus", "sofia", "skopje"),
-    ("bus", "skopje", "tirana"),
-    ("bus", "podgorica", "sarajevo"),
-    ("bus", "chisinau", "bucharest"),
-    ("bus", "kyiv", "warsaw"),
-    ("bus", "tallinn", "riga"),
-    ("bus", "riga", "vilnius"),
-    ("bus", "ljubljana", "vienna"),
-    ("bus", "bratislava", "budapest"),
-    ("bus", "luxembourg", "brussels"),
-    ("bus", "san-marino", "rimini"),
-    ("bus", "vatican-city", "rome"),
-    ("bus", "vaduz", "sargans"),
-    ("bus", "andorra-la-vella", "barcelona"),
-    ("bus", "monaco", "nice"),
-    ("bus", "minsk", "vilnius"),
-    ("bus", "moscow", "minsk"),
-    ("bus", "ankara", "istanbul"),
-    ("bus", "pristina", "skopje"),
-    ("bus", "tbilisi", "yerevan"),
-    ("bus", "baku", "tbilisi"),
-    ("flight", "tallinn", "berlin"),
-    ("flight", "riga", "berlin"),
-    ("flight", "sofia", "vienna"),
-    ("flight", "bucharest", "rome"),
-    ("flight", "ljubljana", "paris"),
-    ("flight", "belgrade", "berlin"),
-    ("flight", "sarajevo", "vienna"),
-    ("flight", "tirana", "rome"),
-    ("flight", "skopje", "vienna"),
-    ("flight", "podgorica", "rome"),
-    ("flight", "chisinau", "vienna"),
-    ("flight", "reykjavik", "london"),
-    ("flight", "nicosia", "athens"),
-    ("flight", "valletta", "rome"),
-    ("flight", "luxembourg", "berlin"),
-    ("flight", "oslo", "paris"),
-    ("flight", "dublin", "london"),
-    ("flight", "helsinki", "stockholm"),
-    ("flight", "copenhagen", "paris"),
-    ("flight", "zagreb", "paris"),
-    ("flight", "vilnius", "berlin"),
-    ("flight", "bratislava", "london"),
-    ("flight", "budapest", "paris"),
-    ("flight", "athens", "rome"),
-    ("flight", "stockholm", "berlin"),
-    ("flight", "pristina", "vienna"),
-    ("flight", "baku", "istanbul"),
-    ("flight", "tbilisi", "vienna"),
-    ("flight", "yerevan", "athens"),
-    ("ferry", "helsinki", "tallinn"),
-    ("ferry", "stockholm", "helsinki"),
-)
-
-SOURCE_MODE_PAIRS = tuple(
-    (mode, origin, destination)
-    for mode, pairs in (
-        ("train", _PASTED_TRAIN_PAIRS),
-        ("bus", _PASTED_BUS_PAIRS),
-        ("flight", _PASTED_FLIGHT_PAIRS),
-        ("ferry", _PASTED_FERRY_PAIRS),
-    )
-    for origin, destination in pairs
-)
-SOURCE_GENERAL_PAIRS = _PASTED_GENERAL_PAIRS
-SOURCE_DESTINATION_SLUGS = (
-    "madrid", "paris", "barcelona", "prague", "vienna", "florence", "lisbon",
-    "porto", "rome", "london", "amsterdam", "capri", "naples", "sorrento",
-    "positano", "amalfi", "helsinki",
-    "berlin", "milan", "krakow", "budapest", "frankfurt", "copenhagen",
-    "bratislava", "seville", "valencia", "malaga",
-    "athens", "granada", "lyon", "munich", "alicante", "cologne",
-    "stockholm", "geneva", "brussels", "hamburg", "gothenburg",
-    "chamonix", "disneyland-paris", "bristol", "bath", "biarritz", "glasgow",
-    "oslo", "zakynthos", "luxembourg", "como",
-)
-
-SOURCE_COMPANIES = (
-    "Italo", "Frecciarossa", "iryo", "Ouigo Spain", "České dráhy", "Trenitalia",
-    "FlixBus", "Alsa", "Costa Verde", "National Express", "Swiss Tours", "Infobus",
-    "Vueling", "easyJet", "Ryanair", "Malta Air", "Lufthansa", "Iberia",
-    "Seajets", "NLG", "Alilauro", "Positano Jet", "Alilauro Gruson",
-    "Blue Star Ferries", "Renfe", "Deutsche Bahn", "Eurostar", "SBB", "SNCF",
-    "Gatwick Express", "Heathrow Express", "SJ", "NS", "British Airways", "ÖBB",
-    "Air France", "SNCB", "KLM", "Via Rail Canada", "Blablacar Bus",
-    "Regiojet", "Comboios", "VR Finland", "Öresundståg",
-    "Travelmar", "SNAV", "DFDS",
-)
-
-SOURCE_COMPANY_ALIASES = {
-    "BlaBlaCar Bus": "Blablacar Bus",
-    "Flixbus": "FlixBus",
-    "RegioJet": "Regiojet",
-    "DFDS Ferries": "DFDS",
-    "NLG ferries": "NLG",
-    "SNAV ferris": "SNAV",
+AIRPORTLESS_GATEWAYS = {
+    "andorra-la-vella": ("barcelona", "Andorra la Vella Bus Station", "Barcelona Nord Bus Station", "Andbus"),
+    "vaduz": ("zurich", "Vaduz Post via Sargans/Buchs", "Zurich Bus Station", "LIEmobil"),
+    "san-marino": ("bologna", "San Marino Bus Terminal via Rimini", "Bologna Autostazione", "San Marino Shuttle"),
+    "vatican-city": ("rome", "Vatican City Bus Stop", "Rome Tiburtina Bus Station", "ATAC"),
+    "monaco": ("nice", "Monaco-Monte-Carlo Station", "Nice-Ville Station", "SNCF"),
 }
 
 
-def _distance_km(origin: str, destination: str) -> float:
-    by_slug = {location.slug: location for location in LOCATIONS}
-    first = by_slug[origin]
-    second = by_slug[destination]
+AIRPORT_POINTS = {
+    "tirana": "Tirana International Airport", "vienna": "Vienna International Airport",
+    "minsk": "Minsk National Airport", "brussels": "Brussels Airport",
+    "sarajevo": "Sarajevo International Airport", "sofia": "Sofia Airport",
+    "zagreb": "Zagreb Airport", "prague": "Prague Airport",
+    "copenhagen": "Copenhagen Airport", "tallinn": "Tallinn Airport",
+    "helsinki": "Helsinki Airport", "paris": "Paris Charles de Gaulle Airport",
+    "marseille": "Marseille Provence Airport", "lyon": "Lyon-Saint Exupery Airport",
+    "nice": "Nice Cote d'Azur Airport", "bordeaux": "Bordeaux Airport",
+    "toulouse": "Toulouse-Blagnac Airport", "berlin": "Berlin Brandenburg Airport",
+    "hamburg": "Hamburg Airport", "munich": "Munich Airport",
+    "frankfurt": "Frankfurt Airport", "athens": "Athens International Airport",
+    "thessaloniki": "Thessaloniki Airport", "heraklion": "Heraklion Airport",
+    "budapest": "Budapest Airport", "reykjavik": "Keflavik International Airport",
+    "dublin": "Dublin Airport", "cork": "Cork Airport",
+    "rome": "Rome Fiumicino Airport", "milan": "Milan Malpensa Airport",
+    "naples": "Naples International Airport", "venice": "Venice Marco Polo Airport",
+    "genoa": "Genoa Airport", "bari": "Bari Airport",
+    "palermo": "Palermo Airport", "cagliari": "Cagliari Airport",
+    "bologna": "Bologna Airport", "turin": "Turin Airport",
+    "pristina": "Pristina International Airport", "riga": "Riga International Airport",
+    "vilnius": "Vilnius Airport", "luxembourg": "Luxembourg Airport",
+    "valletta": "Malta International Airport", "chisinau": "Chisinau International Airport",
+    "podgorica": "Podgorica Airport", "amsterdam": "Amsterdam Schiphol Airport",
+    "skopje": "Skopje International Airport", "oslo": "Oslo Airport",
+    "bergen": "Bergen Airport", "kristiansand": "Kristiansand Airport",
+    "warsaw": "Warsaw Chopin Airport", "krakow": "Krakow Airport",
+    "gdansk": "Gdansk Airport", "wroclaw": "Wroclaw Airport",
+    "poznan": "Poznan Airport", "lisbon": "Lisbon Airport", "porto": "Porto Airport",
+    "bucharest": "Bucharest Henri Coanda Airport", "cluj-napoca": "Cluj International Airport",
+    "timisoara": "Timisoara Airport", "moscow": "Moscow Sheremetyevo Airport",
+    "saint-petersburg": "Pulkovo Airport", "belgrade": "Belgrade Nikola Tesla Airport",
+    "ljubljana": "Ljubljana Airport", "madrid": "Madrid Barajas Airport",
+    "barcelona": "Barcelona El Prat Airport", "valencia": "Valencia Airport",
+    "seville": "Seville Airport", "malaga": "Malaga Airport", "bilbao": "Bilbao Airport",
+    "santander": "Santander Airport", "palma": "Palma de Mallorca Airport",
+    "stockholm": "Stockholm Arlanda Airport", "gothenburg": "Gothenburg Landvetter Airport",
+    "zurich": "Zurich Airport", "geneva": "Geneva Airport", "kyiv": "Kyiv Boryspil Airport",
+    "lviv": "Lviv International Airport", "odesa": "Odesa International Airport",
+    "london": "London Heathrow Airport", "edinburgh": "Edinburgh Airport",
+    "glasgow": "Glasgow Airport", "cardiff": "Cardiff Airport",
+    "manchester": "Manchester Airport", "birmingham": "Birmingham Airport",
+    "liverpool": "Liverpool John Lennon Airport", "belfast": "Belfast International Airport",
+    "leeds": "Leeds Bradford Airport", "istanbul": "Istanbul Airport (European side)",
+}
+
+
+PORT_POINTS = {
+    "helsinki": "Port of Helsinki", "tallinn": "Tallinn Passenger Port",
+    "turku": "Port of Turku", "stockholm": "Stockholm Vartahamnen Terminal",
+    "copenhagen": "Copenhagen Ferry Terminal", "oslo": "Oslo Ferry Terminal",
+    "belfast": "Belfast Ferry Terminal",
+    "liverpool": "Birkenhead (Liverpool) Ferry Terminal",
+    "portsmouth": "Portsmouth International Port", "santander": "Port of Santander",
+    "bilbao": "Port of Bilbao", "barcelona": "Port of Barcelona",
+    "palma": "Port of Palma", "valencia": "Port of Valencia", "genoa": "Port of Genoa",
+    "naples": "Naples Ferry Terminal", "palermo": "Port of Palermo",
+    "cagliari": "Port of Cagliari", "bari": "Port of Bari", "durres": "Port of Durres",
+    "patras": "Port of Patras", "venice": "Port of Venice", "split": "Port of Split",
+    "piraeus": "Port of Piraeus", "heraklion": "Port of Heraklion",
+}
+
+
+FERRY_CORRIDORS = frozenset({
+    frozenset(pair) for pair in (
+        ("helsinki", "tallinn"), ("helsinki", "stockholm"), ("turku", "stockholm"),
+        ("copenhagen", "oslo"), ("belfast", "liverpool"),
+        ("portsmouth", "santander"), ("portsmouth", "bilbao"),
+        ("barcelona", "palma"), ("valencia", "palma"), ("barcelona", "genoa"),
+        ("naples", "palermo"), ("naples", "cagliari"), ("genoa", "palermo"),
+        ("genoa", "cagliari"), ("palermo", "cagliari"), ("bari", "durres"),
+        ("bari", "patras"), ("venice", "patras"), ("split", "bari"),
+        ("piraeus", "heraklion"),
+    )
+})
+
+
+TRAIN_CORRIDORS = frozenset({
+    frozenset(pair) for pair in (
+        ("london", "paris"), ("london", "brussels"), ("paris", "brussels"),
+        ("paris", "amsterdam"), ("brussels", "amsterdam"), ("paris", "strasbourg"),
+        ("paris", "lyon"), ("paris", "bordeaux"), ("madrid", "barcelona"),
+        ("madrid", "valencia"), ("berlin", "hamburg"), ("berlin", "dresden"),
+        ("berlin", "prague"), ("prague", "vienna"), ("vienna", "budapest"),
+        ("vienna", "bratislava"), ("vienna", "graz"), ("munich", "vienna"),
+        ("frankfurt", "cologne"), ("frankfurt", "brussels"), ("milan", "turin"),
+        ("milan", "venice"), ("milan", "bologna"), ("bologna", "florence"),
+        ("florence", "rome"), ("rome", "naples"), ("stockholm", "gothenburg"),
+        ("copenhagen", "malmo"), ("oslo", "gothenburg"), ("warsaw", "krakow"),
+        ("warsaw", "gdansk"), ("warsaw", "poznan"), ("krakow", "wroclaw"),
+        ("lisbon", "porto"), ("bucharest", "constanta"), ("belgrade", "novi-sad"),
+        ("sofia", "istanbul"), ("moscow", "saint-petersburg"),
+        ("kyiv", "lviv"), ("zurich", "bern"), ("zurich", "geneva"),
+    )
+})
+
+BUS_CORRIDORS = frozenset({
+    frozenset(("london", "paris")),
+})
+
+
+ISLAND_REGIONS = {
+    "reykjavik": "iceland", "dublin": "ireland", "cork": "ireland",
+    "belfast": "ireland", "valletta": "malta", "heraklion": "crete",
+    "palermo": "sicily", "cagliari": "sardinia", "palma": "mallorca",
+    "london": "great-britain", "edinburgh": "great-britain",
+    "glasgow": "great-britain", "cardiff": "great-britain",
+    "manchester": "great-britain", "birmingham": "great-britain",
+    "liverpool": "great-britain", "portsmouth": "great-britain",
+    "leeds": "great-britain",
+    "helsinki": "finland", "turku": "finland", "tampere": "finland",
+    "oslo": "scandinavia", "bergen": "scandinavia",
+    "kristiansand": "scandinavia", "stockholm": "scandinavia",
+    "gothenburg": "scandinavia", "malmo": "scandinavia",
+}
+
+
+def distance_km(origin: str, destination: str) -> float:
+    first = _LOCATION_BY_SLUG[origin]
+    second = _LOCATION_BY_SLUG[destination]
     lat1, lat2 = radians(first.latitude), radians(second.latitude)
     delta_lat = lat2 - lat1
     delta_lon = radians(second.longitude - first.longitude)
-    haversine = sin(delta_lat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(delta_lon / 2) ** 2
+    haversine = (
+        sin(delta_lat / 2) ** 2
+        + cos(lat1) * cos(lat2) * sin(delta_lon / 2) ** 2
+    )
     return 6371 * 2 * asin(sqrt(haversine))
-
-
-_CAPITAL_TRAIN_COMPANIES = {
-    frozenset(("ankara", "istanbul")): ("TCDD Taşımacılık",),
-    frozenset(("belgrade", "podgorica")): ("Srbija Voz", "ŽPCG"),
-    frozenset(("bern", "zurich")): ("SBB",),
-    frozenset(("brussels", "luxembourg")): ("SNCB", "CFL"),
-    frozenset(("bucharest", "budapest")): ("CFR Călători", "MÁV"),
-    frozenset(("budapest", "belgrade")): ("MÁV", "Srbija Voz"),
-    frozenset(("budapest", "zagreb")): ("MÁV", "HŽPP"),
-    frozenset(("ljubljana", "zagreb")): ("Slovenske železnice", "HŽPP"),
-    frozenset(("monaco", "nice")): ("SNCF",),
-    frozenset(("moscow", "minsk")): ("Russian Railways", "Belarusian Railway"),
-    frozenset(("paris", "luxembourg")): ("SNCF", "CFL"),
-    frozenset(("sofia", "bucharest")): ("BDZ", "CFR Călători"),
-    frozenset(("stockholm", "oslo")): ("SJ", "Vy"),
-    frozenset(("vienna", "ljubljana")): ("ÖBB", "Slovenske železnice"),
-    frozenset(("vilnius", "riga")): ("LTG Link", "Vivi"),
-    frozenset(("warsaw", "kyiv")): ("PKP Intercity", "Ukrainian Railways"),
-}
-
-_CAPITAL_BUS_COMPANIES = {
-    frozenset(("andorra-la-vella", "barcelona")): ("Andbus", "Direct Bus"),
-    frozenset(("baku", "tbilisi")): ("Caucasus Coach",),
-    frozenset(("monaco", "nice")): ("ZOU!",),
-    frozenset(("san-marino", "rimini")): ("Benedettini Bus",),
-    frozenset(("tbilisi", "yerevan")): ("Caucasus Coach",),
-    frozenset(("vaduz", "sargans")): ("LIEmobil",),
-    frozenset(("vatican-city", "rome")): ("ATAC",),
-}
-
-_CAPITAL_FLIGHT_COMPANIES = {
-    frozenset(("baku", "istanbul")): ("Azerbaijan Airlines", "Turkish Airlines"),
-    frozenset(("tbilisi", "vienna")): ("Georgian Airways", "Austrian Airlines"),
-    frozenset(("yerevan", "athens")): ("Aegean Airlines", "FlyOne Armenia"),
-}
 
 
 def _companies_for(mode: str, origin: str, destination: str) -> tuple[str, ...]:
     countries = {
-        location.slug: location.country_code for location in LOCATIONS
+        _LOCATION_BY_SLUG[origin].country_code,
+        _LOCATION_BY_SLUG[destination].country_code,
     }
-    pair_countries = {countries[origin], countries[destination]}
-    pair = {origin, destination}
     if mode == "train":
-        if companies := _CAPITAL_TRAIN_COMPANIES.get(frozenset(pair)):
-            return companies
-        if "london-heathrow-airport" in pair:
-            return ("Heathrow Express",)
-        if "london-gatwick-airport" in pair:
-            return ("Gatwick Express",)
-        if "CA" in pair_countries:
-            return ("Via Rail Canada",)
-        if "JP" in pair_countries:
-            return ("JR Central",)
-        if pair_countries == {"ES"}:
-            return ("Renfe", "iryo", "Ouigo Spain")
-        if pair_countries == {"IT"}:
-            return ("Trenitalia", "Italo", "Frecciarossa")
-        if pair_countries == {"DE"}:
-            return ("Deutsche Bahn",)
-        if pair_countries == {"FR"}:
-            return ("SNCF",)
-        if "GB" in pair_countries:
+        if "GB" in countries:
             return ("Eurostar",)
-        if "SE" in pair_countries and "DK" in pair_countries:
-            return ("Öresundståg", "SJ")
-        if "SE" in pair_countries:
-            return ("SJ",)
-        if "AT" in pair_countries:
-            return ("ÖBB",)
-        if "CH" in pair_countries:
-            return ("SBB",)
-        if "NL" in pair_countries:
-            return ("NS",)
-        if "BE" in pair_countries:
-            return ("SNCB",)
-        if "PT" in pair_countries:
-            return ("Comboios",)
-        if "FI" in pair_countries:
-            return ("VR Finland",)
-        if "CZ" in pair_countries:
-            return ("České dráhy",)
-        return ("Deutsche Bahn", "SNCF")
+        if "IT" in countries:
+            return ("Trenitalia", "Italo")
+        if "ES" in countries:
+            return ("Renfe",)
+        if countries & {"AT", "CH", "DE"}:
+            return ("ÖBB", "Deutsche Bahn")
+        return ("European Rail Connect",)
     if mode == "bus":
-        if companies := _CAPITAL_BUS_COMPANIES.get(frozenset(pair)):
-            return companies
-        if "GB" in pair_countries:
+        if "GB" in countries:
             return ("National Express", "FlixBus")
-        if "ES" in pair_countries:
+        if "ES" in countries:
             return ("Alsa", "FlixBus")
-        if pair & {"prague", "vienna", "bratislava"}:
-            return ("Regiojet", "FlixBus")
-        return ("FlixBus", "Blablacar Bus")
+        return ("FlixBus", "European Coach Lines")
     if mode == "flight":
-        if companies := _CAPITAL_FLIGHT_COMPANIES.get(frozenset(pair)):
-            return companies
-        if "nicosia" in pair:
-            return ("Aegean Airlines", "Cyprus Airways")
-        if "reykjavik" in pair:
-            return ("Icelandair", "easyJet")
-        if "GB" in pair_countries:
-            return ("easyJet", "British Airways", "Ryanair")
-        if "ES" in pair_countries:
-            return ("Vueling", "Iberia", "Ryanair")
-        if "FR" in pair_countries:
-            return ("Air France", "easyJet")
-        if "DE" in pair_countries:
-            return ("Lufthansa", "easyJet")
-        if "NL" in pair_countries:
-            return ("KLM", "easyJet")
-        return ("Ryanair", "Malta Air", "Lufthansa")
+        return ("Lufthansa", "Ryanair", "easyJet")
     if mode == "ferry":
-        if pair <= {"helsinki", "tallinn", "stockholm"}:
-            return ("Tallink Silja", "Viking Line")
-        if "GR" in pair_countries:
-            return ("Seajets", "Blue Star Ferries")
-        if "IT" in pair_countries:
-            return (
-                "NLG", "Alilauro", "Positano Jet", "Alilauro Gruson",
-                "Travelmar", "SNAV",
-            )
-        return ("Seajets", "Blue Star Ferries")
+        if countries & {"SE", "FI", "EE", "DK", "NO"}:
+            return ("Baltic Ferry Lines",)
+        if countries & {"GB", "IE"}:
+            return ("Atlantic Ferry Lines",)
+        return ("Mediterranean Ferry Lines",)
     raise ValueError(f"unsupported mode {mode!r}")
 
 
-_POINT_OVERRIDES = {
-    ("flight", "nicosia"): "Larnaca International Airport (for Nicosia)",
-    ("flight", "reykjavik"): "Keflavik International Airport",
-    ("flight", "valletta"): "Malta International Airport",
-    ("bus", "andorra-la-vella"): "Andorra la Vella Bus Station",
-    ("bus", "san-marino"): "San Marino City Bus Stop",
-    ("bus", "vaduz"): "Vaduz Post",
-    ("bus", "vatican-city"): "Vatican City Bus Stop",
-    ("train", "monaco"): "Monaco-Monte-Carlo Station",
-    ("ferry", "helsinki"): "Helsinki West Terminal",
-    ("ferry", "stockholm"): "Stockholm Värtahamnen Terminal",
-    ("ferry", "tallinn"): "Tallinn Passenger Port",
-}
+def _point(mode: str, slug: str) -> str:
+    city = _LOCATION_BY_SLUG[slug].city
+    if mode == "flight":
+        return AIRPORT_POINTS[slug]
+    if mode == "ferry":
+        return PORT_POINTS[slug]
+    if mode == "train":
+        if slug == "istanbul":
+            return "Istanbul Halkali Station (European side)"
+        return f"{city} Central Station"
+    if slug == "istanbul":
+        return "Istanbul Esenler Coach Station (European side)"
+    return f"{city} Coach Station"
 
 
-def _synthetic_route(mode: str, origin: str, destination: str) -> RouteSeed:
-    distance = max(20.0, _distance_km(origin, destination))
+def _leg(
+    mode: str,
+    origin: str,
+    destination: str,
+    *,
+    company: str | None = None,
+) -> RouteLegSeed:
+    distance = max(20.0, distance_km(origin, destination))
     duration = {
         "train": round(distance / 130 * 60 + 25),
         "bus": round(distance / 70 * 60 + 30),
         "flight": round(distance / 720 * 60 + 75),
         "ferry": round(distance / 45 * 60 + 30),
     }[mode]
-    price = {
+    return RouteLegSeed(
+        mode,
+        origin,
+        destination,
+        _point(mode, origin),
+        _point(mode, destination),
+        max(20, duration),
+        company or _companies_for(mode, origin, destination)[0],
+    )
+
+
+def _access_leg(origin: str, destination: str) -> RouteLegSeed:
+    microstate = origin if origin in AIRPORTLESS_GATEWAYS else destination
+    gateway, micro_point, gateway_point, company = AIRPORTLESS_GATEWAYS[microstate]
+    mode = "train" if microstate == "monaco" else "bus"
+    duration = max(
+        20,
+        round(distance_km(microstate, gateway) / 65 * 60 + 25),
+    )
+    if origin == microstate:
+        return RouteLegSeed(
+            mode,
+            origin,
+            gateway,
+            micro_point,
+            gateway_point,
+            duration,
+            company,
+        )
+    return RouteLegSeed(
+        mode,
+        gateway,
+        destination,
+        gateway_point,
+        micro_point,
+        duration,
+        company,
+    )
+
+
+def _region(slug: str) -> str:
+    return ISLAND_REGIONS.get(slug, "mainland")
+
+
+def _nearest_airport(slug: str) -> str:
+    if slug in AIRPORT_POINTS:
+        return slug
+    region = _region(slug)
+    candidates = [
+        candidate
+        for candidate in AIRPORT_POINTS
+        if _region(candidate) == region
+    ]
+    return min(candidates, key=lambda candidate: distance_km(slug, candidate))
+
+
+def _flight_legs(origin: str, destination: str) -> tuple[RouteLegSeed, ...]:
+    origin_airport = _nearest_airport(origin)
+    destination_airport = _nearest_airport(destination)
+    legs: list[RouteLegSeed] = []
+    if origin != origin_airport:
+        legs.append(_leg("bus", origin, origin_airport))
+    flight_path = [origin_airport]
+    if origin_airport != "frankfurt" and destination_airport != "frankfurt":
+        flight_path.append("frankfurt")
+    flight_path.append(destination_airport)
+    for first, second in zip(flight_path, flight_path[1:]):
+        if first != second:
+            legs.append(_leg("flight", first, second))
+    if destination != destination_airport:
+        legs.append(_leg("bus", destination_airport, destination))
+    return tuple(legs)
+
+
+def _coverage_legs(origin: str, destination: str) -> tuple[RouteLegSeed, ...]:
+    pair = frozenset((origin, destination))
+    if pair in FERRY_CORRIDORS:
+        return (_leg("ferry", origin, destination),)
+
+    origin_gateway = AIRPORTLESS_GATEWAYS.get(
+        origin, (origin, "", "", "")
+    )[0]
+    destination_gateway = AIRPORTLESS_GATEWAYS.get(
+        destination, (destination, "", "", "")
+    )[0]
+    legs: list[RouteLegSeed] = []
+    if origin_gateway != origin:
+        legs.append(_access_leg(origin, origin_gateway))
+
+    cross_water = (
+        _region(origin_gateway) != _region(destination_gateway)
+        and (
+            _region(origin_gateway) != "mainland"
+            or _region(destination_gateway) != "mainland"
+        )
+    )
+    if origin_gateway != destination_gateway:
+        if cross_water:
+            legs.extend(_flight_legs(origin_gateway, destination_gateway))
+        else:
+            legs.append(_leg("bus", origin_gateway, destination_gateway))
+
+    if destination_gateway != destination:
+        legs.append(_access_leg(destination_gateway, destination))
+    return tuple(legs)
+
+
+def _dominant_leg(legs: tuple[RouteLegSeed, ...]) -> RouteLegSeed:
+    return min(
+        legs,
+        key=lambda leg: (-leg.duration_minutes, MODE_PRIORITY[leg.mode]),
+    )
+
+
+def _dominant_mode(legs: tuple[RouteLegSeed, ...]) -> str:
+    return _dominant_leg(legs).mode
+
+
+def _route(
+    origin: str,
+    destination: str,
+    legs: tuple[RouteLegSeed, ...],
+    source_kind: str,
+) -> RouteSeed:
+    mode = _dominant_mode(legs)
+    distance = max(20.0, distance_km(origin, destination))
+    base_price = {
         "train": max(990, round(distance * 8)),
         "bus": max(690, round(distance * 5)),
         "flight": max(2990, round(distance * 6)),
         "ferry": max(1290, round(distance * 7)),
     }[mode]
-    point_types = {
-        "train": "Central Station",
-        "bus": "Coach Station",
-        "flight": "Airport",
-        "ferry": "Ferry Terminal",
-    }
-    by_slug = {location.slug: location for location in LOCATIONS}
-    point_type = point_types[mode]
-    origin_point = _POINT_OVERRIDES.get(
-        (mode, origin), f"{by_slug[origin].city} {point_type}"
-    )
-    destination_point = _POINT_OVERRIDES.get(
-        (mode, destination), f"{by_slug[destination].city} {point_type}"
-    )
     return RouteSeed(
         mode,
         origin,
         destination,
-        origin_point,
-        destination_point,
-        max(20, duration),
-        price,
-        _companies_for(mode, origin, destination),
-        "supplementary",
+        legs[0].origin_point,
+        legs[-1].destination_point,
+        sum(leg.duration_minutes for leg in legs)
+        + TRANSFER_BUFFER_MINUTES * (len(legs) - 1),
+        base_price,
+        (_dominant_leg(legs).company,),
+        source_kind,
+        legs,
     )
 
 
 def _all_routes() -> tuple[RouteSeed, ...]:
-    routes = list(_BASE_ROUTES)
-    seen = {
-        (route.mode, *sorted((route.origin, route.destination))) for route in routes
-    }
-    for mode, origin, destination in (*SOURCE_MODE_PAIRS, *CAPITAL_MODE_PAIRS):
-        key = (mode, *sorted((origin, destination)))
+    routes: list[RouteSeed] = []
+    seen: set[tuple[str, str, str]] = set()
+    for origin_index, origin in enumerate(LOCATIONS):
+        for destination in LOCATIONS[origin_index + 1 :]:
+            legs = _coverage_legs(origin.slug, destination.slug)
+            route = _route(origin.slug, destination.slug, legs, "coverage")
+            routes.append(route)
+            seen.add((route.mode, *sorted((origin.slug, destination.slug))))
+
+    for pair in TRAIN_CORRIDORS:
+        origin, destination = sorted(pair)
+        key = ("train", origin, destination)
         if key not in seen:
-            routes.append(_synthetic_route(mode, origin, destination))
+            routes.append(
+                _route(
+                    origin,
+                    destination,
+                    (_leg("train", origin, destination),),
+                    "curated",
+                )
+            )
             seen.add(key)
-    route_pairs = {
-        frozenset((route.origin, route.destination)) for route in routes
-    }
-    for origin, destination in SOURCE_GENERAL_PAIRS:
-        pair = frozenset((origin, destination))
-        if pair not in route_pairs:
-            mode = "train" if _distance_km(origin, destination) <= 900 else "flight"
-            routes.append(_synthetic_route(mode, origin, destination))
-            route_pairs.add(pair)
+    for pair in BUS_CORRIDORS:
+        origin, destination = sorted(pair)
+        key = ("bus", origin, destination)
+        if key not in seen:
+            routes.append(
+                _route(
+                    origin,
+                    destination,
+                    (_leg("bus", origin, destination),),
+                    "curated",
+                )
+            )
+            seen.add(key)
     return tuple(routes)
 
 
 ROUTES = _all_routes()
+
+# Retained manifest names describe the current strict-Europe catalog.
+CAPITAL_MODE_PAIRS = tuple(
+    (route.mode, route.origin, route.destination)
+    for route in ROUTES
+    if route.source_kind == "curated"
+)
+SOURCE_MODE_PAIRS = CAPITAL_MODE_PAIRS
+SOURCE_GENERAL_PAIRS: tuple[tuple[str, str], ...] = ()
+SOURCE_DESTINATION_SLUGS = tuple(location.slug for location in LOCATIONS)
+SOURCE_COMPANY_ALIASES: dict[str, str] = {}
 
 
 def company_modes() -> dict[str, str]:
     """Return the single transport mode assigned to every seeded company."""
     result: dict[str, str] = {}
     for route in ROUTES:
-        for company in route.companies:
-            previous = result.setdefault(company, route.mode)
-            if previous != route.mode:
+        assignments = [(company, route.mode) for company in route.companies]
+        assignments.extend((leg.company, leg.mode) for leg in route.legs)
+        for company, mode in assignments:
+            previous = result.setdefault(company, mode)
+            if previous != mode:
                 raise ValueError(f"company {company!r} has conflicting modes")
-    missing = sorted(set(SOURCE_COMPANIES) - result.keys())
-    if missing:
-        raise ValueError(f"source companies have no seeded route: {', '.join(missing)}")
     return result
+
+
+SOURCE_COMPANIES = tuple(
+    sorted({company for route in ROUTES for company in route.companies})
+)

@@ -52,6 +52,7 @@ export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:nu
   }
   return {load,
     getCarrierLabel(carrierId,datasetId){if(datasetId)return resources.get(datasetId)?.carrierNames.get(carrierId);const names=new Set([...resources.values()].flatMap(resource=>{const name=resource.carrierNames.get(carrierId);return name?[name]:[]}));return names.size===1?[...names][0]:undefined},
+    getFareItinerary(id,datasetId){const row=resources.get(datasetId)?.byId.get(id);if(!row)return undefined;const legs=row.legs??[];return structuredClone({transfers:legs.length?legs.length-1:row.direct?0:1,legs})},
     getManifest(id){const resource=resources.get(id);if(!resource)throw new Error('Expired dataset reference');return structuredClone(resource.manifest)},
     async query(input,signal){
       const query=parseQuery(input,[...resources.values()].map(resource=>resource.manifest))
@@ -60,7 +61,7 @@ export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:nu
       if(captured.some(({source,resource})=>resources.get(source.datasetRef)!==resource))throw new Error('Stale query result')
       return result
     },
-    async lookupFare(id,_fields){for(const resource of resources.values()){const row=resource.byId.get(id);if(row){const {availableSeats:_seats,direct:_direct,...fact}=row;return BoundedFareFactSchema.parse(fact)}}throw new Error('Expired fare reference')},
+    async lookupFare(id,_fields){for(const resource of resources.values()){const row=resource.byId.get(id);if(row){const {availableSeats:_seats,direct:_direct,legs:_legs,...fact}=row;return BoundedFareFactSchema.parse(fact)}}throw new Error('Expired fare reference')},
     subscribe(id,listener){const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
     release(id){const resource=resources.get(id);if(resource&&--resource.references<=0){resources.delete(id);engine.release(resource.engineId);listeners.delete(id)}},
     dispose(){for(const item of pending.values())item.controller.abort();pending.clear();for(const resource of resources.values())engine.release(resource.engineId);resources.clear();listeners.clear();if(ownsEngine)engine.dispose()},

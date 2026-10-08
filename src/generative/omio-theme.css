@@ -796,6 +796,39 @@ html .travel-app .travel-dialog [data-slot='button'] {
   }
 }
 
+html .travel-app .fare-route-summary {
+  display: block;
+  margin-top: 8px;
+}
+
+html .travel-app .fare-route-details {
+  margin-top: 9px;
+  border-top: 1px solid var(--travel-line);
+  padding-top: 8px;
+  font-size: 11px;
+}
+
+html .travel-app .fare-route-details > strong {
+  font-size: 11px;
+}
+
+html .travel-app .fare-route-details ol {
+  display: grid;
+  gap: 5px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html .travel-app .fare-route-details li span,
+html .travel-app .fare-route-details li small {
+  display: block;
+}
+
+html .travel-app .fare-route-details.is-compact li small {
+  min-height: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html .travel-app *,
   html .travel-variant-nav * {

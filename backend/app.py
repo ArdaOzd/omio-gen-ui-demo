@@ -15,9 +15,20 @@ from pathlib import Path
 from typing import Never
 from urllib.parse import parse_qs, urlparse
 
+from backend.generate_db import (
+    DEFAULT_END_DATE,
+    DEFAULT_ROW_COUNT,
+    DEFAULT_START_DATE,
+    GENERATOR_VERSION,
+    SCHEMA_VERSION,
+)
+
 
 DEFAULT_DATABASE = Path(__file__).resolve().parents[1] / "data" / "omio.sqlite3"
 MODES = ("train", "bus", "flight", "ferry")
+EXPECTED_COVERAGE_MODEL = "all_ordered_pairs_daily"
+EXPECTED_LOCATION_SCOPE = "strict_geographic_europe"
+EXPECTED_LOCATION_COUNT = 120
 SORTS = {
     "price_asc": "f.price_cents ASC, f.id ASC",
     "price_desc": "f.price_cents DESC, f.id ASC",
@@ -122,7 +133,7 @@ def _source_version(database: Path) -> str:
         stat = database.stat()
     except FileNotFoundError:
         raise ApiError(HTTPStatus.SERVICE_UNAVAILABLE, "database_unavailable", "The fare database is unavailable.") from None
-    return f"sqlite-demo-v2-{stat.st_ino:x}-{stat.st_size:x}-{stat.st_mtime_ns:x}"
+    return f"sqlite-demo-v{GENERATOR_VERSION}-{stat.st_ino:x}-{stat.st_size:x}-{stat.st_mtime_ns:x}"
 
 
 def _verified_source_version(database: Path, expected: str) -> str:
@@ -147,6 +158,61 @@ def _connect(database: Path) -> sqlite3.Connection:
 
 def _metadata_values(connection: sqlite3.Connection) -> dict[str, str]:
     return {row["key"]: row["value"] for row in connection.execute("SELECT key, value FROM metadata")}
+
+
+def validate_database_contract(database: Path) -> dict[str, str]:
+    """Reject a stale fixture before the API begins serving it."""
+    with closing(_connect(database)) as connection:
+        values = _metadata_values(connection)
+        expected = {
+            "generator_version": str(GENERATOR_VERSION),
+            "schema_version": str(SCHEMA_VERSION),
+            "coverage_model": EXPECTED_COVERAGE_MODEL,
+            "location_scope": EXPECTED_LOCATION_SCOPE,
+            "start_date": DEFAULT_START_DATE.isoformat(),
+            "end_date": DEFAULT_END_DATE.isoformat(),
+            "fare_count": str(DEFAULT_ROW_COUNT),
+        }
+        mismatches = [
+            f"{key}={values.get(key)!r} (expected {expected_value!r})"
+            for key, expected_value in expected.items()
+            if values.get(key) != expected_value
+        ]
+        location_count = connection.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
+        if location_count != EXPECTED_LOCATION_COUNT:
+            mismatches.append(
+                f"location_count={location_count!r} (expected {EXPECTED_LOCATION_COUNT!r})"
+            )
+        route_columns = {
+            row[1] for row in connection.execute("PRAGMA table_info(routes)")
+        }
+        leg_columns = {
+            row[1] for row in connection.execute("PRAGMA table_info(route_legs)")
+        }
+        if "transfer_count" not in route_columns:
+            mismatches.append("routes.transfer_count is missing")
+        required_leg_columns = {
+            "route_id",
+            "leg_index",
+            "mode",
+            "origin_location_id",
+            "destination_location_id",
+            "origin_point",
+            "destination_point",
+            "duration_minutes",
+            "company_id",
+        }
+        missing_leg_columns = sorted(required_leg_columns - leg_columns)
+        if missing_leg_columns:
+            mismatches.append(
+                f"route_legs columns are missing: {', '.join(missing_leg_columns)}"
+            )
+    if mismatches:
+        raise RuntimeError(
+            "The fare database does not match the current dataset contract; "
+            "regenerate it with `npm run seed`. " + "; ".join(mismatches)
+        )
+    return values
 
 
 def _validate_timetable_date(
@@ -228,10 +294,12 @@ def get_metadata(database: Path) -> dict[str, object]:
         company_rows = connection.execute(
             "SELECT name, mode FROM companies ORDER BY mode, name"
         ).fetchall()
+        location_count = connection.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
+        route_count = connection.execute("SELECT COUNT(*) FROM routes").fetchone()[0]
         route_rows = connection.execute(
             """
             SELECT r.route_key, r.mode, origin.slug AS origin, destination.slug AS destination,
-                   r.origin_point, r.destination_point, r.source_kind
+                   r.origin_point, r.destination_point, r.transfer_count, r.source_kind
             FROM routes r
             JOIN locations origin ON origin.id = r.origin_location_id
             JOIN locations destination ON destination.id = r.destination_location_id
@@ -241,6 +309,11 @@ def get_metadata(database: Path) -> dict[str, object]:
 
     return {
         "source_version": _verified_source_version(database, source_version),
+        "schema_version": int(values["schema_version"]),
+        "coverage_model": values["coverage_model"],
+        "location_scope": values["location_scope"],
+        "location_count": location_count,
+        "route_count": route_count,
         "timetable": {
             "start_date": values["start_date"],
             "end_date": values["end_date"],
@@ -260,6 +333,54 @@ def get_metadata(database: Path) -> dict[str, object]:
         "source_url": values["source_url"],
         "generator": {"version": values["generator_version"], "seed": int(values["seed"])},
     }
+
+
+def _route_legs(
+    connection: sqlite3.Connection, route_ids: list[int]
+) -> dict[int, list[dict[str, object]]]:
+    if not route_ids:
+        return {}
+    placeholders = ",".join("?" for _ in route_ids)
+    rows = connection.execute(
+        f"""
+        SELECT leg.route_id, leg.leg_index, leg.mode, company.name AS company,
+               leg.duration_minutes,
+               origin.slug AS origin_id, origin.city AS origin_city,
+               origin.country_code AS origin_country_code, leg.origin_point,
+               destination.slug AS destination_id, destination.city AS destination_city,
+               destination.country_code AS destination_country_code, leg.destination_point
+        FROM route_legs leg
+        JOIN companies company ON company.id = leg.company_id
+        JOIN locations origin ON origin.id = leg.origin_location_id
+        JOIN locations destination ON destination.id = leg.destination_location_id
+        WHERE leg.route_id IN ({placeholders})
+        ORDER BY leg.route_id, leg.leg_index
+        """,
+        route_ids,
+    ).fetchall()
+    by_route: dict[int, list[dict[str, object]]] = {}
+    for row in rows:
+        by_route.setdefault(row["route_id"], []).append(
+            {
+                "leg_index": row["leg_index"],
+                "mode": row["mode"],
+                "company": row["company"],
+                "duration_minutes": row["duration_minutes"],
+                "origin": {
+                    "id": row["origin_id"],
+                    "city": row["origin_city"],
+                    "country_code": row["origin_country_code"],
+                    "point": row["origin_point"],
+                },
+                "destination": {
+                    "id": row["destination_id"],
+                    "city": row["destination_city"],
+                    "country_code": row["destination_country_code"],
+                    "point": row["destination_point"],
+                },
+            }
+        )
+    return by_route
 
 
 def _location_id(connection: sqlite3.Connection, slug: str, field: str) -> int:
@@ -342,7 +463,8 @@ def _search_leg(
     offset = (page - 1) * limit
     rows = connection.execute(
         f"""
-        SELECT f.id, r.mode, c.name AS company, f.departure_time, f.arrival_time,
+        SELECT f.id, r.id AS route_id, r.mode, r.transfer_count,
+               c.name AS company, f.departure_time, f.arrival_time,
                f.duration_minutes, f.price_cents, f.available_seats,
                origin.slug AS origin_id, origin.city AS origin_city,
                origin.country_code AS origin_country_code, r.origin_point,
@@ -360,11 +482,14 @@ def _search_leg(
         """,
         (*parameters, limit, offset),
     ).fetchall()
+    legs_by_route = _route_legs(connection, list({row["route_id"] for row in rows}))
     results = [
         {
             "id": f'fare_{row["id"]:09d}',
             "mode": row["mode"],
             "company": row["company"],
+            "transfers": row["transfer_count"],
+            "legs": legs_by_route[row["route_id"]],
             "departure_time": row["departure_time"],
             "arrival_time": row["arrival_time"],
             "duration_minutes": row["duration_minutes"],
@@ -463,8 +588,17 @@ def dispatch(
     if path == "/api/health":
         source_version = _source_version(database)
         with closing(_connect(database)) as connection:
-            fare_count = int(_metadata_values(connection)["fare_count"])
-        return HTTPStatus.OK, {"status": "ok", "fare_count": fare_count, "source_version": _verified_source_version(database, source_version), "service": "omio-fare-api", "pid": os.getpid()}
+            values = _metadata_values(connection)
+            fare_count = int(values["fare_count"])
+        return HTTPStatus.OK, {
+            "status": "ok",
+            "fare_count": fare_count,
+            "schema_version": int(values["schema_version"]),
+            "coverage_model": values["coverage_model"],
+            "source_version": _verified_source_version(database, source_version),
+            "service": "omio-fare-api",
+            "pid": os.getpid(),
+        }
     if path == "/api/locations":
         return HTTPStatus.OK, get_locations(database)
     if path == "/api/metadata":
@@ -523,7 +657,21 @@ def main() -> None:
     )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(
+        "--check-contract",
+        action="store_true",
+        help="validate the database contract and exit",
+    )
     arguments = parser.parse_args()
+    try:
+        validate_database_contract(arguments.database)
+    except ApiError as error:
+        parser.error(error.message)
+    except RuntimeError as error:
+        parser.error(str(error))
+    if arguments.check_contract:
+        print(f"Validated fare database contract at {arguments.database.resolve()}")
+        return
     server = ThreadingHTTPServer(
         (arguments.host, arguments.port), make_handler(arguments.database)
     )

@@ -25,6 +25,7 @@ import {
   useTravelAction,
 } from '../context'
 import type { WidgetProps } from '../layout'
+import { FareRouteDetails } from '../fare-route-details'
 
 type Plan = ReturnType<typeof useItineraryPlan>
 type PlanLeg = Plan['legs'][number]
@@ -397,6 +398,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, compact = false }: { art
         <div className="trip-fare-option-top"><span>{modeIcon(row.mode)}{cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong></div>
         <p>{departure(row.departureMinutes)} · {duration(row.durationMinutes)}</p>
         <small>{carrierLabel(row, result.services.bridge, result.datasetId)} · {row.serviceDate}</small>
+        <FareRouteDetails row={row} bridge={result.services.bridge} datasetId={result.datasetId!} compact />
         <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: result.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose fare'}</Button>
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}

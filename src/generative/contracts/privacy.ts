@@ -1,5 +1,5 @@
-import { FareRowSchema } from './index';
-const fareFields=FareRowSchema.keyof().options.filter(field=>field!=='carrierName');
+import { FareFieldSchema } from './index';
+const fareFields=FareFieldSchema.options.filter(field=>field!=='carrierName');
 export const hasFareRowFields=(keys:readonly string[]):boolean=>fareFields.every(field=>keys.includes(field));
 export const LEAKAGE_SENTINEL = 'private-fare-sentinel-4c917d';
 const forbidden = new Set(['rows', 'fares', 'rowBuffers', 'rawData', 'price_cents', 'available_seats', 'sql', 'html', 'css', 'javascript']);

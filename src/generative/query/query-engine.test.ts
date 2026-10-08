@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { executeQuery } from './query-engine'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { parseQuery } from '../contracts'
-import { DatasetIdSchema, DatasetRevisionSchema, FareIdSchema, type FareRow, type QueryIR } from '../contracts'
+import { DatasetIdSchema, DatasetRevisionSchema, FareFieldSchema, FareIdSchema, type FareRow, type QueryIR } from '../contracts'
 const datasetId=DatasetIdSchema.parse('fixture')
 const rows:FareRow[]=[
 {id:FareIdSchema.parse('c'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',carrierName:'Eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
@@ -33,7 +33,7 @@ describe('bounded local queries',()=>{
  })
  it('executes the exact-minute threshold day plus following-day predicate used after a selected arrival',async()=>{
   const where={all:[{any:[{all:[{field:'serviceDate' as const,op:'eq' as const,value:'2026-10-02'},{field:'departureMinutes' as const,op:'gte' as const,value:700}]},{field:'serviceDate' as const,op:'between' as const,value:['2026-10-03','2026-10-04']}]}]}
-  const manifest={datasetId,revision:DatasetRevisionSchema.parse(1),schemaVersion:'1.0.0' as const,coverage:{originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-04'},modes:['train' as const,'bus' as const],passengers:1,complete:true,truncated:false},rowCount:rows.length,fields:Object.keys(rows[0]!).map(name=>({name:name as keyof FareRow,type:typeof rows[0]![name as keyof FareRow] as 'string'|'number'|'boolean',nullable:false,filterable:true,groupable:true,joinKey:['originId','destinationId'].includes(name)})),compactSummary:{modeCounts:{}},source:{kind:'synthetic-fixture' as const,descriptorId:'fixture',sourceVersion:'v1'}}
+  const manifest={datasetId,revision:DatasetRevisionSchema.parse(1),schemaVersion:'1.0.0' as const,coverage:{originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-04'},modes:['train' as const,'bus' as const],passengers:1,complete:true,truncated:false},rowCount:rows.length,fields:FareFieldSchema.options.map(name=>({name,type:typeof rows[0]![name] as 'string'|'number'|'boolean',nullable:false,filterable:true,groupable:true,joinKey:['originId','destinationId'].includes(name)})),compactSummary:{modeCounts:{}},source:{kind:'synthetic-fixture' as const,descriptorId:'fixture',sourceVersion:'v1'}}
   const parsed=parseQuery(query({where,project:['id']}),[manifest])
   const future={...rows[0]!,id:FareIdSchema.parse('future'),serviceDate:'2026-10-03',departureMinutes:100}
   const result=await executeQuery(parsed,new Map([[datasetId,{rows:[...rows,future],revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]]),new AbortController().signal)

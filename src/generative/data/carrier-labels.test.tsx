@@ -8,7 +8,7 @@ import {createUIStateStore} from '../state/ui-state-store'
 import {TravelProvider} from '../catalog/context'
 import {CatalogNode} from '../catalog/component'
 const request={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-02'},modes:['bus'] as const,passengers:1}
-const apiRow={id:'same-fare',mode:'bus',company:'Blablacar Bus',departure_time:'2026-10-02T09:00',duration_minutes:120,origin:{id:'london'},destination:{id:'paris'},price_cents:2103,currency:'EUR',available_seats:9}
+const apiRow={id:'same-fare',mode:'bus',company:'Blablacar Bus',departure_time:'2026-10-02T09:00',duration_minutes:120,transfers:0,legs:[{leg_index:0,mode:'bus',company:'Blablacar Bus',duration_minutes:120,origin:{id:'london',city:'London'},destination:{id:'paris',city:'Paris'}}],origin:{id:'london'},destination:{id:'paris'},price_cents:2103,currency:'EUR',available_seats:9}
 const pageSource=createSearchPageSource({fetch:async()=>new Response(JSON.stringify({source_version:'v1',outbound:{date:'2026-10-02',page:1,pages:1,total:1,results:[apiRow]}}))})
 it('retains API carrier names and same IDs through bounded facts and native views',async()=>{
  const bridge=createFareDataBridge({pageSource}),manifest=await bridge.load({...request,modes:[...request.modes]},new AbortController().signal)
@@ -23,7 +23,7 @@ it('projects and orders nullable display names without breaking unlabeled legacy
  const named=(await pageSource({originId:'london',destinationId:'paris',date:'2026-10-02',passengers:1,page:1,limit:100},new AbortController().signal)).rows[0];if(!named)throw new Error('Missing fixture')
  const {carrierName:_name,...legacy}=named
  expect(FareRowSchema.parse(legacy)).toEqual(legacy)
- const {availableSeats:_seats,direct:_direct,...legacyFact}=legacy
+ const {availableSeats:_seats,direct:_direct,legs:_legs,...legacyFact}=legacy
  expect(BoundedFareFactSchema.parse(legacyFact)).toEqual(legacyFact)
  const bridge=createFareDataBridge({pageSource:async()=>({rows:[{...named,id:FareRowSchema.shape.id.parse('named')},{...legacy,id:FareRowSchema.shape.id.parse('legacy')}],total:2,pages:1,page:1,sourceVersion:'v1'})})
  const manifest=await bridge.load({...request,modes:[...request.modes]},new AbortController().signal)

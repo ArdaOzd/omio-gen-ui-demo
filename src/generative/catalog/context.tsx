@@ -5,7 +5,7 @@ import { legKey, legState, legRequest, orderedLegResources, resolveBoundDatasetI
 import { scheduleLegs } from '../state/itinerary-schedule'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
-import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type Coverage, type FareDataBridge, type FareRow, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
+import { ArtifactIdSchema, DatasetIdSchema, FareFieldSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type Coverage, type FareDataBridge, type FareRow, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
 export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; artifactIds?:()=>ReturnType<typeof ArtifactIdSchema.parse>[]; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>;selectFromQuery?:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>DispatchResult;calendarDateFromQuery?:(command:Extract<UICommand,{kind:'calendarDateByLeg'}>,scope:CalendarDateSelectionScope)=>DispatchResult}; record?: (input: unknown) => void; queryForView?:()=>QueryIR; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
@@ -74,7 +74,7 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
   return { ...coherent, state, services, datasetId, facts:plan.facts,queryKey,currentQueryKey }
 }
 export function useFareRows(ref: string, datasetRef?: string) {
-  const result = useTravelQuery(ref, datasetRef, (state, id) => ({ version:1, sources:[{datasetRef:id,alias:'fares'}], where:filterPredicate(state), project:FareRowSchema.keyof().options, orderBy:[state.sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:100 }))
+  const result = useTravelQuery(ref, datasetRef, (state, id) => ({ version:1, sources:[{datasetRef:id,alias:'fares'}], where:filterPredicate(state), project:FareFieldSchema.options, orderBy:[state.sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:100 }))
   const rows = useMemo(() => { const parsed: FareRow[]=[]; for (const row of result.data?.rows ?? []) { const valid=FareRowSchema.safeParse(row); if (valid.success) parsed.push(valid.data) } return parsed }, [result.data])
   return {...result,rows}
 }
@@ -84,12 +84,12 @@ function parsedFareRows(result: ReturnType<typeof useTravelQuery>): FareRow[] {
   return parsed
 }
 export function useFareRowsForDate(ref:string,datasetRef:string|undefined,date:string){
- const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const filtered=filterPredicate(state),day={field:'serviceDate' as const,op:'eq' as const,value:date},sort=plannerSort(state,coverage);return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filtered&&'all'in filtered?{all:[...filtered.all,day]}:filtered?{all:[filtered,day]}:day,project:FareRowSchema.keyof().options,orderBy:[sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:100}})
+ const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const filtered=filterPredicate(state),day={field:'serviceDate' as const,op:'eq' as const,value:date},sort=plannerSort(state,coverage);return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filtered&&'all'in filtered?{all:[...filtered.all,day]}:filtered?{all:[filtered,day]}:day,project:FareFieldSchema.options,orderBy:[sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:100}})
  const rows=useMemo(()=>parsedFareRows(result),[result.data])
  return{...result,rows}
 }
 export function useFareDayRepresentatives(ref:string,datasetRef?:string){
- const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=calendarSort(state,coverage);return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),groupBy:['serviceDate'],project:FareRowSchema.keyof().options,groupTop:{by:sort.field,direction:sort.direction},orderBy:[{field:'serviceDate',direction:'asc'}],limit:62}})
+ const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=calendarSort(state,coverage);return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),groupBy:['serviceDate'],project:FareFieldSchema.options,groupTop:{by:sort.field,direction:sort.direction},orderBy:[{field:'serviceDate',direction:'asc'}],limit:62}})
  const rows=useMemo(()=>parsedFareRows(result),[result.data])
   return{...result,rows}
 }
@@ -99,7 +99,7 @@ const fastestCalendarSort:ArtifactUIState['sort']={field:'durationMinutes',direc
 function plannerSort(state:ArtifactUIState,coverage:Coverage):ArtifactUIState['sort']{const key=legKey(coverage);return key?state.sortByLeg[key]??chronologicalLegSort:chronologicalLegSort}
 function calendarSort(state:ArtifactUIState,coverage:Coverage):ArtifactUIState['sort']{const key=legKey(coverage),sort=key?state.sortByLeg[key]:undefined;return sort?.field==='durationMinutes'?fastestCalendarSort:cheapestCalendarSort}
 export function useLegFareRows(ref:string,datasetRef?:string){
- const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=plannerSort(state,coverage),orderBy:NonNullable<QueryIR['orderBy']>=sort.field==='departureMinutes'&&sort.direction==='asc'?[{field:'serviceDate',direction:'asc'},{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}]:[sort,{field:'serviceDate',direction:'asc'},{field:'departureMinutes',direction:'asc'}];return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),project:FareRowSchema.keyof().options,orderBy,limit:100}})
+ const result=useTravelQuery(ref,datasetRef,(state,id,coverage)=>{const sort=plannerSort(state,coverage),orderBy:NonNullable<QueryIR['orderBy']>=sort.field==='departureMinutes'&&sort.direction==='asc'?[{field:'serviceDate',direction:'asc'},{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}]:[sort,{field:'serviceDate',direction:'asc'},{field:'departureMinutes',direction:'asc'}];return{version:1,sources:[{datasetRef:id,alias:'fares'}],where:filterPredicate(state),project:FareFieldSchema.options,orderBy,limit:100}})
  const rows=useMemo(()=>parsedFareRows(result),[result.data])
  return{...result,rows}
 }
