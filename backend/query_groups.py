@@ -601,7 +601,7 @@ def _manifest(
         parameters,
     ).fetchall()
     counts = {row["mode"]: int(row["count"]) for row in rows}
-    resource_key = _fingerprint("scope", {"sourceVersion": source_version, "scope": scope})
+    resource_key = _fingerprint("scope", scope)
     return {
         "kind": "fareScopeManifest",
         "resourceKey": resource_key,

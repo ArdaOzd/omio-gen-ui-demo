@@ -19,7 +19,7 @@ from unittest.mock import patch
 from backend import app as app_module
 from backend.app import MAX_REQUEST_BODY_BYTES, dispatch, dispatch_post, make_handler
 from backend.generate_db import directional_routes, generate_database
-from backend.query_groups import QueryApiError, _cursor_hash, _encode_cursor, stable_ref
+from backend.query_groups import QueryApiError, _cursor_hash, _encode_cursor, execute_query_groups, stable_ref
 
 
 class QueryGroupsTestCase(unittest.TestCase):
@@ -207,6 +207,18 @@ class QueryGroupsTestCase(unittest.TestCase):
         self.assertEqual(group["projections"], [])
         self.assertGreater(group["manifest"]["totalAvailable"], 0)
         self.assertTrue(group["manifest"]["complete"])
+
+    def test_resource_key_identifies_logical_scope_across_source_generations(self) -> None:
+        with sqlite3.connect(self.database) as connection:
+            connection.row_factory = sqlite3.Row
+            first = execute_query_groups(connection, self.request([]), "source-generation-1")
+            second = execute_query_groups(connection, self.request([]), "source-generation-2")
+        first_manifest = first["groups"][0]["manifest"]
+        second_manifest = second["groups"][0]["manifest"]
+        self.assertEqual(first_manifest["resourceKey"], second_manifest["resourceKey"])
+        self.assertEqual(first_manifest["source"]["descriptorId"], first_manifest["resourceKey"])
+        self.assertEqual(second_manifest["source"]["descriptorId"], second_manifest["resourceKey"])
+        self.assertNotEqual(first_manifest["source"]["sourceVersion"], second_manifest["source"]["sourceVersion"])
 
     def test_lookup_is_source_scoped_deduplicated_and_independent_of_pages(self) -> None:
         group = self.execute([self.fare_page(limit=1)])["groups"][0]
