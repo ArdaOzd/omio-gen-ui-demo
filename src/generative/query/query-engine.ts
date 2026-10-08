@@ -1,4 +1,4 @@
-import { DatasetRevisionSchema, type AllowedFareField, type BoundedQueryResult, type DatasetId, type DatasetRevision, type FareRow, type JsonScalar, type PredicateTree, type QueryIR } from '../contracts'
+import { DatasetRevisionSchema, FareFieldSchema, type AllowedFareField, type BoundedQueryResult, type DatasetId, type DatasetRevision, type FareRow, type JsonScalar, type PredicateTree, type QueryIR } from '../contracts'
 import { abortError } from '../data/resource-loader'
 export type QueryResource={rows:readonly FareRow[];revision:DatasetRevision;sourceVersion:string;logicalDatasetId?:DatasetId}
 export type QueryResources=ReadonlyMap<DatasetId,QueryResource>
@@ -78,7 +78,7 @@ export async function executeQuery(query:QueryIR,resources:QueryResources,signal
   })
  }else{
   projection=query.project??['id','mode','carrierId','carrierName','priceCents','durationMinutes','serviceDate','departureMinutes','originId','destinationId']
-  output=filtered.map(({legs:_legs,...row})=>row)
+  output=filtered.map(row=>Object.fromEntries(FareFieldSchema.options.map(field=>[field,row[field]??null])))
  }
  const ordering=query.topK?[{field:query.topK.by,direction:query.topK.direction},...(query.orderBy??[])]:query.orderBy??[]
  output.sort((left,right)=>{for(const order of ordering){const difference=compare(valueOf(left,order.field),valueOf(right,order.field));if(difference)return order.direction==='desc'?-difference:difference}return String(left.id??JSON.stringify(left)).localeCompare(String(right.id??JSON.stringify(right)))})
