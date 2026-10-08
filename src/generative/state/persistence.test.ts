@@ -131,6 +131,46 @@ function bridgeWithStableResource(sourceVersion: string, resourceKey: ResourceKe
 }
 
 describe('descriptor-only thread persistence', () => {
+  it('upgrades pre-cleanup generic artifacts without losing conversation state', async () => {
+    const item = await fixture()
+    const io = memory()
+    const messages = [
+      ...item.record.messages,
+      { id: 'saved-user', role: 'user', parts: [{ type: 'text', text: 'Keep this selected itinerary' }] },
+    ]
+    const legacy = {
+      ...item.record,
+      recordRevision: 3,
+      activeArtifactId: item.id,
+      messages,
+      artifacts: item.record.artifacts.map(artifact => ({ ...artifact, variant: 'a' })),
+    }
+    io.values.set('pre-cleanup', legacy)
+
+    const persistence = createThreadPersistence(io.storage)
+    const loaded = await persistence.load('pre-cleanup')
+    expect(loaded).toEqual({ ...item.record, recordRevision: 3, activeArtifactId: item.id, messages })
+    expect(io.values.get('pre-cleanup')).toEqual(loaded)
+    expect(JSON.stringify(loaded)).not.toContain('"variant"')
+    expect(loaded?.artifacts[0]?.state.selectedFareIds).toEqual([row.id])
+    expect(loaded?.artifacts[0]?.source).toBe(item.record.artifacts[0]?.source)
+    expect(await persistence.load('pre-cleanup')).toEqual(loaded)
+
+    await persistence.save('pre-cleanup', loaded)
+    expect(io.values.get('pre-cleanup')).toEqual({ ...loaded, recordRevision: 4 })
+  })
+
+  it('rejects unknown or structurally expanded legacy artifact variants', async () => {
+    const item = await fixture()
+    const io = memory()
+    const persistence = createThreadPersistence(io.storage)
+    io.values.set('unknown-variant', { ...item.record, artifacts: item.record.artifacts.map(artifact => ({ ...artifact, variant: 'b' })) })
+    io.values.set('unknown-field', { ...item.record, artifacts: item.record.artifacts.map(artifact => ({ ...artifact, variant: 'a', retiredRoute: '/a' })) })
+
+    expect(await persistence.load('unknown-variant')).toBeNull()
+    expect(await persistence.load('unknown-field')).toBeNull()
+  })
+
   it('continues loading saved 1.1.0 conversations after additive catalog metadata changes', async () => {
     const item = await fixture()
     const io = memory()
