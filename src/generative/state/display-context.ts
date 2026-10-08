@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import {
   DISPLAY_CONTEXT_VERSION,
   DISPLAY_LIMITS,
@@ -23,6 +24,9 @@ import {
   type SemanticInteraction,
 } from '../contracts/display-context'
 import type { QueryExecutionState, QueryGroupScope } from '../contracts/query-groups'
+import type { QueryFareSelectionScope } from './action-router'
+
+const SelectionFareIdSchema = z.string().min(1).max(160).regex(/^[a-zA-Z0-9_.:-]+$/).brand<'FareId'>()
 
 export type DisplayInspectionSource = {
   resultKey: string
@@ -71,6 +75,7 @@ export interface DisplayContextStore {
   provenance(artifactId: string, fields: readonly InputProvenance['field'][]): InputProvenance[]
   capture(input: DisplayCaptureInput): FrozenDisplayContext
   inspect(input: InspectDisplayInput): InspectDisplayOutput
+  resolveFareSelection(input: { captureId: string; displayHandle: string; resultKey: string; sourceVersion?: string; fareId: string; artifactId: string }): QueryFareSelectionScope
   get(componentRef: string): DisplayLedgerEntry | undefined
 }
 
@@ -248,6 +253,7 @@ export function createDisplayContextStore(options: { maxCapturedDisplays?: numbe
       }
     }
     const displayedFacts = new Map<string, DisplayedFareFact>()
+    let omittedDisplayedBy = 0
     const factEntries = included.filter(entry => entry.visibility === 'visible').sort((left, right) => left.renderOrder - right.renderOrder)
     for (const entry of factEntries) {
       const sourceVersion = entry.inspection?.sourceVersion
@@ -258,6 +264,7 @@ export function createDisplayContextStore(options: { maxCapturedDisplays?: numbe
         const displayedBy = { componentRef: entry.identity.componentRef.value, ...(item.rank ? { rank: item.rank } : {}), ...(item.label ? { label: item.label } : {}) }
         const current = displayedFacts.get(key)
         if (current && current.displayedBy.length < 16) current.displayedBy.push(displayedBy)
+        else if (current) omittedDisplayedBy += 1
         else displayedFacts.set(key, DisplayedFareFactSchema.parse({ sourceVersion, fact: item.fact, displayedBy: [displayedBy] }))
       }
     }
@@ -266,12 +273,15 @@ export function createDisplayContextStore(options: { maxCapturedDisplays?: numbe
       const key = `${parsed.sourceVersion}\u0000${parsed.fact.id}`
       const current = displayedFacts.get(key)
       if (current) {
-        for (const owner of parsed.displayedBy) if (!current.displayedBy.some(candidate => JSON.stringify(candidate) === JSON.stringify(owner))) current.displayedBy.push(owner)
+        for (const owner of parsed.displayedBy) if (!current.displayedBy.some(candidate => JSON.stringify(candidate) === JSON.stringify(owner))) {
+          if (current.displayedBy.length < 16) current.displayedBy.push(owner)
+          else omittedDisplayedBy += 1
+        }
       } else displayedFacts.set(key, parsed)
     }
     const allShownFacts = [...displayedFacts.values()]
     const shownFareFacts = allShownFacts.slice(0, DISPLAY_LIMITS.shownFacts)
-    const omittedFacts = Math.max(input.omittedFacts ?? 0, allShownFacts.length - shownFareFacts.length)
+    const omittedFacts = Math.max(input.omittedFacts ?? 0, allShownFacts.length - shownFareFacts.length) + omittedDisplayedBy
     const context = FrozenDisplayContextSchema.parse({
       version: DISPLAY_CONTEXT_VERSION,
       captureId: input.captureId,
@@ -334,6 +344,32 @@ export function createDisplayContextStore(options: { maxCapturedDisplays?: numbe
     })
   }
 
+  const resolveFareSelection = (input: { captureId: string; displayHandle: string; resultKey: string; sourceVersion?: string; fareId: string; artifactId: string }): QueryFareSelectionScope => {
+    const capture = captures.get(input.captureId)
+    if (!capture) throw new DisplayInspectionError(expiredCaptures.has(input.captureId) ? 'expiredCapture' : 'unknownCapture', expiredCaptures.has(input.captureId) ? 'The captured display has expired.' : 'The captured display is unknown.')
+    const source = capture.inspections.get(input.displayHandle)
+    if (!source) throw new DisplayInspectionError('unknownDisplay', 'The display handle is not part of this capture.')
+    if (source.resultKey !== input.resultKey) throw new DisplayInspectionError('resultMismatch', 'The display result does not match this captured handle.')
+    if (input.sourceVersion && source.sourceVersion !== input.sourceVersion) throw new DisplayInspectionError('sourceMismatch', 'The display source does not match this captured handle.')
+    const component = capture.context.components.find(entry => entry.identity.componentRef.value === source.componentRef)
+    if (!component || component.identity.scope.artifactId !== input.artifactId) throw new DisplayInspectionError('unknownDisplay', 'The captured display does not belong to this artifact.')
+    const inspectedIds = new Set(source.items.map(item => item.itemId))
+    const fareIds = component.display ? displayFareIds(component.display).filter(fareId => inspectedIds.has(fareId)).map(fareId => SelectionFareIdSchema.parse(fareId)) : []
+    if (!fareIds.includes(SelectionFareIdSchema.parse(input.fareId))) throw new DisplayInspectionError('unknownItem', 'The selected fare is not part of this captured display.')
+    const result = currentResult(component.execution)
+    if (!result || result.resultKey !== source.resultKey || result.sourceVersion !== source.sourceVersion) throw new DisplayInspectionError('resultMismatch', 'The captured display is not backed by the expected query result.')
+    return {
+      kind: 'query-result',
+      fareIds,
+      resultKey: result.resultKey,
+      currentResultKey: () => currentResult(entries.get(source.componentRef)?.execution)?.resultKey,
+      resourceKey: result.resourceKey,
+      datasetId: result.datasetId,
+      datasetRevision: result.datasetRevision,
+      sourceVersion: result.sourceVersion,
+    }
+  }
+
   const get = (componentRef: string): DisplayLedgerEntry | undefined => {
     const entry = entries.get(componentRef)
     if (!entry) return undefined
@@ -346,7 +382,7 @@ export function createDisplayContextStore(options: { maxCapturedDisplays?: numbe
     return fields.map(field => clone(current?.get(field) ?? { field, origin: 'unknown' as const }))
   }
 
-  return { register, setGroup, setInputs, setExecution, setDisplay, setVisibility, setActiveChild, recordInteraction, provenance, capture, inspect, get }
+  return { register, setGroup, setInputs, setExecution, setDisplay, setVisibility, setActiveChild, recordInteraction, provenance, capture, inspect, resolveFareSelection, get }
 }
 
 export function currentDisplayResult(entry: DisplayLedgerEntry) {

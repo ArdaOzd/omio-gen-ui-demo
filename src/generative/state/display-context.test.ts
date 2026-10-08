@@ -203,6 +203,19 @@ describe('display context store', () => {
     expect(capture.components.find(item => item.identity.componentRef.value === 'root.hidden')?.display?.displayHandle).toBeTruthy()
   })
 
+  it('keeps the first sixteen display owners and reports additional owners as omitted', () => {
+    const store=createDisplayContextStore()
+    for(let index=0;index<17;index++){
+      const ref=`root.fare-${index}`
+      store.register(identity(ref))
+      store.setExecution(ref,QueryExecutionStateSchema.parse({status:'ready',intent:intent('input-old',1),current:current('input-old',1)}))
+      store.setDisplay(ref,{payload:{kind:'fare-order',orderedFareRefs:[{fareId:'fare-shared',rank:1}]},totalDisplayed:1,includedCount:1,complete:true,omittedCount:0},{...current('input-old',1),items:[{itemId:'fare-shared',rank:1,fact:fact('fare-shared')}]})
+    }
+    const capture=store.capture({captureId:'capture-owner-limit',artifactIds:['artifact-1']})
+    expect(capture.shownFareFacts[0]?.displayedBy.map(owner=>owner.componentRef)).toEqual(Array.from({length:16},(_,index)=>`root.fare-${index}`))
+    expect(capture.completeness).toMatchObject({complete:false,omittedFacts:1})
+  })
+
   it('expires old captures and bounds interaction history', () => {
     const store = createDisplayContextStore({ maxCapturedDisplays: 1, maxEvents: 2 })
     store.register(identity('root.fares'))

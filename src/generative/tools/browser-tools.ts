@@ -5,7 +5,9 @@ import { InspectDisplayInputSchema, InspectDisplayOutputSchema } from '../contra
 import { DisplayInspectionError, type DisplayContextStore } from '../state/display-context';
 import type { InputField } from '../contracts/display-context';
 import type { ServerFareDataBridge } from '../data/fare-data-bridge';
+import type { QueryFareSelectionScope } from '../state/action-router';
 type UICommandPatch=z.infer<typeof UICommandPatchSchema>;
+type BrowserDispatch=((command:UICommand)=>DispatchResult)&{selectFromQuery?:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>DispatchResult};
 function scopeMetadata(store:UIStateStore,bridge:ServerFareDataBridge,artifactId:ArtifactId){return store.get(artifactId).datasetRefs.flatMap((datasetRef,legIndex)=>{const binding=bridge.findBinding(datasetRef);if(!binding)return[];const {coverage,source,totalAvailable,complete}=binding.manifest;return[{datasetRef,resourceKey:binding.resourceKey,legIndex,originId:coverage.originId,destinationId:coverage.destinationId,dateWindow:coverage.dateWindow,sourceVersion:source.sourceVersion,totalAvailable,complete}]})}
 function completeCommand(command:UICommandPatch,artifactId:ArtifactId,expectedRevision:UIStateRevision):UICommand{
  switch(command.kind){
@@ -35,7 +37,7 @@ function commandInputFields(command:UICommandPatch):InputField[]{
   default:return[]
  }
 }
-export function createBrowserTools(options:{bridge:ServerFareDataBridge;store:UIStateStore;displayStore?:DisplayContextStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal;dispatch?:(command:UICommand)=>DispatchResult;whenIdle?:(id:ArtifactId)=>Promise<void>}) {
+export function createBrowserTools(options:{bridge:ServerFareDataBridge;store:UIStateStore;displayStore?:DisplayContextStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal;dispatch?:BrowserDispatch;whenIdle?:(id:ArtifactId)=>Promise<void>}) {
  const wrap=<T>(schema:z.ZodType<T>,description:string,execute:(input:T,signal:AbortSignal)=>Promise<unknown>)=>({
   description, parameters:schema,
   execute:async(input:unknown,context?:{abortSignal?:AbortSignal})=>{const signals=[context?.abortSignal,options.signal?.()].filter((signal):signal is AbortSignal=>signal!==undefined);const signal=AbortSignal.any(signals);try{signal.throwIfAborted();const output=await execute(schema.parse(input),signal);signal.throwIfAborted();assertNoBulkData(output);return output;}catch(error){const output=error instanceof DisplayInspectionError?{status:'error' as const,code:error.code,message:error.message}:{status:'error' as const,code:signal.aborted?'LOCAL_TOOL_CANCELLED':'LOCAL_TOOL_FAILED'};assertNoBulkData(output);return output;}}
@@ -47,9 +49,16 @@ export function createBrowserTools(options:{bridge:ServerFareDataBridge;store:UI
   }),
   create_artifact:wrap(z.strictObject({}),'Create and activate a separate empty artifact with a host-owned ID',async()=>{if(!options.createArtifact)throw new Error('Artifact creation unavailable');const artifactId=options.createArtifact();options.store.initializeMissing(artifactId,{});return {artifactId,revision:options.store.get(artifactId).revision};}),
   edit_artifact:wrap(EditArtifactInputSchema,'Apply a bounded typed state patch only at the observed revision',async({artifactRef,expectedRevision,commands},signal)=>{
-   for(const command of commands)if(command.kind==='select'&&!options.bridge.findCachedFare(command.fareId))throw new Error('Fare selection is outside the current displayed results');
    signal.throwIfAborted();let current=options.store.get(artifactRef);if(current.revision!==expectedRevision)return {artifactId:artifactRef,status:'stale',revision:current.revision};
-   for(const command of commands){const result=(options.dispatch??options.store.dispatch)(completeCommand(command,artifactRef,current.revision));if(result.status==='stale')return {artifactId:artifactRef,...result};options.displayStore?.recordInteraction({artifactId:artifactRef,actor:'agent',action:command.kind==='select'?(command.selected?'select':'deselect'):'input',inputFields:commandInputFields(command)});current=options.store.get(artifactRef);}
+   for(const command of commands){
+    let result:DispatchResult
+    if(command.kind==='select'&&command.selected){
+     if(!options.displayStore||!options.dispatch?.selectFromQuery)throw new Error('Scoped fare selection is unavailable')
+     const scope=options.displayStore.resolveFareSelection({captureId:command.captureId,displayHandle:command.displayHandle,resultKey:command.resultKey,sourceVersion:command.sourceVersion,fareId:command.fareId,artifactId:artifactRef})
+     result=options.dispatch.selectFromQuery({kind:'select',artifactId:artifactRef,expectedRevision:current.revision,fareId:command.fareId,selected:true},scope)
+    }else result=(options.dispatch??options.store.dispatch)(completeCommand(command,artifactRef,current.revision))
+    if(result.status==='stale')return {artifactId:artifactRef,...result};options.displayStore?.recordInteraction({artifactId:artifactRef,actor:'agent',action:command.kind==='select'?(command.selected?'select':'deselect'):'input',inputFields:commandInputFields(command)});current=options.store.get(artifactRef);
+   }
    await options.whenIdle?.(artifactRef);
    return {artifactId:artifactRef,status:'applied',revision:options.store.get(artifactRef).revision,scopes:scopeMetadata(options.store,options.bridge,artifactRef)};
   }),

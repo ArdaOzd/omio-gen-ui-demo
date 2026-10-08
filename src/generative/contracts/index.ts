@@ -269,7 +269,7 @@ export function parseQuery(input: unknown, manifests: DatasetManifest[]): Valida
   return query;
 }
 
-export const UICommandPatchSchema = z.discriminatedUnion('kind', [
+const UICommandWithoutSelectionSchema = z.discriminatedUnion('kind', [
  z.strictObject({kind:z.literal('filters'),filters:TravelFiltersSchema}),
  z.strictObject({kind:z.literal('dates'),dates:ArtifactUIStateSchema.shape.dates}),
  z.strictObject({kind:z.literal('route'),citySequence:ArtifactUIStateSchema.shape.citySequence}),
@@ -281,6 +281,10 @@ export const UICommandPatchSchema = z.discriminatedUnion('kind', [
  z.strictObject({kind:z.literal('availableModesByLeg'),availableModesByLeg:ArtifactUIStateSchema.shape.availableModesByLeg}),
  z.strictObject({kind:z.literal('requestedModesByLeg'),requestedModesByLeg:ArtifactUIStateSchema.shape.requestedModesByLeg}),
  z.strictObject({kind:z.literal('displayWindowByLeg'),displayWindowByLeg:ArtifactUIStateSchema.shape.displayWindowByLeg}),
- z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.boolean()}),
 ]);
+const AgentSelectionPatchSchema=z.union([
+ z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.literal(false)}),
+ z.strictObject({kind:z.literal('select'),fareId:FareIdSchema,selected:z.literal(true),captureId:ref,displayHandle:ref,resultKey:ref,sourceVersion:ref.optional()}),
+]);
+export const UICommandPatchSchema=z.union([UICommandWithoutSelectionSchema,AgentSelectionPatchSchema]);
 export const EditArtifactInputSchema=z.strictObject({artifactRef:ArtifactIdSchema,expectedRevision:UIStateRevisionSchema,commands:z.array(UICommandPatchSchema).min(1).max(8)});
