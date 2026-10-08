@@ -1,24 +1,26 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ArtifactIdSchema, CoverageRequestSchema, FareRowSchema, type FareRow } from '../../contracts'
-import { createFareDataBridge } from '../../data/fare-data-bridge'
+import { ArtifactIdSchema } from '../../contracts'
+import { FareItemSchema, type FareItem, type FareScope } from '../../contracts/query-groups'
 import { createActionRouter } from '../../state/action-router'
 import { createUIStateStore } from '../../state/ui-state-store'
+import { createFixedProjectionFixture } from '../../testing/fixed-projection-fixture'
 import { TravelProvider } from '../context'
 import { FadeFares, FareCalendar, FareOrder, MultiCityPlanGrid, TravelDate, sortFares } from './components'
 
 const artifactId = ArtifactIdSchema.parse('trip-planning-test')
 
-function fare(input: { id: string; date: string; mode: 'train' | 'bus'; price: number; duration: number; departure: number }): FareRow {
-  return FareRowSchema.parse({
+function fare(input: { id: string; date: string; mode: 'train' | 'bus'; price: number; duration: number; departure: number }): FareItem {
+  const carrierName = input.mode === 'train' ? 'Eurostar' : 'FlixBus'
+  return FareItemSchema.parse({
     id: input.id,
     originId: 'london',
     destinationId: 'paris',
     serviceDate: input.date,
     mode: input.mode,
     carrierId: input.mode === 'train' ? 'eurostar' : 'flixbus',
-    carrierName: input.mode === 'train' ? 'Eurostar' : 'FlixBus',
+    carrierName,
     priceCents: input.price,
     durationMinutes: input.duration,
     departureMinutes: input.departure,
@@ -27,7 +29,29 @@ function fare(input: { id: string; date: string; mode: 'train' | 'bus'; price: n
     synthetic: true,
     priceBasis: 'per-passenger-including-demo-fees',
     direct: true,
+    legs: [{ legIndex: 0, mode: input.mode, carrierName, durationMinutes: input.duration, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }],
   })
+}
+
+const signal = () => new AbortController().signal
+const datesIn = ({ from, to }: FareScope['dateWindow']) => {
+  const dates: string[] = []
+  for (let value = from; value <= to;) {
+    dates.push(value)
+    const next = new Date(`${value}T00:00:00.000Z`)
+    next.setUTCDate(next.getUTCDate() + 1)
+    value = next.toISOString().slice(0, 10)
+  }
+  return dates
+}
+
+function scopedFixture(rows: readonly FareItem[] | ((scope: FareScope, signal: AbortSignal) => readonly FareItem[] | Promise<readonly FareItem[]>), sourceVersion: string, sourceDateWindow?: FareScope['dateWindow']) {
+  const fixed = createFixedProjectionFixture({ rows, sourceVersion, ...(sourceDateWindow ? { sourceDateWindow } : {}) })
+  const load = async (originId: string, destinationId: string, dateWindow: FareScope['dateWindow'], passengers = 1) => {
+    const manifest = await fixed.bridge.loadScope({ kind: 'fareScope', originId, destinationId, dateWindow, passengers, earliestDeparture: { date: dateWindow.from, minutes: 0 } }, signal())
+    return fixed.bridge.getBinding(manifest.resourceKey)
+  }
+  return { ...fixed, load }
 }
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
@@ -50,8 +74,8 @@ describe('trip planning fare ordering', () => {
 it('uses a compact icon dropdown in the grid and omits zero-count modes', async () => {
   vi.stubGlobal('fetch',vi.fn(async()=>new Response(JSON.stringify({locations:[{slug:'london',display_name:'London, GB'},{slug:'paris',display_name:'Paris, FR'}]}),{status:200,headers:{'content-type':'application/json'}})))
   const train=fare({id:'train-only',date:'2026-10-09',mode:'train',price:3200,duration:150,departure:540})
-  const bridge=createFareDataBridge({pageSource:async()=>({rows:[train],total:1,pages:1,page:1,sourceVersion:'grid-dropdown-v1'})})
-  const manifest=await bridge.load(CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train','bus'],passengers:1}),new AbortController().signal)
+  const fixture=scopedFixture([train],'grid-dropdown-v1'),bridge=fixture.bridge
+  const manifest=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-09'})
   const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09'}})
   render(<TravelProvider services={{bridge,state,activeId:()=>artifactId,activate:()=>{}}}><MultiCityPlanGrid artifactRef={artifactId}/></TravelProvider>)
   const trigger=await screen.findByRole('button',{name:'Transport: All available'})
@@ -60,25 +84,25 @@ it('uses a compact icon dropdown in the grid and omits zero-count modes', async 
   expect(screen.queryByRole('menuitemcheckbox',{name:'Bus'})).not.toBeInTheDocument()
 })
 
-it('hides old-route fares while replacement coverage is loading', async () => {
+it('keeps the committed route visible while replacement coverage is loading', async () => {
   vi.stubGlobal('fetch',vi.fn(async()=>new Response(JSON.stringify({locations:[{slug:'london',display_name:'London, GB'},{slug:'paris',display_name:'Paris, FR'},{slug:'rome',display_name:'Rome, IT'}]}),{status:200,headers:{'content-type':'application/json'}})))
   let releaseRome: (() => void) | undefined
   const romeGate = new Promise<void>(resolve => { releaseRome = resolve })
-  const bridge=createFareDataBridge({pageSource:async input=>{
-    if(input.destinationId==='rome')await romeGate
-    const row=fare({id:input.destinationId==='rome'?'new-rome-fare':'old-paris-fare',date:input.date,mode:'train',price:input.destinationId==='rome'?4700:3200,duration:150,departure:540})
-    return{rows:[{...row,destinationId:input.destinationId}],total:1,pages:1,page:input.page,sourceVersion:'route-refresh-v1'}
-  }})
-  const seed=await bridge.load(CoverageRequestSchema.parse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train'],passengers:1}),new AbortController().signal)
+  const fixture=scopedFixture(async scope=>{
+    if(scope.destinationId==='rome')await romeGate
+    const row=fare({id:scope.destinationId==='rome'?'new-rome-fare':'old-paris-fare',date:scope.dateWindow.from,mode:'train',price:scope.destinationId==='rome'?4700:3200,duration:150,departure:540})
+    return[{...row,destinationId:scope.destinationId,legs:[{...row.legs[0]!,destinationId:scope.destinationId,destinationLabel:scope.destinationId}]}]
+  },'route-refresh-v1'),bridge=fixture.bridge
+  const seed=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-09'})
   const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[seed.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09'},displayWindowByLeg:{'london:paris':{from:'2026-10-09',to:'2026-10-09'}}})
   const router=createActionRouter(state,{bridge})
   render(<TravelProvider services={{bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}}><MultiCityPlanGrid artifactRef={artifactId}/></TravelProvider>)
   await screen.findByText('€32.00')
 
   router({kind:'route',artifactId,citySequence:['london','rome']})
-  await screen.findByText('No route is ready yet')
-  expect(screen.queryByText('€32.00')).not.toBeInTheDocument()
-  expect(screen.queryByRole('button',{name:'Choose fare'})).not.toBeInTheDocument()
+  expect(await screen.findByText('€32.00')).toBeInTheDocument()
+  expect(screen.getByRole('button',{name:'Choose fare'})).toBeInTheDocument()
+  expect(screen.getByRole('region',{name:'Multi-city trip planner'})).toHaveTextContent('London to Paris')
 
   releaseRome?.()
   await router.whenIdle(artifactId)
@@ -89,11 +113,8 @@ it('hides old-route fares while replacement coverage is loading', async () => {
 })
 
 it('keeps a standalone authored calendar bound by leg position after every endpoint changes', async () => {
-  const bridge=createFareDataBridge({pageSource:async input=>{
-    const row=FareRowSchema.parse({id:`${input.originId}-${input.destinationId}-${input.date}`,originId:input.originId,destinationId:input.destinationId,serviceDate:input.date,mode:'train',carrierId:'rail',carrierName:'Fixture Rail',priceCents:4700,durationMinutes:150,departureMinutes:540,availableSeats:12,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
-    return{rows:[row],total:1,pages:1,page:input.page,sourceVersion:'authored-binding-v1'}
-  }})
-  const load=async(originId:string,destinationId:string)=>bridge.load(CoverageRequestSchema.parse({originIds:[originId],destinationIds:[destinationId],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train'],passengers:1}),new AbortController().signal)
+  const fixture=scopedFixture(scope=>{const base=fare({id:scope.originId+'-'+scope.destinationId+'-'+scope.dateWindow.from,date:scope.dateWindow.from,mode:'train',price:4700,duration:150,departure:540});return[{...base,originId:scope.originId,destinationId:scope.destinationId,carrierId:'rail',carrierName:'Fixture Rail',legs:[{...base.legs[0]!,carrierName:'Fixture Rail',originId:scope.originId,destinationId:scope.destinationId,originLabel:scope.originId,destinationLabel:scope.destinationId}]}]},'authored-binding-v1'),bridge=fixture.bridge
+  const load=async(originId:string,destinationId:string)=>fixture.load(originId,destinationId,{from:'2026-10-09',to:'2026-10-09'})
   const first=await load('london','paris'),second=await load('paris','rome')
   const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[first.datasetId,second.datasetId],citySequence:['london','paris','rome'],dates:{start:'2026-10-09'}})
   const router=createActionRouter(state,{bridge})
@@ -112,15 +133,12 @@ it('keeps a standalone authored calendar bound by leg position after every endpo
 })
 
 it('shows only the leg display window and persists a day chosen from selected modes', async () => {
-  const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-11' }, modes: ['train', 'bus'], passengers: 1 })
-  const bridge = createFareDataBridge({ pageSource: async input => {
-    const rows = [
-      fare({ id: `train-${input.date}`, date: input.date, mode: 'train', price: 5200, duration: 150, departure: 540 }),
-      fare({ id: `bus-${input.date}`, date: input.date, mode: 'bus', price: 2400, duration: 430, departure: 600 }),
-    ]
-    return { rows, total: rows.length, pages: 1, page: input.page, sourceVersion: 'trip-ui-v1' }
-  } })
-  const manifest = await bridge.load(request, new AbortController().signal)
+  const dates=['2026-10-09','2026-10-10','2026-10-11'],rows=dates.flatMap(date=>[
+    fare({ id: `train-${date}`, date, mode: 'train', price: 5200, duration: 150, departure: 540 }),
+    fare({ id: `bus-${date}`, date, mode: 'bus', price: 2400, duration: 430, departure: 600 }),
+  ])
+  const fixture=scopedFixture(rows,'trip-ui-v1'),bridge=fixture.bridge
+  const manifest=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-11'})
   const state = createUIStateStore()
   state.initializeMissing(artifactId, {
     datasetRefs: [manifest.datasetId],
@@ -150,14 +168,9 @@ it('shows only the leg display window and persists a day chosen from selected mo
 })
 
 it('disables days without downloaded fares and replaces a stale unavailable calendar selection', async () => {
-  const calls:string[]=[]
-  const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-10' }, modes: ['train'], passengers: 1 })
-  const bridge = createFareDataBridge({ pageSource: async input => {
-    calls.push(input.date)
-    const rows=input.date==='2026-10-10'?[fare({ id: 'train-available', date: input.date, mode: 'train', price: 5200, duration: 150, departure: 540 })]:[]
-    return { rows, total: rows.length, pages: 1, page: input.page, sourceVersion: 'calendar-availability-v1' }
-  } })
-  const manifest = await bridge.load(request, new AbortController().signal)
+  let calls=0
+  const fixture=scopedFixture(()=>{calls+=1;return[fare({ id: 'train-available', date: '2026-10-10', mode: 'train', price: 5200, duration: 150, departure: 540 })]},'calendar-availability-v1',{from:'2026-10-09',to:'2026-10-10'}),bridge=fixture.bridge
+  const manifest=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-10'})
   const state = createUIStateStore()
   state.initializeMissing(artifactId, {datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09',end:'2026-10-10'},displayWindowByLeg:{'london:paris':{from:'2026-10-09',to:'2026-10-10'}},calendarDateByLeg:{'london:paris':'2026-10-09'}})
   const router=createActionRouter(state,{bridge}),services={bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}
@@ -169,21 +182,16 @@ it('disables days without downloaded fares and replaces a stale unavailable cale
   expect(available).not.toBeDisabled();await waitFor(()=>expect(available).toHaveAttribute('aria-pressed','true'))
   await waitFor(()=>expect(state.get(artifactId).calendarDateByLeg['london:paris']).toBe('2026-10-10'))
   expect(screen.getByRole('heading',{name:'Saturday 10 October'})).toBeInTheDocument()
-  const before=state.get(artifactId),loaded=calls.length
+  const before=state.get(artifactId),loaded=calls
   expect(router({kind:'calendarDateByLeg',artifactId,calendarDateByLeg:{'london:paris':'2026-10-09'}})).toEqual({status:'stale',revision:before.revision})
   fireEvent.click(unavailable)
-  expect(state.get(artifactId)).toEqual(before);expect(calls).toHaveLength(loaded);router.dispose()
+  expect(state.get(artifactId)).toEqual(before);expect(calls).toBe(loaded);router.dispose()
 })
 
 it('shifts the full itinerary window before querying and rendering a new first-leg date', async () => {
   const loadedDates: string[] = []
-  const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-11' }, modes: ['train'], passengers: 1 })
-  const bridge = createFareDataBridge({ pageSource: async input => {
-    loadedDates.push(input.date)
-    const row = fare({ id: `train-${input.date}`, date: input.date, mode: 'train', price: 5200, duration: 150, departure: 540 })
-    return { rows: [row], total: 1, pages: 1, page: input.page, sourceVersion: 'trip-date-shift-v1' }
-  } })
-  const manifest = await bridge.load(request, new AbortController().signal)
+  const fixture=scopedFixture(scope=>datesIn(scope.dateWindow).map(date=>{loadedDates.push(date);return fare({id:`train-${date}`,date,mode:'train',price:5200,duration:150,departure:540})}),'trip-date-shift-v1',{from:'2026-10-09',to:'2026-10-12'}),bridge=fixture.bridge
+  const manifest=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-11'})
   const state = createUIStateStore()
   state.initializeMissing(artifactId, {
     datasetRefs: [manifest.datasetId],
@@ -213,10 +221,9 @@ it('shifts the full itinerary window before querying and rendering a new first-l
 })
 
 it('lets a later-leg departure move backward by reducing its stay', async () => {
-  const pageSource = async (input: { originId: string; destinationId: string; date: string; page: number }) => ({ rows: [FareRowSchema.parse({ id: `${input.originId}-${input.destinationId}-${input.date}`, originId: input.originId, destinationId: input.destinationId, serviceDate: input.date, mode: 'train', carrierId: 'rail', carrierName: 'Fixture Rail', priceCents: 3200, durationMinutes: 180, departureMinutes: 600, availableSeats: 12, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true })], total: 1, pages: 1, page: input.page, sourceVersion: 'trip-stay-date-v1' })
-  const bridge = createFareDataBridge({ pageSource })
-  const first = await bridge.load(CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-26', to: '2026-11-02' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
-  const second = await bridge.load(CoverageRequestSchema.parse({ originIds: ['paris'], destinationIds: ['rome'], dateWindow: { from: '2026-10-26', to: '2026-11-02' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
+  const fixture=scopedFixture(scope=>datesIn(scope.dateWindow).map(date=>{const base=fare({id:scope.originId+'-'+scope.destinationId+'-'+date,date,mode:'train',price:3200,duration:180,departure:600});return{...base,originId:scope.originId,destinationId:scope.destinationId,carrierId:'rail',carrierName:'Fixture Rail',legs:[{...base.legs[0]!,carrierName:'Fixture Rail',originId:scope.originId,destinationId:scope.destinationId,originLabel:scope.originId,destinationLabel:scope.destinationId}]}}),'trip-stay-date-v1'),bridge=fixture.bridge
+  const first = await fixture.load('london','paris',{ from: '2026-10-26', to: '2026-11-02' })
+  const second = await fixture.load('paris','rome',{ from: '2026-10-26', to: '2026-11-02' })
   const state = createUIStateStore()
   state.initializeMissing(artifactId, { datasetRefs: [first.datasetId, second.datasetId], citySequence: ['london', 'paris', 'rome'], dates: { start: '2026-10-26', end: '2026-11-02' }, stays: [{ cityId: 'paris', nights: 3 }, { cityId: 'rome', nights: 0 }] })
   const router = createActionRouter(state, { bridge })
@@ -238,8 +245,8 @@ it('lets a later-leg departure move backward by reducing its stay', async () => 
 it('queries leg fares chronologically by default and restores that order after price sorting', async () => {
   const rows = [fare({ id: 'expensive-earliest', date: '2026-10-09', mode: 'train', price: 99_900, duration: 160, departure: 60 })]
   for (let index = 0; index < 100; index += 1) rows.push(fare({ id: `cheap-later-${index}`, date: '2026-10-10', mode: 'train', price: 1_000 + index, duration: 160, departure: 120 + index }))
-  const bridge = createFareDataBridge({ pageSource: async input => { const dated = rows.filter(row => row.serviceDate === input.date); return { rows: dated, total: dated.length, pages: 1, page: input.page, sourceVersion: 'trip-order-v1' } } })
-  const manifest = await bridge.load(CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-10' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
+  const fixture=scopedFixture(rows,'trip-order-v1'),bridge=fixture.bridge
+  const manifest=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-10'})
   const state = createUIStateStore()
   state.initializeMissing(artifactId, { datasetRefs: [manifest.datasetId], citySequence: ['london', 'paris'], dates: { start: '2026-10-09', end: '2026-10-10' } })
   const services = { bridge, state, activeId: () => artifactId, activate: () => {} }
@@ -257,8 +264,8 @@ it('defaults calendar days to complete cheapest representatives and keeps fastes
   firstDay.push(fare({ id: 'true-cheapest', date: '2026-10-09', mode: 'bus', price: 500, duration: 700, departure: 900 }))
   firstDay.push(fare({ id: 'true-fastest', date: '2026-10-09', mode: 'train', price: 99_900, duration: 60, departure: 1_000 }))
   const rows = [...firstDay, fare({ id: 'second-day', date: '2026-10-10', mode: 'train', price: 4_000, duration: 120, departure: 400 })]
-  const bridge = createFareDataBridge({ pageSource: async input => { const dated=rows.filter(row=>row.serviceDate===input.date),pages=Math.max(1,Math.ceil(dated.length/100));return{rows:dated.slice((input.page-1)*100,input.page*100),total:dated.length,pages,page:input.page,sourceVersion:'calendar-groups-v1'} } })
-  const manifest = await bridge.load(CoverageRequestSchema.parse({ originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-10'},modes:['train','bus'],passengers:1 }),new AbortController().signal)
+  const fixture=scopedFixture(rows,'calendar-groups-v1'),bridge=fixture.bridge
+  const manifest=await fixture.load('london','paris',{from:'2026-10-09',to:'2026-10-10'})
   const state=createUIStateStore()
   state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09',end:'2026-10-10'},availableModesByLeg:{'london:paris':['train','bus']}})
   render(<TravelProvider services={{bridge,state,activeId:()=>artifactId,activate:()=>{}}}><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
@@ -274,29 +281,9 @@ it('defaults calendar days to complete cheapest representatives and keeps fastes
 })
 
 it('excludes coverage margins for a later leg and shows a status when its threshold passes the display end', async () => {
-  const pageSource = async (input: { originId: string; destinationId: string; date: string; page: number }) => {
-    const row = FareRowSchema.parse({
-      id: `${input.originId}-${input.destinationId}-${input.date}`,
-      originId: input.originId,
-      destinationId: input.destinationId,
-      serviceDate: input.date,
-      mode: 'train',
-      carrierId: 'rail',
-      carrierName: 'Fixture Rail',
-      priceCents: 3200,
-      durationMinutes: 180,
-      departureMinutes: 600,
-      availableSeats: 12,
-      currency: 'EUR',
-      synthetic: true,
-      priceBasis: 'per-passenger-including-demo-fees',
-      direct: true,
-    })
-    return { rows: [row], total: 1, pages: 1, page: input.page, sourceVersion: 'trip-window-v1' }
-  }
-  const bridge = createFareDataBridge({ pageSource })
-  const first = await bridge.load(CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-23', to: '2026-11-03' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
-  const second = await bridge.load(CoverageRequestSchema.parse({ originIds: ['paris'], destinationIds: ['rome'], dateWindow: { from: '2026-10-27', to: '2026-11-05' }, modes: ['train'], passengers: 1 }), new AbortController().signal)
+  const fixture=scopedFixture(scope=>datesIn(scope.dateWindow).map(date=>{const base=fare({id:scope.originId+'-'+scope.destinationId+'-'+date,date,mode:'train',price:3200,duration:180,departure:600});return{...base,originId:scope.originId,destinationId:scope.destinationId,carrierId:'rail',carrierName:'Fixture Rail',legs:[{...base.legs[0]!,carrierName:'Fixture Rail',originId:scope.originId,destinationId:scope.destinationId,originLabel:scope.originId,destinationLabel:scope.destinationId}]}}),'trip-window-v1'),bridge=fixture.bridge
+  const first = await fixture.load('london','paris',{ from: '2026-10-23', to: '2026-11-03' })
+  const second = await fixture.load('paris','rome',{ from: '2026-10-27', to: '2026-11-05' })
   const state = createUIStateStore()
   state.initializeMissing(artifactId, {
     datasetRefs: [first.datasetId, second.datasetId],

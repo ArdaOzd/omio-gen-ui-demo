@@ -2,25 +2,28 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { PlanningTracker } from '../variants/a/planning-tracker'
-import { ArtifactIdSchema, FareRowSchema, type FareRow } from '../contracts'
-import { createFareDataBridge } from '../data/fare-data-bridge'
+import { ArtifactIdSchema } from '../contracts'
+import { FareItemSchema, type FareItem } from '../contracts/query-groups'
 import { createUIStateStore } from '../state/ui-state-store'
+import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
 import { CatalogNode } from './component'
 import { TravelProvider, type TravelServices } from './context'
 
 const artifactId = ArtifactIdSchema.parse('fare-actions')
 const rows = [
-  FareRowSchema.parse({ id: 'cheap-bus', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode: 'bus', carrierId: 'flixbus', carrierName: 'FlixBus', priceCents: 2300, durationMinutes: 470, departureMinutes: 600, availableSeats: 10, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true }),
-  FareRowSchema.parse({ id: 'fast-train', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode: 'train', carrierId: 'eurostar', carrierName: 'Eurostar', priceCents: 5500, durationMinutes: 140, departureMinutes: 660, availableSeats: 8, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true }),
+  FareItemSchema.parse({ id: 'cheap-bus', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode: 'bus', carrierId: 'flixbus', carrierName: 'FlixBus', priceCents: 2300, durationMinutes: 470, departureMinutes: 600, availableSeats: 10, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true, legs: [{ legIndex: 0, mode: 'bus', carrierName: 'FlixBus', durationMinutes: 470, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }] }),
+  FareItemSchema.parse({ id: 'fast-train', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-09', mode: 'train', carrierId: 'eurostar', carrierName: 'Eurostar', priceCents: 5500, durationMinutes: 140, departureMinutes: 660, availableSeats: 8, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true, legs: [{ legIndex: 0, mode: 'train', carrierName: 'Eurostar', durationMinutes: 140, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }] }),
 ]
 
-async function fixture(fares: FareRow[] = rows) {
-  const bridge = createFareDataBridge({ pageSource: async input => ({ rows: fares.filter(row => row.serviceDate === input.date), total: fares.length, page: input.page, pages: 1, sourceVersion: 'fare-actions-v1' }) })
-  const manifest = await bridge.load({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-09' }, modes: ['train', 'bus'], passengers: 1 }, new AbortController().signal)
+async function fixture(fares: FareItem[] = rows) {
+  const fixed = createFixedProjectionFixture({ rows: fares, sourceVersion: 'fare-actions-v1' })
+  const bridge = fixed.bridge
+  const manifest = await bridge.loadScope(fixed.scope({ originId: 'london', destinationId: 'paris', dateWindow: { from: '2026-10-09', to: '2026-10-09' }, passengers: 1, earliestDeparture: { date: '2026-10-09', minutes: 0 } }), new AbortController().signal)
+  const binding = bridge.getBinding(manifest.resourceKey)
   const state = createUIStateStore()
-  state.initializeMissing(artifactId, { datasetRefs: [manifest.datasetId], dates: { start: '2026-10-09' } })
+  state.initializeMissing(artifactId, { datasetRefs: [binding.datasetId], dates: { start: '2026-10-09' } })
   const services = { bridge, state, activeId: () => artifactId, artifactIds: () => [artifactId], activate: () => {} } satisfies TravelServices
-  return { manifest, services, state }
+  return { binding, services, state }
 }
 
 describe('generated fare selection', () => {
@@ -100,8 +103,8 @@ describe('generated fare selection', () => {
 
   it('keeps calendar date browsing separate from adding that day cheapest fare', async () => {
     const user = userEvent.setup()
-    const { manifest, services, state } = await fixture()
-    render(<TravelProvider services={services}><CatalogNode kind="PriceCalendar" artifactRef={artifactId} datasetRef={manifest.datasetId} /></TravelProvider>)
+    const { binding, services, state } = await fixture()
+    render(<TravelProvider services={services}><CatalogNode kind="PriceCalendar" artifactRef={artifactId} datasetRef={binding.datasetId} /></TravelProvider>)
 
     await user.click(await screen.findByRole('button', { name: /Fri 9 Oct.*€23\.00.*2 options/ }))
     expect(state.get(artifactId).selectedFareIds).toEqual([])
