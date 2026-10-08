@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   ArtifactIdSchema,
   CATALOG_VERSION,
@@ -199,6 +199,44 @@ describe('descriptor-only thread persistence', () => {
     expect(bindings[0]?.manifest.complete).toBe(!partial)
     expect(restoredStore.get(item.id).selectedFareIds).toEqual([row.id])
     expect(loaded.messages).toEqual(item.record.messages)
+  })
+
+  it('hydrates selected fare pins before publishing restored artifact state', async () => {
+    const item = await fixture()
+    const fresh = createFixedProjectionFixture({
+      sourceVersion: 'persistence-v1',
+      sourceDateWindow: { from: '2026-10-02', to: '2026-10-02' },
+      rows: [row, FareItemSchema.parse({ ...row, id: FareIdSchema.parse('fare-2') })],
+    })
+    const lookup = vi.spyOn(fresh.client, 'lookupPins')
+    const store = createUIStateStore()
+
+    const bindings = await createThreadPersistence(memory().storage).restore(item.record, fresh.bridge, store, new AbortController().signal)
+
+    expect(lookup).toHaveBeenCalledOnce()
+    expect(lookup.mock.calls[0]?.[0]).toMatchObject({
+      sourceVersion: 'persistence-v1',
+      pins: [{ fareId: row.id, resourceKey: bindings[0]?.resourceKey }],
+    })
+    expect(fresh.bridge.findCachedFare(row.id, bindings[0]?.resourceKey)).toEqual(row)
+    expect(store.get(item.id).selectedFareIds).toEqual([row.id])
+  })
+
+  it('keeps a restored selection when its scoped pin is missing', async () => {
+    const item = await fixture()
+    const fresh = createFixedProjectionFixture({
+      sourceVersion: 'persistence-v1',
+      sourceDateWindow: { from: '2026-10-02', to: '2026-10-02' },
+      rows: [],
+    })
+    const lookup = vi.spyOn(fresh.client, 'lookupPins')
+    const store = createUIStateStore()
+
+    const bindings = await createThreadPersistence(memory().storage).restore(item.record, fresh.bridge, store, new AbortController().signal)
+
+    expect(lookup).toHaveBeenCalledOnce()
+    expect(fresh.bridge.findCachedFare(row.id, bindings[0]?.resourceKey)).toBeUndefined()
+    expect(store.get(item.id).selectedFareIds).toEqual([row.id])
   })
 
   it('restores the last active artifact independently from first registration', async () => {
