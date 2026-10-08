@@ -1,13 +1,13 @@
 import {filterPredicate} from '../state/filter-predicate'
 export {filterPredicate} from '../state/filter-predicate'
-import type { QueryFareSelectionScope } from '../state/action-router'
+import type { CalendarDateSelectionScope,QueryFareSelectionScope } from '../state/action-router'
 import { legKey, legState, legRequest, orderedLegResources, resolveBoundDatasetId } from '../state/leg-bindings'
 import { scheduleLegs } from '../state/itinerary-schedule'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { ArtifactIdSchema, DatasetIdSchema, FareRowSchema, parseQuery, type ArtifactUIState, type BoundedQueryResult, type Coverage, type FareDataBridge, type FareRow, type QueryIR, type UICommand, type UIStateStore, type DispatchResult } from '../contracts'
 
-export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; artifactIds?:()=>ReturnType<typeof ArtifactIdSchema.parse>[]; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>;selectFromQuery?:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>DispatchResult}; record?: (input: unknown) => void; queryForView?:()=>QueryIR; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
+export type TravelServices = { bridge: FareDataBridge; state: UIStateStore; activate: (id: string) => void; activeId: () => string | undefined; artifactIds?:()=>ReturnType<typeof ArtifactIdSchema.parse>[]; subscribeActive?: (listener:()=>void)=>()=>void; dispatch?: ((command:UICommand)=>DispatchResult)&{retry?:(id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>;selectFromQuery?:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>DispatchResult;calendarDateFromQuery?:(command:Extract<UICommand,{kind:'calendarDateByLeg'}>,scope:CalendarDateSelectionScope)=>DispatchResult}; record?: (input: unknown) => void; queryForView?:()=>QueryIR; whenIdle?: (id:ReturnType<typeof ArtifactIdSchema.parse>)=>Promise<void>; createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse> }
 const TravelContext = createContext<TravelServices | null>(null)
 export function TravelProvider({ services, children }: { services: TravelServices; children: ReactNode }) { return <TravelContext.Provider value={services}>{children}</TravelContext.Provider> }
 export function useTravelServices() { const services = useContext(TravelContext); if (!services) throw new Error('Travel provider missing'); return services }
@@ -44,7 +44,8 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
   useEffect(() => datasetId ? services.bridge.subscribe(datasetId, () => refresh(n => n + 1)) : undefined, [services.bridge, datasetId])
   let encoded=''
   try{if(datasetId){const coverage=services.bridge.getManifest(datasetId).coverage;encoded=JSON.stringify(services.queryForView?.()??make(legState(state,coverage,plan.facts),datasetId,coverage))}}catch{/* The effect exposes a bounded query error. */}
-  const [result, setResult] = useState<{status:'loading'|'ready'|'error'; data?:BoundedQueryResult}>({status:'loading'})
+  const queryKey=encoded
+  const [result, setResult] = useState<{status:'loading'|'ready'|'error'; data?:BoundedQueryResult;queryKey?:string}>({status:'loading'})
   useEffect(() => {
     if (!datasetId) { setResult({status:'error'}); return }
     if (!covered) { setResult({status:'loading'}); return }
@@ -59,12 +60,18 @@ export function useTravelQuery(ref: string, datasetRef: string | undefined, make
         const latest=services.state.get(state.artifactId)
         const coverage=services.bridge.getManifest(datasetId).coverage;const current=services.queryForView?.()??make(legState(latest,coverage,plan.facts),datasetId,coverage)
         if(JSON.stringify(current)!==encoded||generations.some(source=>{const manifest=services.bridge.getManifest(source.datasetId);return manifest.revision!==source.revision||manifest.source.sourceVersion!==source.sourceVersion}))return
-        setResult({status:'ready',data})
+        setResult({status:'ready',data,queryKey})
       }).catch(() => { if (!controller.signal.aborted) setResult({status:'error'}) })
     } catch { setResult({status:'error'}) }
     return () => controller.abort()
-  }, [services, datasetId, encoded, state.artifactId, resourceRevision, covered])
-  return { ...result, state, services, datasetId }
+  }, [services, datasetId, encoded, queryKey, state.artifactId, resourceRevision, covered])
+  const coherent=result.status==='ready'&&result.queryKey!==queryKey?{status:'loading' as const}:result
+  const currentQueryKey=()=>{
+    if(!datasetId)return''
+    const latest=services.state.get(state.artifactId),coverage=services.bridge.getManifest(datasetId).coverage
+    return JSON.stringify(services.queryForView?.()??make(legState(latest,coverage,plan.facts),datasetId,coverage))
+  }
+  return { ...coherent, state, services, datasetId, facts:plan.facts,queryKey,currentQueryKey }
 }
 export function useFareRows(ref: string, datasetRef?: string) {
   const result = useTravelQuery(ref, datasetRef, (state, id) => ({ version:1, sources:[{datasetRef:id,alias:'fares'}], where:filterPredicate(state), project:FareRowSchema.keyof().options, orderBy:[state.sort,{field:'departureMinutes',direction:'asc'},{field:'id',direction:'asc'}],limit:100 }))

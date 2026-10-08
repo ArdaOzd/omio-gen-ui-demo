@@ -1,16 +1,14 @@
 import type { ArtifactId,ArtifactUIState,CoverageRequest,DatasetManifest,DispatchResult,FareDataBridge,UICommand,UIStateStore,ValidatedQueryIR,DatasetId,DatasetRevision,FareId } from '../contracts'
-import { availableModes,legDate,legKey,legRequest,orderedLegResources } from './leg-bindings'
+import { availableModes,hasLoadedItineraryCoverage,legDate,legKey,legRequest,manifestCovers,orderedLegResources } from './leg-bindings'
+import { withTripDates } from './ui-state-store'
 import { scheduleLegs,staleDownstreamFareIds } from './itinerary-schedule'
 import { releaseDatasetWhenUnowned } from './dataset-ownership'
 export type QueryFareSelectionScope={
  kind:'query-result';fareIds:readonly FareId[];query:ValidatedQueryIR;currentQuery:()=>ValidatedQueryIR
  sources:ReadonlyArray<{datasetId:DatasetId;revision:DatasetRevision;sourceVersion:string}>
 }
+export type CalendarDateSelectionScope={legKey:string;date?:string;availableDates:readonly string[];datasetId:DatasetId;revision:DatasetRevision;sourceVersion:string;queryKey:string;currentQueryKey:()=>string;selectionKey:string}
 export type CoverageLoadStatus={artifactId:ArtifactId;status:'loading'|'ready'|'error';message?:string}
-export function covers(manifest:DatasetManifest,request:CoverageRequest):boolean{
- const coverage=manifest.coverage
- return coverage.complete&&!coverage.truncated&&request.passengers===coverage.passengers&&request.originIds.every(id=>coverage.originIds.includes(id))&&request.destinationIds.every(id=>coverage.destinationIds.includes(id))&&request.modes.every(mode=>coverage.modes.includes(mode))&&request.dateWindow.from>=coverage.dateWindow.from&&request.dateWindow.to<=coverage.dateWindow.to
-}
 const signature=(state:ArtifactUIState)=>JSON.stringify({dates:state.dates,citySequence:state.citySequence,stays:state.stays,modes:state.filters.modes,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,requestedModesByLeg:state.requestedModesByLeg,displayWindowByLeg:state.displayWindowByLeg})
 function requestsFor(state:ArtifactUIState,bridge:FareDataBridge,selectedFacts:readonly Awaited<ReturnType<FareDataBridge['lookupFare']>>[]=[]):CoverageRequest[]{
  const resources=orderedLegResources(state,bridge)
@@ -41,12 +39,27 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
    return store.get(artifactId).datasetRefs.includes(source.datasetId)&&manifest.revision===source.revision&&manifest.source.sourceVersion===source.sourceVersion
   })}catch{return false}
  }
- const route=(command:UICommand,selectionScope?:QueryFareSelectionScope):DispatchResult=>{
+ const currentCalendarScope=(artifactId:ArtifactId,command:Extract<UICommand,{kind:'calendarDateByLeg'}>,scope:CalendarDateSelectionScope):boolean=>{
+  const bridge=options.bridge;if(!bridge)return false
+  try{
+   const state=store.get(artifactId),manifest=bridge.getManifest(scope.datasetId)
+   if(!state.datasetRefs.includes(scope.datasetId)||legKey(manifest.coverage)!==scope.legKey||manifest.revision!==scope.revision||manifest.source.sourceVersion!==scope.sourceVersion||scope.queryKey!==scope.currentQueryKey()||scope.selectionKey!==JSON.stringify(state.selectedFareIds))return false
+   const changed=[...new Set([...Object.keys(state.calendarDateByLeg),...Object.keys(command.calendarDateByLeg)])].filter(key=>state.calendarDateByLeg[key]!==command.calendarDateByLeg[key])
+   return changed.length===1&&changed[0]===scope.legKey&&command.calendarDateByLeg[scope.legKey]===scope.date&&(!scope.date||scope.availableDates.includes(scope.date))
+  }catch{return false}
+ }
+ const route=(command:UICommand,selectionScope?:QueryFareSelectionScope,calendarScope?:CalendarDateSelectionScope):DispatchResult=>{
   if(command.kind==='select'&&command.selected&&selectionScope&&(!selectionScope.fareIds.includes(command.fareId)||!currentScope(command.artifactId,selectionScope)))return{status:'stale',revision:store.get(command.artifactId).revision}
+  if(command.kind==='calendarDateByLeg'&&(!calendarScope||!currentCalendarScope(command.artifactId,command,calendarScope)))return{status:'stale',revision:store.get(command.artifactId).revision}
+  if(command.kind==='calendarDates'){
+   const current=store.get(command.artifactId),bridge=options.bridge
+   let available=false;try{available=!!bridge&&hasLoadedItineraryCoverage(withTripDates(current,command.dates),bridge)}catch{}
+   if(!available)return{status:'stale',revision:current.revision}
+  }
   const result=store.dispatch({...command,expectedRevision:command.expectedRevision??store.get(command.artifactId).revision})
   if(result.status!=='applied')return result
   options.activate?.(command.artifactId);const bridge=options.bridge;if(!bridge)return result
-  if(['select','dates','route','stays'].includes(command.kind)){
+  if(['select','dates','calendarDates','route','stays'].includes(command.kind)){
    const token=Symbol();const state=store.get(command.artifactId);const selected=JSON.stringify(state.selectedFareIds)
    const promise=Promise.all(state.selectedFareIds.map(id=>bridge.lookupFare(id,[]))).then(async facts=>{
     if(selections.get(command.artifactId)?.token!==token||JSON.stringify(store.get(command.artifactId).selectedFareIds)!==selected)return
@@ -97,7 +110,7 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
   if(JSON.stringify(availableModesByLeg)!==JSON.stringify(state.availableModesByLeg)){store.dispatch({kind:'availableModesByLeg',artifactId,availableModesByLeg,expectedRevision:state.revision});state=store.get(artifactId)}
   if(JSON.stringify(modesByLeg)!==JSON.stringify(state.modesByLeg)){store.dispatch({kind:'modesByLeg',artifactId,modesByLeg,expectedRevision:state.revision});state=store.get(artifactId)}
   const plans=requestsFor(state,bridge,selectedFacts)
-  const manifests=state.datasetRefs.map(ref=>bridge.getManifest(ref));const missing=plans.filter(plan=>!manifests.some(manifest=>covers(manifest,plan)))
+  const manifests=state.datasetRefs.map(ref=>bridge.getManifest(ref));const missing=plans.filter(plan=>!manifests.some(manifest=>manifestCovers(manifest,plan)))
   if(!missing.length){options.onCoverageStatus?.({artifactId,status:'ready'});return Promise.resolve()}
   const controller=new AbortController();const captured=signature(state);const loaded:DatasetManifest[]=[]
   options.onCoverageStatus?.({artifactId,status:'loading'})
@@ -132,5 +145,5 @@ export function createActionRouter(store:UIStateStore,options:{bridge?:FareDataB
   requests.set(artifactId,{controller,promise});return promise
  }
  const cancelPending=()=>{for(const request of requests.values())request.controller.abort();requests.clear();selections.clear()}
- return Object.assign(route,{retry,selectFromQuery:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>route(command,scope),whenIdle:async(id:ArtifactId)=>{await Promise.all([requests.get(id)?.promise,selections.get(id)?.promise])},cancelPending,dispose:cancelPending})
+ return Object.assign(route,{retry,selectFromQuery:(command:Extract<UICommand,{kind:'select'}>,scope:QueryFareSelectionScope)=>route(command,scope),calendarDateFromQuery:(command:Extract<UICommand,{kind:'calendarDateByLeg'}>,scope:CalendarDateSelectionScope)=>route(command,undefined,scope),whenIdle:async(id:ArtifactId)=>{await Promise.all([requests.get(id)?.promise,selections.get(id)?.promise])},cancelPending,dispose:cancelPending})
 }

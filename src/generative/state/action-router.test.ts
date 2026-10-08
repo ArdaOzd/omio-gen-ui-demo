@@ -6,6 +6,32 @@ import { ArtifactIdSchema,FareIdSchema,type FareId,type FareRow,type CoverageReq
 const request:CoverageRequest={originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-08'},modes:['train'],passengers:1}
 const row:FareRow={id:FareIdSchema.parse('fare-1'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'test',carrierName:'Test Rail',priceCents:1000,durationMinutes:120,departureMinutes:600,availableSeats:4,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}
 describe('direct action coverage routing',()=>{
+ it('rejects calendar-only date changes outside complete downloaded leg coverage without mutating or loading',async()=>{
+  const calls:string[]=[]
+  const bridge=createFareDataBridge({pageSource:async input=>{calls.push(`${input.originId}:${input.destinationId}:${input.date}`);return{rows:[{...row,id:FareIdSchema.parse(`${input.originId}-${input.destinationId}-${input.date}`),originId:input.originId,destinationId:input.destinationId,serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'}}})
+  const first=await bridge.load(request,new AbortController().signal)
+  const second=await bridge.load({...request,originIds:['paris'],destinationIds:['rome']},new AbortController().signal)
+  const store=createUIStateStore(),id=ArtifactIdSchema.parse('calendar-coverage')
+  store.initializeMissing(id,{datasetRefs:[first.datasetId,second.datasetId],citySequence:['london','paris','rome'],dates:{start:'2026-10-02',end:'2026-10-04'},stays:[{cityId:'paris',nights:0}]})
+  const router=createActionRouter(store,{bridge}),before=store.get(id),loaded=calls.length
+  expect(router({kind:'calendarDates',artifactId:id,dates:{start:'2026-11-01',end:'2026-11-03'}})).toEqual({status:'stale',revision:before.revision})
+  expect(store.get(id)).toEqual(before);expect(calls).toHaveLength(loaded)
+  store.dispatch({kind:'datasets',artifactId:id,datasetRefs:[first.datasetId],expectedRevision:before.revision})
+  const missing=store.get(id),missingLoads=calls.length
+  expect(router({kind:'calendarDates',artifactId:id,dates:{start:'2026-10-03',end:'2026-10-05'}})).toEqual({status:'stale',revision:missing.revision})
+  expect(store.get(id)).toEqual(missing);expect(calls).toHaveLength(missingLoads);router.dispose()
+ })
+ it('rejects a fare-calendar day captured before the current query filters changed',async()=>{
+  const bridge=createFareDataBridge({pageSource:async input=>({rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'})})
+  const manifest=await bridge.load(request,new AbortController().signal),store=createUIStateStore(),id=ArtifactIdSchema.parse('stale-calendar-query')
+  store.initializeMissing(id,{datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-02',end:'2026-10-08'}})
+  const router=createActionRouter(store,{bridge}),queryKey=JSON.stringify(store.get(id).filters)
+  const scope={legKey:'london:paris',date:'2026-10-03',availableDates:['2026-10-03'],datasetId:manifest.datasetId,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion,queryKey,currentQueryKey:()=>JSON.stringify(store.get(id).filters),selectionKey:JSON.stringify(store.get(id).selectedFareIds)}
+  store.dispatch({kind:'filters',artifactId:id,filters:{...store.get(id).filters,modes:['bus']}})
+  const before=store.get(id)
+  expect(router.calendarDateFromQuery({kind:'calendarDateByLeg',artifactId:id,calendarDateByLeg:{'london:paris':'2026-10-03'}},scope)).toEqual({status:'stale',revision:before.revision})
+  expect(store.get(id)).toEqual(before);router.dispose()
+ })
  it('uses cached dates locally and loads a bounded outside date without a model request',async()=>{
   const dates:string[]=[];const bridge=createFareDataBridge({pageSource:async input=>{dates.push(input.date);return{rows:[{...row,id:FareIdSchema.parse(`fare-${input.date}`),serviceDate:input.date}],total:1,pages:1,page:input.page,sourceVersion:'v1'}}});const manifest=await bridge.load(request,new AbortController().signal);const store=createUIStateStore();const id=ArtifactIdSchema.parse('a');store.initializeMissing(id,{dates:{start:'2026-10-02'},datasetRefs:[manifest.datasetId]});const router=createActionRouter(store,{bridge})
   const before=dates.length;router({kind:'dates',artifactId:id,dates:{start:'2026-10-04'}});await router.whenIdle(id);expect(dates.length).toBe(before)

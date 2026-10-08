@@ -3,6 +3,10 @@ import { fallbackLegDate,legThreshold } from './itinerary-schedule'
 export function legKey(coverage:Pick<Coverage,'originIds'|'destinationIds'>):string|undefined{return coverage.originIds.length===1&&coverage.destinationIds.length===1?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined}
 export type LegResource={key:string;datasetId:DatasetId;coverage:Coverage}
 export function availableModes(manifest:Pick<DatasetManifest,'coverage'|'compactSummary'>):TransportMode[]{return manifest.coverage.modes.filter(mode=>(manifest.compactSummary.modeCounts[mode]??0)>0)}
+export function manifestCovers(manifest:DatasetManifest,request:CoverageRequest):boolean{
+ const coverage=manifest.coverage
+ return coverage.complete&&!coverage.truncated&&request.passengers===coverage.passengers&&request.originIds.every(id=>coverage.originIds.includes(id))&&request.destinationIds.every(id=>coverage.destinationIds.includes(id))&&request.modes.every(mode=>coverage.modes.includes(mode))&&request.dateWindow.from>=coverage.dateWindow.from&&request.dateWindow.to<=coverage.dateWindow.to
+}
 export function orderedLegResources(state:ArtifactUIState,bridge:FareDataBridge):LegResource[]{
  const resources=state.datasetRefs.flatMap(datasetId=>{const coverage=bridge.getManifest(datasetId).coverage,key=legKey(coverage);return key?[{key,datasetId,coverage}]:[]})
  const latest=new Map(resources.map(resource=>[resource.key,resource]))
@@ -34,6 +38,16 @@ export function legRequest(state:ArtifactUIState,coverage:Coverage,selectedFacts
  const from=requestedFrom>fallbackTo?fallbackTo:requestedFrom
  return {originIds:coverage.originIds,destinationIds:coverage.destinationIds,dateWindow:{from,to:fallbackTo},modes:chosen.length?chosen:coverage.modes,passengers:coverage.passengers}
 }
+export function hasLoadedItineraryCoverage(state:ArtifactUIState,bridge:FareDataBridge,selectedFacts:readonly BoundedFareFact[]=[]):boolean{
+ const manifests=state.datasetRefs.map(id=>bridge.getManifest(id))
+ const resources=orderedLegResources(state,bridge)
+ if(!resources.length)return false
+ const first=resources[0]?.coverage.originIds[0]
+ const route=state.citySequence.length>1?state.citySequence:state.stays.length&&first?[first,...state.stays.map(stay=>stay.cityId)]:[]
+ const stops=route.filter((city,index,all)=>!!city&&(index===0||city!==all[index-1]))
+ if(stops.length>1&&resources.length!==stops.length-1)return false
+ return resources.every(resource=>manifests.some(manifest=>manifestCovers(manifest,legRequest(state,resource.coverage,selectedFacts))))
+}
 export function legState(state:ArtifactUIState,coverage:Coverage,selectedFacts:readonly BoundedFareFact[]=[]):ArtifactUIState{
  const key=legKey(coverage)
  const threshold=legThreshold(state,coverage,selectedFacts)
@@ -46,7 +60,14 @@ export function legState(state:ArtifactUIState,coverage:Coverage,selectedFacts:r
 }
 
 export function resolveBoundDatasetId(state:ArtifactUIState,bridge:FareDataBridge,seedRef:DatasetId,selectedFacts:readonly BoundedFareFact[]=[]):DatasetId{
- const initial=bridge.getManifest(seedRef);const request=legRequest(state,initial.coverage,selectedFacts)
+ let initial:DatasetManifest
+ try{initial=bridge.getManifest(seedRef)}catch{
+  const key=state.datasetBindings[seedRef]
+  const rebound=key?[...state.datasetRefs].reverse().find(id=>legKey(bridge.getManifest(id).coverage)===key):undefined
+  if(rebound)return rebound
+  throw new Error('Expired dataset reference')
+ }
+ const request=legRequest(state,initial.coverage,selectedFacts)
  const current=[...state.datasetRefs].reverse().find(id=>{const candidate=bridge.getManifest(id);const coverage=candidate.coverage;return legKey(coverage)===legKey(initial.coverage)&&request.dateWindow.from>=coverage.dateWindow.from&&request.dateWindow.to<=coverage.dateWindow.to&&request.modes.every(mode=>coverage.modes.includes(mode))})
  if(current&&bridge.getManifest(current).source.sourceVersion!==initial.source.sourceVersion)throw new Error('Travel source changed; reload this artifact')
  return current??seedRef

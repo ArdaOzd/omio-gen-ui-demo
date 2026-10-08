@@ -2,7 +2,7 @@ import { Component, type ReactNode } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { nodePropsSchema } from './generated/catalog'
-import { useTravelServices } from './context'
+import { useArtifact, useTravelServices } from './context'
 import { ArtifactIdSchema } from '../contracts'
 import { Layout, type WidgetProps } from './layout'
 import { Control } from './controls'
@@ -17,6 +17,46 @@ export class ArtifactErrorBoundary extends Component<{children:ReactNode},{faile
  state={failed:false};static getDerivedStateFromError(){return{failed:true}}
  render(){return this.state.failed?<Alert className="travel-tools-error">This view could not be displayed. Ask the assistant to regenerate it.</Alert>:this.props.children}
 }
+function SubscribedCatalogNode({kind,props}:{kind:string;props:WidgetProps}) {
+ const {services}=useArtifact(props.artifactRef)
+ let current=props,failed=false
+ try {
+  const datasetRef=resolvePlannerDatasetRef({kind,artifactRef:props.artifactRef,datasetRef:props.datasetRef,legIndex:props.legIndex},services.state,services.bridge)
+  if(datasetRef)current={...props,datasetRef}
+ }catch{failed=true}
+ if(failed)return <Alert className="travel-notice" role="status">This view's travel data is not available. Reload or retry the conversation.</Alert>
+ let content:ReactNode
+ if(layouts.has(kind))content=<Layout kind={kind} {...current}/>
+ else if(controls.has(kind))content=<Control kind={kind} {...current}/>
+ else if(statuses.has(kind))content=<Status kind={kind} {...current}/>
+ else switch(kind){
+ case 'CityField':content=<CityField {...current}/>;break
+ case 'TravelDate':content=<TravelDate {...current}/>;break
+ case 'StayDuration':content=<StayDuration {...current}/>;break
+ case 'TransportSelect':content=<TransportSelect {...current}/>;break
+ case 'FareOrder':content=<FareOrder {...current}/>;break
+ case 'FadeFares':content=<FadeFares {...current}/>;break
+ case 'FareCalendar':content=<FareCalendar {...current}/>;break
+ case 'MultiCityPlanGrid':content=<MultiCityPlanGrid {...current}/>;break
+ case 'FareCards':content=<FareCards {...current}/>;break
+ case 'FarePicker':content=<FarePicker {...current}/>;break
+ case 'PriceCalendar':content=<PriceCalendar {...current}/>;break
+ case 'ComparisonTable':content=<ComparisonTable {...current}/>;break
+ case 'ComparisonMatrix':content=<Comparison {...current}/>;break
+ case 'ModeBreakdown':content=<ModeBreakdown {...current}/>;break
+ case 'SyntheticTotal':content=<Total {...current}/>;break
+ case 'SelectedItinerary':content=<SelectedItinerary {...current}/>;break
+ case 'CoverageSummary':content=<Coverage {...current}/>;break
+ case 'RouteMap':content=<Route {...current}/>;break
+ case 'CitySequence':content=<CitySequence {...current}/>;break
+ case 'ItineraryTimeline':content=<Timeline {...current}/>;break
+ case 'DurationPricePlot':content=<Plot {...current}/>;break
+ case 'CheapestFastest':content=<CheapestFastest {...current}/>;break
+ case 'SelectedFareCount':content=<SelectedFareCount {...current}/>;break
+ default:content=<Alert>Unknown travel component.</Alert>
+ }
+ return content
+}
 export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
  const services=useTravelServices()
  const {children,$status,...scalar}=input;const parsed=nodePropsSchema.safeParse(scalar)
@@ -26,35 +66,5 @@ export function CatalogNode({kind,...input}:WidgetProps&{kind:string}) {
   services.state.get(ArtifactIdSchema.parse(props.artifactRef))
   resolvePlannerDatasetRef({kind,artifactRef:props.artifactRef,datasetRef:props.datasetRef,legIndex:props.legIndex},services.state,services.bridge)
  }catch{return <Alert className="travel-notice" role="status">This view's travel data is not available. Reload or retry the conversation.</Alert>}
- let content:ReactNode
- if(layouts.has(kind))content=<Layout kind={kind} {...props}/>
- else if(controls.has(kind))content=<Control kind={kind} {...props}/>
- else if(statuses.has(kind))content=<Status kind={kind} {...props}/>
- else switch(kind){
- case 'CityField':content=<CityField {...props}/>;break
- case 'TravelDate':content=<TravelDate {...props}/>;break
- case 'StayDuration':content=<StayDuration {...props}/>;break
- case 'TransportSelect':content=<TransportSelect {...props}/>;break
- case 'FareOrder':content=<FareOrder {...props}/>;break
- case 'FadeFares':content=<FadeFares {...props}/>;break
- case 'FareCalendar':content=<FareCalendar {...props}/>;break
- case 'MultiCityPlanGrid':content=<MultiCityPlanGrid {...props}/>;break
- case 'FareCards':content=<FareCards {...props}/>;break
- case 'FarePicker':content=<FarePicker {...props}/>;break
- case 'PriceCalendar':content=<PriceCalendar {...props}/>;break
- case 'ComparisonTable':content=<ComparisonTable {...props}/>;break
- case 'ComparisonMatrix':content=<Comparison {...props}/>;break
- case 'ModeBreakdown':content=<ModeBreakdown {...props}/>;break
- case 'SyntheticTotal':content=<Total {...props}/>;break
- case 'SelectedItinerary':content=<SelectedItinerary {...props}/>;break
- case 'CoverageSummary':content=<Coverage {...props}/>;break
- case 'RouteMap':content=<Route {...props}/>;break
- case 'CitySequence':content=<CitySequence {...props}/>;break
- case 'ItineraryTimeline':content=<Timeline {...props}/>;break
- case 'DurationPricePlot':content=<Plot {...props}/>;break
- case 'CheapestFastest':content=<CheapestFastest {...props}/>;break
- case 'SelectedFareCount':content=<SelectedFareCount {...props}/>;break
- default:content=<Alert>Unknown travel component.</Alert>
- }
- return <ArtifactErrorBoundary>{content}</ArtifactErrorBoundary>
+ return <ArtifactErrorBoundary><SubscribedCatalogNode kind={kind} props={props}/></ArtifactErrorBoundary>
 }

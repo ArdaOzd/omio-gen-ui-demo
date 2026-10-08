@@ -1,8 +1,8 @@
 # Shared catalog 1.1.0
 
-Manifest hash: 3a2d4adcc2138f9d854642275fb6e7006403c1bb09a05745fa41107cc2b14ae0
+Manifest hash: a31023ad25eab43be41802eab6f496be612464e3dd59160b034f3903778f5b47
 
-Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. The seven same-leg planner primitives also require legIndex, a zero-based integer from 0 through 7, to keep their logical leg identity through route edits. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
+Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. Dataset-bound components also require legIndex, a zero-based integer from 0 through 7, to keep their logical leg identity through route, date and coverage changes. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
 - MultiCityPlanGrid: Connected multi-city planner for distinct city stops with an optional final return to the origin. Reads the ordered citySequence and leg datasets for one artifact; composes CityField, TravelDate, TransportSelect, FareOrder and FadeFares per leg, inserts StayDuration for each destination, and cascades selected arrival plus stay into the next leg minimum departure.
 - FareCalendar: Same-leg calendar within the exact display date window. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle. Uses that leg multi-selected transport modes and host-derived minimum departure; defaults each day to its local cheapest synthetic fare, offers cheapest or fastest comparison, then opens that day fares without sending rows to the model.

@@ -436,12 +436,22 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   const dates = useMemo(() => outsideWindow ? [] : dateRange(visibleStart, requestedTo), [outsideWindow, visibleStart, requestedTo])
   const calendarKey = resolved?.leg.key
   const persistedDate = calendarKey ? plan.state.calendarDateByLeg[calendarKey] : undefined
-  const selectedDate = persistedDate && dates.includes(persistedDate) ? persistedDate : dates[0] ?? visibleStart
   const representatives = useFareDayRepresentatives(artifactRef, datasetRef)
+  const availableDates = new Set(representatives.rows.map(row => row.serviceDate))
+  const selectedDate = persistedDate && availableDates.has(persistedDate) ? persistedDate : dates.find(date => availableDates.has(date)) ?? visibleStart
   const selectedResult = useFareRowsForDate(artifactRef, datasetRef, selectedDate)
   const calendarOrder: Extract<FareOrderKind, 'cheapest' | 'fastest'> = calendarKey && plan.state.sortByLeg[calendarKey]?.field === 'durationMinutes' ? 'fastest' : 'cheapest'
+  const setCalendarDate = (date: string | undefined) => {
+    if (!calendarKey || !representatives.datasetId) return
+    const manifest=plan.services.bridge.getManifest(representatives.datasetId)
+    const calendarDateByLeg={...plan.state.calendarDateByLeg}
+    if(date)calendarDateByLeg[calendarKey]=date;else delete calendarDateByLeg[calendarKey]
+    const command={kind:'calendarDateByLeg' as const,artifactId:plan.state.artifactId,calendarDateByLeg,expectedRevision:plan.state.revision}
+    const scope={legKey:calendarKey,date,availableDates:[...availableDates],datasetId:representatives.datasetId,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion,queryKey:representatives.queryKey,currentQueryKey:representatives.currentQueryKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
+    return plan.services.dispatch?.calendarDateFromQuery?.(command,scope)??plan.services.state.dispatch(command)
+  }
   const chooseDate = (date: string) => {
-    if (calendarKey) dispatch({ kind: 'calendarDateByLeg', artifactId: plan.state.artifactId, calendarDateByLeg: { ...plan.state.calendarDateByLeg, [calendarKey]: date } })
+    if (availableDates.has(date)) setCalendarDate(date)
   }
   const chooseCalendarOrder = (order: typeof calendarOrder) => {
     if (!calendarKey) return
@@ -449,16 +459,16 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     dispatch({ kind: 'sortByLeg', artifactId: plan.state.artifactId, sortByLeg: { ...plan.state.sortByLeg, [calendarKey]: sort } })
   }
   useEffect(() => {
-    if (!calendarKey) return
-    if (dates.length > 0) {
+    if (!calendarKey || representatives.status !== 'ready') return
+    if (availableDates.size > 0) {
       if (persistedDate !== selectedDate) chooseDate(selectedDate)
       return
     }
     if (persistedDate) {
       const { [calendarKey]: _removed, ...calendarDateByLeg } = plan.state.calendarDateByLeg
-      dispatch({ kind: 'calendarDateByLeg', artifactId: plan.state.artifactId, calendarDateByLeg })
+      setCalendarDate(undefined)
     }
-  }, [calendarKey, dates.length, persistedDate, selectedDate])
+  }, [availableDates.size, calendarKey, persistedDate, representatives.status, selectedDate])
   if (!resolved) return <EmptyPlanningState />
   if (outsideWindow) return <Card className="trip-planning-control trip-fare-calendar"><div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div></div><Alert role="status">No departures fit this trip window; adjust the previous fare or stay.</Alert></Card>
   if (representatives.status === 'loading' || selectedResult.status === 'loading') return <Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
@@ -473,10 +483,10 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     </FieldSet>
     <div className="trip-calendar-grid">{dates.map(date => {
       const representative = byDate.get(date)
-      return <Button key={date} type="button" variant="outline" className="trip-calendar-day" aria-pressed={selectedDate === date} onClick={() => chooseDate(date)}>
+      return <Button key={date} type="button" variant="outline" className="trip-calendar-day" disabled={!representative} aria-pressed={selectedDate === date} onClick={() => { if (representative) chooseDate(date) }}>
         <span>{new Date(`${date}T12:00:00.000Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
         <strong>{representative ? money(representative.priceCents) : 'No fares'}</strong>
-        <small>{representative ? `${cityLabel(representative.mode)} · ${duration(representative.durationMinutes)}` : 'Try another day'}</small>
+        <small>{representative ? `${cityLabel(representative.mode)} · ${duration(representative.durationMinutes)}` : 'Not downloaded'}</small>
         {representative && <i aria-label={cityLabel(representative.mode)}>{modeIcon(representative.mode)}</i>}
       </Button>
     })}</div>

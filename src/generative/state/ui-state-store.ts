@@ -2,9 +2,16 @@ import { ArtifactUIStateSchema, CompactArtifactSnapshotSchema, DateSchema, UISta
 
 const dayDelta = (from: string, to: string): number => (Date.parse(`${to}T00:00:00.000Z`) - Date.parse(`${from}T00:00:00.000Z`)) / 86_400_000
 const shiftDate = (date: string, days: number): string => DateSchema.parse(new Date(Date.parse(`${date}T00:00:00.000Z`) + days * 86_400_000).toISOString().slice(0, 10))
+export function withTripDates(current:ArtifactUIState,dates:ArtifactUIState['dates']):ArtifactUIState {
+  const startDelta=dayDelta(current.dates.start,dates.start)
+  const endDelta=dayDelta(current.dates.end??current.dates.start,dates.end??dates.start)
+  const displayWindowByLeg=Object.fromEntries(Object.entries(current.displayWindowByLeg).map(([key,window])=>[key,{from:shiftDate(window.from,startDelta),to:shiftDate(window.to,endDelta)}]))
+  return {...current,dates,displayWindowByLeg}
+}
 
 export function createUIStateStore(options: { now?: () => string } = {}): UIStateStore {
   const states = new Map<ArtifactId, ArtifactUIState>()
+  const authoredDatasetBindings=new Map<ArtifactId,ArtifactUIState['datasetBindings']>()
   const listeners = new Map<ArtifactId, Set<() => void>>()
   const now = options.now ?? (() => new Date().toISOString())
   function get(artifactId: ArtifactId): ArtifactUIState {
@@ -14,7 +21,7 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
   }
   function initializeMissing(artifactId: ArtifactId, defaults: Partial<ArtifactUIState>): void {
     if (states.has(artifactId)) return
-    const state = ArtifactUIStateSchema.parse({ revision:0,datasetRefs:[],filters:{modes:[],carrierIds:[],directOnly:false},dates:{start:now().slice(0,10)},citySequence:[],stays:[],modesByLeg:{},availableModesByLeg:{},requestedModesByLeg:{},displayWindowByLeg:{},sort:{field:'priceCents',direction:'asc'},sortByLeg:{},calendarDateByLeg:{},selectedFareIds:[],pending:[],lastInteractionAt:now(),...defaults,artifactId })
+    const state = ArtifactUIStateSchema.parse({ revision:0,datasetRefs:[],datasetBindings:{},filters:{modes:[],carrierIds:[],directOnly:false},dates:{start:now().slice(0,10)},citySequence:[],stays:[],modesByLeg:{},availableModesByLeg:{},requestedModesByLeg:{},displayWindowByLeg:{},sort:{field:'priceCents',direction:'asc'},sortByLeg:{},calendarDateByLeg:{},selectedFareIds:[],pending:[],lastInteractionAt:now(),...defaults,artifactId })
     states.set(artifactId,state)
     listeners.get(artifactId)?.forEach(listener => listener())
   }
@@ -24,11 +31,9 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
     let patch: Partial<ArtifactUIState>
     switch (command.kind) {
       case 'filters': patch={filters:command.filters};break
-      case 'dates': {
-        const startDelta=dayDelta(current.dates.start,command.dates.start)
-        const endDelta=dayDelta(current.dates.end??current.dates.start,command.dates.end??command.dates.start)
-        const displayWindowByLeg=Object.fromEntries(Object.entries(current.displayWindowByLeg).map(([key,window])=>[key,{from:shiftDate(window.from,startDelta),to:shiftDate(window.to,endDelta)}]))
-        patch={dates:command.dates,displayWindowByLeg};break
+      case 'dates': case 'calendarDates': {
+        const shifted=withTripDates(current,command.dates)
+        patch={dates:shifted.dates,displayWindowByLeg:shifted.displayWindowByLeg};break
       }
       case 'sort': patch={sort:command.sort};break
       case 'sortByLeg':patch={sortByLeg:command.sortByLeg};break
@@ -58,7 +63,7 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
       case 'availableModesByLeg':patch={availableModesByLeg:command.availableModesByLeg};break
       case 'requestedModesByLeg':patch={requestedModesByLeg:command.requestedModesByLeg};break
       case 'displayWindowByLeg':patch={displayWindowByLeg:command.displayWindowByLeg};break
-      case 'datasets': patch={datasetRefs:command.datasetRefs};break
+      case 'datasets': patch={datasetRefs:command.datasetRefs,datasetBindings:command.datasetBindings??authoredDatasetBindings.get(command.artifactId)??current.datasetBindings};break
       case 'select': patch={selectedFareIds:command.selected ? [...new Set([...current.selectedFareIds,command.fareId])] : current.selectedFareIds.filter(id => id !== command.fareId)};break
       default: {const unreachable: never=command;throw new Error(`Unknown command ${String(unreachable)}`)}
     }
@@ -68,6 +73,7 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
     return {status:'applied',revision:next.revision}
   }
   return {get,initializeMissing,dispatch,getIds:()=>[...states.keys()],
+    setDatasetBindings(id,bindings) {get(id);authoredDatasetBindings.set(id,ArtifactUIStateSchema.shape.datasetBindings.parse(bindings))},
     subscribe(id,listener) {const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
     exportSnapshot(id) {const state=get(id);return CompactArtifactSnapshotSchema.parse({artifactId:state.artifactId,revision:state.revision,datasetRefs:state.datasetRefs,selectedFareIds:state.selectedFareIds,filters:state.filters,dates:state.dates,citySequence:state.citySequence,stays:state.stays,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,requestedModesByLeg:state.requestedModesByLeg,displayWindowByLeg:state.displayWindowByLeg,pending:state.pending,sort:state.sort,sortByLeg:state.sortByLeg,calendarDateByLeg:state.calendarDateByLeg,runtimeVariables:state.runtimeVariables,legThresholds:[],componentBindings:[],layoutSummary:'Travel artifact with local dates, filters and selections.',catalogVersion:CATALOG_VERSION})},
   }

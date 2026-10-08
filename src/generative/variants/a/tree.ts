@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { LIMITS } from '../../contracts'
 import { assertNoBulkData } from '../../contracts/privacy'
 import { catalogDescriptors, nodePropsSchema } from '../../catalog/generated/catalog'
-import { isLegBoundPlannerComponent } from '../../catalog/trip-planning/binding'
+import { isDatasetBoundComponent, isLegBoundPlannerComponent } from '../../catalog/trip-planning/binding'
 export type PresentNode=z.infer<typeof nodePropsSchema>&{$type:string;$key?:string;children?:PresentNode|PresentNode[]|string}
 const names=new Set<string>(catalogDescriptors.map(d=>d.name));const layouts=new Set<string>(catalogDescriptors.filter(d=>d.children).map(d=>d.name))
 export const registeredActions=new Set(['filters','dates','sort','sortByLeg','calendarDateByLeg','modesByLeg','select','stays','route','activate','retry'])
@@ -15,11 +15,11 @@ export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string
  let count=0;const keys=new Set<string>()
  const visit=(node:PresentNode,depth:number):void=>{
   if(++count>LIMITS.treeNodes||depth>LIMITS.treeDepth)throw new Error('Tree budget exceeded')
-  const legBound=isLegBoundPlannerComponent(node.$type)
-  if(node.legIndex!==undefined&&!legBound)throw new Error('legIndex is only valid for leg-bound planner components')
+  const legBound=isLegBoundPlannerComponent(node.$type),datasetBound=isDatasetBoundComponent(node.$type)
+  if(node.legIndex!==undefined&&!datasetBound)throw new Error('legIndex is only valid for dataset-bound components')
   if(node.datasetRef&&legBound&&node.legIndex===undefined)throw new Error('Leg-bound planner dataset requires legIndex')
   if(scope&&!scope.artifactIds.has(node.artifactRef))throw new Error('Unknown artifact reference')
-  if(scope&&node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(legBound&&node.legIndex!==undefined))throw new Error('Unknown dataset reference')
+  if(scope&&node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(datasetBound&&node.legIndex!==undefined))throw new Error('Unknown dataset reference')
   if(node.actionRef&&!registeredActions.has(node.actionRef))throw new Error('Unknown action reference')
   if(node.selectorRef&&!registeredSelectors.has(node.selectorRef))throw new Error('Unknown selector reference')
   if(node.$key){if(keys.has(node.$key))throw new Error('Duplicate node key');keys.add(node.$key)}
@@ -42,10 +42,10 @@ export function prunePresentTree(input:unknown,scope?:{artifactIds:Set<string>;d
   }
   const parsed=shallowNodeSchema.safeParse(scalar);if(!parsed.success)return undefined
   const node=parsed.data
-  const legBound=isLegBoundPlannerComponent(node.$type)
-  if(node.legIndex!==undefined&&!legBound||node.datasetRef&&legBound&&node.legIndex===undefined)return undefined
+  const legBound=isLegBoundPlannerComponent(node.$type),datasetBound=isDatasetBoundComponent(node.$type)
+  if(node.legIndex!==undefined&&!datasetBound||node.datasetRef&&legBound&&node.legIndex===undefined)return undefined
   if(depth===1&&node.$type!=='TravelSurface')return undefined
-  if(scope&&(!scope.artifactIds.has(node.artifactRef)||(node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(legBound&&node.legIndex!==undefined))))return undefined
+  if(scope&&(!scope.artifactIds.has(node.artifactRef)||(node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(datasetBound&&node.legIndex!==undefined))))return undefined
   if(node.actionRef&&!registeredActions.has(node.actionRef)||node.selectorRef&&!registeredSelectors.has(node.selectorRef))return undefined
   if(node.$key){if(keys.has(node.$key))return undefined;keys.add(node.$key)}
   if(!layouts.has(node.$type))return node

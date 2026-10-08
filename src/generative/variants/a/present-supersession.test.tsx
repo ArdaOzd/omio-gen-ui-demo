@@ -6,7 +6,9 @@ import { GenerativeChat } from '../../chat/runtime-provider'
 import { CatalogNode } from '../../catalog/component'
 import { createUIStateStore } from '../../state/ui-state-store'
 import { createFareDataBridge } from '../../data/fare-data-bridge'
-import { ArtifactIdSchema } from '../../contracts'
+import { ArtifactIdSchema,CoverageRequestSchema } from '../../contracts'
+import { resolvePlannerDatasetRef } from '../../catalog/trip-planning/binding'
+import { createThreadPersistence,type PersistedThread,type ThreadStorage } from '../../state/persistence'
 vi.mock('./toolkit',async()=>{const {z}=await import('zod');return{default:{present:{type:'frontend',parameters:z.record(z.string(),z.unknown()),execute:async()=>({}),render:(props:ToolCallMessagePartProps<Record<string,unknown>,Record<string,never>>)=><CatalogNode kind="TravelSurface" artifactRef={String(props.args.artifactRef)} title={String(props.args.title)}/>}}}})
 afterEach(()=>{cleanup();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
 const accepted=(id:string,artifactRef:string,title:string):UIMessage['parts'][number]=>({type:'tool-present',toolCallId:id,state:'output-available',input:{$type:'TravelSurface',artifactRef,title},output:{}})
@@ -42,4 +44,36 @@ it('retains distinct artifacts and scenes before a later user turn',()=>{
  mount([accepted('first','art-1','Current artifact'),accepted('other','art-2','Other artifact')],earlier)
  for(const title of ['Earlier turn','Current artifact','Other artifact'])expect(screen.getByText(title)).toBeVisible()
  expect(document.querySelectorAll('.travel-travelsurface')).toHaveLength(3)
+})
+
+it('captures authored multi-leg bindings without a render revision and restores them after replacement',async()=>{
+ Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}})
+ vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
+ const source=async(input:{page:number})=>({rows:[],total:0,pages:1,page:input.page,sourceVersion:'binding-persistence-v1'})
+ const bridge=createFareDataBridge({pageSource:source}),state=createUIStateStore(),artifactRef=ArtifactIdSchema.parse('art-1')
+ const request=(originId:string,destinationId:string,from:string,to:string)=>CoverageRequestSchema.parse({originIds:[originId],destinationIds:[destinationId],dateWindow:{from,to},modes:['train'],passengers:1})
+ const firstSeed=await bridge.load(request('london','paris','2026-10-09','2026-10-10'),new AbortController().signal)
+ const secondSeed=await bridge.load(request('paris','rome','2026-10-11','2026-10-12'),new AbortController().signal)
+ state.initializeMissing(artifactRef,{datasetRefs:[firstSeed.datasetId,secondSeed.datasetId],citySequence:['london','paris','rome'],dates:{start:'2026-10-09',end:'2026-10-12'},stays:[{cityId:'paris',nights:2}]})
+ const before=state.get(artifactRef)
+ const tree={$type:'TravelSurface',artifactRef,children:[{$type:'FareCards',artifactRef,datasetRef:firstSeed.datasetId,legIndex:0},{$type:'PriceCalendar',artifactRef,datasetRef:secondSeed.datasetId,legIndex:1}]}
+ const part={type:'tool-present' as const,toolCallId:'bound-scene',state:'output-available' as const,input:tree,output:{}}
+ render(<GenerativeChat services={{state,bridge,activeId:()=>artifactRef,activate:()=>{}}} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={[{id:'assistant-bound',role:'assistant',parts:[part]}]}/> )
+ expect(state.get(artifactRef)).toEqual(before)
+
+ const firstCurrent=await bridge.load(request('london','paris','2026-10-13','2026-10-14'),new AbortController().signal)
+ const secondCurrent=await bridge.load(request('paris','rome','2026-10-15','2026-10-16'),new AbortController().signal)
+ state.dispatch({kind:'datasets',artifactId:artifactRef,datasetRefs:[firstCurrent.datasetId,secondCurrent.datasetId]})
+ expect(state.get(artifactRef).datasetBindings).toEqual({[firstSeed.datasetId]:'london:paris',[secondSeed.datasetId]:'paris:rome'})
+ bridge.release(firstSeed.datasetId);bridge.release(secondSeed.datasetId)
+ state.dispatch({kind:'sort',artifactId:artifactRef,sort:{field:'durationMinutes',direction:'asc'}})
+ expect(resolvePlannerDatasetRef({kind:'FareCards',artifactRef,datasetRef:firstSeed.datasetId},state,bridge)).toBe(firstCurrent.datasetId)
+ expect(resolvePlannerDatasetRef({kind:'PriceCalendar',artifactRef,datasetRef:secondSeed.datasetId},state,bridge)).toBe(secondCurrent.datasetId)
+
+ const values=new Map<string,unknown>(),storage:ThreadStorage={async read(key){return values.get(key)},async write(key,value){values.set(key,structuredClone(value))}}
+ const persistence=createThreadPersistence(storage),record:PersistedThread={schemaVersion:'1.0.0',catalogVersion:'1.1.0',parserVersion:'native-present-1',queryVersion:'1',messages:[{id:'assistant-bound',role:'assistant',parts:[part]}],artifacts:[{variant:'a',source:JSON.stringify(tree),state:state.get(artifactRef)}],descriptors:[firstCurrent,secondCurrent].map(manifest=>({datasetId:manifest.datasetId,request:request(manifest.coverage.originIds[0]!,manifest.coverage.destinationIds[0]!,manifest.coverage.dateWindow.from,manifest.coverage.dateWindow.to),sourceVersion:manifest.source.sourceVersion,complete:manifest.coverage.complete}))}
+ await persistence.save('bound',record);const saved=await persistence.load('bound');if(!saved)throw new Error('Missing saved bindings')
+ const restoredBridge=createFareDataBridge({pageSource:source}),restoredState=createUIStateStore();await persistence.restore(saved,restoredBridge,restoredState,new AbortController().signal)
+ expect(resolvePlannerDatasetRef({kind:'FareCards',artifactRef,datasetRef:firstSeed.datasetId},restoredState,restoredBridge)).toBe(firstCurrent.datasetId)
+ expect(resolvePlannerDatasetRef({kind:'PriceCalendar',artifactRef,datasetRef:secondSeed.datasetId},restoredState,restoredBridge)).toBe(secondCurrent.datasetId)
 })

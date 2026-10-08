@@ -1,5 +1,5 @@
 import {afterEach,expect,it} from 'vitest'
-import {cleanup,fireEvent,render,screen} from '@testing-library/react'
+import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react'
 import {ArtifactIdSchema,CoverageRequestSchema,FareIdSchema,FareRowSchema} from '../contracts'
 import {createFareDataBridge} from '../data/fare-data-bridge'
 import {createUIStateStore} from '../state/ui-state-store'
@@ -26,14 +26,30 @@ it('includes the first route origin with legal destination-only stay allocations
  render(<TravelProvider services={{bridge,state,activeId:()=>id,activate:()=>{}}}><CatalogNode kind="RouteMap" artifactRef={id}/></TravelProvider>)
  expect(screen.getByRole('img').getAttribute('aria-label')).toBe('Schematic route: London to Paris to Barcelona')
 })
-it('shifts a calendar window without reversing its dates',async()=>{
+it('disables a calendar day whose shifted trip would require fares that are not downloaded',async()=>{
  const bridge=createFareDataBridge({pageSource:source}),state=createUIStateStore()
  const manifest=await bridge.load(request,new AbortController().signal)
  state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-03',end:'2026-10-05'}})
  const router=createActionRouter(state,{bridge}),services={bridge,state,dispatch:router,activeId:()=>id,activate:()=>{}}
  render(<TravelProvider services={services}><CatalogNode kind="PriceCalendar" artifactRef={id} datasetRef={manifest.datasetId}/><CatalogNode kind="FareCards" artifactRef={id} datasetRef={manifest.datasetId}/></TravelProvider>)
- fireEvent.click(await screen.findByRole('button',{name:/Tue 6 Oct/}));await router.whenIdle(id)
- expect(state.get(id).dates).toEqual({start:'2026-10-06',end:'2026-10-08'});expect(legDate(state.get(id),'london')).toBe('2026-10-06')
+ const before=state.get(id),day=await screen.findByRole('button',{name:/Fri 9 Oct/}),add=screen.getByRole('button',{name:'Add cheapest fare on 2026-10-09 to trip'})
+ expect(day).toBeDisabled();expect(day).toHaveAttribute('aria-pressed','false');expect(add).toBeDisabled()
+ fireEvent.click(day);fireEvent.click(add);await router.whenIdle(id)
+ expect(state.get(id)).toEqual(before)
+ expect(screen.queryAllByText('This view could not be displayed. Ask the assistant to regenerate it.')).toHaveLength(0)
+})
+
+it('changes to a downloaded calendar day locally and keeps sibling fare views mounted',async()=>{
+ const bridge=createFareDataBridge({pageSource:source}),state=createUIStateStore()
+ const manifest=await bridge.load(request,new AbortController().signal)
+ state.initializeMissing(id,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-03',end:'2026-10-05'}})
+ const router=createActionRouter(state,{bridge}),services={bridge,state,dispatch:router,activeId:()=>id,activate:()=>{}}
+ render(<TravelProvider services={services}><CatalogNode kind="PriceCalendar" artifactRef={id} datasetRef={manifest.datasetId}/><CatalogNode kind="FareCards" artifactRef={id} datasetRef={manifest.datasetId}/></TravelProvider>)
+ const day=await screen.findByRole('button',{name:/Tue 6 Oct/});expect(day).not.toBeDisabled();fireEvent.click(day);await router.whenIdle(id)
+ expect(state.get(id).dates).toEqual({start:'2026-10-06',end:'2026-10-08'});expect(state.get(id).datasetRefs).toEqual([manifest.datasetId])
+ await waitFor(()=>expect(day).toHaveAttribute('aria-pressed','true'))
+ expect(await screen.findByText('London → Paris · 2026-10-06')).toBeInTheDocument()
+ expect(screen.queryAllByText('This view could not be displayed. Ask the assistant to regenerate it.')).toHaveLength(0)
 })
 
 

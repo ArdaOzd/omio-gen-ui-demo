@@ -149,6 +149,32 @@ it('shows only the leg display window and persists a day chosen from selected mo
   expect(state.get(artifactId).selectedFareIds).toEqual(['bus-2026-10-10'])
 })
 
+it('disables days without downloaded fares and replaces a stale unavailable calendar selection', async () => {
+  const calls:string[]=[]
+  const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-10' }, modes: ['train'], passengers: 1 })
+  const bridge = createFareDataBridge({ pageSource: async input => {
+    calls.push(input.date)
+    const rows=input.date==='2026-10-10'?[fare({ id: 'train-available', date: input.date, mode: 'train', price: 5200, duration: 150, departure: 540 })]:[]
+    return { rows, total: rows.length, pages: 1, page: input.page, sourceVersion: 'calendar-availability-v1' }
+  } })
+  const manifest = await bridge.load(request, new AbortController().signal)
+  const state = createUIStateStore()
+  state.initializeMissing(artifactId, {datasetRefs:[manifest.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-09',end:'2026-10-10'},displayWindowByLeg:{'london:paris':{from:'2026-10-09',to:'2026-10-10'}},calendarDateByLeg:{'london:paris':'2026-10-09'}})
+  const router=createActionRouter(state,{bridge}),services={bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}}
+  render(<TravelProvider services={services}><FareCalendar artifactRef={artifactId} datasetRef={manifest.datasetId} /></TravelProvider>)
+
+  let unavailable=await screen.findByRole('button',{name:/Fri 9 Oct/})
+  const available=await screen.findByRole('button',{name:/Sat 10 Oct/});unavailable=screen.getByRole('button',{name:/Fri 9 Oct/})
+  expect(unavailable).toBeDisabled();expect(unavailable).toHaveAttribute('aria-pressed','false')
+  expect(available).not.toBeDisabled();await waitFor(()=>expect(available).toHaveAttribute('aria-pressed','true'))
+  await waitFor(()=>expect(state.get(artifactId).calendarDateByLeg['london:paris']).toBe('2026-10-10'))
+  expect(screen.getByRole('heading',{name:'Saturday 10 October'})).toBeInTheDocument()
+  const before=state.get(artifactId),loaded=calls.length
+  expect(router({kind:'calendarDateByLeg',artifactId,calendarDateByLeg:{'london:paris':'2026-10-09'}})).toEqual({status:'stale',revision:before.revision})
+  fireEvent.click(unavailable)
+  expect(state.get(artifactId)).toEqual(before);expect(calls).toHaveLength(loaded);router.dispose()
+})
+
 it('shifts the full itinerary window before querying and rendering a new first-leg date', async () => {
   const loadedDates: string[] = []
   const request = CoverageRequestSchema.parse({ originIds: ['london'], destinationIds: ['paris'], dateWindow: { from: '2026-10-09', to: '2026-10-11' }, modes: ['train'], passengers: 1 })

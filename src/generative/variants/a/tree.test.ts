@@ -15,10 +15,11 @@ describe('native present boundary',()=>{
   const scene=tree(names.map((name,index)=>({...leaf(name,`trip-${index}`),...(name==='MultiCityPlanGrid'?{}:{legIndex:0}),selectorRef:'legSchedule'})))
   expect(validatePresentTree(scene,scope)).toEqual(scene)
  })
- it('limits stable leg bindings to planner primitives and requires them for planner datasets',()=>{
+ it('accepts stable leg bindings for every dataset view and still requires them for planner datasets',()=>{
   expect(validatePresentTree(tree([{...leaf('FareCalendar','calendar'),legIndex:0}]),{artifactIds:new Set(['artifact-1']),datasetIds:new Set()})).toBeTruthy()
   expect(()=>validatePresentTree(tree([{...leaf('FareCalendar','calendar')}]),scope)).toThrow('legIndex')
-  expect(()=>validatePresentTree(tree([{...leaf('FareCards','fares'),legIndex:0}]),scope)).toThrow('legIndex')
+  expect(validatePresentTree(tree([{...leaf('FareCards','fares'),legIndex:0}]),scope)).toBeTruthy()
+  expect(()=>validatePresentTree(tree([{...leaf('TravelHero','hero'),legIndex:0}]),scope)).toThrow('legIndex')
  })
  it('rejects executable sources, raw rows, invented refs, unknown components and props',()=>{
   for(const input of [tree([{...leaf('FareCards','f'),rows:[{secret:LEAKAGE_SENTINEL}]}]),tree([leaf('Iframe','x')]),tree([{...leaf('ModeChips','m'),actionRef:'fetch'}]),tree([{...leaf('FareCards','f'),datasetRef:'unknown'}]),tree([{...leaf('Section','s'),html:'<script>alert(1)</script>'}]),tree([{...leaf('FareCards','f'),title:LEAKAGE_SENTINEL}])])expect(()=>validatePresentTree(input,scope)).toThrow()
@@ -31,9 +32,9 @@ describe('native present boundary',()=>{
 })
 
 describe('partial native rendering boundary',()=>{
- it('retains only complete planner leg bindings when their authored dataset handle has expired',()=>{
+ it('retains complete dataset leg bindings when their authored dataset handle has expired',()=>{
   const input=tree([{...leaf('FareCalendar','current'),legIndex:0},leaf('FareCalendar','missing-index'),{...leaf('FareCards','arbitrary'),legIndex:0}])
-  expect(prunePresentTree(input,{artifactIds:new Set(['artifact-1']),datasetIds:new Set()} )?.children).toEqual([{...leaf('FareCalendar','current'),legIndex:0}])
+  expect(prunePresentTree(input,{artifactIds:new Set(['artifact-1']),datasetIds:new Set()} )?.children).toEqual([{...leaf('FareCalendar','current'),legIndex:0},{...leaf('FareCards','arbitrary'),legIndex:0}])
  })
  it('retains valid completed siblings and drops incomplete or row-shaped children',()=>{
   const tree={$type:'TravelSurface',artifactRef:'artifact-1',children:[{$type:'ModeChips',artifactRef:'artifact-1'},{$type:'FareCards',artifactRef:'artifact-'},{$type:'Section',artifactRef:'artifact-1',payload:[{id:'f',priceCents:10}]},{$type:'DateStrip',artifactRef:'artifact-1'}]}
