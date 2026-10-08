@@ -714,14 +714,14 @@ Keep one owner for each shared file. Workers use separate worktrees and return s
 
 | Milestone | Owner | Status |
 | --- | --- | --- |
-| 0. Clean base and plan |  |  |
-| 1. Fixed SQL projections |  |  |
-| 2. Query contracts and coordinator |  |  |
-| 3. Catalog function bindings |  |  |
-| 4. Display ledger and inspection capture |  |  |
-| 5. Runtime migration and preload deletion |  |  |
-| 6. First user-test render |  |  |
-| 7. Graph refresh and handoff |  |  |
+| 0. Clean base and plan | `/root/plan_branch` | complete at `a29b55e` |
+| 1. Fixed SQL projections | `/root/plan_branch` | in progress |
+| 2. Query contracts and coordinator | `/root/query_composition_design` | in progress |
+| 3. Catalog function bindings | `/root/query_composition_design` | foundation validated; production migration pending |
+| 4. Display ledger and inspection capture | `/root/runtime_composition` | in progress |
+| 5. Runtime migration and preload deletion | `/root` | pending integration |
+| 6. First user-test render | `/root` | pending integration |
+| 7. Graph refresh and handoff | `/root` | pending integration |
 
 ### 0. Preserve the clean base and journal
 
@@ -843,7 +843,7 @@ Browser:
 
 ## Progress journal
 
-The root integrator becomes the sole editor of this section after the plan commit. Append entries. Do not rewrite earlier decisions after implementation starts.
+Append entries and do not rewrite earlier decisions after implementation starts. `/root/plan_branch` is the sole Git commit steward while the three implementation workers share the managed worktree, so no worker races the index or `HEAD`.
 
 Current checklist:
 
@@ -853,7 +853,7 @@ Current checklist:
 - [x] Create a clean managed worktree at `7c60602`.
 - [x] Create `feature/server-driven-generative-ui-review` in the managed worktree.
 - [x] Write and verify this implementation plan.
-- [ ] Commit this plan alone.
+- [x] Commit this plan alone as `a29b55e`.
 - [ ] Implement and commit fixed backend projections.
 - [ ] Implement and commit query contracts and coordinator.
 - [ ] Implement and commit component function bindings.
@@ -864,9 +864,20 @@ Current checklist:
 - [ ] Open the populated local preview for user testing.
 - [ ] Report local commits and confirm no merge or push.
 
+Implementation entries:
+
+- 2026-10-08: The public protocol is accepted as written above. Backend responses use the clean committed `FareItem`; fields observed only in the original dirty checkout, including transfers and legs, are excluded. Group and projection fingerprints depend on normalized query inputs rather than global `uiRevision`.
+- 2026-10-08: Three workers began from the same clean managed worktree: `/root/plan_branch` owns `backend/**` and this journal, `/root/query_composition_design` owns the query contract/coordinator and catalog functions, and `/root/runtime_composition` owns the display ledger and runtime instrumentation. `/root/plan_branch` is the sole commit steward and stages only explicitly reported owner paths.
+- 2026-10-08: The query worker validated the self-contained query protocol, HTTP client, batching coordinator, immutable bounded results, and 49-component static registry with focused tests and typecheck. This is the milestone 3 foundation; production catalog migration remains pending.
+- 2026-10-08: The managed worktree initially lacked a code-review graph. The required full build completed at plan HEAD `a29b55e`; both code-review graph and Graphify still require a final refresh after integration.
+- 2026-10-08: Candidate isolated preview ports are backend `8003`, agent `8013`, and frontend `5175`. Confirm availability before starting processes and preserve any user-owned process already bound there.
+- 2026-10-08: No source edit is made in the original dirty checkout after isolation. Its state and `/tmp/server-driven-generative-ui-baseline.FcThYk` remain read-only diagnostics.
+- 2026-10-08: Provenance that is not captured by a worker report may be recorded as unknown or restored. Do not attribute an edit to a worker without evidence.
+- 2026-10-08: The backend contract is all-or-nothing for query-group batches. User testing begins only after the populated render is open. The branch remains local, unmerged, and unpushed.
+
 Resume pointer:
 
-> Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on `feature/server-driven-generative-ui-review`. Start from milestone 1 after confirming the plan commit and a clean status. Treat the original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` as read-only evidence. The next unresolved design task is to finalize exact request and response schemas for each fixed projection before writing the backend endpoint.
+> Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on `feature/server-driven-generative-ui-review`. The plan is committed at `a29b55e`. Before doing work again, check the live status of `/root/plan_branch`, `/root/query_composition_design`, and `/root/runtime_composition`; they are implementing backend milestone 1, query/catalog milestones 2-3, and display milestone 4 respectively. Do not redo their work. The next actions are to finish and test those owned slices, have `/root/plan_branch` create isolated commits from each reported path list, integrate milestone 5, run the real preview on available candidate ports `8003`/`8013`/`5175`, perform desktop and mobile user tests, refresh both graphs, and hand off without merge or push. Treat the original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` as read-only evidence.
 
 Decision record:
 
@@ -880,6 +891,9 @@ Decision record:
 | Keep old committed output during refresh | It matches what remains visible and permits safe cancel or retry | coordinator flow above | decided |
 | Keep classic search on `/api/search` | The requested migration is for generative UI data flow | `src/api.js`, `backend/app.py` | decided |
 | Keep 24 KB and 12 facts initially | Existing privacy and turn-budget limits are tested; changing them needs measured evidence | `contracts/index.ts`, `agent/turn-budget.ts` | decided |
+| Use one commit steward in the shared managed worktree | Concurrent `git add` and `git commit` operations would race the shared index and `HEAD` | root orchestration decision and live shared checkout | decided |
+| Keep group fingerprints independent of global UI revision | Only normalized query dependencies should invalidate a server result | accepted coordinator identity contract | decided |
+| Reserve candidate preview ports 8003, 8013, and 5175 | The isolated render must not replace user-owned services | root orchestration decision | decided |
 
 ## Source citations
 
