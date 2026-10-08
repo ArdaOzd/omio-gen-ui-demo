@@ -28,8 +28,8 @@ export function TripPlanningFixture(){
  const [ready,setReady]=useState<{services:TravelServices;tree:PresentNode}|{error:true}>()
  useEffect(()=>{
   const controller=new AbortController()
-  const firstScope={kind:'fareScope' as const,originId:'london',destinationId:'paris',dateWindow:{from:'2026-10-23',to:'2026-11-03'},passengers:1,earliestDeparture:{date:'2026-10-23',minutes:0}}
-  const secondScope={kind:'fareScope' as const,originId:'paris',destinationId:'rome',dateWindow:{from:'2026-10-27',to:'2026-11-05'},passengers:1,earliestDeparture:{date:'2026-10-27',minutes:0}}
+  const firstScope={kind:'fareScope' as const,originId:'london',destinationId:'paris',dateWindow:{from:'2026-10-26',to:'2026-11-01'},passengers:1,earliestDeparture:{date:'2026-10-26',minutes:0}}
+  const secondScope={kind:'fareScope' as const,originId:'paris',destinationId:'rome',dateWindow:{from:'2026-10-29',to:'2026-11-01'},passengers:1,earliestDeparture:{date:'2026-10-29',minutes:0}}
   Promise.all([
    fixture.bridge.loadScope(firstScope,controller.signal),
    fixture.bridge.loadScope(secondScope,controller.signal),

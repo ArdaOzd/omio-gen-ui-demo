@@ -11,7 +11,7 @@ import { createFixedProjectionFixture } from '../testing/fixed-projection-fixtur
 import { DisplayContextProvider, DisplayNodeProvider } from './display-context-provider'
 import { TravelProvider, type TravelServices } from './context'
 import { FareCards, FarePicker } from './views'
-import { FadeFares, FareCalendar } from './trip-planning/components'
+import { FadeFares, FareCalendar, TransportSelect } from './trip-planning/components'
 
 const scope: FareScope = { kind: 'fareScope', originId: 'london', destinationId: 'paris', dateWindow: { from: '2026-10-26', to: '2026-10-26' }, passengers: 1, earliestDeparture: { date: '2026-10-26', minutes: 0 } }
 const items = Array.from({ length: 9 }, (_, index) => FareItemSchema.parse({
@@ -118,6 +118,37 @@ describe('interactive selector pagination',()=>{
     const capture=displayStore.capture({captureId:'strip-page-2',artifactIds:[artifactId]})
     expect(capture.exposedOrderedIds).toEqual(selectorItems.slice(16).map(item=>item.id))
     expect(capture.components[0]?.display?.payload).toMatchObject({kind:'fare-order',renderedRange:{fromRank:17,toRank:18},viewport:{offset:16,limit:2,cursor:'fixture-cursor-16'}})
+    router.dispose()
+  })
+
+  it('returns a second-page fare strip to page one when its leg modes change',async()=>{
+    const mixedItems=(['train','bus'] as const).flatMap((mode,modeIndex)=>Array.from({length:18},(_,index)=>FareItemSchema.parse({
+      ...items[0],
+      id:`${mode}-fare-${index+1}`,
+      mode,
+      carrierId:mode==='train'?'rail':'bus-line',
+      carrierName:mode==='train'?`Mode Rail ${index+1}`:`Mode Bus ${index+1}`,
+      departureMinutes:300+modeIndex*600+index*20,
+      legs:[{...items[0]!.legs[0],mode,carrierName:mode==='train'?`Mode Rail ${index+1}`:`Mode Bus ${index+1}`}],
+    })))
+    const fixture=createFixedProjectionFixture({rows:mixedItems,sourceVersion:'mode-page-source-1'})
+    const manifest=await fixture.bridge.loadScope(scope,new AbortController().signal)
+    const binding=fixture.bridge.getBinding(manifest.resourceKey)
+    const artifactId=ArtifactIdSchema.parse('artifact-mode-pages')
+    const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
+    state.initializeMissing(artifactId,{datasetRefs:[binding.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-26'},availableModesByLeg:{'london:paris':['train','bus']}})
+    const router=createActionRouter(state,{bridge:fixture.bridge})
+    const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+    render(<TravelProvider services={services}><TransportSelect artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/><FadeFares artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></TravelProvider>)
+
+    const pages=await screen.findByLabelText('Fare pages for London to Paris')
+    fireEvent.click(within(pages).getByRole('button',{name:'Next'}))
+    await waitFor(()=>expect(within(pages).getByText('Page 2')).toBeVisible())
+
+    fireEvent.click(screen.getByRole('button',{name:'Train'}))
+    await waitFor(()=>expect(within(pages).getByText('Page 1')).toBeVisible())
+    expect(screen.getAllByRole('article')).toHaveLength(16)
+    expect(screen.getAllByRole('article').every(article=>article.textContent?.includes('Mode Bus'))).toBe(true)
     router.dispose()
   })
 

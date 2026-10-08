@@ -418,7 +418,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
   const [cursor,setCursor]=useState<string|null>(null)
   const [cursorHistory,setCursorHistory]=useState<Array<string|null>>([])
   const result = useOrderedFares(artifactRef,{componentRef:componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,cursor,limit:pageSize})
-  const pagingIdentity=JSON.stringify({datasetRef,datasetRevision:result.requirement.datasetRevision,sourceVersion:result.requirement.sourceVersion,filters:plan.state.filters,sort:resolved?plan.state.sortByLeg[resolved.leg.key]:undefined,window:resolved?plan.state.displayWindowByLeg[resolved.leg.key]:undefined,threshold:resolved?.leg.threshold})
+  const pagingIdentity=JSON.stringify({datasetRef,datasetRevision:result.requirement.datasetRevision,sourceVersion:result.requirement.sourceVersion,filters:result.requirement.projection.filters,sort:resolved?plan.state.sortByLeg[resolved.leg.key]:undefined,window:resolved?plan.state.displayWindowByLeg[resolved.leg.key]:undefined,threshold:resolved?.leg.threshold})
   useEffect(()=>{setCursor(null);setCursorHistory([])},[pagingIdentity])
   const rows = resolved?sortFares((result.data?.items??[]).filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold)), fareOrderFromState((plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).field,(plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).direction)):[]
   const shown=rows,total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-shown.length),pageIndex=cursorHistory.length,rankOffset=pageIndex*pageSize
