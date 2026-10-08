@@ -1,6 +1,14 @@
 import { expect, test, type Page } from '@playwright/test'
-import { CATALOG_VERSION, CONTRACT_VERSION, type CoverageRequest } from '../../src/generative/contracts'
-import { coverageKey, stableRef } from '../../src/generative/data/resource-loader'
+import { CATALOG_VERSION, CONTRACT_VERSION } from '../../src/generative/contracts'
+import {
+  FareItemSchema,
+  LookupPinsRequestSchema,
+  QueryGroupsRequestSchema,
+  type FareItem,
+  type FareScope,
+  type ProjectionRequest,
+  type QueryGroupsRequest,
+} from '../../src/generative/contracts/query-groups'
 
 const sourceVersion = 'chat-session-browser-v1'
 
@@ -40,30 +48,188 @@ const beta: SessionFixture = {
   prompt: 'Keep the Beta night itinerary.',
 }
 
-function requestFor(item: SessionFixture): CoverageRequest {
+function scopeFor(item: SessionFixture): FareScope {
   return {
-    originIds: [item.origin],
-    destinationIds: [item.destination],
+    kind: 'fareScope',
+    originId: item.origin,
+    destinationId: item.destination,
     dateWindow: { from: item.date, to: item.date },
-    modes: ['train'],
     passengers: 1,
+    earliestDeparture: { date: item.date, minutes: 0 },
   }
 }
 
-function datasetIdFor(item: SessionFixture): string {
-  return `dataset-${stableRef(coverageKey(requestFor(item)))}`
+function resourceKeyForScope(scope: FareScope): string {
+  return `scope-${scope.originId}-${scope.destinationId}-${scope.dateWindow.from}-${scope.earliestDeparture.minutes}`
+}
+
+function resourceKeyFor(item: SessionFixture): string {
+  return resourceKeyForScope(scopeFor(item))
+}
+
+function fixtureForScope(scope: FareScope): SessionFixture {
+  return scope.originId === alpha.origin ? alpha : beta
+}
+
+function label(id: string): string {
+  return id.charAt(0).toUpperCase() + id.slice(1)
+}
+
+function fareRows(item: SessionFixture, count: number, scope: FareScope = scopeFor(item)): FareItem[] {
+  return Array.from({ length: count }, (_, index) => {
+    const carrierName = index === 0 ? item.carrier : `${item.carrier} ${index + 1}`
+    const durationMinutes = 150 + index
+    const mode = 'train' as const
+    return FareItemSchema.parse({
+      id: index === 0 ? item.fareId : `${item.fareId}-${index + 1}`,
+      originId: scope.originId,
+      destinationId: scope.destinationId,
+      serviceDate: scope.dateWindow.from,
+      mode,
+      carrierId: `${item.id}-rail`,
+      carrierName,
+      priceCents: (item === alpha ? 4900 : 5900) + index * 100,
+      durationMinutes,
+      departureMinutes: Math.min(1439, Math.max(540, scope.earliestDeparture.minutes) + index * 60),
+      availableSeats: 8,
+      currency: 'EUR',
+      synthetic: true,
+      priceBasis: 'per-passenger-including-demo-fees',
+      direct: true,
+      legs: [{
+        legIndex: 0,
+        mode,
+        carrierName,
+        durationMinutes,
+        originId: scope.originId,
+        destinationId: scope.destinationId,
+        originLabel: label(scope.originId),
+        destinationLabel: label(scope.destinationId),
+      }],
+    })
+  })
+}
+
+function matchingRows(rows: FareItem[], projection: ProjectionRequest): FareItem[] {
+  let matching = rows.filter(row => {
+    const { filters } = projection
+    const modes = projection.kind === 'modeSummary' && projection.baseline === 'withoutModeFilter' ? [] : filters.modes
+    return (!modes.length || modes.includes(row.mode))
+      && (!filters.carrierIds.length || filters.carrierIds.includes(row.carrierId))
+      && (filters.minPriceCents === undefined || row.priceCents >= filters.minPriceCents)
+      && (filters.maxPriceCents === undefined || row.priceCents <= filters.maxPriceCents)
+      && (filters.maxDurationMinutes === undefined || row.durationMinutes <= filters.maxDurationMinutes)
+      && (!filters.directOnly || row.direct)
+  })
+  if (projection.kind === 'farePage') {
+    if (projection.serviceDate) matching = matching.filter(row => row.serviceDate === projection.serviceDate)
+    matching.sort((left, right) => {
+      const value = left[projection.sort.field] - right[projection.sort.field]
+      return projection.sort.direction === 'asc' ? value : -value
+    })
+  }
+  return matching
+}
+
+function projectionResult(projection: ProjectionRequest, rows: FareItem[]) {
+  const matching = matchingRows(rows, projection)
+  const identity = {
+    projectionId: projection.projectionId,
+    inputHash: `${projection.projectionId}-input`,
+    resultFingerprint: `${projection.projectionId}-result`,
+  }
+  switch (projection.kind) {
+    case 'farePage': {
+      const offset = projection.after ? Number.parseInt(projection.after.replace('cursor-', ''), 10) : 0
+      const items = matching.slice(offset, offset + projection.limit)
+      const hasNextPage = offset + items.length < matching.length
+      return {
+        ...identity,
+        kind: projection.kind,
+        items,
+        pageInfo: {
+          total: matching.length,
+          returned: items.length,
+          hasNextPage,
+          nextCursor: hasNextPage ? `cursor-${offset + items.length}` : null,
+        },
+      }
+    }
+    case 'calendarDays':
+      return { ...identity, kind: projection.kind, days: [{ date: rows[0]?.serviceDate ?? alpha.date, count: matching.length, representative: matching[0] ?? null }] }
+    case 'carrierFacets': {
+      const carriers = new Map<string, { carrierName: string | null; count: number }>()
+      for (const row of matching) {
+        const current = carriers.get(row.carrierId)
+        carriers.set(row.carrierId, { carrierName: row.carrierName, count: (current?.count ?? 0) + 1 })
+      }
+      return { ...identity, kind: projection.kind, options: [...carriers].map(([carrierId, option]) => ({ carrierId, ...option })) }
+    }
+    case 'modeSummary':
+      return {
+        ...identity,
+        kind: projection.kind,
+        baseline: projection.baseline,
+        modes: [...new Set(matching.map(row => row.mode))].map(mode => {
+          const modeRows = matching.filter(row => row.mode === mode)
+          return {
+            mode,
+            count: modeRows.length,
+            minPriceCents: Math.min(...modeRows.map(row => row.priceCents)),
+            minDurationMinutes: Math.min(...modeRows.map(row => row.durationMinutes)),
+          }
+        }),
+      }
+    case 'fareHighlights':
+      return {
+        ...identity,
+        kind: projection.kind,
+        cheapest: [...matching].sort((left, right) => left.priceCents - right.priceCents)[0] ?? null,
+        fastest: [...matching].sort((left, right) => left.durationMinutes - right.durationMinutes)[0] ?? null,
+      }
+  }
+}
+
+function queryGroupsResponse(request: QueryGroupsRequest, counts: { alpha?: number; beta?: number } = {}) {
+  return {
+    version: 1,
+    requestId: request.requestId,
+    sourceVersion,
+    groups: request.groups.map(group => {
+      const item = fixtureForScope(group.scope)
+      const rows = fareRows(item, item === alpha ? counts.alpha ?? 1 : counts.beta ?? 1, group.scope)
+      const resourceKey = resourceKeyForScope(group.scope)
+      return {
+        groupId: group.groupId,
+        manifest: {
+          kind: 'fareScopeManifest',
+          resourceKey,
+          source: { kind: 'search', descriptorId: resourceKey, sourceVersion },
+          coverage: group.scope,
+          totalAvailable: rows.length,
+          availableModes: [...new Set(rows.map(row => row.mode))],
+          availableDateWindow: group.scope.dateWindow,
+          complete: true,
+        },
+        projections: group.projections.map(projection => projectionResult(projection, rows)),
+      }
+    }),
+  }
 }
 
 function threadRecord(item: SessionFixture) {
-  const datasetId = datasetIdFor(item)
+  const datasetId = resourceKeyFor(item)
   const scene = {
     $type: 'TravelSurface',
+    $key: 'root',
     artifactRef: item.artifactId,
     title: `${item.title} generated itinerary`,
     children: [{
       $type: 'FareCards',
+      $key: 'fares',
       artifactRef: item.artifactId,
       datasetRef: datasetId,
+      legIndex: 0,
     }],
   }
   return {
@@ -107,7 +273,7 @@ function threadRecord(item: SessionFixture) {
         lastInteractionAt: '2026-10-07T12:00:00.000Z',
       },
     }],
-    descriptors: [{ datasetId, request: requestFor(item), sourceVersion, complete: true }],
+    descriptors: [{ datasetId, resourceKey: datasetId, scope: scopeFor(item), sourceVersion, complete: true }],
   }
 }
 
@@ -149,35 +315,35 @@ async function seedSessions(page: Page): Promise<void> {
   }, { history, threads })
 }
 
-async function mockFareSearch(page: Page, counts: { alpha?: number; beta?: number } = {}): Promise<void> {
-  await page.route('**/api/search?**', async route => {
-    const url = new URL(route.request().url())
-    const origin = url.searchParams.get('origin')
-    const item = origin === alpha.origin ? alpha : beta
-    const count = item === alpha ? counts.alpha ?? 1 : counts.beta ?? 1
+async function mockFareApi(page: Page, counts: { alpha?: number; beta?: number } = {}): Promise<void> {
+  await page.route('**/api/query-groups', async route => {
+    const request = QueryGroupsRequestSchema.parse(route.request().postDataJSON())
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(queryGroupsResponse(request, counts)),
+    })
+  })
+  await page.route('**/api/lookup', async route => {
+    const request = LookupPinsRequestSchema.parse(route.request().postDataJSON())
+    const resources = new Map(request.resources.map(resource => [resource.resourceKey, resource.scope]))
+    const items = request.pins.flatMap(pin => {
+      const scope = resources.get(pin.resourceKey)
+      if (!scope || resourceKeyForScope(scope) !== pin.resourceKey) return []
+      const item = fixtureForScope(scope)
+      const count = item === alpha ? counts.alpha ?? 1 : counts.beta ?? 1
+      return fareRows(item, count).filter(row => row.id === pin.fareId)
+    })
+    const found = new Set(items.map(item => item.id))
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        source_version: sourceVersion,
-        outbound: {
-          date: item.date,
-          page: 1,
-          pages: 1,
-          total: count,
-          results: Array.from({ length: count }, (_, index) => ({
-            id: index === 0 ? item.fareId : `${item.fareId}-${index + 1}`,
-            mode: 'train',
-            company: index === 0 ? item.carrier : `${item.carrier} ${index + 1}`,
-            departure_time: `${item.date}T${String(9 + index).padStart(2, '0')}:00:00`,
-            duration_minutes: 150 + index,
-            origin: { id: item.origin },
-            destination: { id: item.destination },
-            price_cents: (item === alpha ? 4900 : 5900) + index * 100,
-            currency: 'EUR',
-            available_seats: 8,
-          })),
-        },
+        version: 1,
+        requestId: request.requestId,
+        sourceVersion: request.sourceVersion,
+        items,
+        missingPins: request.pins.filter(pin => !found.has(pin.fareId)),
       }),
     })
   })
@@ -197,27 +363,35 @@ async function mockGeneratedPlanner(page: Page): Promise<void> {
     requestCounts.set(item.id, count)
     const artifactMatch = serialized.match(/"activeArtifactId":"([^"]+)"/)
     const artifactId = artifactMatch?.[1] ?? item.artifactId
-    const datasetId = datasetIdFor(item)
+    const datasetId = resourceKeyFor(item)
     let events: unknown[]
     if (count === 1) {
-      const input = { coverage: requestFor(item), artifactRef: artifactId }
+      const input = {
+        artifactRef: artifactId,
+        expectedRevision: 0,
+        commands: [
+          { kind: 'route', citySequence: [item.origin, item.destination] },
+          { kind: 'dates', dates: { start: item.date } },
+        ],
+      }
       events = [
         { type: 'start', messageId: `assistant-${item.id}` },
         { type: 'start-step' },
-        { type: 'tool-input-start', toolCallId: `load-${item.id}`, toolName: 'load_fares' },
-        { type: 'tool-input-available', toolCallId: `load-${item.id}`, toolName: 'load_fares', input },
+        { type: 'tool-input-start', toolCallId: `edit-${item.id}`, toolName: 'edit_artifact' },
+        { type: 'tool-input-available', toolCallId: `edit-${item.id}`, toolName: 'edit_artifact', input },
         { type: 'finish-step' },
         { type: 'finish', finishReason: 'tool-calls' },
       ]
     } else if (count === 2) {
       const input = {
         $type: 'TravelSurface',
+        $key: 'root',
         artifactRef: artifactId,
         title: `${item.title} live generated itinerary`,
         children: [
-          { $type: 'ModeChips', artifactRef: artifactId, datasetRef: datasetId },
-          { $type: 'FareCards', artifactRef: artifactId, datasetRef: datasetId },
-          { $type: 'SyntheticTotal', artifactRef: artifactId, datasetRef: datasetId },
+          { $type: 'ModeChips', $key: 'modes', artifactRef: artifactId, datasetRef: datasetId, legIndex: 0 },
+          { $type: 'FareCards', $key: 'fares', artifactRef: artifactId, datasetRef: datasetId, legIndex: 0 },
+          { $type: 'SyntheticTotal', $key: 'total', artifactRef: artifactId },
         ],
       }
       events = [
@@ -293,7 +467,7 @@ test('landing keyboard controls submit or open a fresh empty chat deliberately',
 })
 
 test('two sessions restore their own generated layout and selected fare across switching and reload', async ({ page }) => {
-  await mockFareSearch(page)
+  await mockFareApi(page)
   await seedSessions(page)
   await page.goto('/generative')
   await expect(page.getByRole('complementary', { name: 'Chat sessions' })).toBeVisible()
@@ -311,32 +485,23 @@ test('two sessions restore their own generated layout and selected fare across s
   await expect(page.locator('.travel-chat').getByText(beta.prompt, { exact: true })).toHaveCount(0)
 })
 
-for (const width of [360, 1280]) test(`fare lists show seven complete rows before scrolling at ${width}px`, async ({ page }) => {
+for (const width of [360, 1280]) test(`fare lists show seven complete rows without overflow at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 })
-  await mockFareSearch(page, { alpha: 8, beta: 7 })
+  await mockFareApi(page, { alpha: 8, beta: 7 })
   await seedSessions(page)
   await page.goto('/generative')
 
   const list = page.getByRole('region', { name: 'Fare options' })
   const rows = list.getByRole('article')
-  await expect(rows).toHaveCount(8)
-  await expect(list).toHaveAttribute('data-scrollable', 'true')
-  const overflow = await list.evaluate(element => {
-    const bounds = element.getBoundingClientRect()
-    const rowBounds = Array.from(element.children, child => child.getBoundingClientRect())
-    return {
-      clientHeight: element.clientHeight,
-      scrollHeight: element.scrollHeight,
-      seventhBottom: rowBounds[6]?.bottom,
-      eighthTop: rowBounds[7]?.top,
-      viewportBottom: bounds.bottom,
-    }
-  })
-  expect(overflow.scrollHeight).toBeGreaterThan(overflow.clientHeight)
-  expect(Math.abs((overflow.seventhBottom ?? 0) - overflow.viewportBottom)).toBeLessThanOrEqual(1)
-  expect(overflow.eighthTop).toBeGreaterThan(overflow.viewportBottom)
+  await expect(rows).toHaveCount(7)
+  await expect(list).toHaveAttribute('data-scrollable', 'false')
+  expect(await list.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 
-  const eighth = rows.nth(7)
+  await page.getByLabel('Fare result pages').getByRole('button', { name: 'Next' }).click()
+  await expect(rows).toHaveCount(1)
+  const eighth = rows.first()
+  await expect(eighth).toContainText('Alpha Rail 8')
   await eighth.getByRole('button').click()
   await expect(eighth.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText('Alpha Rail 8')
@@ -349,7 +514,7 @@ for (const width of [360, 1280]) test(`fare lists show seven complete rows befor
 })
 
 test('UI-created sessions save generated cards, filters, and selected fares before switching and reload', async ({ page }) => {
-  await mockFareSearch(page)
+  await mockFareApi(page)
   await mockGeneratedPlanner(page)
   await page.goto('/')
   await page.getByRole('tab', { name: 'Smart planner' }).click()
@@ -364,7 +529,7 @@ test('UI-created sessions save generated cards, filters, and selected fares befo
   await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(alpha.carrier)
   const alphaTrain = page.getByRole('button', { name: 'Train', exact: true })
   await alphaTrain.click()
-  await expect(alphaTrain).toHaveAttribute('aria-pressed', 'false')
+  await expect(alphaTrain).toHaveAttribute('aria-pressed', 'true')
   await composer.fill('Alpha unsent draft')
 
   await page.getByRole('button', { name: 'Start new chat' }).click()
@@ -379,14 +544,14 @@ test('UI-created sessions save generated cards, filters, and selected fares befo
   await expect(page.getByText(`${alpha.title} is ready.`, { exact: true })).toBeVisible()
   await expect(page.getByText(`${alpha.title} live generated itinerary`, { exact: true })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(alpha.carrier)
-  await expect(page.getByRole('button', { name: 'Train', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: 'Train', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('textbox', { name: 'Message' })).toHaveValue('Alpha unsent draft')
   await expect(page.getByText(`${beta.title} is ready.`, { exact: true })).toHaveCount(0)
 
   await page.reload()
   await expect(page.getByText(`${alpha.title} is ready.`, { exact: true })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(alpha.carrier)
-  await expect(page.getByRole('button', { name: 'Train', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: 'Train', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('textbox', { name: 'Message' })).toHaveValue('Alpha unsent draft')
 })
 
@@ -488,34 +653,15 @@ test('New chat cancels a held local fare load before waiting for session actions
   let searchStarted = false
   let releaseSearch: (() => void) | undefined
   const heldSearch = new Promise<void>(resolve => { releaseSearch = resolve })
-  await page.route('**/api/search?**', async route => {
+  await page.route('**/api/query-groups', async route => {
     searchStarted = true
     await heldSearch
     try {
+      const request = QueryGroupsRequestSchema.parse(route.request().postDataJSON())
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          source_version: sourceVersion,
-          outbound: {
-            date: alpha.date,
-            page: 1,
-            pages: 1,
-            total: 1,
-            results: [{
-              id: alpha.fareId,
-              mode: 'train',
-              company: alpha.carrier,
-              departure_time: `${alpha.date}T09:00:00`,
-              duration_minutes: 150,
-              origin: { id: alpha.origin },
-              destination: { id: alpha.destination },
-              price_cents: 4900,
-              currency: 'EUR',
-              available_seats: 8,
-            }],
-          },
-        }),
+        body: JSON.stringify(queryGroupsResponse(request)),
       })
     } catch {
       // Canceling the owning session may abort the intercepted search first.
@@ -524,7 +670,14 @@ test('New chat cancels a held local fare load before waiting for session actions
   await page.route('**/api/chat', async route => {
     const serialized = JSON.stringify(route.request().postDataJSON())
     const artifactId = serialized.match(/"activeArtifactId":"([^"]+)"/)?.[1] ?? alpha.artifactId
-    const input = { coverage: requestFor(alpha), artifactRef: artifactId }
+    const input = {
+      artifactRef: artifactId,
+      expectedRevision: 0,
+      commands: [
+        { kind: 'route', citySequence: [alpha.origin, alpha.destination] },
+        { kind: 'dates', dates: { start: alpha.date } },
+      ],
+    }
     await route.fulfill({
       status: 200,
       contentType: 'text/event-stream',
@@ -532,8 +685,8 @@ test('New chat cancels a held local fare load before waiting for session actions
       body: dataStream([
         { type: 'start', messageId: 'held-search-assistant' },
         { type: 'start-step' },
-        { type: 'tool-input-start', toolCallId: 'held-load', toolName: 'load_fares' },
-        { type: 'tool-input-available', toolCallId: 'held-load', toolName: 'load_fares', input },
+        { type: 'tool-input-start', toolCallId: 'held-edit', toolName: 'edit_artifact' },
+        { type: 'tool-input-available', toolCallId: 'held-edit', toolName: 'edit_artifact', input },
         { type: 'finish-step' },
         { type: 'finish', finishReason: 'tool-calls' },
       ]),
@@ -557,7 +710,7 @@ test('New chat cancels a held local fare load before waiting for session actions
 
 for (const width of [360, 1280]) test(`session sidebar stays usable when collapsed at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 })
-  await mockFareSearch(page)
+  await mockFareApi(page)
   await seedSessions(page)
   await page.goto('/generative')
   await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toBeVisible()
