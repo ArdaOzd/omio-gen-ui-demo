@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { executeQuery } from './query-engine'
-import { createFareDataBridge } from '../data/fare-data-bridge'
 import { parseQuery } from '../contracts'
 import { DatasetIdSchema, DatasetRevisionSchema, FareIdSchema, type FareRow, type QueryIR } from '../contracts'
+import { createQueryEngineFixture } from '../testing/query-engine-fixture'
 const datasetId=DatasetIdSchema.parse('fixture')
+const fare=(input:Omit<FareRow,'legs'>):FareRow=>({...input,legs:[{legIndex:0,mode:input.mode,carrierName:input.carrierName??input.carrierId,durationMinutes:input.durationMinutes,originId:input.originId,destinationId:input.destinationId,originLabel:input.originId,destinationLabel:input.destinationId}]})
 const rows:FareRow[]=[
-{id:FareIdSchema.parse('c'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',carrierName:'Eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
-{id:FareIdSchema.parse('a'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',carrierName:'FlixBus',priceCents:1000,durationMinutes:400,departureMinutes:900,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true},
-{id:FareIdSchema.parse('b'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',carrierName:'FlixBus',priceCents:1000,durationMinutes:380,departureMinutes:800,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}]
+fare({id:FareIdSchema.parse('c'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',carrierName:'Eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}),
+fare({id:FareIdSchema.parse('a'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',carrierName:'FlixBus',priceCents:1000,durationMinutes:400,departureMinutes:900,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true}),
+fare({id:FareIdSchema.parse('b'),originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'bus',carrierId:'flix',carrierName:'FlixBus',priceCents:1000,durationMinutes:380,departureMinutes:800,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})]
 const query=(extra:Partial<QueryIR>):QueryIR=>({version:1,sources:[{datasetRef:datasetId,alias:'fares'}],limit:10,...extra})
 const resources=new Map([[datasetId,{rows,revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]])
 describe('bounded local queries',()=>{
@@ -33,10 +34,10 @@ describe('bounded local queries',()=>{
  })
  it('executes the exact-minute threshold day plus following-day predicate used after a selected arrival',async()=>{
   const where={all:[{any:[{all:[{field:'serviceDate' as const,op:'eq' as const,value:'2026-10-02'},{field:'departureMinutes' as const,op:'gte' as const,value:700}]},{field:'serviceDate' as const,op:'between' as const,value:['2026-10-03','2026-10-04']}]}]}
-  const manifest={datasetId,revision:DatasetRevisionSchema.parse(1),schemaVersion:'1.0.0' as const,coverage:{originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-02',to:'2026-10-04'},modes:['train' as const,'bus' as const],passengers:1,complete:true,truncated:false},rowCount:rows.length,fields:Object.keys(rows[0]!).map(name=>({name:name as keyof FareRow,type:typeof rows[0]![name as keyof FareRow] as 'string'|'number'|'boolean',nullable:false,filterable:true,groupable:true,joinKey:['originId','destinationId'].includes(name)})),compactSummary:{modeCounts:{}},source:{kind:'synthetic-fixture' as const,descriptorId:'fixture',sourceVersion:'v1'}}
-  const parsed=parseQuery(query({where,project:['id']}),[manifest])
+  const manifest=createQueryEngineFixture(rows,'threshold').manifest
+  const parsed=parseQuery({...query({where,project:['id']}),sources:[{datasetRef:manifest.datasetId,alias:'fares'}]},[manifest])
   const future={...rows[0]!,id:FareIdSchema.parse('future'),serviceDate:'2026-10-03',departureMinutes:100}
-  const result=await executeQuery(parsed,new Map([[datasetId,{rows:[...rows,future],revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]]),new AbortController().signal)
+  const result=await executeQuery(parsed,new Map([[manifest.datasetId,{rows:[...rows,future],revision:DatasetRevisionSchema.parse(1),sourceVersion:'v1'}]]),new AbortController().signal)
   expect(result.rows).toEqual([{id:'a'},{id:'b'},{id:'future'}])
  })
  it('rejects mixed source versions and join expansion before any result',async()=>{
@@ -49,10 +50,9 @@ describe('bounded local queries',()=>{
 
 it('executes authored inclusive date-window queries through manifest validation',async()=>{
  const dated=rows.map((row,index)=>({...row,serviceDate:`2026-10-${String(index+1).padStart(2,'0')}`}))
- const bridge=createFareDataBridge({pageSource:async input=>({rows:dated.filter(row=>row.serviceDate===input.date),total:1,pages:1,page:input.page,sourceVersion:'v1'})})
- const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-01',to:'2026-10-03'},modes:['train','bus'],passengers:1},new AbortController().signal)
+ const fixture=createQueryEngineFixture(dated,'date-window'),manifest=fixture.manifest
  const input:QueryIR={version:1,sources:[{datasetRef:manifest.datasetId,alias:'fares'}],where:{field:'serviceDate',op:'between',value:['2026-10-02','2026-10-03']},groupBy:['mode'],metrics:[{as:'minimum',op:'min',field:'priceCents'},{as:'fastest',op:'min',field:'durationMinutes'},{as:'count',op:'count'}],limit:4}
- const result=await bridge.query(parseQuery(input,[manifest]),new AbortController().signal)
+ const result=await fixture.execute(parseQuery(input,[manifest]))
  expect(result.rows).toEqual([{mode:'bus',minimum:1000,fastest:380,count:2}])
  expect(()=>parseQuery({...input,where:{field:'carrierId',op:'between',value:['a','z']}},[manifest])).toThrow(/Comparison requires/)
  expect(()=>parseQuery({...input,project:['priceCents'],orderBy:[{field:'priceCents',direction:'asc'}]},[manifest])).toThrow(/Unknown ordering/)
