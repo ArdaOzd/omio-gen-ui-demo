@@ -14,8 +14,8 @@ describe('selected fare count catalog extension', () => {
   state.initializeMissing(artifactId, {})
   state.initializeMissing(otherId, {selectedFareIds: [FareIdSchema.parse('unrelated')]})
   const bridge = createFareDataBridge()
-  const query = vi.spyOn(bridge, 'query')
-  const lookup = vi.spyOn(bridge, 'lookupFare')
+  const query = vi.spyOn(bridge, 'executeGroup')
+  const lookup = vi.spyOn(bridge, 'lookupPins')
   const services = {state, bridge, activeId: () => artifactId, activate: () => {}}
   validatePresentTree({$type: 'TravelSurface', artifactRef: artifactId, children: [{$type: 'SelectedFareCount', artifactRef: artifactId}]})
   render(<TravelProvider services={services}><CatalogNode kind="SelectedFareCount" artifactRef={artifactId}/></TravelProvider>)
