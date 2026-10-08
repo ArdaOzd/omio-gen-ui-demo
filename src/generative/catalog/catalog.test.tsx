@@ -1,18 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from '../state/ui-state-store'
-import { ArtifactIdSchema, FareRowSchema, type FareRow, type BoundedQueryResult } from '../contracts'
-import { TravelProvider, useTravelQuery, filterPredicate } from './context'
+import { ArtifactIdSchema } from '../contracts'
+import { FareItemSchema, type FareItem, type FareScope } from '../contracts/query-groups'
+import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
+import { TravelProvider, useOrderedFares, filterPredicate } from './context'
 import { CatalogNode } from './component'
 const artifactId=ArtifactIdSchema.parse('artifact-1')
-const fare=(id:string,mode:'train'|'bus',price:number):FareRow=>FareRowSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'eurostar':'flixbus',carrierName:mode==='train'?'Eurostar':'FlixBus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true})
-async function setup(options:Parameters<typeof createFareDataBridge>[0]={}){
- const bridge=createFareDataBridge({pageSource:async()=>({rows:[fare('f1','train',5500),fare('f2','bus',2300)],total:2,page:1,pages:1,sourceVersion:'fixture-v1'}),...options})
- const manifest=await bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-09',to:'2026-10-09'},modes:['train','bus'],passengers:2},new AbortController().signal)
- const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[manifest.datasetId],dates:{start:'2026-10-09'}})
+const fare=(id:string,mode:'train'|'bus',price:number):FareItem=>FareItemSchema.parse({id,originId:'london',destinationId:'paris',serviceDate:'2026-10-09',mode,carrierId:mode==='train'?'eurostar':'flixbus',carrierName:mode==='train'?'Eurostar':'FlixBus',priceCents:price,durationMinutes:mode==='train'?140:470,departureMinutes:600,availableSeats:10,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true,legs:[{legIndex:0,mode,carrierName:mode==='train'?'Eurostar':'FlixBus',durationMinutes:mode==='train'?140:470,originId:'london',destinationId:'paris',originLabel:'London',destinationLabel:'Paris'}]})
+async function setup(rows:readonly FareItem[]|((scope:FareScope,signal:AbortSignal)=>readonly FareItem[])=[fare('f1','train',5500),fare('f2','bus',2300)]){
+ const fixed=createFixedProjectionFixture({rows,sourceVersion:'fixture-v1'})
+ const bridge=fixed.bridge
+ const scope=fixed.scope({originId:'london',destinationId:'paris',dateWindow:{from:'2026-10-09',to:'2026-10-09'},passengers:2,earliestDeparture:{date:'2026-10-09',minutes:0}})
+ const loaded=await bridge.loadScope(scope,new AbortController().signal),binding=bridge.getBinding(loaded.resourceKey)
+ const manifest={...binding,revision:binding.datasetRevision,source:binding.manifest.source}
+ const state=createUIStateStore();state.initializeMissing(artifactId,{datasetRefs:[binding.datasetId],dates:{start:'2026-10-09'}})
  const services={bridge,state,activate:()=>{},activeId:()=>artifactId}
- return{services,manifest,state}
+ return{services,manifest,state,fixed}
 }
 describe('shared direct travel controls',()=>{
  it('updates siblings, selections and synthetic totals locally across repeated revisions',async()=>{
@@ -37,7 +41,7 @@ describe('shared direct travel controls',()=>{
    {...fare('highest','train',9000),durationMinutes:300,departureMinutes:500},
    {...fare('fastest','train',5000),durationMinutes:60,departureMinutes:900},
   ]
-  const{services}=await setup({pageSource:async()=>({rows,total:rows.length,page:1,pages:1,sourceVersion:'sort-v1'})})
+  const{services}=await setup(rows)
   render(<TravelProvider services={services}><CatalogNode kind="SortSelect" artifactRef={artifactId}/><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
   const first=()=>within(screen.getAllByRole('article')[0]!)
   await waitFor(()=>expect(first().getByText('€10.00')).toBeInTheDocument())
@@ -46,19 +50,21 @@ describe('shared direct travel controls',()=>{
   fireEvent.change(screen.getByLabelText('Sort options'),{target:{value:'durationMinutes:asc'}})
   await waitFor(()=>expect(first().getByText('1h 0m',{exact:false})).toBeInTheDocument())
  })
- it('keeps every fare available while limiting the keyboard-scrollable list to seven visible rows',async()=>{
+ it('keeps every fare available through bounded seven-row pages',async()=>{
   const rows=Array.from({length:21},(_,index)=>fare(`fare-${index+1}`,'train',1000+index*100))
-  const{services,state}=await setup({pageSource:async()=>({rows,total:rows.length,page:1,pages:1,sourceVersion:'fare-list-v1'})})
+  const{services,state}=await setup(rows)
   render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
-  await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(21))
+  await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(7))
   const list=screen.getByRole('region',{name:'Fare options'})
-  expect(list).toHaveAttribute('data-scrollable','true');expect(list).toHaveAttribute('tabindex','0')
+  expect(list).toHaveAttribute('data-scrollable','false');expect(list).not.toHaveAttribute('tabindex')
+  expect(screen.getByText('21 matches · Synthetic fares per passenger')).toBeVisible()
+  fireEvent.click(screen.getByRole('button',{name:'Next'}));await screen.findByText('Page 2')
   fireEvent.click(screen.getByRole('button',{name:/Select Train Eurostar 10:00 €17.00/}))
   expect(state.get(artifactId).selectedFareIds).toEqual(['fare-8'])
  })
  it('does not make a seven-fare list a separate scroll stop',async()=>{
   const rows=Array.from({length:7},(_,index)=>fare(`fare-${index+1}`,'train',1000+index*100))
-  const{services}=await setup({pageSource:async()=>({rows,total:rows.length,page:1,pages:1,sourceVersion:'short-fare-list-v1'})})
+  const{services}=await setup(rows)
   render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId}/></TravelProvider>)
   await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(7))
   const list=screen.getByRole('region',{name:'Fare options'})
@@ -86,7 +92,8 @@ it('keeps explicit leg mode controls separate from the global mode filter',async
 it.each(['ComparisonTable','PriceCalendar'])('explains a ready empty %s result instead of leaving a blank view',async kind=>{
  const{services,state,manifest}=await setup();state.dispatch({kind:'filters',artifactId,filters:{...state.get(artifactId).filters,maxPriceCents:0}})
  render(<TravelProvider services={services}><CatalogNode kind={kind} artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
- await screen.findByText('No options match. Try another mode, date, or price limit.')
+ if(kind==='PriceCalendar'){await screen.findByText('No fare');expect(screen.getByText('0 options')).toBeVisible()}
+ else await screen.findByText('No options match. Try another mode, date, or price limit.')
  expect(screen.queryByText(/Infinity|NaN/)).not.toBeInTheDocument();expect(screen.queryByText('€0.00')).not.toBeInTheDocument()
 })
 
@@ -94,8 +101,9 @@ it.each(['ComparisonTable','PriceCalendar'])('explains a ready empty %s result i
 it('renders granular route and fare surfaces while retaining the selected fare and filters',async()=>{
  const{services,state,manifest}=await setup()
  state.dispatch({kind:'stays',artifactId,stays:[{cityId:'london',nights:0},{cityId:'paris',nights:2},{cityId:'barcelona',nights:4}]})
+ state.dispatch({kind:'route',artifactId,citySequence:['london','paris','barcelona']})
  state.dispatch({kind:'filters',artifactId,filters:{...state.get(artifactId).filters,modes:['bus']}})
- state.dispatch({kind:'select',artifactId,fareId:FareRowSchema.parse(fare('f2','bus',2300)).id,selected:true})
+ state.dispatch({kind:'select',artifactId,fareId:fare('f2','bus',2300).id,selected:true})
  const before=state.get(artifactId)
  const view=render(<TravelProvider services={services}><CatalogNode kind="RouteMap" artifactRef={artifactId} datasetRef={manifest.datasetId}/><CatalogNode kind="CitySequence" artifactRef={artifactId}/><CatalogNode kind="FarePicker" artifactRef={artifactId} datasetRef={manifest.datasetId}/><CatalogNode kind="FareCards" artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
  const picker=await screen.findByRole('combobox',{name:'Choose a synthetic fare'})
@@ -123,29 +131,30 @@ it('keeps the selected fare button mounted and focused when only selection chang
 
 
 function PendingQueryProbe(){
- const result=useTravelQuery(artifactId,undefined,(state,id)=>({version:1,sources:[{datasetRef:id,alias:'f'}],where:state.filters.modes.length?{field:'mode',op:'in',value:state.filters.modes}:undefined,limit:1}))
- return <p data-testid="pending-query">{result.status}:{String(result.data?.rows[0]?.mode??'')}</p>
+ const result=useOrderedFares(artifactId,{componentRef:'pending-query',purpose:'ordered',limit:1})
+ return <p data-testid="pending-query">{result.queryState.status}:{String(result.data?.items[0]?.mode??'')}</p>
 }
 
 it('accepts an in-flight unchanged query after a selection revision without restarting it',async()=>{
- const{services,state,manifest}=await setup();let complete:(value:BoundedQueryResult)=>void=()=>{}
- const query=vi.spyOn(services.bridge,'query').mockImplementation(()=>new Promise(resolve=>{complete=resolve}))
+ const{services,state,fixed}=await setup();state.dispatch({kind:'filters',artifactId,filters:{...state.get(artifactId).filters,modes:['bus']}})
+ const original=fixed.client.queryGroups.bind(fixed.client);let complete=()=>{}
+ const query=vi.spyOn(fixed.client,'queryGroups').mockImplementation((request,signal)=>new Promise(resolve=>{complete=()=>{void original(request,signal).then(resolve)}}))
  render(<TravelProvider services={services}><PendingQueryProbe/></TravelProvider>)
  await waitFor(()=>expect(query).toHaveBeenCalledTimes(1))
  act(()=>{state.dispatch({kind:'select',artifactId,fareId:fare('f2','bus',2300).id,selected:true})})
- await act(async()=>{complete({rows:[{mode:'bus'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'same-query'})})
+ await act(async()=>{complete()})
  expect(query).toHaveBeenCalledTimes(1);expect(screen.getByTestId('pending-query')).toHaveTextContent('ready:bus')
 })
 
 it('aborts a changed query and rejects its late result after a newer filtered result',async()=>{
- const{services,state,manifest}=await setup();const pending:Array<{signal:AbortSignal;complete:(value:BoundedQueryResult)=>void}>=[]
- vi.spyOn(services.bridge,'query').mockImplementation((_query,signal)=>new Promise(resolve=>{pending.push({signal,complete:resolve})}))
+ const{services,state,fixed}=await setup();const original=fixed.client.queryGroups.bind(fixed.client);const pending:Array<{signal:AbortSignal;complete:()=>void}>=[]
+ vi.spyOn(fixed.client,'queryGroups').mockImplementation((request,signal)=>new Promise(resolve=>{pending.push({signal,complete:()=>{void original(request,new AbortController().signal).then(resolve)}})}))
  render(<TravelProvider services={services}><PendingQueryProbe/></TravelProvider>)
  await waitFor(()=>expect(pending).toHaveLength(1))
  act(()=>{state.dispatch({kind:'filters',artifactId,filters:{...state.get(artifactId).filters,modes:['bus']}})})
  await waitFor(()=>expect(pending).toHaveLength(2));expect(pending[0]?.signal.aborted).toBe(true)
- await act(async()=>{pending[1]?.complete({rows:[{mode:'bus'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'new-query'})})
- await act(async()=>{pending[0]?.complete({rows:[{mode:'train'}],total:1,truncated:false,datasetRevision:manifest.revision,requestId:'old-query'})})
+ await act(async()=>{pending[1]?.complete()})
+ await act(async()=>{pending[0]?.complete()})
  expect(screen.getByTestId('pending-query')).toHaveTextContent('ready:bus')
 })
 
@@ -159,14 +168,10 @@ it('filters inclusive date windows while single dates and date-free summaries re
 })
 
 
-it('keeps an outside-cache date loading until real coverage arrives rather than claiming no fares',async()=>{
- const{services,state,manifest}=await setup({pageSource:async input=>({rows:input.date==='2026-10-09'?[fare('f2','bus',2300)]:[],total:input.date==='2026-10-09'?1:0,page:1,pages:1,sourceVersion:'fixture-v1'})})
+it('queries an outside-cache date through a bounded server projection',async()=>{
+ const{services,state,manifest}=await setup(scope=>scope.dateWindow.from==='2026-10-09'?[fare('f2','bus',2300)]:[])
  render(<TravelProvider services={services}><CatalogNode kind="FareCards" artifactRef={artifactId} datasetRef={manifest.datasetId}/></TravelProvider>)
  await screen.findByText('FlixBus')
- act(()=>{state.dispatch({kind:'dates',artifactId,dates:{start:'2026-10-10'}})})
- expect(await screen.findByRole('status')).toHaveTextContent('Finding your options')
- expect(screen.queryByText('No options match. Try another mode, date, or price limit.')).not.toBeInTheDocument()
- const fresh=await services.bridge.load({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-10-10',to:'2026-10-10'},modes:['train','bus'],passengers:2},new AbortController().signal)
- act(()=>{state.dispatch({kind:'datasets',artifactId,datasetRefs:[manifest.datasetId,fresh.datasetId]})})
+ act(()=>{state.dispatch({kind:'displayWindowByLeg',artifactId,displayWindowByLeg:{'london:paris':{from:'2026-10-10',to:'2026-10-10'}}})})
  await screen.findByText('No options match. Try another mode, date, or price limit.')
 })
