@@ -1,6 +1,6 @@
 # Server-driven generative UI implementation plan
 
-Status: ready for implementation from a clean isolated worktree
+Status: implementation complete, verified, and running locally for user testing
 
 Target branch: `feature/server-driven-generative-ui-review`
 
@@ -10,9 +10,27 @@ Working directory: `/Users/ardaozdogru/.codex/worktrees/server-driven-generative
 
 Delivery boundary: produce the first complete browser render for user testing. Keep the branch local, unmerged, and unpushed.
 
+## Authoritative current state — 2026-10-08
+
+This section supersedes the earlier clean-base assumptions preserved later in this document as planning history.
+
+- Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on local branch `feature/server-driven-generative-ui-review`. The original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` remain read-only evidence. Do not merge or push.
+- The active source is generator v4 on schema v3: 50,000,000 fares, 120 cities, all ordered city pairs, and date coverage from 2026-10-08 through 2027-12-31. Public fares include bounded ordered `legs`; `direct` agrees with leg count. Manifests distinguish the requested `coverage` from `availableDateWindow` and report partial or unavailable windows with `complete: false`.
+- Fixed `/api/query-groups` and `/api/lookup` endpoints, strict TypeScript contracts, the batching coordinator, all 49 catalog component functions, immutable display context, bounded inspection, source-bound pins, and production server-query hooks are implemented. The arbitrary public `QueryIR` and generative browser bulk-load seams are gone; local QueryIR survives only behind test fixtures.
+- Row selectors use bounded cursor pages. Fare views, the planner strip, and the active calendar day expose Back/Next controls, reset cursors when query dependencies change, preserve committed rows during refresh, and retain selected facts outside the visible page.
+- Next-turn context records normalized desired inputs separately from immutable committed output. It carries active views, exact ordered IDs or aggregate cells, source version, result identity, omissions, compact selected facts, and bounded `inspect_display` handles.
+- The implementation is committed through `0adff6538924be8aa52c1a40d0c7658a04a41382`; the only remaining tracked change before handoff is this final journal update. Cursor continuation binds semantic query inputs rather than response-correlation IDs. Logical fare-scope resource keys remain stable across source generations, while page caches, pin caches, result identities, cursors, and inspection handles remain source-bound.
+- Final validation passes: Vitest reports 65 files and 327 tests passed, one file and four opt-in cases skipped; `npm run typecheck`, `npm run build`, and `npm run check:catalog` pass; the backend suite passes 28 tests; the strict live TypeScript wire suite passes four tests; and `tests/generative/verify-api.ts` exercises all five projections plus a selected pin against the 50-million-row source.
+- Both project graphs are current at implementation HEAD `0adff65`: Code Review Graph reports 2,124 nodes and 23,413 edges. The final local Graphify build reports 2,035 nodes, 4,760 edges, 20 hyperedges, and 161 communities with zero invalid endpoints, dangling edges, self-loops, or collapsed edges.
+- The populated preview is running at [http://127.0.0.1:5175/a](http://127.0.0.1:5175/a). Trusted native probes show backend `127.0.0.1:8003` PID `3993`, agent `127.0.0.1:8013` PID `93255`, and Vite `127.0.0.1:5175` PID `83528`. The backend health endpoint reports 50,000,000 fares and source `sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b`; the frontend returns HTTP 200. The agent listener intentionally returns HTTP 404 for GET `/` and serves its chat endpoint. Sandbox-local curl can falsely report connection refusal, so use native `lsof` and escalated curl before replacing a listener.
+- Native acceptance passed on a 390 px mobile viewport in chat `travel-5592f2a8-561b-4bcd-825e-41521cf4c17a`, artifact `artifact-11e3b762-e9e5-4bbf-8975-067813dac649`: the tracker stacked responsively, real calendar Page 2 showed ranks 9–16 with different IDs, and the immutable display capture was `display-8` / `result-4786e0e6-0a68-4873-a971-3e24134e5b55` on source v4. Reloading the same chat at desktop width restored Page 2 and the right-side tracker.
+- A post-resource-identity native reload also passes in chat `travel-f8fd5677-34f9-45b6-a177-4c9354b0be74`, artifact `artifact-5c9077d2-f46c-4369-9846-7030a1b7f768`, with stable logical scope `scope-67a42174e3bf6ae2969e365019a303f8` and the same source v4 identity.
+- A prior next-turn proof changed the Flight filter locally from selected to cleared without another model request; the committed Bus €12.69 / 5h26 and Train €41.25 / 3h04 remained visible. The next model turn cited those displayed fares and dates, the €28.56 premium, the 2h22 time saving, and approximately €12 per hour saved from the frozen display context.
+- No implementation work remains. Leave the preview populated, commit this journal and the final Graphify documentation refresh, verify the branch status, and hand the local unmerged and unpushed branch to the user.
+
 ## Objective
 
-Move the generative travel UI from browser-loaded fare datasets to server-executed, fixed query functions. The model still composes the existing registered UI components. Components ask for semantic query groups, the server runs parameterized SQL against the 10 million row synthetic timetable, and the browser receives only the bounded rows or aggregates required for the active display.
+Move the generative travel UI from browser-loaded fare datasets to server-executed, fixed query functions. The model still composes the existing registered UI components. Components ask for semantic query groups, the server runs parameterized SQL against the current 50 million row synthetic timetable, and the browser receives only the bounded rows or aggregates required for the active display.
 
 The next model turn must describe what the user actually saw. It must carry the exact user inputs, the committed display result, selected fare facts, active views, ordered visible fare IDs, aggregate cells, omissions, and stable inspection handles. A pending refresh must not rewrite the previous display record until its new result commits.
 
@@ -36,7 +54,7 @@ The next model turn must describe what the user actually saw. It must carry the 
 - A real browser run against the actual SQLite API renders a representative multi-city plan on desktop and mobile. Captured network evidence shows bounded query-group requests rather than page-by-page coverage downloads.
 - The final handoff leaves `feature/server-driven-generative-ui-review` checked out, with reviewable commits, no merge, and no push.
 
-## Repository and dirty-baseline record
+## Repository and dirty-baseline record (historical isolation evidence)
 
 The original checkout was on `dev` at `7c60602` with active concurrent changes. Creating `feature/server-driven-generative-ui` in that checkout preserved those changes, but the worktree continued to change while it was being inspected. That checkout is therefore evidence only and is not an implementation workspace.
 
@@ -54,7 +72,7 @@ This worktree does not contain `node_modules` or the ignored database. The origi
 
 If work must later touch a file that is also dirty in the original checkout, compare the clean-branch diff to the original baseline by hunk. Never use `git add -A`, stash the original checkout, reset it, or copy a whole mixed file over it. Integration into the original checkout is outside this task.
 
-## Current system at the committed base
+## Original system at the committed base (historical)
 
 The backend owns a deterministic 10,000,000-row SQLite timetable covering 2026-01-01 through 2027-12-31. `/api/search` accepts one exact departure date, optional return date, mode, sort, page, and limit. `_search_leg` counts and selects one route-day scope with parameterized SQL, then returns up to 100 rows plus per-mode summaries.
 
@@ -890,13 +908,13 @@ Current checklist:
 - [x] Commit this plan alone as `a29b55e`.
 - [x] Implement and commit fixed backend projections.
 - [x] Implement and commit query contracts and coordinator.
-- [ ] Implement and commit component function bindings.
-- [ ] Implement and commit display ledger and inspection capture.
-- [ ] Migrate runtime and delete obsolete generative preload paths.
-- [ ] Run focused, full, privacy, and browser validation.
-- [ ] Refresh both graphs.
-- [ ] Open the populated local preview for user testing.
-- [ ] Report local commits and confirm no merge or push.
+- [x] Implement and commit component function bindings.
+- [x] Implement and commit display ledger and inspection capture.
+- [x] Migrate runtime and delete obsolete generative preload paths.
+- [x] Run focused, full, privacy, and browser validation.
+- [x] Refresh both graphs.
+- [x] Open the populated local preview for user testing.
+- [x] Report local commits and confirm no merge or push.
 
 Implementation entries:
 
@@ -919,16 +937,24 @@ Implementation entries:
 - 2026-10-08: Commit `b2a394b` closes the v3 source-compatibility milestone. It contains the backend adapter, protocol and live-test updates, and this journal. The committed API restarted on port `8003` as PID `79233`; it continues to read the original database without writes.
 - 2026-10-08: Source replacement recovery gets one bounded metadata-only scope refresh followed by a new-generation query. It never retries forever with an expected old source version. Selection handling revalidates or clears old pins when identity cannot be proved. Immutable old-display handles retain the old source identity and expire with a typed error rather than falling through to latest data.
 - 2026-10-08: The runtime migration may delete obsolete arbitrary `QueryIR` browser tools. The required model surface remains fixed metadata, source-bound selected-fare lookup, and immutable bounded display inspection. Production components and the actual preview must use the server bridge; only tests may use the new fixed-projection fixture adapter.
-- 2026-10-08: The test-only fixed-projection server adapter now exercises the production bridge with the five closed projection variants, coverage intersections, direct filtering, cursor pages, pins, and resource lifecycle. Three legacy data/lifecycle suites have been migrated without adding production compatibility methods. Their focused suite has 14 passing tests; one retained privacy assertion exposed a copied-row detection regression after `legs` became array-valued and is awaiting the contract-owned fix.
+- 2026-10-08: The test-only fixed-projection server adapter now exercises the production bridge with the five closed projection variants, coverage intersections, direct filtering, cursor pages, pins, and resource lifecycle. Three legacy data/lifecycle suites have been migrated without adding production compatibility methods. Their focused suite has 14 passing tests; one retained privacy assertion exposed a copied-row detection regression after `legs` became array-valued. This historical blocker was resolved before the final gate below.
 - 2026-10-08: Query lifecycle hardening validates returned scope and projection kinds at the HTTP boundary, includes source version and dataset revision in desired-input identity, coalesces cancellable metadata-only scope refreshes, and performs at most one source-change refresh per intent. Late old-source completions cannot commit, stable partial manifests remain cached, binding revisions advance with a new source, and pinned immutable facts remain independent of page eviction. Six focused files pass 23 tests, and isolated strict typecheck passes.
 - 2026-10-08: Legacy local `QueryIR` tests now invoke the internal engine only through a test fixture. The production bridge is absent from these tests, fare legs are excluded from scalar query output, and ordering, nullable predicates, grouping, thresholds, joins, and budgets retain 13 passing assertions. This does not restore a public production arbitrary-query seam.
 - 2026-10-08: The active trip-planning fixture no longer synthesizes browser fare rows. It loads two logical scopes through the default server bridge, binds the returned resource identities, and targets source-covered October and November 2026 dates. The API verifier now reads the live timetable horizon, executes all five fixed projection variants, checks chronological bounded output, and resolves one source-bound pin. Against the read-only 50-million-fare source it returned 68 London-to-Paris fares for 2026-10-08 through 2026-10-10 and completed the pin lookup.
 - 2026-10-08: Local commits `5ae0366` and `9620556` isolate two query boundary corrections: local test-query rows are materialized only from declared scalar fare fields, and refreshed resource identities retire their previous scope mapping before binding changed coverage. The latter passes the bridge and runtime source-refresh suites with six assertions.
-- 2026-10-08: The first real native Present attempt on ports 8003, 8013, and 5175 reached the London-to-Paris response but exposed an effect-order defect: the model called `setGroup` before display component registration completed, producing an unknown-component error. This is a runtime blocker under repair. Do not mark the first render ready until the real renderer regression and browser proof pass.
+- 2026-10-08: The first real native Present attempt on ports 8003, 8013, and 5175 reached the London-to-Paris response but exposed an effect-order defect: the model called `setGroup` before display component registration completed, producing an unknown-component error. This historical blocker was resolved by the runtime registration regression and the native acceptance recorded below.
+- 2026-10-08: Runtime instrumentation, immutable display capture, fixed tool schemas, all production component-function bindings, scope-aware controls, source refresh, persistence, pagination, and native Present identity are committed. Obsolete raw generative query tools are absent from the active model surface; `inspect_display`, artifact mutation, and Present remain strict and bounded. The orphaned production raw-search adapter and its obsolete test were deleted in `802cb6f`; classic `/api/search` and the classic UI remain intact.
+- 2026-10-08: Commit `7f3af33` fixes real cursor continuation. Backend cursors exclude both `after` and response-correlation `projectionId`; the coordinator keeps one stable wire projection ID across page cursors. Backend, coordinator, and hook-level regressions prove that Page 2 is distinct, chronological, and accepted under a different response correlation ID.
+- 2026-10-08: Commits `fb17273`, `a509d28`, and `0adff65` close cross-source restore. The backend hashes resource keys from semantic scope only; the bridge evicts source-bound pages and pins before publishing a new source generation; and the action router retains pre-eviction fare-to-leg identity so changed and downstream selections clear while proven upstream choices remain.
+- 2026-10-08: Final automated validation passes from implementation HEAD `0adff65`: 327 Vitest tests pass with four opt-in skips, TypeScript passes, the production build passes, the 49-entry catalog check passes, 28 backend tests pass, four strict live-wire tests pass, and the real API verifier returns 68 London-to-Paris fares for 2026-10-08 through 2026-10-10 across all five projection kinds plus a source-bound pin.
+- 2026-10-08: Final native acceptance passes on mobile and desktop. Chat `travel-5592f2a8-561b-4bcd-825e-41521cf4c17a` / artifact `artifact-11e3b762-e9e5-4bbf-8975-067813dac649` displayed a stacked 390 px tracker, real Page 2 ranks 9–16, immutable display capture `display-8`, and desktop reload restoration. Post-resource-key chat `travel-f8fd5677-34f9-45b6-a177-4c9354b0be74` / artifact `artifact-5c9077d2-f46c-4369-9846-7030a1b7f768` restored stable scope `scope-67a42174e3bf6ae2969e365019a303f8` on source v4.
+- 2026-10-08: Trusted preview health is backend PID `3993` on 8003, agent PID `93255` on 8013, and Vite PID `83528` on 5175. Sandbox-local connection refusals were false negatives; native `lsof` and escalated curl are the authority. The backend reads the existing database, the frontend returns HTTP 200 at `/a`, and the populated preview remains open for user testing.
+- 2026-10-08: Code Review Graph refreshed to 2,124 nodes and 23,413 edges at `0adff65`. The final Graphify build reports 2,035 nodes, 4,760 edges, 20 hyperedges, and 161 communities with zero invalid endpoints, dangling edges, self-loops, or collapsed edges. No merge or push occurred.
+- 2026-10-08: During the required documentation-aware graph refresh, `graphify . --update` selected Gemini because ambient key variables were present. It built one semantic request containing `README.md`, `backend/README.md`, this plan, `src/generative/catalog/generated/catalog.md`, and the three images under `verification/generative-ui/fare-selection-proof/`, then received HTTP 400 `Please pass a valid API key`. The command log cannot prove that the rejected request body was discarded, so the seven-file payload may have reached the provider. No external extraction result succeeded or entered the graph. A retry with both Gemini key variables unset stopped locally before extraction. The completed refresh used only local deterministic code extraction and inline Codex semantic extraction: all seven files were cached, contributing 46 semantic nodes, 47 edges, and three hyperedges.
 
 Resume pointer:
 
-> Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on `feature/server-driven-generative-ui-review`. PID `79233` serves the committed backend read-only on port `8003`; the isolated agent and frontend use 8013 and 5175. Before editing, check `/root/query_composition_design` and `/root/runtime_composition` and do not overlap their files. The real-server fixture and API verifier are migrated. The immediate blockers are legacy test-only callers, the runtime registration-order renderer regression, full typecheck/test/catalog/build validation, and desktop/mobile evidence. After these pass, refresh both graphs and hand off without merge or push. Treat the original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` as read-only evidence.
+> The implementation is complete in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on `feature/server-driven-generative-ui-review`, through implementation commit `0adff65` plus the final documentation/graph commit. Backend PID `3993` serves the read-only 50-million-row source on 8003; agent PID `93255` serves chat on 8013; Vite PID `83528` serves the populated preview at `http://127.0.0.1:5175/a`. All automated and native acceptance gates above pass. If work resumes, first verify these listeners with native `lsof`, inspect `git status --short`, and read this authoritative section. Do not repeat the migration or copy from the original dirty checkout. The branch is deliberately local, unmerged, and unpushed.
 
 Decision record:
 
@@ -953,8 +979,10 @@ Decision record:
 - `backend/README.md`, database generation and API sections: 10 million deterministic fares, 2026-01-01 through 2027-12-31, exact-date search, and 100-row page cap.
 - `backend/app.py`, `_search_leg`, `search`, and `dispatch`: current parameterized SQL, one-date request shape, summaries, pagination, and endpoint routing.
 - `src/generative/data/resource-loader.ts`, `loadResource`: current browser route-date-page loop and row accumulation.
-- `src/generative/data/search-client.ts`, `createSearchPageSource`: current `/api/search` adapter and fare normalization.
 - `src/generative/data/fare-data-bridge.ts`, `createFareDataBridge`: current browser resource registration, lookup, and local query ownership.
+- `backend/query_groups.py`: current fixed projection execution, stable logical scope identity, source-bound cursors, manifests, and lookup.
+- `src/generative/data/server-query-client.ts` and `projection-coordinator.ts`: strict wire validation, batching, source refresh, and immutable committed result identity.
+- `src/generative/contracts/display-context.ts` and `src/generative/state/display-context.ts`: display ledger, frozen visible facts, completeness, and immutable inspection handles.
 - `src/generative/query/query-engine.ts`, `executeQuery`: current local QueryIR execution, grouping, ordering, and transfer budgets.
 - `src/generative/catalog/context.tsx`, `useTravelQuery` and fare hooks: current per-view query construction and stale-result guards.
 - `src/generative/catalog/descriptors.ts`: 49 component definitions and the 11 child-accepting containers.

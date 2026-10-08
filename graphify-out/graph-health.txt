@@ -1,37 +1,30 @@
 {
-  "nodes": 1896,
-  "edges": 3656,
+  "nodes": 2043,
+  "edges": 4773,
+  "hyperedges": 21,
+  "communities": 155,
   "danglingEndpoints": 0,
-  "scope": {
-    "scope": "Partial semantic coverage: hash-verified canonical571 records plus local AST refresh and grounded original status. No model extraction.",
-    "historicalOriginal": "967de22fc3878dc8895f24b13b7ef00c2b191da8",
-    "authoritativeSemanticCheckpoint": "57105899c8d00af9d630487565d0e9be00df4f38",
-    "premergeSnapshot": "artifacts/original-local-integration-2026-10-05/premerge/graphify-out/",
-    "verifiedReuseFiles": 330,
-    "differingSources": [
-      "README.md",
-      "agent/request-schema.test.ts",
-      "src/generative/catalog/catalog.test.tsx",
-      "src/generative/data/data-state.test.ts",
-      "src/generative/data/synthetic-source.ts",
-      "src/generative/query/query-engine.test.ts",
-      "src/generative/state/action-router.test.ts",
-      "src/generative/state/persistence.test.ts",
-      "src/generative/tools/browser-tools.test.ts",
-      "verification/generative-ui/a/spike/main.tsx",
-      "src/generative/data/search-client.test.ts",
-      "docs/status/generative-ui-ab-handoff.md",
-      "src/generative/catalog/primitives.test.tsx",
-      "verification/generative-ui/catalog-extension/spike/main.tsx",
-      "docs/decisions/framework-compatibility.md"
-    ],
-    "lateLocalStatusEdits": [
-      "docs/status/generative-ui-ab-handoff.md",
-      "docs/implementation/generative-ui-ab-ledger.md",
-      "docs/plans/generative-ui-ab-implementation-plan.md",
-      "verification/generative-ui/comparison-decision.md"
-    ]
+  "selfLoops": 0,
+  "danglingHyperedgeMembers": 0,
+  "semanticRefresh": {
+    "backend": "local Codex",
+    "externalProviderUsed": false,
+    "files": 7,
+    "nodes": 57,
+    "edges": 60,
+    "hyperedges": 4,
+    "finalPlanRefresh": {
+      "nodes": 25,
+      "edges": 27,
+      "hyperedges": 3
+    }
   },
-  "fixturePreserved": true,
-  "hooksPreserved": true
+  "codeRefresh": {
+    "files": 138
+  },
+  "incrementalAfterRefresh": {
+    "newTotal": 0,
+    "deletedFiles": 0
+  },
+  "builtAtCommit": "0adff6538924be8aa52c1a40d0c7658a04a41382"
 }
