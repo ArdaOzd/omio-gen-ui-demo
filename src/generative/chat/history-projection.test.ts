@@ -3,7 +3,7 @@ import type {UIMessage} from 'ai'
 import {snapshotRequest} from './transport'
 import {parseChatRequest} from '../../../agent/request-schema'
 
-const context=()=>({schemaVersion:'1.0.0',turnId:'latest',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})
+const context=()=>({schemaVersion:'2.0.0' as const,turnId:'latest',artifacts:[],olderArtifactSummaries:[],datasets:[],plannedFareIds:[],selectedFareFacts:[],displayContext:{version:1 as const,captureId:'capture-latest',components:[],activeViews:[],exposedOrderedIds:[],shownFareFacts:[],recentInteractions:[],completeness:{complete:true,omittedComponents:0,omittedFacts:0}}})
 const text=(id:string,role:'user'|'assistant',value:string):UIMessage=>({id,role,parts:[{type:'text',text:value}]})
 async function prepared(messages:UIMessage[]){return snapshotRequest(context)({id:'thread',messages,body:{},trigger:'submit-message',messageId:'continuation',requestMetadata:{retry:true},api:'/api/chat',credentials:undefined,headers:undefined})}
 
@@ -29,17 +29,17 @@ describe('bounded outbound history with intact local transcript',()=>{
  })
  it('summarizes invalid completed tool inputs but preserves and validates the current continuation',async()=>{
   const old: UIMessage={id:'old-tool',role:'assistant',parts:[{type:'dynamic-tool',toolName:'present',toolCallId:'old-call',state:'output-available',input:{$type:'Unknown',artifactRef:'a'},output:{}}]}
-  const current:UIMessage={id:'current-tool',role:'assistant',parts:[{type:'dynamic-tool',toolName:'get_route',toolCallId:'current-call',state:'input-available',input:{datasetRef:'dataset-current'}}]}
+  const current:UIMessage={id:'current-tool',role:'assistant',parts:[{type:'dynamic-tool',toolName:'inspect_display',toolCallId:'current-call',state:'input-available',input:{captureId:'capture-latest',displayHandle:'display-current',resultKey:'result-current',limit:5}}]}
   const messages=[text('old-user','user','Make a planner'),old,text('repair','user','Repair the planner'),current]
   const request=parseChatRequest((await prepared(messages)).body)
   expect(request.messages.find(message=>message.id==='old-tool')?.parts).toEqual([{type:'text',text:expect.stringContaining('Earlier tool present')}])
   expect(request.messages.at(-1)).toEqual(current)
-  current.parts=[{type:'dynamic-tool',toolName:'get_route',toolCallId:'current-call',state:'input-available',input:{wrong:'input'}}]
+  current.parts=[{type:'dynamic-tool',toolName:'inspect_display',toolCallId:'current-call',state:'input-available',input:{wrong:'input'}}]
   const invalidCurrent=await prepared(messages)
   expect(()=>parseChatRequest(invalidCurrent.body)).toThrow()
  })
  it('rejects bulk data even in an older turn before projection',async()=>{
-  const messages:UIMessage[]=[text('old','user','Old task'),{id:'private-tool',role:'assistant',parts:[{type:'dynamic-tool',toolName:'get_route',toolCallId:'private',state:'input-available',input:{rows:[{id:'private-fare'}]}}]},text('latest','user','Repair')]
+  const messages:UIMessage[]=[text('old','user','Old task'),{id:'private-tool',role:'assistant',parts:[{type:'dynamic-tool',toolName:'inspect_display',toolCallId:'private',state:'input-available',input:{rows:[{id:'private-fare'}]}}]},text('latest','user','Repair')]
   await expect(prepared(messages)).rejects.toThrow(/bulk|rows/i)
  })
  it('reports an oversized mandatory turn and permits a subsequent short repair turn',async()=>{

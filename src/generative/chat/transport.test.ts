@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createSnapshotTransport, snapshotRequest } from './transport'
 import type { UIMessage } from 'ai'
 
-const envelope = (turnId: string) => ({ schemaVersion: '1.0.0', turnId, artifacts: [], olderArtifactSummaries: [], datasets: [], selectedFareFacts: [] })
+const envelope = (turnId: string) => ({ schemaVersion: '2.0.0' as const, turnId, artifacts: [], olderArtifactSummaries: [], datasets: [], plannedFareIds: [], selectedFareFacts: [], displayContext: { version: 1 as const, captureId: `capture-${turnId}`, components: [], activeViews: [], exposedOrderedIds: [], shownFareFacts: [], recentInteractions: [], completeness: { complete: true, omittedComponents: 0, omittedFacts: 0 } } })
 
 const messages: UIMessage[] = [{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'Compare options' }] }]
 

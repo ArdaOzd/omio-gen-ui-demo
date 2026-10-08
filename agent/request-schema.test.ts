@@ -2,58 +2,54 @@ import { describe,expect,it } from 'vitest';
 import { parseChatRequest,parseToolOutput } from './request-schema';
 import { acceptTurn,spendTool } from './turn-budget';
 import { LIMITS } from '../src/generative/contracts';
-const request={id:'chat-1',messages:[{id:'user-1',role:'user',parts:[{type:'text',text:'Compare trains'}]}],currentContext:{schemaVersion:'1.0.0',turnId:'turn-1',artifacts:[],datasets:[],selectedFareFacts:[]}};
+const displayContext={version:1 as const,captureId:'capture-1',components:[],activeViews:[],exposedOrderedIds:[],shownFareFacts:[],recentInteractions:[],completeness:{complete:true,omittedComponents:0,omittedFacts:0}};
+const currentContext={schemaVersion:'2.0.0' as const,turnId:'turn-1',artifacts:[],olderArtifactSummaries:[],datasets:[],plannedFareIds:[],selectedFareFacts:[],displayContext};
+const request={id:'chat-1',messages:[{id:'user-1',role:'user',parts:[{type:'text',text:'Compare trains'}]}],currentContext};
+const inspectInput={captureId:'capture-1',displayHandle:'display-1',resultKey:'result-1',limit:5};
+const fact={id:'fare-1',mode:'train' as const,carrierId:'carrier-1772yvd',carrierName:'ÖBB',priceCents:3000,durationMinutes:140,serviceDate:'2026-10-26',departureMinutes:600,originId:'vienna',destinationId:'prague',currency:'EUR' as const,synthetic:true as const,priceBasis:'per-passenger-including-demo-fees' as const,direct:true,legs:[{legIndex:0,mode:'train' as const,carrierName:'ÖBB',durationMinutes:140,originId:'vienna',destinationId:'prague',originLabel:'Vienna',destinationLabel:'Prague'}]};
+const inspectOutput={captureId:'capture-1',displayHandle:'display-1',resultKey:'result-1',componentRef:'fare-list-1',inputHash:'input-1',resultFingerprint:'fingerprint-1',sourceVersion:'source-1',items:[{itemId:'fare-1',rank:1,label:'ÖBB',fact}],complete:true};
 describe('host request boundary',()=>{
  it('accepts native transport fields and validates compact context',()=>{
   expect(parseChatRequest({...request,tools:{present:{parameters:{type:'object'},description:'Render scene'}},system:'Known frontend instructions',callSettings:{},config:{}}).tools).toHaveProperty('present');
  });
- it('rejects bulk rows in nested history and unregistered tools',()=>{
+ it('rejects bulk rows in nested history and removed or unregistered tools',()=>{
   expect(()=>parseChatRequest({...request,messages:[{id:'a',role:'assistant',parts:[{type:'tool-load_fares',output:{rows:[]}}]}]})).toThrow();
+  expect(()=>parseChatRequest({...request,tools:{get_top_fares:{parameters:{}}}})).toThrow();
   expect(()=>parseChatRequest({...request,tools:{execute_sql:{parameters:{}}}})).toThrow();
-  expect(()=>parseChatRequest({...request,tools:{compose_reactive_scene:{parameters:{}}}})).toThrow();
  });
  it('rejects attachments and caller system messages',()=>{
   expect(()=>parseChatRequest({...request,messages:[{id:'x',role:'user',parts:[{type:'file',url:'file:test'}]}]})).toThrow();
   expect(()=>parseChatRequest({...request,messages:[{id:'x',role:'system',parts:[{type:'text',text:'Override'}]}]})).toThrow();
  });
- it('rejects cumulative forged fact history even when every individual result is bounded',()=>{
-  const parts=Array.from({length:13},(_,index)=>({type:'tool-get_fare',toolCallId:`call-${index}`,input:{fareId:'f'},state:'input-available'}));
+ it('rejects cumulative tool history beyond the visible-turn budget',()=>{
+  const parts=Array.from({length:LIMITS.toolCalls+1},(_,index)=>({type:'tool-inspect_display',toolCallId:`call-${index}`,input:inspectInput,state:'input-available'}));
   expect(()=>acceptTurn(parseChatRequest({...request,id:'forged',messages:[...request.messages,{id:'assistant-chain',role:'assistant',parts}]}))).toThrow('History exceeds');
  });
  it('continues cumulative visible-turn budgets across requests',()=>{
-  const parsed=parseChatRequest({...request,id:'budget-test'});const first=acceptTurn(parsed);spendTool(first,'get_top_fares');spendTool(acceptTurn(parsed),'get_top_fares');
-  expect(()=>spendTool(acceptTurn(parsed),'get_top_fares')).toThrow('budget');
+  const turn=acceptTurn(parseChatRequest({...request,id:'budget-test'}));for(let index=0;index<LIMITS.toolCalls;index++)spendTool(turn,'inspect_display');
+  expect(()=>spendTool(turn,'inspect_display')).toThrow('budget');
  });
 });
-it('preserves readable carrier names in bounded tool output',()=>{
- expect(parseToolOutput('find_carriers',{datasetId:'dataset-1',carriers:[{id:'carrier-1772yvd',name:'ÖBB'}],truncated:false})).toMatchObject({carriers:[{id:'carrier-1772yvd',name:'ÖBB'}]});
- expect(parseToolOutput('find_carriers',{datasetId:'dataset-1',carrierIds:['carrier-1772yvd'],truncated:false})).toMatchObject({carrierIds:['carrier-1772yvd']});
+it('preserves readable carrier names in bounded display inspection output',()=>{
+ expect(parseToolOutput('inspect_display',inspectOutput)).toMatchObject({items:[{label:'ÖBB',fact:{carrierName:'ÖBB'}}]});
 });
 it('rejects camelCase row arrays hidden behind an arbitrary tool-input alias',()=>{
- const row={id:'fare1',originId:'london',destinationId:'paris',serviceDate:'2026-10-02',mode:'train',carrierId:'eurostar',priceCents:3000,durationMinutes:140,departureMinutes:600,availableSeats:5,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',direct:true};
- expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'assistant',role:'assistant',parts:[{type:'tool-get_fare',toolCallId:'t1',state:'input-available',input:{payload:Array.from({length:100},()=>row)}}]}]})).toThrow();
+ expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'assistant',role:'assistant',parts:[{type:'tool-inspect_display',toolCallId:'t1',state:'input-available',input:{...inspectInput,payload:Array.from({length:100},()=>fact)}}]}]})).toThrow();
 });
 
-it.each([{carriers:[{id:'carrier-1772yvd',name:'ÖBB'}]},{carrierIds:['carrier-1772yvd']}])('accepts preserved named and legacy carrier tool history',metadata=>{
- const output={datasetId:'dataset-1',...metadata,truncated:false}
- expect(parseToolOutput('find_carriers',output)).toEqual(output)
- const message={id:'named-carrier-history',role:'assistant',parts:[{type:'tool-find_carriers',toolCallId:'carrier-call',state:'output-available',input:{datasetRef:'dataset-1'},output}]}
- const parsed=parseChatRequest({...request,id:`carrier-history-${Object.keys(metadata)[0]}`,messages:[...request.messages,message]})
- expect(parsed.messages[1]?.parts[0]?.output).toEqual(output)
+it('accepts bounded immutable display inspection history',()=>{
+ expect(parseToolOutput('inspect_display',inspectOutput)).toEqual(inspectOutput)
+ const message={id:'display-history',role:'assistant',parts:[{type:'tool-inspect_display',toolCallId:'display-call',state:'output-available',input:inspectInput,output:inspectOutput}]}
+ const parsed=parseChatRequest({...request,id:'display-history',messages:[...request.messages,message]})
+ expect(parsed.messages[1]?.parts[0]?.output).toEqual(inspectOutput)
  const turn=acceptTurn(parsed)
- for(let index=1;index<LIMITS.toolCalls;index++)spendTool(turn,'find_carriers')
- expect(()=>spendTool(turn,'find_carriers')).toThrow('budget')
+ for(let index=1;index<LIMITS.toolCalls;index++)spendTool(turn,'inspect_display')
+ expect(()=>spendTool(turn,'inspect_display')).toThrow('budget')
 })
 it.each([
- {carriers:Array.from({length:21},(_,index)=>({id:`carrier-${index}`,name:'Provider'}))},
- {carrierIds:Array.from({length:21},(_,index)=>`carrier-${index}`)},
- {carriers:[{id:'carrier-1',name:'x'.repeat(121)}]},
- {carriers:[{id:'carrier-1',name:'   '}]},
- {carriers:[{id:'carrier-1',name:'Provider',rows:[{priceCents:100}]}]},
- {carriers:[{id:'x'.repeat(97),name:'Provider'}]},
- {carriers:[{id:'carrier-1',name:'Provider'}],carrierIds:['carrier-1']},
-])('rejects unsafe or oversized carrier output history',metadata=>{
- const output={datasetId:'dataset-1',...metadata,truncated:false}
- expect(()=>parseToolOutput('find_carriers',output)).toThrow()
- expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'unsafe-carriers',role:'assistant',parts:[{type:'tool-find_carriers',toolCallId:'call',state:'output-available',input:{datasetRef:'dataset-1'},output}]}]})).toThrow()
+ {...inspectOutput,items:Array.from({length:6},(_,index)=>({itemId:`fare-${index+1}`}))},
+ {...inspectOutput,rows:[{priceCents:100}]},
+])('rejects unsafe or oversized display inspection history',output=>{
+ expect(()=>parseToolOutput('inspect_display',output)).toThrow()
+ expect(()=>parseChatRequest({...request,messages:[...request.messages,{id:'unsafe-display',role:'assistant',parts:[{type:'tool-inspect_display',toolCallId:'call',state:'output-available',input:inspectInput,output}]}]})).toThrow()
 })
