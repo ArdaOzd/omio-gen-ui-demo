@@ -354,10 +354,10 @@
     "semantic_hash": "4975e98e48b036e4475ab9077e98e641"
   },
   "src/generative/catalog/context.tsx": {
-    "mtime": 1791454099.429604,
-    "seen": 1791456114.563829,
-    "ast_hash": "98246e0c0b48d9a0ee4b2b7207d642d1",
-    "semantic_hash": "98246e0c0b48d9a0ee4b2b7207d642d1"
+    "mtime": 1791459135.0996962,
+    "seen": 1791460096.206183,
+    "ast_hash": "e7afb850924f9a3fbc66a93b7afdb327",
+    "semantic_hash": "e7afb850924f9a3fbc66a93b7afdb327"
   },
   "src/generative/catalog/controls/index.tsx": {
     "mtime": 1791451461.6525986,
@@ -1350,10 +1350,10 @@
     "semantic_hash": "0ae2ee7ebefe644d2bdd3a00959a7237"
   },
   "src/generative/catalog/trip-planning/components.tsx": {
-    "mtime": 1791454409.308742,
-    "seen": 1791456114.5638778,
-    "ast_hash": "7bdac71323600e9cda79b0c499c9a3c1",
-    "semantic_hash": "7bdac71323600e9cda79b0c499c9a3c1"
+    "mtime": 1791459370.334715,
+    "seen": 1791460096.2062001,
+    "ast_hash": "78aae0718cac11828b5f3537bb509f78",
+    "semantic_hash": "78aae0718cac11828b5f3537bb509f78"
   },
   "src/generative/contracts/route-shape.test.ts": {
     "mtime": 1791449095.1027253,
@@ -1374,10 +1374,10 @@
     "semantic_hash": "787df392aea184a6d6ba25b40e1d00f0"
   },
   "src/generative/testing/trip-planning-fixture.tsx": {
-    "mtime": 1791452681.0871892,
-    "seen": 1791456114.564425,
-    "ast_hash": "9ecab6b08aaf717133f6d3680d439758",
-    "semantic_hash": "9ecab6b08aaf717133f6d3680d439758"
+    "mtime": 1791458336.4612038,
+    "seen": 1791460096.206259,
+    "ast_hash": "7afa70ad9f744b54b0c488278f5ae9d3",
+    "semantic_hash": "7afa70ad9f744b54b0c488278f5ae9d3"
   },
   "src/generative/catalog/trip-planning/review-controls.test.tsx": {
     "mtime": 1791454150.1187325,
@@ -1464,10 +1464,10 @@
     "semantic_hash": "7c02c2198366c4345cb3b1fea9ce0bb2"
   },
   "src/generative/catalog/context.server-query.test.tsx": {
-    "mtime": 1791454110.729796,
-    "seen": 1791456114.563828,
-    "ast_hash": "d2d3a2617d40e66177fad214a3921b78",
-    "semantic_hash": "d2d3a2617d40e66177fad214a3921b78"
+    "mtime": 1791459135.1248643,
+    "seen": 1791460096.206181,
+    "ast_hash": "ed7ad2e5344976007e41af6757bab7d0",
+    "semantic_hash": "ed7ad2e5344976007e41af6757bab7d0"
   },
   "src/generative/catalog/display-context-provider.test.tsx": {
     "mtime": 1791452805.7200663,
@@ -1494,10 +1494,10 @@
     "semantic_hash": "56b8be60bf71992c4fa27176938d1195"
   },
   "src/generative/catalog/fare-pagination.test.tsx": {
-    "mtime": 1791455056.3983047,
-    "seen": 1791456114.563835,
-    "ast_hash": "bfbeac95d52cd7a43f8578b9691100e2",
-    "semantic_hash": "bfbeac95d52cd7a43f8578b9691100e2"
+    "mtime": 1791459401.3629525,
+    "seen": 1791460096.2061892,
+    "ast_hash": "01c77379f1c4057169009c83753fe202",
+    "semantic_hash": "01c77379f1c4057169009c83753fe202"
   },
   "src/generative/catalog/views/fare-list.tsx": {
     "mtime": 1791450740.212376,
@@ -1644,9 +1644,9 @@
     "semantic_hash": "557b59ebb508f4aeb0ffeafea6ed71fb"
   },
   "docs/server-driven-generative-ui-implementation-plan.md": {
-    "mtime": 1791456239.2565725,
-    "seen": 1791456410.422157,
-    "ast_hash": "cec3ae53fb2f5b43474d03bd45d94bad",
-    "semantic_hash": "cec3ae53fb2f5b43474d03bd45d94bad"
+    "mtime": 1791459765.1233437,
+    "seen": 1791460096.206295,
+    "ast_hash": "157a9aac856c30e33cc7b0e57034cedd",
+    "semantic_hash": "157a9aac856c30e33cc7b0e57034cedd"
   }
 }
