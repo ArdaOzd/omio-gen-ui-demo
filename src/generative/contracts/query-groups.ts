@@ -65,6 +65,19 @@ export const FareItemSchema = z.strictObject({
   if (fare.direct !== (fare.legs.length <= 1)) {
     context.addIssue({ code: 'custom', path: ['direct'], message: 'Direct flag must match the ordered fare legs' })
   }
+  const first = fare.legs[0]
+  const last = fare.legs.at(-1)
+  if (first && first.originId !== fare.originId) {
+    context.addIssue({ code: 'custom', path: ['legs', 0, 'originId'], message: 'First fare leg must start at the fare origin' })
+  }
+  if (last && last.destinationId !== fare.destinationId) {
+    context.addIssue({ code: 'custom', path: ['legs', fare.legs.length - 1, 'destinationId'], message: 'Last fare leg must end at the fare destination' })
+  }
+  fare.legs.slice(1).forEach((leg, index) => {
+    if (fare.legs[index]?.destinationId !== leg.originId) {
+      context.addIssue({ code: 'custom', path: ['legs', index + 1, 'originId'], message: 'Fare legs must form a continuous route' })
+    }
+  })
 })
 export type FareItem = z.infer<typeof FareItemSchema>
 
@@ -120,6 +133,12 @@ export const FareScopeManifestSchema = z.strictObject({
   if (available === null && (manifest.totalAvailable !== 0 || manifest.availableModes.length !== 0)) {
     context.addIssue({ code: 'custom', path: ['availableDateWindow'], message: 'Unavailable scope cannot report fares or modes' })
   }
+  if (manifest.source.descriptorId !== manifest.resourceKey) {
+    context.addIssue({ code: 'custom', path: ['source', 'descriptorId'], message: 'Source descriptor must match the logical resource key' })
+  }
+  if (new Set(manifest.availableModes).size !== manifest.availableModes.length) {
+    context.addIssue({ code: 'custom', path: ['availableModes'], message: 'Available modes must be unique' })
+  }
 })
 export type FareScopeManifest = z.infer<typeof FareScopeManifestSchema>
 
@@ -128,7 +147,14 @@ export const FareScopeBindingSchema = z.strictObject({
   datasetId,
   datasetRevision,
   manifest: FareScopeManifestSchema,
-}).refine(binding => binding.resourceKey === binding.manifest.resourceKey, { path: ['resourceKey'], message: 'Binding resource key must match its manifest' })
+}).superRefine((binding, context) => {
+  if (binding.resourceKey !== binding.manifest.resourceKey) {
+    context.addIssue({ code: 'custom', path: ['resourceKey'], message: 'Binding resource key must match its manifest' })
+  }
+  if (String(binding.datasetId) !== binding.resourceKey) {
+    context.addIssue({ code: 'custom', path: ['datasetId'], message: 'Dataset ID must match the logical resource key' })
+  }
+})
 export type FareScopeBinding = z.infer<typeof FareScopeBindingSchema>
 
 export const ProjectionFiltersSchema = travelFilters.superRefine((filters, context) => {

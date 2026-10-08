@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { FrozenDisplayContextSchema } from './display-context';
+import { FareLegSchema, FareScopeBindingSchema } from './query-groups';
 
-export const CONTRACT_VERSION = '1.0.0';
+export const CONTRACT_VERSION = '2.0.0';
 export const CATALOG_VERSION = '1.1.0';
 export const LIMITS = Object.freeze({ snapshotBytes: 24_000, artifacts: 8, storedArtifacts: 20, artifactDatasets: 8, datasetBindings: 64, snapshotDatasets: 8 * 8, passengers: 8, plannedFares: 20 * 8, selectedFacts: 20 * 8, queryRows: 100, queryGroups: 30, treeNodes: 80, treeDepth: 8, toolCalls: 12, factBudget: 12 });
 const ref = z.string().min(1).max(96).regex(/^[a-zA-Z0-9_.:-]+$/);
@@ -26,15 +28,20 @@ export const CoverageRequestSchema = z.strictObject({
 export type CoverageRequest = z.infer<typeof CoverageRequestSchema>;
 export const CoverageSchema = CoverageRequestSchema.extend({ complete: z.boolean(), truncated: z.boolean() }).refine(value => !(value.complete && value.truncated), 'Truncated coverage cannot be complete');
 export type Coverage = z.infer<typeof CoverageSchema>;
-export const FareRowSchema = z.strictObject({
+const FareRowBaseSchema = z.strictObject({
   id: FareIdSchema, originId: ref, destinationId: ref, serviceDate: DateSchema, mode: TransportModeSchema,
   carrierId: ref, carrierName: z.string().trim().min(1).max(120).nullish(), priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(),
   departureMinutes: z.number().int().min(0).max(1439), availableSeats: z.number().int().nonnegative(),
   currency: z.literal('EUR'), synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees'),
   direct: z.boolean(),
+  legs: z.array(FareLegSchema).max(8),
+});
+export const FareRowSchema = FareRowBaseSchema.superRefine((fare, context) => {
+  if (fare.legs.some((leg, index) => leg.legIndex !== index)) context.addIssue({code:'custom',path:['legs'],message:'Fare legs must use consecutive ordered indices'});
+  if (fare.direct !== (fare.legs.length <= 1)) context.addIssue({code:'custom',path:['direct'],message:'Direct flag must match the ordered fare legs'});
 });
 export type FareRow = z.infer<typeof FareRowSchema>;
-export const FareFieldSchema = FareRowSchema.keyof();
+export const FareFieldSchema = FareRowBaseSchema.omit({legs:true}).keyof();
 export type AllowedFareField = z.infer<typeof FareFieldSchema>;
 export const DatasetFieldManifestSchema = z.strictObject({
   name: FareFieldSchema, type: z.enum(['string', 'number', 'boolean']), nullable: z.boolean(),
@@ -92,7 +99,8 @@ export type ExecutionGuard = z.infer<typeof ExecutionGuardSchema>;
 export const BoundedFareFactSchema = z.strictObject({ id: FareIdSchema, mode: TransportModeSchema, carrierId: ref, carrierName: z.string().trim().min(1).max(120).nullish(),
   priceCents: z.number().int().nonnegative(), durationMinutes: z.number().int().positive(), serviceDate: DateSchema,
   departureMinutes: z.number().int().min(0).max(1439), originId: ref, destinationId: ref, currency: z.literal('EUR'),
-  synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees') });
+  synthetic: z.literal(true), priceBasis: z.literal('per-passenger-including-demo-fees'), direct:z.boolean(), legs:z.array(FareLegSchema).max(8) })
+  .refine(fare=>fare.direct===(fare.legs.length<=1),{path:['direct'],message:'Direct flag must match the ordered fare legs'});
 export type BoundedFareFact = z.infer<typeof BoundedFareFactSchema>;
 export const CompactArtifactSnapshotSchema = z.strictObject({ artifactId: ArtifactIdSchema, revision: UIStateRevisionSchema,
   runtimeVariables: RuntimeVariablesSchema.default({}), datasetRefs: z.array(DatasetIdSchema).max(LIMITS.artifactDatasets), selectedFareIds: z.array(FareIdSchema).max(8), filters: TravelFiltersSchema,
@@ -107,7 +115,8 @@ export type OlderArtifactSummary=z.infer<typeof OlderArtifactSummarySchema>;
 export const AgentContextEnvelopeSchema = z.strictObject({ schemaVersion: z.literal(CONTRACT_VERSION), turnId: ref,
   activeArtifactId: ArtifactIdSchema.optional(), artifacts: z.array(CompactArtifactSnapshotSchema).max(LIMITS.artifacts),
   olderArtifactSummaries:z.array(OlderArtifactSummarySchema).max(LIMITS.storedArtifacts).default([]),
-  datasets: z.array(DatasetManifestSchema).max(LIMITS.snapshotDatasets), plannedFareIds:z.array(FareIdSchema).max(LIMITS.plannedFares).optional(), selectedFareFacts: z.array(BoundedFareFactSchema).max(LIMITS.selectedFacts) });
+  datasets: z.array(FareScopeBindingSchema).max(LIMITS.snapshotDatasets), plannedFareIds:z.array(FareIdSchema).max(LIMITS.plannedFares).optional(), selectedFareFacts: z.array(BoundedFareFactSchema).max(LIMITS.selectedFacts),
+  displayContext: FrozenDisplayContextSchema });
 export type AgentContextEnvelope = z.infer<typeof AgentContextEnvelopeSchema>;
 export function parseAgentContext(input: unknown): AgentContextEnvelope {
   const result = AgentContextEnvelopeSchema.parse(input);
@@ -116,12 +125,47 @@ export function parseAgentContext(input: unknown): AgentContextEnvelope {
   const fullIds=new Set(result.artifacts.map(artifact=>artifact.artifactId)),summaryIds=result.olderArtifactSummaries.map(artifact=>artifact.artifactId);
   if(new Set(summaryIds).size!==summaryIds.length||summaryIds.some(id=>fullIds.has(id)))throw new Error('Duplicate older artifact summary');
   const datasets = new Set(result.datasets.map(d => d.datasetId));
+  if (datasets.size !== result.datasets.length) throw new Error('Duplicate dataset binding');
   if (result.artifacts.some(a => a.datasetRefs.some(id => !datasets.has(id)))) throw new Error('Unknown dataset reference');
   if(result.plannedFareIds&&new Set(result.plannedFareIds).size!==result.plannedFareIds.length)throw new Error('Duplicate planned fare');
   const artifactSelections=result.artifacts.flatMap(a=>a.selectedFareIds)
   if(result.plannedFareIds&&artifactSelections.some(id=>!result.plannedFareIds?.includes(id)))throw new Error('Missing planned fare');
   const selected = new Set(result.plannedFareIds??artifactSelections);
   if (result.selectedFareFacts.some(f => !selected.has(f.id))) throw new Error('Unselected fare fact');
+  const componentRefs = result.displayContext.components.map(component => component.identity.componentRef.value);
+  if (new Set(componentRefs).size !== componentRefs.length) throw new Error('Duplicate display component reference');
+  if (new Set(result.displayContext.activeViews).size !== result.displayContext.activeViews.length) throw new Error('Duplicate active display reference');
+  const displayComponents = new Map(result.displayContext.components.map(component => [component.identity.componentRef.value, component]));
+  if (result.displayContext.components.some(component => !fullIds.has(ArtifactIdSchema.parse(component.identity.scope.artifactId)))) throw new Error('Display component belongs to an omitted artifact');
+  const bindingsByResource=new Map<string,(typeof result.datasets)[number]>(result.datasets.map(binding=>[binding.resourceKey,binding]));
+  for(const component of result.displayContext.components){
+    if(component.identity.scope.kind!=='leg')continue;
+    const artifact=result.artifacts.find(item=>item.artifactId===component.identity.scope.artifactId),binding=bindingsByResource.get(component.identity.scope.resourceKey);
+    if(!artifact||!binding||!artifact.datasetRefs.includes(binding.datasetId))throw new Error('Display component uses a resource outside its artifact');
+    const execution=component.execution,current=execution?.status==='ready'||execution?.status==='refreshing'?execution.current:execution?.status==='error'?execution.previous:undefined;
+    if(current&&current.resourceKey!==component.identity.scope.resourceKey)throw new Error('Displayed result uses a different resource scope');
+  }
+  if (result.displayContext.activeViews.some(componentRef => !displayComponents.has(componentRef))) throw new Error('Active display reference is missing its component');
+  if (result.displayContext.shownFareFacts.some(fact => fact.displayedBy.some(display => !displayComponents.has(display.componentRef)))) throw new Error('Shown fare fact references an omitted component');
+  for(const fact of result.displayContext.shownFareFacts){
+    const hasVisibleSource=fact.displayedBy.some(owner=>{
+      const component=displayComponents.get(owner.componentRef);
+      if(!component||component.visibility!=='visible')return false;
+      const execution=component.execution,current=execution?.status==='ready'||execution?.status==='refreshing'?execution.current:execution?.status==='error'?execution.previous:undefined;
+      if(!current||current.sourceVersion!==fact.sourceVersion)return false;
+      const payload=component.display?.payload;
+      if(!payload)return false;
+      if(payload.kind==='fare-order'){
+        const reference=payload.orderedFareRefs.find(item=>item.fareId===fact.fact.id);
+        return !!reference&&(!payload.renderedRange||(reference.rank>=payload.renderedRange.fromRank&&reference.rank<=payload.renderedRange.toRank));
+      }
+      if(payload.kind==='plot'||payload.kind==='selection')return payload.orderedFareRefs.some(item=>item.fareId===fact.fact.id);
+      if(payload.kind==='fare-highlights')return payload.items.some(item=>item.fareId===fact.fact.id);
+      if(payload.kind==='calendar'||payload.kind==='aggregate')return payload.cells.some(item=>item.fareId===fact.fact.id);
+      return false;
+    });
+    if(!hasVisibleSource)throw new Error('Shown fare fact lacks a visible committed source');
+  }
   return result;
 }
 
@@ -172,6 +216,9 @@ export interface UIStateStore {
   setDatasetBindings?(artifactId:ArtifactId,bindings:ArtifactUIState['datasetBindings']):void;
 }
 export type ComponentDescriptor = { name: string; description: string; group: 'layout'|'status'|'control'|'view'; props: ReadonlyArray<{ name: string; kind: 'ref'|'text'|'variant'|'number'; required: boolean }>; children: boolean };
+
+export * from './query-groups';
+export * from './display-context';
 
 export function parseQuery(input: unknown, manifests: DatasetManifest[]): ValidatedQueryIR {
   const query = QueryIRSchema.parse(input);
