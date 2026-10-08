@@ -5,10 +5,10 @@ import userEvent from '@testing-library/user-event'
 import App from './App'
 vi.mock('./components/LandingPage.jsx',()=>({default:({search,onSearch}:{search:unknown;onSearch:(value:unknown)=>void})=><button onClick={()=>onSearch(search)}>Search</button>}))
 const summaries={train:{count:32,minimum_price_cents:4110},bus:{count:38,minimum_price_cents:1972},flight:{count:27,minimum_price_cents:3603},ferry:{count:0}}
-const trip=(mode:string,company:string)=>({id:mode,mode,company,departure_time:'2026-10-04T07:03:00',arrival_time:'2026-10-04T09:03:00',duration_minutes:120,origin:'London',destination:'Paris',price:41.1,available_seats:4,transfers:0})
+const trip=(mode:string,company:string)=>({id:mode,mode,company,departure_time:'2026-10-08T07:03:00',arrival_time:'2026-10-08T09:03:00',duration_minutes:120,origin:'London',destination:'Paris',price:41.1,available_seats:4,transfers:0,legs:[]})
 const response=(mode:string,summary=summaries)=>({outbound:{results:mode?[trip(mode,mode==='train'?'Eurostar':'Bus operator')]:[],mode_summaries:summary,total:mode?summary[mode as keyof typeof summaries].count:0,page:1,limit:20}})
 afterEach(()=>vi.unstubAllGlobals())
-function mockSearch(search:(url:URL)=>Promise<unknown>){vi.stubGlobal('React',React);vi.stubGlobal('scrollTo',vi.fn());vi.stubGlobal('fetch',vi.fn(async input=>{const url=new URL(String(input),'http://localhost');const body=url.pathname==='/api/search'?await search(url):url.pathname==='/api/metadata'?{timetable:{start_date:'2026-01-01',end_date:'2027-12-31'}}:{locations:[]};return new Response(JSON.stringify(body))}))}
+function mockSearch(search:(url:URL)=>Promise<unknown>){vi.stubGlobal('React',React);vi.stubGlobal('scrollTo',vi.fn());vi.stubGlobal('fetch',vi.fn(async input=>{const url=new URL(String(input),'http://localhost');const body=url.pathname==='/api/search'?await search(url):url.pathname==='/api/metadata'?{timetable:{start_date:'2026-10-08',end_date:'2027-12-31'}}:{locations:[]};return new Response(JSON.stringify(body))}))}
 const start=()=>{render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Search'}))}
 describe('classic search resolves paged results for its selected mode',()=>{
  it('shows actual trains even when the all-mode price page contains only cheaper buses',async()=>{
@@ -27,5 +27,17 @@ describe('classic search resolves paged results for its selected mode',()=>{
   const user=userEvent.setup()
   let resolveTrain!:(value:unknown)=>void;const train=new Promise(resolve=>{resolveTrain=resolve});mockSearch(async url=>{const mode=url.searchParams.get('mode');if(mode==='train')return train;return response(mode==='all'?'bus':'bus')})
   start();await waitFor(()=>expect(vi.mocked(fetch).mock.calls.some(([input])=>String(input).includes('mode=train'))).toBe(true));await user.click(screen.getByRole('radio',{name:/Buses/}));await screen.findByText('Bus operator');await act(async()=>resolveTrain(response('train')));await waitFor(()=>expect(screen.getByRole('radio',{name:/Buses/})).toHaveAttribute('aria-checked','true'));expect(screen.queryByText('Eurostar')).not.toBeInTheDocument()
+ })
+ it('shows transfer counts and ordered operators for a mixed-mode journey',async()=>{
+  const connected={...trip('flight','Demo Air'),transfers:1,legs:[
+   {leg_index:0,mode:'bus',company:'City Bus',duration_minutes:45,origin:{city:'London'},destination:{city:'Airport Hub'}},
+   {leg_index:1,mode:'flight',company:'Demo Air',duration_minutes:75,origin:{city:'Airport Hub'},destination:{city:'Paris'}},
+  ]}
+  mockSearch(async()=>({outbound:{results:[connected],mode_summaries:{...summaries,train:{count:0},bus:{count:0}},total:1,page:1,limit:20}}))
+  start()
+  expect(await screen.findByText('1 transfer')).toBeVisible()
+  expect(await screen.findByText('City Bus')).toBeVisible()
+  expect(screen.getAllByText('Demo Air').length).toBeGreaterThan(0)
+  expect(screen.getByText('London → Airport Hub')).toBeVisible()
  })
 })

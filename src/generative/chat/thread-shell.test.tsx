@@ -19,6 +19,11 @@ beforeEach(()=>{Object.defineProperty(HTMLElement.prototype,'scrollTo',{configur
 afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
 
 describe('assistant message activity',()=>{
+ it('describes the current 50 million fare catalog in the empty state',()=>{
+  render(<Chat messages={[]}/>)
+  expect(screen.getByText(/Explore 50 million synthetic fares/)).toBeVisible()
+ })
+
  it('rotates a random travel pun every five seconds and removes it when work completes',async()=>{
   vi.useFakeTimers();vi.spyOn(Math,'random').mockReturnValue(0)
   const view=render(<Chat messages={[assistant({type:'running'})]}/>)

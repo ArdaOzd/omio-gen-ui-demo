@@ -10,14 +10,24 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from backend.seeds import LOCATIONS, ROUTES, SOURCE_URL, RouteSeed, company_modes
+from backend.seeds import (
+    LOCATIONS,
+    MODE_PRIORITY,
+    ROUTES,
+    SOURCE_URL,
+    TRANSFER_BUFFER_MINUTES,
+    RouteLegSeed,
+    RouteSeed,
+    company_modes,
+)
 
 
-DEFAULT_START_DATE = date(2026, 1, 1)
+DEFAULT_START_DATE = date(2026, 10, 8)
 DEFAULT_END_DATE = date(2027, 12, 31)
-DEFAULT_ROW_COUNT = 10_000_000
+DEFAULT_ROW_COUNT = 50_000_000
 DEFAULT_SEED = 20261002
-GENERATOR_VERSION = "2"
+GENERATOR_VERSION = "4"
+SCHEMA_VERSION = "3"
 
 
 SCHEMA = """
@@ -54,7 +64,8 @@ CREATE TABLE routes (
     destination_point TEXT NOT NULL,
     base_duration_minutes INTEGER NOT NULL CHECK (base_duration_minutes > 0),
     base_price_cents INTEGER NOT NULL CHECK (base_price_cents > 0),
-    source_kind TEXT NOT NULL CHECK (source_kind IN ('homepage', 'supplementary')),
+    transfer_count INTEGER NOT NULL CHECK (transfer_count >= 0),
+    source_kind TEXT NOT NULL CHECK (source_kind IN ('coverage', 'curated')),
     source_url TEXT NOT NULL,
     CHECK (origin_location_id <> destination_location_id)
 );
@@ -63,6 +74,20 @@ CREATE TABLE route_companies (
     route_id INTEGER NOT NULL REFERENCES routes(id),
     company_id INTEGER NOT NULL REFERENCES companies(id),
     PRIMARY KEY (route_id, company_id)
+) WITHOUT ROWID;
+
+CREATE TABLE route_legs (
+    route_id INTEGER NOT NULL REFERENCES routes(id),
+    leg_index INTEGER NOT NULL CHECK (leg_index >= 0),
+    mode TEXT NOT NULL CHECK (mode IN ('train', 'bus', 'flight', 'ferry')),
+    origin_location_id INTEGER NOT NULL REFERENCES locations(id),
+    destination_location_id INTEGER NOT NULL REFERENCES locations(id),
+    origin_point TEXT NOT NULL,
+    destination_point TEXT NOT NULL,
+    duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
+    company_id INTEGER NOT NULL REFERENCES companies(id),
+    PRIMARY KEY (route_id, leg_index),
+    CHECK (origin_location_id <> destination_location_id)
 ) WITHOUT ROWID;
 
 CREATE TABLE fares (
@@ -97,6 +122,17 @@ CREATE INDEX idx_fares_company ON fares (company_id);
 
 
 @dataclass(frozen=True)
+class DirectionalLeg:
+    mode: str
+    origin: str
+    destination: str
+    origin_point: str
+    destination_point: str
+    duration_minutes: int
+    company: str
+
+
+@dataclass(frozen=True)
 class DirectionalRoute:
     id: int
     mode: str
@@ -108,10 +144,15 @@ class DirectionalRoute:
     base_price_cents: int
     companies: tuple[str, ...]
     source_kind: str
+    legs: tuple[DirectionalLeg, ...]
 
     @property
     def key(self) -> str:
         return f"{self.mode}:{self.origin}:{self.destination}"
+
+    @property
+    def transfer_count(self) -> int:
+        return len(self.legs) - 1
 
 
 def directional_routes() -> tuple[DirectionalRoute, ...]:
@@ -126,7 +167,30 @@ def directional_routes() -> tuple[DirectionalRoute, ...]:
 
 
 def _direction(route_id: int, route: RouteSeed, *, reverse: bool) -> DirectionalRoute:
+    seed_legs = route.legs or (
+        RouteLegSeed(
+            route.mode,
+            route.origin,
+            route.destination,
+            route.origin_point,
+            route.destination_point,
+            route.duration_minutes,
+            route.companies[0],
+        ),
+    )
     if reverse:
+        legs = tuple(
+            DirectionalLeg(
+                leg.mode,
+                leg.destination,
+                leg.origin,
+                leg.destination_point,
+                leg.origin_point,
+                leg.duration_minutes,
+                leg.company,
+            )
+            for leg in reversed(seed_legs)
+        )
         return DirectionalRoute(
             route_id,
             route.mode,
@@ -138,7 +202,20 @@ def _direction(route_id: int, route: RouteSeed, *, reverse: bool) -> Directional
             route.base_price_cents,
             route.companies,
             route.source_kind,
+            legs,
         )
+    legs = tuple(
+        DirectionalLeg(
+            leg.mode,
+            leg.origin,
+            leg.destination,
+            leg.origin_point,
+            leg.destination_point,
+            leg.duration_minutes,
+            leg.company,
+        )
+        for leg in seed_legs
+    )
     return DirectionalRoute(
         route_id,
         route.mode,
@@ -150,6 +227,7 @@ def _direction(route_id: int, route: RouteSeed, *, reverse: bool) -> Directional
         route.base_price_cents,
         route.companies,
         route.source_kind,
+        legs,
     )
 
 
@@ -202,6 +280,7 @@ def _fare_rows(
     company_ids: dict[str, int],
     row_count: int,
     seed: int,
+    mode_counts: dict[str, int],
 ) -> Iterator[tuple[int, int, int, str, str, str, int, int, int]]:
     cells = len(routes) * len(service_dates)
     if row_count < cells:
@@ -232,6 +311,7 @@ def _fare_rows(
             cumulative_weight += _cell_weight(route, service_day, day_index, seed)
             allocated_rows = cumulative_weight * remaining_rows // total_weight
             departures = 1 + allocated_rows - previous_allocated
+            mode_counts[route.mode] += departures
             start_minute, end_minute = service_windows[route.mode]
             service_span = end_minute - start_minute + 1
             for sequence in range(departures):
@@ -248,15 +328,12 @@ def _fare_rows(
                     minutes=minute
                 )
                 max_jitter = max(3, route.duration_minutes * jitter_percent[route.mode] // 100)
-                duration_delta = int(duration_noise % (2 * max_jitter + 1)) - max_jitter
-                company_delta = (
-                    route.companies.index(company_name) - (len(route.companies) - 1) / 2
-                )
-                duration = max(
-                    20,
+                duration_delta = int(duration_noise % (max_jitter + 1))
+                company_delta = route.companies.index(company_name)
+                duration = (
                     route.duration_minutes
                     + duration_delta
-                    + round(company_delta * max(2, max_jitter / 3)),
+                    + round(company_delta * max(2, max_jitter / 3))
                 )
                 arrival = departure + timedelta(minutes=duration)
 
@@ -273,8 +350,10 @@ def _fare_rows(
                 )
                 capacity = capacities[route.mode]
                 seats = int(seat_noise % (capacity + 1))
-                if seat_noise >> 60 == 0:
+                if sequence > 0 and seat_noise >> 60 == 0:
                     seats = 0
+                elif sequence == 0:
+                    seats = max(1, seats)
 
                 yield (
                     fare_id,
@@ -350,7 +429,7 @@ def generate_database(
             ((company_ids[name], name, companies[name]) for name in company_names),
         )
         connection.executemany(
-            "INSERT INTO routes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO routes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 (
                     route.id,
@@ -362,6 +441,7 @@ def generate_database(
                     route.destination_point,
                     route.duration_minutes,
                     route.base_price_cents,
+                    route.transfer_count,
                     route.source_kind,
                     SOURCE_URL,
                 )
@@ -376,8 +456,28 @@ def generate_database(
         connection.executemany(
             "INSERT INTO route_companies VALUES (?, ?)", route_company_rows
         )
+        route_leg_rows = (
+            (
+                route.id,
+                leg_index,
+                leg.mode,
+                location_ids[leg.origin],
+                location_ids[leg.destination],
+                leg.origin_point,
+                leg.destination_point,
+                leg.duration_minutes,
+                company_ids[leg.company],
+            )
+            for route in routes
+            for leg_index, leg in enumerate(route.legs)
+        )
+        connection.executemany(
+            "INSERT INTO route_legs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            route_leg_rows,
+        )
         metadata = {
             "generator_version": GENERATOR_VERSION,
+            "schema_version": SCHEMA_VERSION,
             "seed": str(seed),
             "fare_count": str(row_count),
             "start_date": start_date.isoformat(),
@@ -385,18 +485,19 @@ def generate_database(
             "source_url": SOURCE_URL,
             "currency": "EUR",
             "dataset_type": "synthetic_demo",
+            "coverage_model": "all_ordered_pairs_daily",
+            "location_scope": "strict_geographic_europe",
             "schedule_disclaimer": "Generated examples; not live schedules or bookable fares",
-            "timestamp_semantics": "local scheduled time at each origin/destination",
+            "timestamp_semantics": "naive ISO local scheduled datetimes; duration_minutes is authoritative",
         }
-        connection.executemany(
-            "INSERT INTO metadata VALUES (?, ?)", sorted(metadata.items())
-        )
+        fare_counts_by_mode = {mode: 0 for mode in MODE_PRIORITY}
         rows = _fare_rows(
             routes=routes,
             service_dates=service_dates,
             company_ids=company_ids,
             row_count=row_count,
             seed=seed,
+            mode_counts=fare_counts_by_mode,
         )
         insert_sql = """
             INSERT INTO fares (
@@ -412,20 +513,73 @@ def generate_database(
             if progress is not None and inserted_count >= next_progress:
                 progress(inserted_count)
                 next_progress += 2_000_000
+        if sum(fare_counts_by_mode.values()) != row_count:
+            raise RuntimeError("per-mode fare counts do not sum to the requested row count")
+        metadata.update(
+            {
+                f"fare_count_{mode}": str(count)
+                for mode, count in fare_counts_by_mode.items()
+            }
+        )
+        connection.executemany(
+            "INSERT INTO metadata VALUES (?, ?)", sorted(metadata.items())
+        )
         connection.executescript(INDEXES)
         connection.execute("ANALYZE")
         connection.commit()
 
         actual_count = connection.execute("SELECT COUNT(*) FROM fares").fetchone()[0]
-        coverage = connection.execute(
-            "SELECT COUNT(*) FROM (SELECT route_id, service_date FROM fares GROUP BY route_id, service_date)"
-        ).fetchone()[0]
+        coverage, available_coverage = connection.execute(
+            """
+            SELECT COUNT(*), SUM(has_available) FROM (
+                SELECT route_id, service_date,
+                       MAX(CASE WHEN available_seats > 0 THEN 1 ELSE 0 END) AS has_available
+                FROM fares
+                GROUP BY route_id, service_date
+            )
+            """
+        ).fetchone()
         expected_coverage = len(routes) * len(service_dates)
+        pair_count = connection.execute(
+            """
+            SELECT COUNT(*) FROM (
+                SELECT origin_location_id, destination_location_id
+                FROM routes
+                GROUP BY origin_location_id, destination_location_id
+            )
+            """
+        ).fetchone()[0]
+        expected_pairs = len(LOCATIONS) * (len(LOCATIONS) - 1)
+        invalid_routes = sum(
+            route.transfer_count != len(route.legs) - 1
+            or route.duration_minutes
+            != sum(leg.duration_minutes for leg in route.legs)
+            + TRANSFER_BUFFER_MINUTES * route.transfer_count
+            or route.mode
+            != min(
+                route.legs,
+                key=lambda leg: (
+                    -leg.duration_minutes,
+                    MODE_PRIORITY[leg.mode],
+                ),
+            ).mode
+            for route in routes
+        )
         integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
-        if actual_count != row_count or coverage != expected_coverage or integrity != "ok":
+        if (
+            actual_count != row_count
+            or coverage != expected_coverage
+            or available_coverage != expected_coverage
+            or pair_count != expected_pairs
+            or invalid_routes
+            or integrity != "ok"
+        ):
             raise RuntimeError(
                 "database verification failed: "
-                f"rows={actual_count}, coverage={coverage}/{expected_coverage}, integrity={integrity}"
+                f"rows={actual_count}, coverage={coverage}/{expected_coverage}, "
+                f"available={available_coverage}/{expected_coverage}, "
+                f"pairs={pair_count}/{expected_pairs}, invalid_routes={invalid_routes}, "
+                f"integrity={integrity}"
             )
     except BaseException:
         connection.close()
@@ -438,6 +592,7 @@ def generate_database(
         "path": str(output),
         "fare_count": row_count,
         "route_count": len(routes),
+        "route_leg_count": sum(len(route.legs) for route in routes),
         "company_count": len(company_names),
         "location_count": len(LOCATIONS),
         "start_date": start_date.isoformat(),

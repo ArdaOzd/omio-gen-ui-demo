@@ -68,7 +68,7 @@ export default function LandingPage({
           <div className="landing-header__actions">
             <span>€</span>
             <span>EN</span>
-            <Badge className="demo-label demo-label--inverse">Synthetic demo</Badge>
+            <Badge className="demo-label demo-label--inverse">50M synthetic fares</Badge>
           </div>
         </header>
 

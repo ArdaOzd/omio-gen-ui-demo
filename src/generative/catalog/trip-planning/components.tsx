@@ -28,6 +28,7 @@ import type { WidgetProps } from '../layout'
 import { DisplayNodeProvider, recordDisplayInteraction, useDisplayNode, usePublishDisplay } from '../display-context-provider'
 import { fareInspectionItems, useProjectionDisplay } from '../display-records'
 import { DISPLAY_LIMITS, type ComponentIdentity } from '../../contracts/display-context'
+import { FareRouteDetails } from '../fare-route-details'
 
 type Plan = ReturnType<typeof useItineraryPlan>
 type PlanLeg = Plan['legs'][number]
@@ -543,6 +544,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
         <div className="trip-fare-option-top"><span>{modeIcon(row.mode)}{cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong></div>
         <p>{departure(row.departureMinutes)} · {duration(row.durationMinutes)}</p>
         <small>{carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.serviceDate} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small>
+        <FareRouteDetails row={row} compact />
         <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => {recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:selected?'deselect':'select'});dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}}>{selected ? 'Selected' : 'Choose fare'}</Button>
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}
@@ -732,7 +734,7 @@ export function MultiCityPlanGrid(props: WidgetProps) {
       <LegRow plan={plan} leg={leg} index={index} locations={catalog.locations} parentRef={parentRef} />
       {index < plan.legs.length - 1 && <div className="trip-stay-bridge"><span aria-hidden="true" /><Card><InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="stay" componentType="StayDurationInternal"><StayDurationControl plan={plan} leg={leg} nextLeg={plan.legs[index + 1]} /></InternalLegNode></Card></div>}
     </div>)}</div>
-    <p className="trip-synthetic-note">All fares and totals are synthetic demo data. Prices are per passenger and include demo fees.</p>
+    <p className="trip-synthetic-note">Explore 50 million synthetic fares. All fares and totals are demo data; prices are per passenger and include demo fees.</p>
   </Card>
 }
 

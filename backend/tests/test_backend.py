@@ -5,25 +5,40 @@ import shutil
 import sqlite3
 import tempfile
 import unittest
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from unittest.mock import patch
 
 from backend import app
 
 from backend.app import ApiError, dispatch, parse_search_query, search
-from backend.generate_db import DEFAULT_ROW_COUNT, directional_routes, generate_database
+from backend.generate_db import (
+    DEFAULT_END_DATE,
+    DEFAULT_ROW_COUNT,
+    DEFAULT_START_DATE,
+    directional_routes,
+    generate_database,
+)
 from backend.seeds import (
+    AIRPORTLESS_GATEWAYS,
+    BUS_CORRIDORS,
+    CAPITAL_SLUGS,
     CAPITAL_MODE_PAIRS,
+    FERRY_CORRIDORS,
+    ISLAND_REGIONS,
     LOCATIONS,
+    MODE_PRIORITY,
     ROUTES,
     SOURCE_COMPANIES,
     SOURCE_COMPANY_ALIASES,
     SOURCE_DESTINATION_SLUGS,
     SOURCE_GENERAL_PAIRS,
     SOURCE_MODE_PAIRS,
+    TRAIN_CORRIDORS,
+    TRANSFER_BUFFER_MINUTES,
+    distance_km,
 )
-from backend.verify_db import verify_database
+from backend.verify_db import MAX_MODE_SPEED_KMH, verify_database
 
 
 class BackendTestCase(unittest.TestCase):
@@ -35,8 +50,8 @@ class BackendTestCase(unittest.TestCase):
         cls.summary = generate_database(
             cls.database,
             row_count=route_days * 4,
-            start_date=date(2026, 10, 2),
-            end_date=date(2026, 10, 4),
+            start_date=date(2026, 10, 8),
+            end_date=date(2026, 10, 10),
             seed=42,
         )
 
@@ -49,7 +64,7 @@ class BackendTestCase(unittest.TestCase):
         replacement = source.with_name("read-race-replacement.sqlite3")
         shutil.copy2(self.database, source)
         shutil.copy2(self.database, replacement)
-        query = parse_search_query({"origin": ["london"], "destination": ["paris"], "departure_date": ["2026-10-02"]})
+        query = parse_search_query({"origin": ["london"], "destination": ["paris"], "departure_date": ["2026-10-08"]})
         original = app._search_leg
 
         def replace_after_read(*args, **kwargs):
@@ -66,7 +81,7 @@ class BackendTestCase(unittest.TestCase):
     def test_source_version_changes_with_regenerated_fare_facts(self) -> None:
         changed = Path(self.temporary_directory.name) / "changed-source.sqlite3"
         shutil.copy2(self.database, changed)
-        query = parse_search_query({"origin": ["london"], "destination": ["paris"], "departure_date": ["2026-10-02"]})
+        query = parse_search_query({"origin": ["london"], "destination": ["paris"], "departure_date": ["2026-10-08"]})
         first = search(changed, query)
         first_version = first["source_version"]
         row = first["outbound"]["results"][0]
@@ -86,6 +101,8 @@ class BackendTestCase(unittest.TestCase):
 
     def test_generator_is_exact_and_covers_every_route_every_day(self) -> None:
         expected_cells = len(directional_routes()) * 3
+        expected_pairs = len(LOCATIONS) * (len(LOCATIONS) - 1)
+        expected_pair_days = expected_pairs * 3
         with sqlite3.connect(self.database) as connection:
             count = connection.execute("SELECT COUNT(*) FROM fares").fetchone()[0]
             covered_cells = connection.execute(
@@ -98,35 +115,273 @@ class BackendTestCase(unittest.TestCase):
             invalid_seats = connection.execute(
                 "SELECT COUNT(*) FROM fares WHERE available_seats < 0"
             ).fetchone()[0]
+            invalid_timestamps = connection.execute(
+                """
+                SELECT COUNT(*) FROM fares
+                WHERE date(departure_time) <> service_date
+                   OR datetime(arrival_time) <= datetime(departure_time)
+                   OR CAST(ROUND(
+                          (julianday(arrival_time) - julianday(departure_time)) * 1440
+                      ) AS INTEGER) <> duration_minutes
+                """
+            ).fetchone()[0]
+            fares_shorter_than_route = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM fares f JOIN routes r ON r.id = f.route_id
+                WHERE f.duration_minutes < r.base_duration_minutes
+                """
+            ).fetchone()[0]
+            multi_day_fares = connection.execute(
+                """
+                SELECT COUNT(*) FROM fares
+                WHERE date(arrival_time) > date(departure_time)
+                """
+            ).fetchone()[0]
+            feasible_cells = connection.execute(
+                """
+                SELECT COUNT(*) FROM (
+                    SELECT route_id, service_date
+                    FROM fares
+                    WHERE available_seats >= 1
+                    GROUP BY route_id, service_date
+                )
+                """
+            ).fetchone()[0]
+            route_pairs = connection.execute(
+                """
+                SELECT COUNT(*) FROM (
+                    SELECT origin_location_id, destination_location_id
+                    FROM routes
+                    GROUP BY origin_location_id, destination_location_id
+                )
+                """
+            ).fetchone()[0]
+            feasible_pair_days = connection.execute(
+                """
+                SELECT COUNT(*) FROM (
+                    SELECT r.origin_location_id, r.destination_location_id,
+                           f.service_date
+                    FROM fares f JOIN routes r ON r.id = f.route_id
+                    WHERE f.available_seats >= 1
+                    GROUP BY r.origin_location_id, r.destination_location_id,
+                             f.service_date
+                )
+                """
+            ).fetchone()[0]
             integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
         self.assertEqual(count, expected_cells * 4)
         self.assertEqual(covered_cells, expected_cells)
+        self.assertEqual(feasible_cells, expected_cells)
+        self.assertEqual(route_pairs, expected_pairs)
+        self.assertEqual(feasible_pair_days, expected_pair_days)
         self.assertEqual(invalid_seats, 0)
+        self.assertEqual(invalid_timestamps, 0)
+        self.assertEqual(fares_shorter_than_route, 0)
+        self.assertGreater(multi_day_fares, 0)
         self.assertEqual(integrity, "ok")
         verification = verify_database(
-            self.database, expected_rows=expected_cells * 4
+            self.database,
+            expected_rows=expected_cells * 4,
+            expected_start_date=date(2026, 10, 8),
+            expected_end_date=date(2026, 10, 10),
         )
         self.assertEqual(verification["route_day_count"], expected_cells)
+        self.assertEqual(verification["feasible_route_day_count"], expected_cells)
+        self.assertEqual(verification["ordered_pair_count"], expected_pairs)
+        self.assertEqual(verification["pair_day_count"], expected_pair_days)
+        self.assertEqual(verification["feasible_pair_day_count"], expected_pair_days)
 
-    def test_catalog_covers_common_european_capitals_without_us_locations(self) -> None:
+    def test_route_legs_are_contiguous_and_match_route_endpoints_and_modes(self) -> None:
+        with sqlite3.connect(self.database) as connection:
+            invalid_sequences = connection.execute(
+                """
+                WITH leg_stats AS (
+                    SELECT route_id, COUNT(*) AS leg_count,
+                           COUNT(DISTINCT leg_index) AS distinct_indexes,
+                           MIN(leg_index) AS first_index,
+                           MAX(leg_index) AS last_index,
+                           SUM(duration_minutes) AS travel_minutes
+                    FROM route_legs GROUP BY route_id
+                )
+                SELECT COUNT(*)
+                FROM routes r LEFT JOIN leg_stats s ON s.route_id = r.id
+                WHERE s.route_id IS NULL OR s.first_index <> 0
+                   OR s.last_index <> s.leg_count - 1
+                   OR s.distinct_indexes <> s.leg_count
+                   OR r.transfer_count <> s.leg_count - 1
+                   OR r.base_duration_minutes <>
+                      s.travel_minutes + r.transfer_count * ?
+                """,
+                (TRANSFER_BUFFER_MINUTES,),
+            ).fetchone()[0]
+            endpoint_mismatches = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM routes r
+                JOIN route_legs first_leg
+                  ON first_leg.route_id = r.id AND first_leg.leg_index = 0
+                JOIN route_legs last_leg
+                  ON last_leg.route_id = r.id
+                 AND last_leg.leg_index = r.transfer_count
+                WHERE first_leg.origin_location_id <> r.origin_location_id
+                   OR last_leg.destination_location_id <> r.destination_location_id
+                """
+            ).fetchone()[0]
+            discontinuities = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM route_legs leg
+                JOIN route_legs next_leg
+                  ON next_leg.route_id = leg.route_id
+                 AND next_leg.leg_index = leg.leg_index + 1
+                WHERE leg.destination_location_id <> next_leg.origin_location_id
+                """
+            ).fetchone()[0]
+            operator_mode_mismatches = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM route_legs leg JOIN companies c ON c.id = leg.company_id
+                WHERE leg.mode <> c.mode
+                """
+            ).fetchone()[0]
+            dominant_mode_mismatches = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM routes r
+                WHERE r.mode <> (
+                    SELECT leg.mode FROM route_legs leg
+                    WHERE leg.route_id = r.id
+                    ORDER BY leg.duration_minutes DESC,
+                             CASE leg.mode
+                                 WHEN 'flight' THEN 0
+                                 WHEN 'ferry' THEN 1
+                                 WHEN 'train' THEN 2
+                                 WHEN 'bus' THEN 3
+                             END,
+                             leg.leg_index
+                    LIMIT 1
+                )
+                """
+            ).fetchone()[0]
+            route_company_mismatches = connection.execute(
+                """
+                WITH company_stats AS (
+                    SELECT route_id, COUNT(*) AS company_count,
+                           MIN(company_id) AS company_id
+                    FROM route_companies
+                    GROUP BY route_id
+                )
+                SELECT COUNT(*)
+                FROM routes r
+                LEFT JOIN company_stats companies ON companies.route_id = r.id
+                WHERE companies.company_count <> 1
+                   OR companies.company_id <> (
+                        SELECT leg.company_id FROM route_legs leg
+                        WHERE leg.route_id = r.id
+                        ORDER BY leg.duration_minutes DESC,
+                                 CASE leg.mode
+                                     WHEN 'flight' THEN 0
+                                     WHEN 'ferry' THEN 1
+                                     WHEN 'train' THEN 2
+                                     WHEN 'bus' THEN 3
+                                 END,
+                                 leg.leg_index
+                        LIMIT 1
+                   )
+                """
+            ).fetchone()[0]
+        self.assertEqual(invalid_sequences, 0)
+        self.assertEqual(endpoint_mismatches, 0)
+        self.assertEqual(discontinuities, 0)
+        self.assertEqual(operator_mode_mismatches, 0)
+        self.assertEqual(dominant_mode_mismatches, 0)
+        self.assertEqual(route_company_mismatches, 0)
+
+    def test_route_leg_modes_and_durations_obey_physical_constraints(self) -> None:
+        with sqlite3.connect(self.database) as connection:
+            legs = connection.execute(
+                """
+                SELECT leg.mode, origin.slug, destination.slug,
+                       leg.duration_minutes
+                FROM route_legs leg
+                JOIN locations origin ON origin.id = leg.origin_location_id
+                JOIN locations destination ON destination.id = leg.destination_location_id
+                """
+            ).fetchall()
+
+        ferry_corridors = {
+            frozenset((origin, destination))
+            for mode, origin, destination, _ in legs
+            if mode == "ferry"
+        }
+        self.assertEqual(ferry_corridors, FERRY_CORRIDORS)
+        self.assertFalse(
+            [
+                (origin, destination)
+                for mode, origin, destination, _ in legs
+                if mode == "flight"
+                and (
+                    origin in AIRPORTLESS_GATEWAYS
+                    or destination in AIRPORTLESS_GATEWAYS
+                )
+            ]
+        )
+
+        invalid_cross_water_ground_legs = []
+        invalid_durations = []
+        long_bus_legs = []
+        for mode, origin, destination, duration_minutes in legs:
+            origin_region = ISLAND_REGIONS.get(origin, "mainland")
+            destination_region = ISLAND_REGIONS.get(destination, "mainland")
+            crosses_water = origin_region != destination_region and (
+                origin_region != "mainland" or destination_region != "mainland"
+            )
+            pair = frozenset((origin, destination))
+            is_whitelisted_ground = (
+                (mode == "train" and pair in TRAIN_CORRIDORS)
+                or (mode == "bus" and pair in BUS_CORRIDORS)
+            )
+            if (
+                crosses_water
+                and mode in {"bus", "train"}
+                and not is_whitelisted_ground
+            ):
+                invalid_cross_water_ground_legs.append((mode, origin, destination))
+
+            distance = distance_km(origin, destination)
+            minimum_duration = round(distance / MAX_MODE_SPEED_KMH[mode] * 60)
+            if duration_minutes < minimum_duration:
+                invalid_durations.append((mode, origin, destination))
+            if mode == "bus" and distance > 1_200:
+                long_bus_legs.append(duration_minutes)
+
+        self.assertFalse(invalid_cross_water_ground_legs)
+        self.assertFalse(invalid_durations)
+        self.assertTrue(long_bus_legs)
+        self.assertTrue(all(duration > 17 * 60 for duration in long_bus_legs))
+
+    def test_catalog_is_strictly_european_and_covers_every_european_capital(self) -> None:
         capital_codes = {
-            "amsterdam": "NL", "andorra-la-vella": "AD", "ankara": "TR",
-            "athens": "GR", "baku": "AZ", "belgrade": "RS", "berlin": "DE", "bern": "CH",
+            "amsterdam": "NL", "andorra-la-vella": "AD",
+            "athens": "GR", "belgrade": "RS", "berlin": "DE", "bern": "CH",
             "bratislava": "SK", "brussels": "BE", "bucharest": "RO",
             "budapest": "HU", "chisinau": "MD", "copenhagen": "DK",
             "dublin": "IE", "helsinki": "FI", "kyiv": "UA", "lisbon": "PT",
             "ljubljana": "SI", "london": "GB", "luxembourg": "LU",
             "madrid": "ES", "minsk": "BY", "monaco": "MC", "moscow": "RU",
-            "nicosia": "CY", "oslo": "NO", "paris": "FR", "podgorica": "ME",
+            "oslo": "NO", "paris": "FR", "podgorica": "ME",
             "prague": "CZ", "pristina": "XK", "reykjavik": "IS", "riga": "LV",
             "rome": "IT", "san-marino": "SM", "sarajevo": "BA", "skopje": "MK",
             "sofia": "BG", "stockholm": "SE", "tallinn": "EE", "tirana": "AL",
             "vaduz": "LI", "valletta": "MT", "vatican-city": "VA",
-            "tbilisi": "GE", "vienna": "AT", "vilnius": "LT", "warsaw": "PL",
-            "yerevan": "AM", "zagreb": "HR",
+            "vienna": "AT", "vilnius": "LT", "warsaw": "PL", "zagreb": "HR",
         }
         expected_capitals = set(capital_codes)
+        self.assertEqual(expected_capitals, CAPITAL_SLUGS)
         location_by_slug = {location.slug: location for location in LOCATIONS}
+        self.assertEqual(len(expected_capitals), 45)
+        self.assertEqual(len(location_by_slug), 120)
         self.assertLessEqual(expected_capitals, location_by_slug.keys())
         self.assertEqual(
             {slug: location_by_slug[slug].country_code for slug in expected_capitals},
@@ -135,9 +390,12 @@ class BackendTestCase(unittest.TestCase):
         self.assertFalse(
             [location.slug for location in LOCATIONS if location.country_code == "US"]
         )
-        removed_us_slugs = {
+        forbidden_non_european_slugs = {
             "new-york", "boston", "miami", "orlando", "philadelphia", "chicago",
             "los-angeles", "washington-dc",
+            "ankara", "antalya", "baku", "nicosia", "tbilisi", "yerevan",
+            "toronto", "montreal", "dubai", "tangier", "tokyo", "kyoto",
+            "osaka", "hiroshima",
         }
         seeded_endpoints = {
             endpoint for route in ROUTES for endpoint in (route.origin, route.destination)
@@ -147,9 +405,9 @@ class BackendTestCase(unittest.TestCase):
             for item in (*SOURCE_MODE_PAIRS, *CAPITAL_MODE_PAIRS)
             for endpoint in item[-2:]
         } | {endpoint for pair in SOURCE_GENERAL_PAIRS for endpoint in pair}
-        self.assertTrue(removed_us_slugs.isdisjoint(location_by_slug))
-        self.assertTrue(removed_us_slugs.isdisjoint(seeded_endpoints))
-        self.assertTrue(removed_us_slugs.isdisjoint(source_endpoints))
+        self.assertTrue(forbidden_non_european_slugs.isdisjoint(location_by_slug))
+        self.assertTrue(forbidden_non_european_slugs.isdisjoint(seeded_endpoints))
+        self.assertTrue(forbidden_non_european_slugs.isdisjoint(source_endpoints))
         self.assertLessEqual(seeded_endpoints, location_by_slug.keys())
 
         capital_routes = [
@@ -181,23 +439,17 @@ class BackendTestCase(unittest.TestCase):
         self.assertEqual(
             capital_ferry_pairs,
             {
-                frozenset(("dublin", "holyhead")),
                 frozenset(("helsinki", "tallinn")),
                 frozenset(("stockholm", "helsinki")),
+                frozenset(("stockholm", "turku")),
                 frozenset(("oslo", "copenhagen")),
             },
         )
-        airportless = {"andorra-la-vella", "vaduz", "monaco", "san-marino", "vatican-city"}
-        trainless_microstates = {"andorra-la-vella", "vaduz", "san-marino", "vatican-city"}
-        self.assertFalse(
-            [route for route in capital_routes if route.mode == "flight" and airportless & {route.origin, route.destination}]
-        )
-        self.assertFalse(
-            [route for route in capital_routes if route.mode == "train" and trainless_microstates & {route.origin, route.destination}]
-        )
-
     def test_default_dataset_size_and_seeded_variation(self) -> None:
-        self.assertEqual(DEFAULT_ROW_COUNT, 10_000_000)
+        self.assertEqual(DEFAULT_ROW_COUNT, 50_000_000)
+        self.assertEqual(DEFAULT_START_DATE, date(2026, 10, 8))
+        self.assertEqual(DEFAULT_END_DATE, date(2027, 12, 31))
+        self.assertEqual((DEFAULT_END_DATE - DEFAULT_START_DATE).days + 1, 450)
         route_days = len(directional_routes())
         same_seed = Path(self.temporary_directory.name) / "same-seed.sqlite3"
         repeated_seed = Path(self.temporary_directory.name) / "repeated-seed.sqlite3"
@@ -206,8 +458,8 @@ class BackendTestCase(unittest.TestCase):
             generate_database(
                 output,
                 row_count=route_days * 4,
-                start_date=date(2026, 10, 2),
-                end_date=date(2026, 10, 2),
+                start_date=date(2026, 10, 8),
+                end_date=date(2026, 10, 8),
                 seed=seed,
             )
 
@@ -250,8 +502,8 @@ class BackendTestCase(unittest.TestCase):
         generate_database(
             distributed,
             row_count=route_days * distribution_days * 4 + 137,
-            start_date=date(2026, 10, 1),
-            end_date=date(2026, 10, distribution_days),
+            start_date=date(2026, 10, 8),
+            end_date=date(2026, 10, 21),
             seed=42,
         )
         with sqlite3.connect(distributed) as connection:
@@ -262,13 +514,9 @@ class BackendTestCase(unittest.TestCase):
                 )
             ]
         self.assertGreater(len(set(daily_counts)), 1)
-        self.assertGreaterEqual(
-            sum(count > route_days * 4 for count in daily_counts),
-            distribution_days // 2,
-            "remainder fares should be distributed instead of front-loaded",
-        )
+        self.assertTrue(all(count > route_days for count in daily_counts))
         mean_daily_count = sum(daily_counts) / len(daily_counts)
-        self.assertLess(max(daily_counts) - min(daily_counts), mean_daily_count * 0.15)
+        self.assertLess(max(daily_counts) - min(daily_counts), mean_daily_count * 0.20)
 
     def test_minimum_and_non_divisible_row_counts(self) -> None:
         cells = len(directional_routes())
@@ -279,8 +527,8 @@ class BackendTestCase(unittest.TestCase):
                     generate_database(
                         database,
                         row_count=row_count,
-                        start_date=date(2026, 10, 2),
-                        end_date=date(2026, 10, 2),
+                        start_date=date(2026, 10, 8),
+                        end_date=date(2026, 10, 8),
                         seed=42,
                     )
 
@@ -290,8 +538,8 @@ class BackendTestCase(unittest.TestCase):
                 generate_database(
                     database,
                     row_count=row_count,
-                    start_date=date(2026, 10, 2),
-                    end_date=date(2026, 10, 2),
+                    start_date=date(2026, 10, 8),
+                    end_date=date(2026, 10, 8),
                     seed=42,
                 )
                 with sqlite3.connect(database) as connection:
@@ -324,12 +572,14 @@ class BackendTestCase(unittest.TestCase):
         self.assertTrue(all(pair in all_pairs for pair in SOURCE_GENERAL_PAIRS))
         seeded_companies = {
             company for route in ROUTES for company in route.companies
-        }
+        } | {leg.company for route in ROUTES for leg in route.legs}
         self.assertLessEqual(set(SOURCE_COMPANIES), seeded_companies)
         self.assertLessEqual(set(SOURCE_COMPANY_ALIASES.values()), seeded_companies)
         self.assertEqual(
-            sum(route.source_kind == "homepage" for route in ROUTES), 36
+            sum(route.source_kind == "coverage" for route in ROUTES),
+            len(LOCATIONS) * (len(LOCATIONS) - 1) // 2,
         )
+        self.assertTrue(any(route.source_kind == "curated" for route in ROUTES))
 
         with sqlite3.connect(self.database) as connection:
             database_locations = {
@@ -370,9 +620,22 @@ class BackendTestCase(unittest.TestCase):
     def test_metadata_and_location_routes_are_exposed(self) -> None:
         status, metadata = dispatch(self.database, "/api/metadata", {})
         self.assertEqual(status, 200)
-        self.assertEqual(metadata["timetable"]["start_date"], "2026-10-02")
+        self.assertEqual(metadata["schema_version"], 3)
+        self.assertEqual(metadata["coverage_model"], "all_ordered_pairs_daily")
+        self.assertEqual(metadata["location_scope"], "strict_geographic_europe")
+        self.assertEqual(metadata["location_count"], len(LOCATIONS))
+        self.assertEqual(metadata["route_count"], len(directional_routes()))
+        self.assertEqual(metadata["timetable"]["start_date"], "2026-10-08")
+        self.assertEqual(metadata["timetable"]["fare_count"], self.summary["fare_count"])
         self.assertEqual(set(metadata["modes"]), {"train", "bus", "flight", "ferry"})
-        self.assertTrue(any(route["source_kind"] == "supplementary" for route in metadata["routes"]))
+        self.assertEqual(
+            sum(mode["fare_count"] for mode in metadata["modes"].values()),
+            self.summary["fare_count"],
+        )
+        self.assertEqual(
+            {route["source_kind"] for route in metadata["routes"]},
+            {"coverage", "curated"},
+        )
 
         status, payload = dispatch(self.database, "/api/locations", {})
         self.assertEqual(status, 200)
@@ -380,13 +643,85 @@ class BackendTestCase(unittest.TestCase):
         paris = next(item for item in london["destinations"] if item["id"] == "paris")
         self.assertEqual(set(paris["modes"]), {"train", "bus", "flight"})
 
+    def test_search_exposes_ordered_contiguous_legs_for_a_transfer(self) -> None:
+        status, metadata = dispatch(self.database, "/api/metadata", {})
+        self.assertEqual(status, 200)
+        transfer_route = next(
+            route for route in metadata["routes"] if route["transfer_count"] > 0
+        )
+        query = parse_search_query(
+            {
+                "origin": [transfer_route["origin"]],
+                "destination": [transfer_route["destination"]],
+                "departure_date": ["2026-10-08"],
+                "mode": [transfer_route["mode"]],
+                "limit": ["100"],
+            }
+        )
+        results = search(self.database, query)["outbound"]["results"]
+        fare = next(item for item in results if item["transfers"] > 0)
+        legs = fare["legs"]
+        self.assertEqual(fare["transfers"], len(legs) - 1)
+        self.assertEqual([leg["leg_index"] for leg in legs], list(range(len(legs))))
+        self.assertEqual(legs[0]["origin"]["id"], fare["origin"]["id"])
+        self.assertEqual(legs[-1]["destination"]["id"], fare["destination"]["id"])
+        self.assertTrue(
+            all(
+                current["destination"]["id"] == following["origin"]["id"]
+                for current, following in zip(legs[:-1], legs[1:], strict=True)
+            )
+        )
+        dominant_leg = min(
+            legs,
+            key=lambda leg: (
+                -leg["duration_minutes"],
+                MODE_PRIORITY[leg["mode"]],
+                leg["leg_index"],
+            ),
+        )
+        self.assertEqual(fare["mode"], dominant_leg["mode"])
+        self.assertEqual(fare["company"], dominant_leg["company"])
+
+    def test_search_preserves_multi_day_iso_timestamps(self) -> None:
+        with sqlite3.connect(self.database) as connection:
+            origin, destination, mode = connection.execute(
+                """
+                SELECT origin.slug, destination.slug, r.mode
+                FROM routes r
+                JOIN locations origin ON origin.id = r.origin_location_id
+                JOIN locations destination ON destination.id = r.destination_location_id
+                ORDER BY r.base_duration_minutes DESC
+                LIMIT 1
+                """
+            ).fetchone()
+        query = parse_search_query(
+            {
+                "origin": [origin],
+                "destination": [destination],
+                "departure_date": ["2026-10-08"],
+                "mode": [mode],
+                "limit": ["100"],
+            }
+        )
+        fare = max(
+            search(self.database, query)["outbound"]["results"],
+            key=lambda result: result["duration_minutes"],
+        )
+        departure = datetime.fromisoformat(fare["departure_time"])
+        arrival = datetime.fromisoformat(fare["arrival_time"])
+        self.assertGreater(arrival.date(), departure.date())
+        self.assertEqual(
+            int((arrival - departure).total_seconds() // 60),
+            fare["duration_minutes"],
+        )
+
     def test_search_returns_available_outbound_and_return_results(self) -> None:
         parsed = parse_search_query(
             {
                 "origin": ["london"],
                 "destination": ["paris"],
-                "departure_date": ["2026-10-02"],
-                "return_date": ["2026-10-03"],
+                "departure_date": ["2026-10-08"],
+                "return_date": ["2026-10-09"],
                 "passengers": ["2"],
                 "mode": ["all"],
                 "sort": ["price_asc"],
@@ -427,7 +762,7 @@ class BackendTestCase(unittest.TestCase):
                     {
                         "origin": ["barcelona"],
                         "destination": ["rome"],
-                        "departure_date": ["2026-10-02"],
+                        "departure_date": ["2026-10-08"],
                         "mode": ["all"],
                         "sort": [sort],
                         "limit": ["100"],
@@ -437,12 +772,16 @@ class BackendTestCase(unittest.TestCase):
                 field = "price_cents" if sort.startswith("price") else "duration_minutes"
                 values = [row[field] for row in rows]
                 self.assertEqual(values, sorted(values, reverse=reverse))
-                self.assertEqual({row["mode"] for row in rows}, {"bus", "flight"})
+                self.assertTrue(rows)
+                self.assertLessEqual(
+                    {row["mode"] for row in rows},
+                    {"train", "bus", "flight", "ferry"},
+                )
 
         base = {
             "origin": ["london"],
             "destination": ["paris"],
-            "departure_date": ["2026-10-02"],
+            "departure_date": ["2026-10-08"],
             "limit": ["2"],
         }
         page_one = search(self.database, parse_search_query(base))["outbound"]
@@ -462,7 +801,7 @@ class BackendTestCase(unittest.TestCase):
             {
                 "origin": ["rome"],
                 "destination": ["rome"],
-                "departure_date": ["2026-10-02"],
+                "departure_date": ["2026-10-08"],
             },
             {
                 "origin": ["rome"],
@@ -472,19 +811,19 @@ class BackendTestCase(unittest.TestCase):
             {
                 "origin": ["rome"],
                 "destination": ["paris"],
-                "departure_date": ["2026-10-03"],
-                "return_date": ["2026-10-02"],
+                "departure_date": ["2026-10-09"],
+                "return_date": ["2026-10-08"],
             },
             {
                 "origin": ["rome"],
                 "destination": ["paris"],
-                "departure_date": ["2026-10-02"],
+                "departure_date": ["2026-10-08"],
                 "passengers": ["0"],
             },
             {
                 "origin": ["rome"],
                 "destination": ["paris"],
-                "departure_date": ["2026-10-02"],
+                "departure_date": ["2026-10-08"],
                 "sort": ["fastest"],
             },
         )

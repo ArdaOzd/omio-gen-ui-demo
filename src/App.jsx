@@ -7,15 +7,13 @@ import {
   storeSmartPlannerHandoff,
 } from './generative/smart-planner-handoff.ts'
 
-function localDate(date = new Date()) {
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-  return local.toISOString().slice(0, 10)
-}
+const DATASET_START_DATE = '2026-10-08'
+const DATASET_END_DATE = '2027-12-31'
 
 const DEFAULT_SEARCH = {
   origin: { id: 'london', display_name: 'London, United Kingdom' },
   destination: { id: 'paris', display_name: 'Paris, France' },
-  departureDate: localDate(),
+  departureDate: DATASET_START_DATE,
   returnDate: '',
   passengers: 1,
   mode: 'all',
@@ -71,7 +69,7 @@ export default function App() {
       metadata?.date_max ||
       metadata?.max_date ||
       metadata?.date_range?.end
-    return { min: min || localDate(), max: max || '2027-12-31' }
+    return { min: min || DATASET_START_DATE, max: max || DATASET_END_DATE }
   }, [metadata])
 
   async function runSearch(nextSearch, options = {}) {
