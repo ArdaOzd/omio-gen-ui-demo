@@ -73,22 +73,30 @@ const scheduleCoverages = (scopes: readonly FareScope[]) => scopes.map(scope => 
 export function createActionRouter(store: UIStateStore, options: { bridge?: ServerFareDataBridge; activate?: (id: ArtifactId) => void; onCoverageStatus?: (status: CoverageLoadStatus) => void; onSourceChanged?: (artifactId: ArtifactId, resourceKey: ResourceKey) => void } = {}) {
   const requests = new Map<ArtifactId, { controller: AbortController; promise: Promise<void> }>()
   const selections = new Map<ArtifactId, { token: symbol; promise: Promise<void> }>()
-  const sourceWatches = new Map<ArtifactId, Map<ResourceKey, { sourceVersion: string; stop: () => void }>>()
+  type SourceWatch = { sourceVersion: string; selectedLegByFare: ReadonlyMap<FareId, string>; stop: () => void }
+  const sourceWatches = new Map<ArtifactId, Map<ResourceKey, SourceWatch>>()
 
   const syncSourceWatches = (artifactId: ArtifactId): void => {
     const bridge = options.bridge
     if (!bridge) return
-    const current = sourceWatches.get(artifactId) ?? new Map<ResourceKey, { sourceVersion: string; stop: () => void }>()
-    const bindings = store.get(artifactId).datasetRefs.flatMap(datasetId => bridge.findBinding(datasetId) ?? [])
+    const state = store.get(artifactId)
+    const current = sourceWatches.get(artifactId) ?? new Map<ResourceKey, SourceWatch>()
+    const bindings = state.datasetRefs.flatMap(datasetId => bridge.findBinding(datasetId) ?? [])
+    const selectedLegByFare = new Map<FareId, string>()
+    for (const fareId of state.selectedFareIds) {
+      const fact = bridge.findCachedFare(fareId)
+      if (fact) selectedLegByFare.set(fareId, `${fact.originId}:${fact.destinationId}`)
+    }
     const active = new Set(bindings.map(binding => binding.resourceKey))
     for (const [resourceKey, watch] of current) if (!active.has(resourceKey)) {
       watch.stop()
       current.delete(resourceKey)
     }
+    for (const watch of current.values()) watch.selectedLegByFare = selectedLegByFare
     for (const binding of bindings) {
       if (current.has(binding.resourceKey)) continue
       const resourceKey = binding.resourceKey
-      const watch = { sourceVersion: binding.manifest.source.sourceVersion, stop: () => {} }
+      const watch: SourceWatch = { sourceVersion: binding.manifest.source.sourceVersion, selectedLegByFare, stop: () => {} }
       watch.stop = bridge.subscribe(resourceKey, () => {
         let latest
         try { latest = bridge.getBinding(resourceKey) } catch { return }
@@ -101,9 +109,9 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
         const changedIndex = route.indexOf(changedKey)
         if (changedIndex < 0) return
         for (const fareId of state.selectedFareIds) {
-          const fact = bridge.findCachedFare(fareId)
-          const selectedIndex = fact ? route.indexOf(`${fact.originId}:${fact.destinationId}`) : -1
-          if (selectedIndex < changedIndex) continue
+          const selectedKey = watch.selectedLegByFare.get(fareId)
+          const selectedIndex = selectedKey ? route.indexOf(selectedKey) : -1
+          if (selectedIndex >= 0 && selectedIndex < changedIndex) continue
           const currentState = store.get(artifactId)
           if (currentState.selectedFareIds.includes(fareId)) store.dispatch({ kind: 'select', artifactId, fareId, selected: false, expectedRevision: currentState.revision })
         }
