@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import type { UIMessage } from 'ai'
 
-export const LEGACY_SESSION_ID = 'travel-a'
 const STORAGE_KEY = 'omio-chat-session-history'
 
 const SessionSummarySchema = z.strictObject({
@@ -43,16 +42,6 @@ export function createSessionSummary(input: { title?: string; handoffId?: string
     createdAt: now,
     updatedAt: now,
     handoffId: input.handoffId,
-  })
-}
-
-export function createLegacySessionSummary(messages: UIMessage[], now = new Date()): SessionSummary {
-  const timestamp = now.toISOString()
-  return SessionSummarySchema.parse({
-    id: LEGACY_SESSION_ID,
-    title: sessionTitle(messages),
-    createdAt: timestamp,
-    updatedAt: timestamp,
   })
 }
 

@@ -10,4 +10,4 @@ Signed-in Codex `gpt-6.1-sol`, high reasoning, Chrome 154, 1280×1000, real Pyth
 
 These are machine observations. Human visual quality/usability ratings remain pending. The separate deterministic browser proof records partial-stream interaction, phone layouts, themes, and focus retention.
 
-Replay authorship against a running demo: `OMIO_DEMO_URL=http://127.0.0.1:5173 node verification/generative-ui/a/run-live.mjs`. Outputs overwrite this local evidence directory. Actual model responses vary between runs.
+Replay authorship against a running demo: `OMIO_DEMO_URL=http://127.0.0.1:5173 node verification/generative-ui/presentation/run-live.mjs`. Outputs overwrite this local evidence directory. Actual model responses vary between runs.

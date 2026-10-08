@@ -91,7 +91,7 @@ async function fixture(partial = false, sourceVersion = 'persistence-v1') {
     parserVersion: 'native-present-1',
     queryVersion: '1',
     messages: [{ role: 'assistant', content: [{ type: 'text', text: 'Synthetic journey' }] }],
-    artifacts: [{ variant: 'a', source: '{"$type":"TravelSurface","artifactRef":"a"}', state: store.get(id) }],
+    artifacts: [{ source: '{"$type":"TravelSurface","artifactRef":"a"}', state: store.get(id) }],
     descriptors: [{
       datasetId: binding.datasetId,
       resourceKey: binding.resourceKey,
@@ -168,7 +168,7 @@ describe('descriptor-only thread persistence', () => {
     const record = {
       ...item.record,
       activeArtifactId: second,
-      artifacts: [...item.record.artifacts, { variant: 'a' as const, source: '{"$type":"TravelSurface","artifactRef":"second"}', state: item.store.get(second) }],
+      artifacts: [...item.record.artifacts, { source: '{"$type":"TravelSurface","artifactRef":"second"}', state: item.store.get(second) }],
     }
     const io = memory()
     const persistence = createThreadPersistence(io.storage)
@@ -206,7 +206,7 @@ describe('descriptor-only thread persistence', () => {
       activeArtifactId: item.id,
       artifacts: [
         { ...item.record.artifacts[0]!, state: item.store.get(item.id) },
-        { variant: 'a', source: 'Other scene', state: item.store.get(other) },
+        { source: 'Other scene', state: item.store.get(other) },
       ],
       descriptors: item.record.descriptors.map(descriptor => ({ ...descriptor, sourceVersion: 'sqlite-demo-v1' })),
     }
@@ -315,7 +315,7 @@ it('saves and restores 21 unique descriptors across three valid artifact states'
     }
     const artifactId = ArtifactIdSchema.parse(`persisted-${artifact}`)
     store.initializeMissing(artifactId, { datasetRefs: refs })
-    artifacts.push({ variant: 'a', source: JSON.stringify({ $type: 'TravelSurface', artifactRef: artifactId }), state: store.get(artifactId) })
+    artifacts.push({ source: JSON.stringify({ $type: 'TravelSurface', artifactRef: artifactId }), state: store.get(artifactId) })
   }
   const activeArtifactId = artifacts[2]?.state.artifactId
   const record: PersistedThread = {

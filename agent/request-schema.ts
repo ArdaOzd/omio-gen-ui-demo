@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { HISTORY_LIMITS } from '../src/generative/chat/history-limits';
 import { EditArtifactInputSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
-import { validatePresentTree } from '../src/generative/variants/a/tree';
+import { validatePresentTree } from '../src/generative/presentation/tree';
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
 import { InspectDisplayErrorSchema,InspectDisplayInputSchema,InspectDisplayOutputSchema } from '../src/generative/contracts/display-context';
 export const TOOL_NAMES=['inspect_display','present','edit_artifact','create_artifact'] as const;

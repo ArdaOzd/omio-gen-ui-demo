@@ -5,12 +5,12 @@ import { lastAssistantMessageIsCompleteWithToolCalls, type UIMessage } from 'ai'
 import { ArtifactIdSchema, type AgentContextEnvelope } from '../contracts'
 import { TravelProvider, type TravelServices } from '../catalog/context'
 import { createBrowserTools } from '../tools/browser-tools'
-import aToolkit from '../variants/a/toolkit-client'
+import presentationToolkit from '../presentation/toolkit-client'
 import { createSnapshotTransport } from './transport'
 import { ThreadShell } from './thread-shell'
 import { normalizeToolContinuations } from './continuation-history'
 import { completeSmartPlannerHandoff } from '../smart-planner-handoff'
-import { PlanningTracker } from '../variants/a/planning-tracker'
+import { PlanningTracker } from '../tracker/planning-tracker'
 import { Alert } from '@/components/ui/alert'
 import '../catalog/tokens.css'
 import '../catalog/trip-planning/trip-planning.css'
@@ -33,7 +33,7 @@ export function GenerativeChat(props:GenerativeChatProps){
  const toolkit=useMemo(()=>{
   const browser=createBrowserTools({bridge:props.services.bridge,store:props.services.state,displayStore,activeArtifactId:()=>ArtifactIdSchema.parse(props.services.activeId()),createArtifact:props.services.createArtifact,dispatch:props.services.dispatch,whenIdle:props.services.whenIdle})
   const frontend=Object.fromEntries(Object.entries(browser).map(([name,tool])=>[name,{...tool,type:'frontend' as const,render:LocalToolStatus}]))
-  return {...frontend,...(props.sceneToolkit??aToolkit)} satisfies Toolkit
+  return {...frontend,...(props.sceneToolkit??presentationToolkit)} satisfies Toolkit
  },[props.services,displayStore,props.sceneToolkit])
  const transport=useMemo(()=>createSnapshotTransport({capture:props.capture,transport:{body:{provider:props.provider??'codex'}}}),[props.capture,props.provider])
  const messages=useMemo(()=>props.initialMessages?normalizeToolContinuations(props.initialMessages):undefined,[props.initialMessages])

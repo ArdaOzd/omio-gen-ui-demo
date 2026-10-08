@@ -18,7 +18,7 @@ npm run dev
 
 On macOS, you can instead double-click `Start Omio Demo.command`. It installs project packages when needed and opens the landing page. When it starts the demo, keep the Terminal window open and press Control-C there to stop it; if the demo is already running, the launcher opens it and exits.
 
-Open [generative travel](http://127.0.0.1:5173/generative), [the direct route](http://127.0.0.1:5173/a), or [classic search](http://127.0.0.1:5173/). The launcher starts three owned processes: Python fare API on 8000, model agent on 8010, and Vite on 5173. It generates the full fixture if missing and rejects stale fixtures whose schema, coverage model, location scope, or date bounds do not match the current contract. Run `npm run seed` to replace a stale fixture. Occupied ports fail explicitly; existing unrelated servers are not reused. Old `/b` and `/study` bookmarks redirect to `/a`.
+Open [generative travel](http://127.0.0.1:5173/generative) or [classic search](http://127.0.0.1:5173/). The launcher starts three owned processes: Python fare API on 8000, model agent on 8010, and Vite on 5173. It generates the full fixture if missing and rejects stale fixtures whose schema, coverage model, location scope, or date bounds do not match the current contract. Run `npm run seed` to replace a stale fixture. Occupied ports fail explicitly; existing unrelated servers are not reused. Old `/b` and `/study` bookmarks redirect to `/generative`.
 
 The agent uses your already signed-in local Codex CLI. No separate API key is needed. On macOS its default binary is the bundled Codex executable in `/Applications/ChatGPT.app`; set `CODEX_BINARY` to another installed Codex executable when needed. Model execution runs in an empty temporary directory with read-only isolation and shell, web, apps, plugins, MCP and delegation disabled. The service binds to loopback.
 
@@ -43,6 +43,6 @@ npm run benchmark:query # optional TS/DuckDB browser benchmark
 python3 -m unittest discover -s backend/tests -v
 ```
 
-Playwright uses installed Chrome. Signed-in live composition replay: `OMIO_DEMO_URL=http://127.0.0.1:5173 node verification/generative-ui/a/run-live.mjs`. Evidence lives in `verification/generative-ui/`; real model outputs and deterministic renderer fixtures are labeled separately. The optional TS-versus-DuckDB benchmark has its own dependency manifest under `benchmarks/query-engine/`; recorded thresholds and results are checked in.
+Playwright uses installed Chrome. Signed-in live composition replay: `OMIO_DEMO_URL=http://127.0.0.1:5173 node verification/generative-ui/presentation/run-live.mjs`. Evidence lives in `verification/generative-ui/`; real model outputs and deterministic renderer fixtures are labeled separately. The optional TS-versus-DuckDB benchmark has its own dependency manifest under `benchmarks/query-engine/`; recorded thresholds and results are checked in.
 
 The API contract is documented in [backend/README.md](backend/README.md), and source asset URLs are listed in [public/assets/omio/SOURCES.md](public/assets/omio/SOURCES.md). Development starts from `dev`; stable releases live on `main`. See [CONTRIBUTING.md](CONTRIBUTING.md) for the merge flow.

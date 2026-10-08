@@ -8,7 +8,7 @@ import {createFareDataBridge} from '../data/fare-data-bridge'
 import {ArtifactIdSchema} from '../contracts'
 import {createDisplayContextStore} from '../state/display-context'
 type TestNode={$type:string;artifactRef:string;title?:string;children?:TestNode[]}
-vi.mock('../variants/a/toolkit-client',async()=>{const {z}=await import('zod');const {CatalogNode}=await import('../catalog/component');const renderNode=(node:TestNode)=><CatalogNode kind={node.$type} artifactRef={node.artifactRef} title={node.title}>{node.children?.map((child,index)=><span key={index}>{renderNode(child)}</span>)}</CatalogNode>;return{default:{present:{type:'frontend',parameters:z.record(z.string(),z.unknown()),execute:async()=>({}),render:({args}:{args:TestNode})=>renderNode(args)}}}})
+vi.mock('../presentation/toolkit-client',async()=>{const {z}=await import('zod');const {CatalogNode}=await import('../catalog/component');const renderNode=(node:TestNode)=><CatalogNode kind={node.$type} artifactRef={node.artifactRef} title={node.title}>{node.children?.map((child,index)=><span key={index}>{renderNode(child)}</span>)}</CatalogNode>;return{default:{present:{type:'frontend',parameters:z.record(z.string(),z.unknown()),execute:async()=>({}),render:({args}:{args:TestNode})=>renderNode(args)}}}})
 afterEach(()=>{cleanup();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
 function setup(parts:UIMessage['parts']){
  Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})

@@ -160,7 +160,7 @@ function capturePreparedContext(prepared:PreparedCapture,selectedFareFacts:Bound
  const bindingLimits=new Map(records.map(record=>[record.snapshot.artifactId,record.snapshot.componentBindings.length]))
  while(true){
   const ids=new Set(included.map(record=>record.snapshot.artifactId))
-  const summaries=records.filter(record=>!ids.has(record.snapshot.artifactId)).map(record=>({artifactId:record.snapshot.artifactId,variant:'a' as const,label:record.snapshot.layoutSummary.slice(0,160),revision:record.snapshot.revision,lastInteractionAt:record.lastInteractionAt})).slice(0,summaryLimit)
+  const summaries=records.filter(record=>!ids.has(record.snapshot.artifactId)).map(record=>({artifactId:record.snapshot.artifactId,label:record.snapshot.layoutSummary.slice(0,160),revision:record.snapshot.revision,lastInteractionAt:record.lastInteractionAt})).slice(0,summaryLimit)
   const artifacts=included.map(record=>{
    const facts=selectedFareFacts.filter(fact=>record.snapshot.selectedFareIds.includes(fact.id))
    return{...record.snapshot,componentBindings:record.snapshot.componentBindings.slice(0,bindingLimits.get(record.snapshot.artifactId)),legThresholds:legThresholds(record,prepared.bindings,facts)}

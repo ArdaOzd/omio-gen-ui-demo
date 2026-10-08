@@ -3,7 +3,7 @@ import {mkdir,writeFile} from 'node:fs/promises'
 import {chromium} from '@playwright/test'
 const base=process.env.OMIO_DEMO_URL??'http://127.0.0.1:5194',expectedRevision=process.env.OMIO_APP_REVISION
 assert.ok(expectedRevision,'Pin OMIO_APP_REVISION before this one isolated live proof')
-const output='verification/generative-ui/a/user-conversation';await mkdir(output,{recursive:true})
+const output='verification/generative-ui/presentation/user-conversation';await mkdir(output,{recursive:true})
 const browser=await chromium.launch({channel:'chrome',headless:true}),context=await browser.newContext({viewport:{width:1280,height:1000}}),page=await context.newPage()
 const requests=[],responses=[],errors=[],timers=new Map();let inflight=0,last=Date.now()
 const started=Date.now(),prompt='Plan London → Paris → Barcelona, starting October 9, 2026, with two nights in Paris and four nights in Barcelona. Set the ordered stays to London zero nights, Paris two nights, Barcelona four nights. Load the synthetic fares for each leg. Use the active artifact. Show the full three-city RouteMap and a separate CitySequence with nights, local modes and dates/stays, a compact FarePicker with separate FareCards, and a SyntheticTotal. Finish the itinerary view and briefly tell me what to choose next.'
@@ -12,7 +12,7 @@ try{
  page.on('request',request=>{if(request.url().endsWith('/api/chat')){requests.push(request.postDataJSON());inflight++;last=Date.now();timers.set(request,setTimeout(()=>void page.close(),180000));console.log('HTTP step',requests.length)}})
  page.on('response',async response=>{if(response.url().endsWith('/api/chat')){try{responses.push({status:response.status(),body:(await response.body()).toString('utf8')})}catch(error){errors.push(String(error))}finally{clearTimeout(timers.get(response.request()));timers.delete(response.request());inflight--;last=Date.now()}}})
  page.on('pageerror',error=>errors.push(error.message))
- await page.goto(`${base}/a`);await page.getByRole('textbox',{name:'Message'}).fill(prompt);await page.getByRole('button',{name:'Send message'}).click()
+ await page.goto(`${base}/generative`);await page.getByRole('textbox',{name:'Message'}).fill(prompt);await page.getByRole('button',{name:'Send message'}).click()
  const deadline=Date.now()+600000;let completed=false
  while(Date.now()<deadline){await page.waitForTimeout(300);if(requests.length&&inflight===0&&Date.now()-last>3000){completed=true;break}}
  assert.equal(completed,true,'One visible turn must finish within the predeclared 600s budget')

@@ -10,11 +10,11 @@ const loading=<p role="status">Opening your travel conversation…</p>
 
 let path=window.location.pathname
 if(path==='/b'||path==='/study'){
-  window.history.replaceState({},'',`/a${window.location.search}${window.location.hash}`)
-  path='/a'
+  window.history.replaceState({},'',`/generative${window.location.search}${window.location.hash}`)
+  path='/generative'
 }
 if(path==='/trip-planning-fixture')createRoot(document.getElementById('root')).render(<Suspense fallback={loading}><TripPlanningFixture/></Suspense>)
-else if(path==='/a'||path==='/generative')createRoot(document.getElementById('root')).render(<Suspense fallback={loading}><GenerativeRoute/></Suspense>)
+else if(path==='/generative')createRoot(document.getElementById('root')).render(<Suspense fallback={loading}><GenerativeRoute/></Suspense>)
 else createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

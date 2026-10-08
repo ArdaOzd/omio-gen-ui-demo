@@ -1,4 +1,4 @@
-import { createPresentValidationScope,type PresentValidationScope } from '../src/generative/variants/a/tree'
+import { createPresentValidationScope,type PresentValidationScope } from '../src/generative/presentation/tree'
 
 type PresentScopeArtifact={artifactId:string;datasetRefs:readonly string[];citySequence:readonly string[]}
 type PresentScopeDataset={datasetId:string;manifest:{coverage:{originId:string;destinationId:string}}}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { catalogDescriptors } from '../../catalog/generated/catalog'
-import { aPrompt } from './prompt'
+import { catalogDescriptors } from '../catalog/generated/catalog'
+import { presentationPrompt } from './prompt'
 
 const suggestedCompositions = [
   ['MultiCityPlanGrid', 'ResponsiveGrid', 'CheapestFastest', 'RouteMap', 'SelectedItinerary', 'SyntheticTotal'],
@@ -22,23 +22,23 @@ describe('Variant A composition guidance', () => {
     expect(suggested.size).toBeGreaterThanOrEqual(25)
     for (const component of suggested) {
       expect(registered, `${component} must be registered`).toContain(component)
-      expect(aPrompt, `${component} must be visible to the agent`).toContain(component)
+      expect(presentationPrompt, `${component} must be visible to the agent`).toContain(component)
     }
   })
 
   it('keeps creative composition subordinate to complete per-leg booking ownership', () => {
-    const patterns = aPrompt.split('\n').filter((line) => /^- (Complete booking|Analysis),/.test(line))
+    const patterns = presentationPrompt.split('\n').filter((line) => /^- (Complete booking|Analysis),/.test(line))
 
     expect(patterns.length).toBeGreaterThanOrEqual(4)
-    expect(aPrompt).toContain('use one of the first two complete-booking patterns')
-    expect(aPrompt).toContain('the remaining patterns are analysis or supplements')
-    expect(aPrompt).toContain('one FareCalendar for every leg in route order')
-    expect(aPrompt).toContain('booking ownership and exact leg coverage apply across the whole authored tree')
-    expect(aPrompt).toContain("matching datasetRef and legIndex")
-    expect(aPrompt).toContain('ingredients, not templates or a checklist')
-    expect(aPrompt).toContain('Choose only the few views that answer the request')
-    expect(aPrompt).toContain('do not invent components, props, custom CSS, styles or data')
-    expect(aPrompt).toContain('StickySummary is an authored supporting container, not the fixed host PlanningTracker')
+    expect(presentationPrompt).toContain('use one of the first two complete-booking patterns')
+    expect(presentationPrompt).toContain('the remaining patterns are analysis or supplements')
+    expect(presentationPrompt).toContain('one FareCalendar for every leg in route order')
+    expect(presentationPrompt).toContain('booking ownership and exact leg coverage apply across the whole authored tree')
+    expect(presentationPrompt).toContain("matching datasetRef and legIndex")
+    expect(presentationPrompt).toContain('ingredients, not templates or a checklist')
+    expect(presentationPrompt).toContain('Choose only the few views that answer the request')
+    expect(presentationPrompt).toContain('do not invent components, props, custom CSS, styles or data')
+    expect(presentationPrompt).toContain('StickySummary is an authored supporting container, not the fixed host PlanningTracker')
   })
 
   it('describes FadeFares as bounded progressive vertical browsing', () => {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { nodePropsSchema,catalogDescriptors } from '../src/generative/catalog/generated/catalog';
-import { registeredActions,registeredSelectors,validatePresentTree } from '../src/generative/variants/a/tree';
+import { registeredActions,registeredSelectors,validatePresentTree } from '../src/generative/presentation/tree';
 const scalars=new Map(Object.entries(nodePropsSchema.shape));
 const keys=new Set(['$type','$key','children',...scalars.keys()]);
 const specifications=z.toJSONSchema(nodePropsSchema).properties??{};

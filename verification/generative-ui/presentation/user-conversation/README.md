@@ -11,5 +11,5 @@ The DOM assertions confirm one travel surface, a full three-city schematic and a
 For a later explicitly authorized verification:
 
 ```sh
-OMIO_APP_REVISION=<verified-served-source-commit> OMIO_DEMO_URL=http://127.0.0.1:5194 node verification/generative-ui/a/user-conversation/run-completion.mjs
+OMIO_APP_REVISION=<verified-served-source-commit> OMIO_DEMO_URL=http://127.0.0.1:5194 node verification/generative-ui/presentation/user-conversation/run-completion.mjs
 ```

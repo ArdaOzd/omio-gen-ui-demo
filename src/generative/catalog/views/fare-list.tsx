@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode, type UIEvent } from 'react'
+import { FieldGroup } from '@/components/ui/field'
 
 const visibleFareRows=7
 const viewportHeightProperty='--travel-fares-viewport-height'
@@ -43,5 +44,5 @@ export function FareList({children,rowIds,onViewportChange}:{children:ReactNode;
   const first=visible[0]??0,last=visible.at(-1)??Math.min(rowIds.length-1,visibleFareRows-1)
   onViewportChange?.({offset:first,limit:Math.max(0,last-first+1),fareIds:rowIds.slice(first,last+1)})
  }
- return <div ref={listRef} className="travel-fares" role="region" aria-label="Fare options" data-scrollable={scrollable} tabIndex={scrollable?0:undefined} onScroll={onScroll}>{children}</div>
+ return <FieldGroup ref={listRef} className="travel-fares" role="region" aria-label="Fare options" data-scrollable={scrollable} tabIndex={scrollable?0:undefined} onScroll={onScroll}>{children}</FieldGroup>
 }

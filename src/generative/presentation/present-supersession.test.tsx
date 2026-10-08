@@ -2,14 +2,14 @@ import type { UIMessage } from 'ai'
 import type { ToolCallMessagePartProps } from '@assistant-ui/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
-import { GenerativeChat } from '../../chat/runtime-provider'
-import { CatalogNode } from '../../catalog/component'
-import { createUIStateStore } from '../../state/ui-state-store'
-import { ArtifactIdSchema,CATALOG_VERSION,CONTRACT_VERSION } from '../../contracts'
-import { resolvePlannerDatasetRef } from '../../catalog/trip-planning/binding'
-import { createThreadPersistence,type PersistedThread,type ThreadStorage } from '../../state/persistence'
-import { createFixedProjectionFixture } from '../../testing/fixed-projection-fixture'
-import { createDisplayContextStore } from '../../state/display-context'
+import { GenerativeChat } from '../chat/runtime-provider'
+import { CatalogNode } from '../catalog/component'
+import { createUIStateStore } from '../state/ui-state-store'
+import { ArtifactIdSchema,CATALOG_VERSION,CONTRACT_VERSION } from '../contracts'
+import { resolvePlannerDatasetRef } from '../catalog/trip-planning/binding'
+import { createThreadPersistence,type PersistedThread,type ThreadStorage } from '../state/persistence'
+import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
+import { createDisplayContextStore } from '../state/display-context'
 vi.mock('./toolkit',async()=>{const {z}=await import('zod');return{default:{present:{type:'frontend',parameters:z.record(z.string(),z.unknown()),execute:async()=>({}),render:(props:ToolCallMessagePartProps<Record<string,unknown>,Record<string,never>>)=><CatalogNode kind="TravelSurface" artifactRef={String(props.args.artifactRef)} title={String(props.args.title)} __displayComponent={{componentRef:{value:`${String(props.args.artifactRef)}:${props.toolCallId}:root`,keySource:'tree-path'},childRefs:[]}}/>}}}})
 afterEach(()=>{cleanup();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
 const accepted=(id:string,artifactRef:string,title:string):UIMessage['parts'][number]=>({type:'tool-present',toolCallId:id,state:'output-available',input:{$type:'TravelSurface',artifactRef,title},output:{}})
@@ -131,7 +131,7 @@ it('captures authored multi-leg bindings without a render revision and restores 
  expect(resolvePlannerDatasetRef({kind:'PriceCalendar',artifactRef,datasetRef:secondSeed.datasetId},state,bridge)).toBe(secondCurrent.datasetId)
 
  const values=new Map<string,unknown>(),storage:ThreadStorage={async read(key){return values.get(key)},async write(key,value){values.set(key,structuredClone(value))}}
- const persistence=createThreadPersistence(storage),record:PersistedThread={schemaVersion:CONTRACT_VERSION,catalogVersion:CATALOG_VERSION,parserVersion:'native-present-1',queryVersion:'1',messages:[{id:'assistant-bound',role:'assistant',parts:[part]}],artifacts:[{variant:'a',source:JSON.stringify(tree),state:state.get(artifactRef)}],descriptors:[firstCurrent,secondCurrent].map(binding=>({datasetId:binding.datasetId,resourceKey:binding.resourceKey,scope:binding.manifest.coverage,sourceVersion:binding.manifest.source.sourceVersion,complete:binding.manifest.complete}))}
+ const persistence=createThreadPersistence(storage),record:PersistedThread={schemaVersion:CONTRACT_VERSION,catalogVersion:CATALOG_VERSION,parserVersion:'native-present-1',queryVersion:'1',messages:[{id:'assistant-bound',role:'assistant',parts:[part]}],artifacts:[{source:JSON.stringify(tree),state:state.get(artifactRef)}],descriptors:[firstCurrent,secondCurrent].map(binding=>({datasetId:binding.datasetId,resourceKey:binding.resourceKey,scope:binding.manifest.coverage,sourceVersion:binding.manifest.source.sourceVersion,complete:binding.manifest.complete}))}
  await persistence.save('bound',record);const saved=await persistence.load('bound');if(!saved)throw new Error('Missing saved bindings')
  const restoredBridge=createFixedProjectionFixture({rows:[],sourceVersion:'binding-persistence-v1'}).bridge,restoredState=createUIStateStore();await persistence.restore(saved,restoredBridge,restoredState,new AbortController().signal)
  expect(resolvePlannerDatasetRef({kind:'FareCards',artifactRef,datasetRef:firstSeed.datasetId},restoredState,restoredBridge)).toBe(firstCurrent.datasetId)

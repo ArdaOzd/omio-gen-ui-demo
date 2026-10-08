@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createPresentValidationScope, presentTreesOverlapForSupersession, prunePresentTree, validatePresentTree } from './tree'
-import { LEAKAGE_SENTINEL } from '../../contracts/privacy'
+import { LEAKAGE_SENTINEL } from '../contracts/privacy'
 const leaf=(name:string,key:string)=>({$type:name,$key:key,artifactRef:'artifact-1',datasetRef:'dataset-1'})
 const tree=(children:unknown[])=>({$type:'TravelSurface',artifactRef:'artifact-1',children})
 const scope={artifactIds:new Set(['artifact-1']),datasetIds:new Set(['dataset-1'])}

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { chromium } from '@playwright/test'
 const base=process.env.A_PROOF_URL??'http://127.0.0.1:5181'
-const output=process.env.A_PROOF_OUTPUT??'verification/generative-ui/a/browser-proof'
+const output=process.env.PRESENTATION_PROOF_OUTPUT??'verification/generative-ui/presentation/browser-proof'
 await mkdir(output,{recursive:true})
 const browser=await chromium.launch({headless:true,channel:'chrome'})
 const results=[]

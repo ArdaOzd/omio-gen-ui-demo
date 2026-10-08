@@ -1,6 +1,6 @@
-import { ArtifactIdSchema,type ArtifactId } from '../../contracts'
-import type { TravelServices } from '../../catalog/context'
-import { orderedLegResources } from '../../state/leg-bindings'
+import { ArtifactIdSchema,type ArtifactId } from '../contracts'
+import type { TravelServices } from '../catalog/context'
+import { orderedLegResources } from '../state/leg-bindings'
 import { createPresentValidationScope,type PresentNode,type PresentValidationScope } from './tree'
 
 export function createRuntimePresentValidationScope(artifactIds:readonly (ArtifactId|string)[],services:Pick<TravelServices,'state'|'bridge'>):PresentValidationScope{

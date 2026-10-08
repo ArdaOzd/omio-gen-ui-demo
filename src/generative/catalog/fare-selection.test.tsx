@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { PlanningTracker } from '../variants/a/planning-tracker'
+import { PlanningTracker } from '../tracker/planning-tracker'
 import { ArtifactIdSchema } from '../contracts'
 import { FareItemSchema, type FareItem } from '../contracts/query-groups'
 import { createUIStateStore } from '../state/ui-state-store'

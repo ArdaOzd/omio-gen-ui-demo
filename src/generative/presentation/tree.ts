@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { LIMITS } from '../../contracts'
-import { assertNoBulkData } from '../../contracts/privacy'
-import { catalogDescriptors, nodePropsSchema } from '../../catalog/generated/catalog'
-import { isDatasetBoundComponent, isLegBoundPlannerComponent } from '../../catalog/trip-planning/binding'
+import { LIMITS } from '../contracts'
+import { assertNoBulkData } from '../contracts/privacy'
+import { catalogDescriptors, nodePropsSchema } from '../catalog/generated/catalog'
+import { isDatasetBoundComponent, isLegBoundPlannerComponent } from '../catalog/trip-planning/binding'
 export type PresentNode=z.infer<typeof nodePropsSchema>&{$type:string;$key?:string;children?:PresentNode|PresentNode[]|string}
 const names=new Set<string>(catalogDescriptors.map(d=>d.name));const layouts=new Set<string>(catalogDescriptors.filter(d=>d.children).map(d=>d.name))
 const bookingScopes=new Map<string,'all-legs'|'bound-leg'>()

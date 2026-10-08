@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ArtifactIdSchema, type ArtifactId, type BoundedFareFact, type FareId } from '../../contracts'
-import { carrierLabel, cityLabel, departure, money, useTravelServices } from '../../catalog/context'
+import { ArtifactIdSchema, type ArtifactId, type BoundedFareFact, type FareId } from '../contracts'
+import { carrierLabel, cityLabel, departure, money, useTravelServices } from '../catalog/context'
 
 type PlannedFare = {
   fareId: FareId

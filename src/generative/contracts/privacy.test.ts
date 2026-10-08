@@ -43,7 +43,7 @@ it('rejects complete camelCase fare data hidden in uploaded tool schema constant
 })
 
 it('accepts additive bounded older-artifact summaries but rejects forged overlap and copied fields',()=>{
- const summary={artifactId:'older',variant:'a',label:'Earlier itinerary',revision:2,lastInteractionAt:'2026-10-03T12:00:00.000Z'}
+ const summary={artifactId:'older',label:'Earlier itinerary',revision:2,lastInteractionAt:'2026-10-03T12:00:00.000Z'}
  const base={...baseContext,turnId:'t'}
  expect(parseAgentContext({...base,olderArtifactSummaries:[summary]}).olderArtifactSummaries).toEqual([summary])
  expect(()=>parseAgentContext({...base,olderArtifactSummaries:[summary,summary]})).toThrow('Duplicate')

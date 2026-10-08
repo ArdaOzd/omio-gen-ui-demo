@@ -85,7 +85,6 @@ function threadRecord(item: SessionFixture) {
       },
     ],
     artifacts: [{
-      variant: 'a',
       source: JSON.stringify(scene),
       state: {
         artifactId: item.artifactId,
@@ -148,29 +147,6 @@ async function seedSessions(page: Page): Promise<void> {
       }
     })
   }, { history, threads })
-}
-
-async function seedLegacySession(page: Page): Promise<void> {
-  await page.goto('/')
-  await page.evaluate(async record => {
-    localStorage.removeItem('omio-chat-session-history')
-    await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open('omio-generative-state', 1)
-      request.onupgradeneeded = () => {
-        if (!request.result.objectStoreNames.contains('threads')) request.result.createObjectStore('threads')
-      }
-      request.onerror = () => reject(new Error('Could not open legacy browser session storage'))
-      request.onsuccess = () => {
-        const transaction = request.result.transaction('threads', 'readwrite')
-        transaction.objectStore('threads').put(record, 'travel-a')
-        transaction.oncomplete = () => {
-          request.result.close()
-          resolve()
-        }
-        transaction.onerror = () => reject(new Error('Could not seed the legacy browser session'))
-      }
-    })
-  }, threadRecord(alpha))
 }
 
 async function mockFareSearch(page: Page, counts: { alpha?: number; beta?: number } = {}): Promise<void> {
@@ -319,7 +295,7 @@ test('landing keyboard controls submit or open a fresh empty chat deliberately',
 test('two sessions restore their own generated layout and selected fare across switching and reload', async ({ page }) => {
   await mockFareSearch(page)
   await seedSessions(page)
-  await page.goto('/a')
+  await page.goto('/generative')
   await expect(page.getByRole('complementary', { name: 'Chat sessions' })).toBeVisible()
   await expectSession(page, alpha)
 
@@ -339,7 +315,7 @@ for (const width of [360, 1280]) test(`fare lists show seven complete rows befor
   await page.setViewportSize({ width, height: 900 })
   await mockFareSearch(page, { alpha: 8, beta: 7 })
   await seedSessions(page)
-  await page.goto('/a')
+  await page.goto('/generative')
 
   const list = page.getByRole('region', { name: 'Fare options' })
   const rows = list.getByRole('article')
@@ -370,16 +346,6 @@ for (const width of [360, 1280]) test(`fare lists show seven complete rows befor
   await expect(shortList.getByRole('article')).toHaveCount(7)
   await expect(shortList).toHaveAttribute('data-scrollable', 'false')
   expect(await shortList.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true)
-})
-
-test('the legacy travel-a conversation becomes an accessible session without losing its state', async ({ page }) => {
-  await mockFareSearch(page)
-  await seedLegacySession(page)
-  await page.goto('/a')
-  await expectSession(page, alpha)
-  await expect(page.getByRole('button', { name: alpha.prompt })).toHaveAttribute('aria-current', 'page')
-  await page.reload()
-  await expectSession(page, alpha)
 })
 
 test('UI-created sessions save generated cards, filters, and selected fares before switching and reload', async ({ page }) => {
@@ -593,7 +559,7 @@ for (const width of [360, 1280]) test(`session sidebar stays usable when collaps
   await page.setViewportSize({ width, height: 900 })
   await mockFareSearch(page)
   await seedSessions(page)
-  await page.goto('/a')
+  await page.goto('/generative')
   await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toBeVisible()
   const collapse = page.getByRole('button', { name: 'Collapse session sidebar' })
   const newChat = page.getByRole('button', { name: 'Start new chat' })

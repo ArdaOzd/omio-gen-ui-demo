@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { UIMessage } from 'ai'
 import {
-  createLegacySessionSummary,
   createSessionSummary,
   orderedSessions,
   readSessionHistory,
@@ -18,7 +17,6 @@ describe('browser-local session history', () => {
   it('uses the complete first user prompt as the durable title', () => {
     const prompt = '  Prague to Rome\nwith a quiet overnight stop  '
     expect(sessionTitle([{ id: 'assistant', role: 'assistant', parts: [{ type: 'text', text: 'Hello' }] }, userMessage(prompt)])).toBe('Prague to Rome\nwith a quiet overnight stop')
-    expect(createLegacySessionSummary([userMessage(prompt)], new Date('2026-10-07T10:00:00Z'))).toMatchObject({ id: 'travel-a', title: 'Prague to Rome\nwith a quiet overnight stop' })
   })
 
   it('round-trips active, collapsed, and handoff metadata without limiting the session list', () => {

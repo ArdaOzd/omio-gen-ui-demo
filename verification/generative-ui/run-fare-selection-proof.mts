@@ -133,7 +133,7 @@ function persistedRecord(sourceVersion: string) {
     parserVersion: 'native-present-1',
     queryVersion: '1',
     activeArtifactId: artifactId,
-    artifacts: [{ variant: 'a', source: JSON.stringify(tree), state }],
+    artifacts: [{ source: JSON.stringify(tree), state }],
     descriptors: [{ datasetId, request, sourceVersion, complete: true }],
     messages: [
       { id: 'proof-user', role: 'user', parts: [{ type: 'text', text: 'Show the cheapest and fastest London to Paris options next week.' }] },
@@ -158,13 +158,13 @@ async function seed(page: Page, record: ReturnType<typeof persistedRecord>) {
       request.onerror = () => reject(request.error)
       request.onsuccess = () => {
         const tx = request.result.transaction('threads', 'readwrite')
-        tx.objectStore('threads').put(value, 'travel-a')
+        tx.objectStore('threads').put(value, 'travel-proof')
         tx.oncomplete = () => resolveSeed()
         tx.onerror = () => reject(tx.error)
       }
     })
   }, record)
-  await page.goto(`${base}/a`)
+  await page.goto(`${base}/generative`)
 }
 
 await rm(outputDir, { recursive: true, force: true })
@@ -246,7 +246,7 @@ try {
   await page.waitForFunction(() => new Promise<boolean>(resolveWait => {
     const request = indexedDB.open('omio-generative-state', 1)
     request.onsuccess = () => {
-      const read = request.result.transaction('threads').objectStore('threads').get('travel-a')
+      const read = request.result.transaction('threads').objectStore('threads').get('travel-proof')
       read.onsuccess = () => resolveWait(read.result?.artifacts?.[0]?.state?.selectedFareIds?.length === 1)
       read.onerror = () => resolveWait(false)
     }

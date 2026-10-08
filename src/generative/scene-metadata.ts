@@ -1,5 +1,5 @@
 import type { UIMessage } from 'ai'
-import { presentTreesOverlapForSupersession,validatePresentTree,type PresentNode,type PresentValidationScope } from './variants/a/tree'
+import { presentTreesOverlapForSupersession,validatePresentTree,type PresentNode,type PresentValidationScope } from './presentation/tree'
 import { DatasetIdSchema,type ComponentBinding } from './contracts'
 
 type ActiveScene={toolCallId:string;tree:PresentNode}

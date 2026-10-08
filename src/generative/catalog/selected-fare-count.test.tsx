@@ -5,7 +5,7 @@ import { createUIStateStore } from '../state/ui-state-store'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { TravelProvider } from './context'
 import { CatalogNode } from './component'
-import { validatePresentTree } from '../variants/a/tree'
+import { validatePresentTree } from '../presentation/tree'
 const artifactId = ArtifactIdSchema.parse('count-artifact')
 const otherId = ArtifactIdSchema.parse('other-artifact')
 describe('selected fare count catalog extension', () => {

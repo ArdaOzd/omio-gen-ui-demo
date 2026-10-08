@@ -34,8 +34,8 @@ Official sources were read through Context7 and [Codex non-interactive documenta
 ```sh
 npm run typecheck
 node_modules/.bin/vitest run src/generative/chat/transport.test.ts --environment node
-node_modules/.bin/vite build --config verification/generative-ui/a/spike/vite.config.ts
-node_modules/.bin/vite --config verification/generative-ui/a/spike/vite.config.ts --host 127.0.0.1 --port 5181
+node_modules/.bin/vite build --config verification/generative-ui/presentation/spike/vite.config.ts
+node_modules/.bin/vite --config verification/generative-ui/presentation/spike/vite.config.ts --host 127.0.0.1 --port 5181
 ```
 
 Playwright used installed Chrome with `chromium.launch({ headless: true, channel: 'chrome' })`. The default downloaded Chromium executable was absent.

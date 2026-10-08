@@ -1,6 +1,6 @@
 import { expect,it } from 'vitest';
 import { validatePresentPrefix } from './present-prefix';
-import { validatePresentTree } from '../src/generative/variants/a/tree';
+import { validatePresentTree } from '../src/generative/presentation/tree';
 const scope={artifactIds:new Set(['a']),datasetIds:new Set(['d'])};
 it('allows a genuinely incomplete but bounded native tree',()=>{expect(()=>validatePresentPrefix('{"$type":"TravelSurface","artifactRef":"a","children":[{"$type":"FareCards","artifactRef":"a","datasetRef":"d"',scope)).not.toThrow()});
 it('accepts every prefix of a valid leg-bound planner tree with a rebindable dataset handle',()=>{

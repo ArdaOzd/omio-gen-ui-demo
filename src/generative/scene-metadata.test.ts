@@ -1,7 +1,7 @@
 import{describe,expect,it}from'vitest'
 import type{UIMessage}from'ai'
 import{getSceneMetadata}from'./scene-metadata'
-import{createPresentValidationScope}from'./variants/a/tree'
+import{createPresentValidationScope}from'./presentation/tree'
 
 const message=(id:string,kind:string):UIMessage=>({id,role:'assistant',parts:[{type:'tool-present',toolCallId:id,state:'output-available',input:{$type:'TravelSurface',$key:`root-${id}`,artifactRef:'artifact-a',children:[{$type:kind,$key:`leaf-${id}`,artifactRef:'artifact-a',datasetRef:'dataset-1',selectorRef:'legSchedule'}]},output:{}}]})
 const present=(id:string,children:Record<string,unknown>[]):UIMessage=>({id,role:'assistant',parts:[{type:'tool-present',toolCallId:id,state:'output-available',input:{$type:'TravelSurface',$key:`root-${id}`,artifactRef:'artifact-a',children},output:{}}]})

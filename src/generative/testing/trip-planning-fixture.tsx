@@ -9,8 +9,8 @@ import { ArtifactIdSchema, type DatasetId } from '../contracts'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from '../state/ui-state-store'
 import { createActionRouter } from '../state/action-router'
-import { PlanningTracker } from '../variants/a/planning-tracker'
-import { validatePresentTree, type PresentNode } from '../variants/a/tree'
+import { PlanningTracker } from '../tracker/planning-tracker'
+import { validatePresentTree, type PresentNode } from '../presentation/tree'
 
 const artifactId=ArtifactIdSchema.parse('trip-planning-fixture')
 

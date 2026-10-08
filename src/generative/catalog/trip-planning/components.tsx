@@ -4,7 +4,7 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { FieldLegend, FieldSet } from '@/components/ui/field'
+import { FieldGroup, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -537,7 +537,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
   return <div className={`trip-fare-strip${compact ? ' is-compact' : ''}`}>
     <p className="trip-fare-caption">Synthetic fares per passenger</p>
     {pages.map((page,pageIndex)=><FareStripPagePublisher key={page.resultKey} artifactRef={artifactRef} baseRef={baseRef} legIndex={resolved.index} legKey={resolved.leg.key} resourceKey={resolved.leg.resourceKey} page={page} pageIndex={pageIndex}/>)}
-    <div key={pagingIdentity} className="trip-fare-results-scroll" role="region" aria-label={`Scrollable fares from ${cityLabel(resolved.leg.originId)} to ${cityLabel(resolved.leg.destinationId)}`} tabIndex={0} onScroll={loadMore}>
+    <FieldGroup key={pagingIdentity} className="trip-fare-results-scroll" role="region" aria-label={`Scrollable fares from ${cityLabel(resolved.leg.originId)} to ${cityLabel(resolved.leg.destinationId)}`} tabIndex={0} onScroll={loadMore}>
     {shown.length > 0 ? <div className="trip-fare-results-grid">{shown.map(row => {
       const selected = plan.state.selectedFareIds.includes(row.id)
       return <Card key={row.id} className={`trip-fare-option${selected ? ' is-selected' : ''}`} role="article">
@@ -549,7 +549,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}
       <div ref={loadSentinelRef} className="trip-fare-load-sentinel"><span className="trip-fare-load-status" role="status">{loadStatus}</span>{appendFailed?<Button type="button" variant="outline" onClick={requestNext}>Retry loading fares</Button>:null}</div>
-    </div>
+    </FieldGroup>
   </div>
 }
 

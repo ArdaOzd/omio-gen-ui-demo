@@ -18,12 +18,10 @@ import { createIndexedDBStorage, createThreadPersistence, ThreadConflictError, t
 import { assertNoBulkData } from './contracts/privacy'
 import { GenerativeChat } from './chat/runtime-provider'
 import type { TravelServices } from './catalog/context'
-import { createRuntimePresentValidationScope } from './variants/a/present-scope'
+import { createRuntimePresentValidationScope } from './presentation/present-scope'
 import { completeSmartPlannerHandoff, readSmartPlannerHandoff, type SmartPlannerHandoff } from './smart-planner-handoff'
 import {
-  createLegacySessionSummary,
   createSessionSummary,
-  LEGACY_SESSION_ID,
   readSessionHistory,
   sessionTitle,
   updateSessionDraft,
@@ -126,7 +124,6 @@ function SessionConversation(props: SessionConversationProps) {
       queryVersion: '1',
       messages: next,
       artifacts: states.map(state => ({
-        variant: 'a',
         source: sources.get(state.artifactId) ?? 'No scene authored yet.',
         state,
       })),
@@ -370,11 +367,6 @@ export function GenerativeRoute() {
       const nextHandoff = readSmartPlannerHandoff(new URLSearchParams(window.location.search).get('handoff'))
       const stored = readSessionHistory()
       let sessions = stored?.sessions ?? []
-      if (!stored) {
-        const legacy = await persistence.load(LEGACY_SESSION_ID)
-        if (controller.signal.aborted) return
-        if (legacy) sessions = [createLegacySessionSummary(legacy.messages.filter(isUIMessage))]
-      }
       let activeSessionId = stored?.activeSessionId
       if (nextHandoff) {
         let target = sessions.find(session => session.handoffId === nextHandoff.id)

@@ -1,6 +1,6 @@
 import{expect,it}from'vitest'
 import{createAgentPresentValidationScope}from'./present-scope'
-import{validatePresentTree}from'../src/generative/variants/a/tree'
+import{validatePresentTree}from'../src/generative/presentation/tree'
 
 const datasets=[
  {datasetId:'d0',manifest:{coverage:{originId:'london',destinationId:'paris'}}},

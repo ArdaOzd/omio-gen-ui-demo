@@ -110,7 +110,7 @@ export const CompactArtifactSnapshotSchema = z.strictObject({ artifactId: Artifa
   modesByLeg: ArtifactUIStateSchema.shape.modesByLeg, pending: ArtifactUIStateSchema.shape.pending,
   legThresholds: z.array(LegThresholdSchema).max(8).default([]), componentBindings:z.array(ComponentBindingSchema).max(LIMITS.treeNodes).default([]), layoutSummary: z.string().max(600), catalogVersion: z.literal(CATALOG_VERSION) });
 export type CompactArtifactSnapshot = z.infer<typeof CompactArtifactSnapshotSchema>;
-export const OlderArtifactSummarySchema=z.strictObject({artifactId:ArtifactIdSchema,variant:z.literal('a'),label:z.string().max(160),revision:UIStateRevisionSchema,lastInteractionAt:z.string().datetime()});
+export const OlderArtifactSummarySchema=z.strictObject({artifactId:ArtifactIdSchema,label:z.string().max(160),revision:UIStateRevisionSchema,lastInteractionAt:z.string().datetime()});
 export type OlderArtifactSummary=z.infer<typeof OlderArtifactSummarySchema>;
 export const AgentContextEnvelopeSchema = z.strictObject({ schemaVersion: z.literal(CONTRACT_VERSION), turnId: ref,
   activeArtifactId: ArtifactIdSchema.optional(), artifacts: z.array(CompactArtifactSnapshotSchema).max(LIMITS.artifacts),

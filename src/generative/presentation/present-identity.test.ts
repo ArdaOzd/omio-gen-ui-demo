@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createDisplayContextStore } from '../../state/display-context'
+import { createDisplayContextStore } from '../state/display-context'
 import { withDisplayComponentIdentity } from './present-boundary'
 import { validatePresentTree } from './tree'
 

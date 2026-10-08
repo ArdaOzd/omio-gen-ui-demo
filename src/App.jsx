@@ -117,7 +117,7 @@ export default function App() {
     const { id } = typeof prompt === 'string'
       ? storeSmartPlannerHandoff(prompt)
       : storeEmptyChatHandoff()
-    window.location.assign(`/a?handoff=${encodeURIComponent(id)}`)
+    window.location.assign(`/generative?handoff=${encodeURIComponent(id)}`)
   }
 
   if (view === 'results') {

@@ -121,7 +121,7 @@ async function restoredContextFixture(activeResources = 1) {
       dates: { start: binding.manifest.coverage.dateWindow.from },
       lastInteractionAt: `2026-01-${String(index + 1).padStart(2, '0')}T00:00:00.000Z`,
     })
-    return { variant: 'a' as const, source: `root = TravelSurface("${artifactId}")`, state: originalState.get(artifactId) }
+    return { source: `root = TravelSurface("${artifactId}")`, state: originalState.get(artifactId) }
   })
   const first = artifacts[0]
   if (!first) throw new Error('Missing fixture artifact')
@@ -164,7 +164,7 @@ it('captures active plus recent restored views and discoverable older summaries 
   const context = captureAgentContext({ ...fixture, turnId: 'restored' })
   expect(context.artifacts.map(artifact => artifact.artifactId)).toEqual(['saved-00', 'saved-19', 'saved-18', 'saved-17', 'saved-16', 'saved-15', 'saved-14', 'saved-13'])
   expect(context.olderArtifactSummaries).toHaveLength(12)
-  expect(context.olderArtifactSummaries.find(summary => summary.artifactId === 'saved-01')).toMatchObject({ label: 'Trip 1', revision: 0, variant: 'a', lastInteractionAt: '2026-01-02T00:00:00.000Z' })
+  expect(context.olderArtifactSummaries.find(summary => summary.artifactId === 'saved-01')).toMatchObject({ label: 'Trip 1', revision: 0, lastInteractionAt: '2026-01-02T00:00:00.000Z' })
   for (const summary of context.olderArtifactSummaries) {
     expect(summary).not.toHaveProperty('source')
     expect(summary).not.toHaveProperty('datasetRefs')

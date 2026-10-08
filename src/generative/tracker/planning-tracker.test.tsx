@@ -1,15 +1,15 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { TravelProvider, type TravelServices } from '../../catalog/context'
-import { FareCards } from '../../catalog/views'
+import { TravelProvider, type TravelServices } from '../catalog/context'
+import { FareCards } from '../catalog/views'
 import {
   ArtifactIdSchema,
-} from '../../contracts'
-import { FareItemSchema, type FareItem } from '../../contracts/query-groups'
-import { createUIStateStore } from '../../state/ui-state-store'
-import { createActionRouter } from '../../state/action-router'
-import { createFixedProjectionFixture } from '../../testing/fixed-projection-fixture'
+} from '../contracts'
+import { FareItemSchema, type FareItem } from '../contracts/query-groups'
+import { createUIStateStore } from '../state/ui-state-store'
+import { createActionRouter } from '../state/action-router'
+import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
 import { PlanningTracker } from './planning-tracker'
 
 const rows = [
@@ -37,7 +37,7 @@ async function fixture(selected = true) {
   return { first, second, services, state }
 }
 
-describe('Version A planning tracker', () => {
+describe('planning tracker', () => {
   it('stays hidden until a fare is selected', async () => {
     const { services } = await fixture(false)
     render(<TravelProvider services={services}><PlanningTracker /></TravelProvider>)
