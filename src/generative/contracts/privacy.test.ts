@@ -3,15 +3,17 @@ import { AgentContextEnvelopeSchema, CoverageSchema, DatasetIdSchema, QueryIRSch
 import { createSyntheticRows } from '../data/synthetic-source';
 import { parseChatRequest } from '../../../agent/request-schema';
 import { assertNoBulkData, LEAKAGE_SENTINEL } from './privacy';
+const displayContext={version:1 as const,captureId:'capture',components:[],activeViews:[],exposedOrderedIds:[],shownFareFacts:[],recentInteractions:[],completeness:{complete:true,omittedComponents:0,omittedFacts:0}}
+const baseContext={schemaVersion:'2.0.0' as const,turnId:'t1',artifacts:[],datasets:[],selectedFareFacts:[],displayContext}
 describe('model and persistence boundaries', () => {
   it('rejects unknown keys at every snapshot level', () => {
-    expect(AgentContextEnvelopeSchema.safeParse({schemaVersion:'1.0.0',turnId:'t1',artifacts:[],datasets:[],selectedFareFacts:[],rows:[]}).success).toBe(false);
-    expect(parseAgentContext({schemaVersion:'1.0.0',turnId:'t1',artifacts:[],datasets:[],selectedFareFacts:[]})).toMatchObject({turnId:'t1'});
+    expect(AgentContextEnvelopeSchema.safeParse({...baseContext,rows:[]}).success).toBe(false);
+    expect(parseAgentContext(baseContext)).toMatchObject({turnId:'t1',displayContext:{captureId:'capture'}});
   });
   it('rejects invalid ids, complete truncated coverage and unknown active artifact', () => {
     expect(DatasetIdSchema.safeParse('<script>').success).toBe(false);
     expect(CoverageSchema.safeParse({originIds:['london'],destinationIds:['paris'],dateWindow:{from:'2026-02-30',to:'2026-03-01'},modes:['train'],passengers:1,complete:true,truncated:true}).success).toBe(false);
-    expect(() => parseAgentContext({schemaVersion:'1.0.0',turnId:'t1',activeArtifactId:'lost',artifacts:[],datasets:[],selectedFareFacts:[]})).toThrow('Unknown active');
+    expect(() => parseAgentContext({...baseContext,activeArtifactId:'lost'})).toThrow('Unknown active');
   });
   it('finds nested row fields and sentinel values without banning bounded ids', () => {
     expect(() => assertNoBulkData({parts:[{result:{fares:[{secret:1}]}}]})).toThrow();
@@ -34,14 +36,15 @@ it('rejects complete camelCase fare data hidden in uploaded tool schema constant
  const row=createSyntheticRows(1)[0]
  const tools={load_fares:{parameters:{type:'object',properties:{hidden:{const:[row,row]}}}}}
  expect(()=>assertNoBulkData({tools})).toThrow()
- expect(()=>parseChatRequest({id:'privacy-probe',variant:'b',currentContext:{schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]},messages:[{id:'u',role:'user',parts:[{type:'text',text:'Trip'}]}],tools})).toThrow()
+ expect(()=>assertNoBulkData({hidden:{const:[{...row,legs:[{legIndex:0,mode:row?.mode}]}]}})).toThrow()
+ expect(()=>parseChatRequest({id:'privacy-probe',variant:'b',currentContext:{...baseContext,turnId:'t'},messages:[{id:'u',role:'user',parts:[{type:'text',text:'Trip'}]}],tools})).toThrow()
  const {availableSeats,direct,...fact}=createSyntheticRows(1)[0]!
  expect(()=>assertNoBulkData({selectedFareFacts:[fact],parameters:{properties:{priceCents:{type:'number'}}}})).not.toThrow()
 })
 
 it('accepts additive bounded older-artifact summaries but rejects forged overlap and copied fields',()=>{
  const summary={artifactId:'older',variant:'a',label:'Earlier itinerary',revision:2,lastInteractionAt:'2026-10-03T12:00:00.000Z'}
- const base={schemaVersion:'1.0.0',turnId:'t',artifacts:[],datasets:[],selectedFareFacts:[]}
+ const base={...baseContext,turnId:'t'}
  expect(parseAgentContext({...base,olderArtifactSummaries:[summary]}).olderArtifactSummaries).toEqual([summary])
  expect(()=>parseAgentContext({...base,olderArtifactSummaries:[summary,summary]})).toThrow('Duplicate')
  expect(()=>parseAgentContext({...base,olderArtifactSummaries:[{...summary,datasetRefs:['hidden']}]})).toThrow()
