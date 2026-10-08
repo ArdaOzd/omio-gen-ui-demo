@@ -6,6 +6,7 @@ import {GenerativeChat} from './runtime-provider'
 import {createUIStateStore} from '../state/ui-state-store'
 import {createFareDataBridge} from '../data/fare-data-bridge'
 import {ArtifactIdSchema} from '../contracts'
+import {createDisplayContextStore} from '../state/display-context'
 type TestNode={$type:string;artifactRef:string;title?:string;children?:TestNode[]}
 vi.mock('../variants/a/toolkit-client',async()=>{const {z}=await import('zod');const {CatalogNode}=await import('../catalog/component');const renderNode=(node:TestNode)=><CatalogNode kind={node.$type} artifactRef={node.artifactRef} title={node.title}>{node.children?.map((child,index)=><span key={index}>{renderNode(child)}</span>)}</CatalogNode>;return{default:{present:{type:'frontend',parameters:z.record(z.string(),z.unknown()),execute:async()=>({}),render:({args}:{args:TestNode})=>renderNode(args)}}}})
 afterEach(()=>{cleanup();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
@@ -13,7 +14,8 @@ function setup(parts:UIMessage['parts']){
  Object.defineProperty(HTMLElement.prototype,'scrollTo',{configurable:true,value:()=>{}});vi.stubGlobal('ResizeObserver',class{observe(){} unobserve(){} disconnect(){}})
  const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{filters:{modes:['bus'],carrierIds:[],directOnly:false}})
  const messages:UIMessage[]=[{id:'assistant-steps',role:'assistant',parts}],before=JSON.stringify(messages)
- render(<GenerativeChat services={{state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}} capture={()=>({schemaVersion:'1.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[]})} initialMessages={messages}/>)
+ const displayContext=createDisplayContextStore().capture({captureId:'test',artifactIds:[]})
+ render(<GenerativeChat services={{state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}} capture={()=>({schemaVersion:'2.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[],plannedFareIds:[],displayContext})} initialMessages={messages}/>)
  return {messages,before,state}
 }
 const scene:UIMessage['parts'][number]={type:'tool-present',toolCallId:'scene',state:'output-available',input:{$type:'TravelSurface',artifactRef:'art',title:'Usable travel view',children:[{$type:'ModeChips',artifactRef:'art'}]},output:{}}
@@ -47,7 +49,7 @@ it('omits completed frontend tool status while preserving the completed tool res
  expect(JSON.stringify(messages)).toBe(before)
 })
 it('keeps useful local tool error and stale feedback visible',()=>{
- setup([{type:'tool-load_fares',toolCallId:'load-error',state:'output-available',input:{},output:{status:'error',code:'LOCAL_TOOL_FAILED'}},{type:'tool-edit_artifact',toolCallId:'edit-stale',state:'output-available',input:{artifactRef:'art',expectedRevision:0,commands:[]},output:{artifactId:'art',status:'stale',revision:1}}])
+ setup([{type:'tool-create_artifact',toolCallId:'create-error',state:'output-available',input:{},output:{status:'error',code:'LOCAL_TOOL_FAILED'}},{type:'tool-edit_artifact',toolCallId:'edit-stale',state:'output-available',input:{artifactRef:'art',expectedRevision:0,commands:[]},output:{artifactId:'art',status:'stale',revision:1}}])
  expect(screen.getByText('I could not update the travel data. Your current plan is unchanged; try again or adjust the request.')).toBeVisible()
  expect(screen.getByText('Your travel plan changed before that update finished. I kept the newer version.')).toBeVisible()
 })
