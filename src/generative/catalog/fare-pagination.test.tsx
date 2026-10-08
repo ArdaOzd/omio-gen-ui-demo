@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { ArtifactIdSchema, DatasetIdSchema, QueryGroupsResponseSchema } from '../contracts'
 import { FareItemSchema, type FareScope } from '../contracts/query-groups'
@@ -161,6 +161,47 @@ describe('interactive selector pagination',()=>{
     const active=capture.components.find(component=>component.identity.componentType==='FareCalendarActiveDay')
     expect(active?.display?.payload).toMatchObject({kind:'fare-order',renderedRange:{fromRank:9,toRank:16},viewport:{offset:8,limit:8,cursor:'fixture-cursor-8'}})
     expect((active?.display?.payload.kind==='fare-order'?active.display.payload.orderedFareRefs:[]).map(item=>item.fareId)).toEqual(selectorItems.slice(8,16).map(item=>item.id))
+    router.dispose()
+  })
+
+  it('moves a persisted FareCalendar day into a shifted trip window',async()=>{
+    const datedItems=['2026-10-26','2026-10-27'].map((serviceDate,index)=>FareItemSchema.parse({
+      ...items[0],
+      id:`dated-calendar-fare-${index+1}`,
+      serviceDate,
+      carrierName:`Dated Rail ${index+1}`,
+      legs:[{...items[0]!.legs[0],carrierName:`Dated Rail ${index+1}`}],
+    }))
+    const fixture=createFixedProjectionFixture({rows:datedItems,sourceVersion:'calendar-date-shift-source-1',sourceDateWindow:{from:'2026-10-26',to:'2026-10-27'}})
+    const manifest=await fixture.bridge.loadScope({
+      ...scope,
+      dateWindow:{from:'2026-10-26',to:'2026-10-27'},
+    },new AbortController().signal)
+    const binding=fixture.bridge.getBinding(manifest.resourceKey)
+    const artifactId=ArtifactIdSchema.parse('artifact-calendar-date-shift')
+    const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
+    state.initializeMissing(artifactId,{
+      datasetRefs:[binding.datasetId],
+      citySequence:['london','paris'],
+      dates:{start:'2026-10-26'},
+      displayWindowByLeg:{'london:paris':{from:'2026-10-26',to:'2026-10-26'}},
+      calendarDateByLeg:{'london:paris':'2026-10-26'},
+      availableModesByLeg:{'london:paris':['train']},
+    })
+    const router=createActionRouter(state,{bridge:fixture.bridge})
+    const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+    const displayStore=createDisplayContextStore()
+    render(<DisplayContextProvider store={displayStore}><TravelProvider services={services}><DisplayNodeProvider identity={{componentRef:{value:`${artifactId}:present:calendar`,keySource:'authored-key'},componentType:'FareCalendar',scope:{kind:'leg',artifactId,legIndex:0,legKey:'london:paris',resourceKey:binding.resourceKey},authored:{}}}><FareCalendar artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/><FadeFares artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></DisplayNodeProvider></TravelProvider></DisplayContextProvider>)
+
+    await screen.findByLabelText('Calendar fare pages for 2026-10-26')
+    act(()=>state.dispatch({kind:'dates',artifactId,dates:{start:'2026-10-27'}}))
+
+    await screen.findByLabelText('Calendar fare pages for 2026-10-27')
+    expect(screen.getByRole('heading',{name:'Tuesday 27 October'})).toBeVisible()
+    await waitFor(()=>expect(state.get(artifactId).calendarDateByLeg['london:paris']).toBe('2026-10-27'))
+    expect(screen.queryByText('Calendar fares could not load. Try the date again.')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('article')).toHaveLength(1)
+    expect(screen.getByRole('article')).toHaveTextContent('2026-10-27')
     router.dispose()
   })
 })

@@ -7,6 +7,7 @@ import {
   QueryGroupsResponseSchema,
   type QueryGroupsRequest,
 } from '../contracts'
+import { FareItemSchema } from '../contracts/query-groups'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import type { ServerQueryClient } from '../data/server-query-client'
 import { createUIStateStore } from '../state/ui-state-store'
@@ -111,6 +112,56 @@ describe('fixed projection hooks', () => {
       kind: 'farePage',
       sort: { field: 'departureMinutes', direction: 'asc' },
     })
+  })
+
+  it('moves the earliest departure into a later display window', async () => {
+    const rows = ['2026-10-26', '2026-10-27'].map((serviceDate, index) => FareItemSchema.parse({
+      id: `dated-fare-${index + 1}`,
+      originId: 'london',
+      destinationId: 'paris',
+      serviceDate,
+      mode: 'train',
+      carrierId: 'rail',
+      carrierName: 'Mode Rail',
+      priceCents: 2_000 + index * 100,
+      durationMinutes: 120,
+      departureMinutes: 480,
+      availableSeats: 4,
+      currency: 'EUR',
+      synthetic: true,
+      priceBasis: 'per-passenger-including-demo-fees',
+      direct: true,
+      legs: [{ legIndex: 0, mode: 'train', carrierName: 'Mode Rail', durationMinutes: 120, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }],
+    }))
+    const fixed = createFixedProjectionFixture({ rows, sourceVersion: 'date-shift-source-v1', sourceDateWindow: { from: '2026-10-26', to: '2026-10-27' } })
+    const initialScope = fixed.scope({ ...scope, dateWindow: { from: '2026-10-26', to: '2026-10-26' } })
+    const manifest = await fixed.bridge.loadScope(initialScope, new AbortController().signal)
+    const binding = fixed.bridge.getBinding(manifest.resourceKey)
+    const state = createUIStateStore({ now: () => '2026-10-26T00:00:00.000Z' })
+    state.initializeMissing(artifactId, {
+      datasetRefs: [binding.datasetId],
+      dates: { start: '2026-10-26' },
+      citySequence: ['london', 'paris'],
+      displayWindowByLeg: { 'london:paris': { from: '2026-10-26', to: '2026-10-26' } },
+    })
+    const services = { bridge: fixed.bridge, state, activeId: () => artifactId, activate: () => {} } satisfies TravelServices
+    const wrapper = ({ children }: { children: ReactNode }) => <TravelProvider services={services}>{children}</TravelProvider>
+    const { result } = renderHook(() => useOrderedFares(artifactId, {
+      componentRef: 'date-shift-fares',
+      purpose: 'date-shift-fares',
+      datasetRef: binding.datasetId,
+      limit: 8,
+    }), { wrapper })
+
+    await waitFor(() => expect(result.current.data?.items[0]?.serviceDate).toBe('2026-10-26'))
+    act(() => state.dispatch({ kind: 'dates', artifactId, dates: { start: '2026-10-27' } }))
+
+    await waitFor(() => expect(result.current.requirement.scope).toMatchObject({
+      dateWindow: { from: '2026-10-27', to: '2026-10-27' },
+      earliestDeparture: { date: '2026-10-27', minutes: 0 },
+    }))
+    await waitFor(() => expect(result.current.data?.items[0]?.serviceDate).toBe('2026-10-27'))
+    expect(result.current.queryState.status).toBe('ready')
   })
 
   it('exposes normalized desired inputs and ignores selected calendar date invalidation', async () => {

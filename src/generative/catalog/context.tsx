@@ -156,10 +156,11 @@ function scopeBinding(state: ArtifactUIState, bridge: ServerFareDataBridge, opti
     ?? binding?.manifest.coverage.dateWindow
     ?? { from: state.dates.start, to: state.dates.end ?? state.dates.start }
   const previous = [...selectedFacts(state, bridge)].reverse().find(fare => fare.destinationId === originId)
-  const earliestDeparture = previous
+  const threshold = previous
     ? addMinutes(previous.serviceDate, previous.departureMinutes + previous.durationMinutes
       + (state.stays.find(stay => stay.cityId === originId)?.nights ?? 0) * 24 * 60)
     : binding?.manifest.coverage.earliestDeparture ?? { date: window.from, minutes: 0 }
+  const earliestDeparture = threshold.date < window.from ? { date: window.from, minutes: 0 } : threshold
   const scope = {
     kind: 'fareScope' as const,
     originId,

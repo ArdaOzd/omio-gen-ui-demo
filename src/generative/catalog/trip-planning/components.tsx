@@ -488,7 +488,7 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   const representatives = useCalendarDays(artifactRef,{componentRef:displayNode.componentRef??`${artifactRef}:leg-${legIndex}.calendar`,purpose:'trip-fare-calendar',legKey:calendarKey,datasetRef,objective:calendarOrder})
   const days=representatives.data?.days??[]
   const availableDates = new Set(days.filter(day=>day.count>0).map(day => day.date))
-  const selectedDate = persistedDate && availableDates.has(persistedDate) ? persistedDate : dates.find(date => availableDates.has(date)) ?? visibleStart
+  const selectedDate = persistedDate && dates.includes(persistedDate) && availableDates.has(persistedDate) ? persistedDate : dates.find(date => availableDates.has(date)) ?? visibleStart
   const activeRef=`${displayNode.componentRef??`${artifactRef}:leg-${legIndex}.calendar`}.active-day`
   const activePageSize=8
   const [activeCursor,setActiveCursor]=useState<string|null>(null)
