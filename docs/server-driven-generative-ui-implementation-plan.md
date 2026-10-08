@@ -889,7 +889,7 @@ Current checklist:
 - [x] Write and verify this implementation plan.
 - [x] Commit this plan alone as `a29b55e`.
 - [x] Implement and commit fixed backend projections.
-- [ ] Implement and commit query contracts and coordinator.
+- [x] Implement and commit query contracts and coordinator.
 - [ ] Implement and commit component function bindings.
 - [ ] Implement and commit display ledger and inspection capture.
 - [ ] Migrate runtime and delete obsolete generative preload paths.
@@ -920,6 +920,7 @@ Implementation entries:
 - 2026-10-08: Source replacement recovery gets one bounded metadata-only scope refresh followed by a new-generation query. It never retries forever with an expected old source version. Selection handling revalidates or clears old pins when identity cannot be proved. Immutable old-display handles retain the old source identity and expire with a typed error rather than falling through to latest data.
 - 2026-10-08: The runtime migration may delete obsolete arbitrary `QueryIR` browser tools. The required model surface remains fixed metadata, source-bound selected-fare lookup, and immutable bounded display inspection. Production components and the actual preview must use the server bridge; only tests may use the new fixed-projection fixture adapter.
 - 2026-10-08: The test-only fixed-projection server adapter now exercises the production bridge with the five closed projection variants, coverage intersections, direct filtering, cursor pages, pins, and resource lifecycle. Three legacy data/lifecycle suites have been migrated without adding production compatibility methods. Their focused suite has 14 passing tests; one retained privacy assertion exposed a copied-row detection regression after `legs` became array-valued and is awaiting the contract-owned fix.
+- 2026-10-08: Query lifecycle hardening validates returned scope and projection kinds at the HTTP boundary, includes source version and dataset revision in desired-input identity, coalesces cancellable metadata-only scope refreshes, and performs at most one source-change refresh per intent. Late old-source completions cannot commit, stable partial manifests remain cached, binding revisions advance with a new source, and pinned immutable facts remain independent of page eviction. Six focused files pass 23 tests, and isolated strict typecheck passes.
 
 Resume pointer:
 

@@ -6,6 +6,7 @@ import {
   QueryGroupsResponseSchema,
   type LookupPinsRequest,
   type LookupPinsResponse,
+  type FareScope,
   type QueryErrorCode,
   type QueryGroupsRequest,
   type QueryGroupsResponse,
@@ -30,6 +31,17 @@ export interface ServerQueryClient {
 }
 
 type Fetch = typeof fetch
+
+function sameScope(left: FareScope, right: FareScope): boolean {
+  return left.kind === right.kind
+    && left.originId === right.originId
+    && left.destinationId === right.destinationId
+    && left.dateWindow.from === right.dateWindow.from
+    && left.dateWindow.to === right.dateWindow.to
+    && left.passengers === right.passengers
+    && left.earliestDeparture.date === right.earliestDeparture.date
+    && left.earliestDeparture.minutes === right.earliestDeparture.minutes
+}
 
 async function responseBody(response: Response): Promise<unknown> {
   try {
@@ -82,11 +94,16 @@ export function createServerQueryClient(options: { fetch?: Fetch; baseUrl?: stri
         const expected = requests.get(group.groupId)
         if (!expected) throw new Error('Unexpected fare query group')
         if (group.manifest.source.sourceVersion !== response.sourceVersion) throw new Error('Mixed fare source version')
-        const projectionIds = new Set(expected.projections.map(projection => projection.projectionId))
+        if (!sameScope(group.manifest.coverage, expected.scope)) throw new Error('Fare query scope mismatch')
+        const expectedProjections = new Map(expected.projections.map(projection => [projection.projectionId, projection]))
+        const projectionIds = new Set(expectedProjections.keys())
         const responseProjectionIds = new Set(group.projections.map(projection => projection.projectionId))
         if (group.projections.length !== projectionIds.size || responseProjectionIds.size !== projectionIds.size
           || [...projectionIds].some(projectionId => !responseProjectionIds.has(projectionId))) {
           throw new Error('Fare query projection identity mismatch')
+        }
+        if (group.projections.some(projection => expectedProjections.get(projection.projectionId)?.kind !== projection.kind)) {
+          throw new Error('Fare query projection kind mismatch')
         }
       }
       return response

@@ -1,68 +1,339 @@
-import { BoundedFareFactSchema, CoverageRequestSchema, DatasetIdSchema, DatasetManifestSchema, DatasetRevisionSchema, FareFieldSchema, CONTRACT_VERSION, parseQuery, type DatasetId, type DatasetManifest, type FareRow, type FareDataBridge, type DatasetFieldManifest } from '../contracts'
-import { loadResource,coverageKey,stableRef,abortError,type PageSource } from './resource-loader'
-import { createLocalQueryEngine,type LocalQueryEngine } from '../query/worker-client'
-import { createSearchPageSource } from './search-client'
+import {
+  DatasetIdSchema,
+  DatasetRevisionSchema,
+  type DatasetId,
+  type DatasetRevision,
+} from '../contracts'
+import {
+  ResourceKeySchema,
+  type FareItem,
+  type FareProjectionBridge,
+  type FareScope,
+  type FareScopeBinding,
+  type FareScopeManifest,
+  type LookupPinsRequest,
+  type LookupPinsResponse,
+  type ProjectionResult,
+  type QueryGroupRequest,
+  type QueryGroupResult,
+  type QueryGroupsResponse,
+  type ResourceKey,
+  type SelectedFarePin,
+} from '../contracts/query-groups'
+import { createProjectionCoordinator, stableFingerprint, type ProjectionCoordinator } from './projection-coordinator'
+import { createServerQueryClient, type ServerQueryClient } from './server-query-client'
 
-export function createFareDataBridge(options:{pageSource?:PageSource;maxRows?:number;maxPages?:number;queryEngine?:LocalQueryEngine}={}):FareDataBridge {
-  const engine=options.queryEngine??createLocalQueryEngine()
-  const ownsEngine=options.queryEngine===undefined
-  const resources=new Map<DatasetId,{manifest:DatasetManifest;engineId:DatasetId;rows:FareRow[];byId:Map<string,FareRow>;carrierNames:Map<string,string>;references:number}>()
-  const pending=new Map<string,{promise:Promise<DatasetManifest>;controller:AbortController;subscribers:number}>()
-  const listeners=new Map<DatasetId,Set<()=>void>>()
-  const fields:DatasetFieldManifest[]=FareFieldSchema.options.map(name=>({name,type:['priceCents','durationMinutes','departureMinutes','availableSeats'].includes(name)?'number':name==='synthetic'||name==='direct'?'boolean':'string',nullable:name==='carrierName',filterable:true,groupable:true,joinKey:['id','originId','destinationId','serviceDate','carrierId'].includes(name)}))
-  async function load(raw:Parameters<FareDataBridge['load']>[0],signal:AbortSignal):Promise<DatasetManifest> {
-    if(signal.aborted)throw abortError()
-    const request=CoverageRequestSchema.parse(raw)
-    const key=coverageKey(request);const id=DatasetIdSchema.parse(`dataset-${stableRef(key)}`)
-    const existing=resources.get(id)
-    if(existing?.manifest.coverage.complete){existing.references++;return structuredClone(existing.manifest)}
-    let active=pending.get(key)
-    if(!active){
-      const controller=new AbortController()
-      const promise=loadResource(request,options.pageSource??createSearchPageSource(),controller.signal,{maxRows:options.maxRows??50_000,maxPages:options.maxPages??256}).then(async result=>{
-        if(controller.signal.aborted)throw abortError()
-        const range=result.rows.reduce((range,row)=>({minPrice:Math.min(range.minPrice,row.priceCents),maxPrice:Math.max(range.maxPrice,row.priceCents),minDuration:Math.min(range.minDuration,row.durationMinutes),maxDuration:Math.max(range.maxDuration,row.durationMinutes)}),{minPrice:Infinity,maxPrice:0,minDuration:Infinity,maxDuration:0})
-        const counts:Partial<Record<FareRow['mode'],number>>={};for(const row of result.rows)counts[row.mode]=(counts[row.mode]??0)+1
-        const summary={modeCounts:counts,...(result.rows.length?{minPriceCents:range.minPrice,maxPriceCents:range.maxPrice,minDurationMinutes:range.minDuration,maxDurationMinutes:range.maxDuration}:{})}
-        const manifest=DatasetManifestSchema.parse({datasetId:id,revision:DatasetRevisionSchema.parse((existing?.manifest.revision??0)+1),schemaVersion:CONTRACT_VERSION,coverage:{...request,complete:result.complete,truncated:!result.complete},rowCount:result.rows.length,fields,compactSummary:summary,source:{kind:'search',descriptorId:`resource-${stableRef(key)}`,sourceVersion:result.sourceVersion}})
-        const engineId=DatasetIdSchema.parse(`cache-${crypto.randomUUID()}`)
-        let committed=false
-        try{
-          await engine.register(engineId,{rows:result.rows,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion,logicalDatasetId:id})
-          if(controller.signal.aborted)throw abortError()
-          const previous=resources.get(id)
-          resources.set(id,{manifest,engineId,rows:result.rows,byId:new Map(result.rows.map(row=>[row.id,row])),carrierNames:new Map(result.rows.flatMap(row=>row.carrierName?[[row.carrierId,row.carrierName]]:[])),references:previous?.references??0})
-          committed=true
-          if(previous)engine.release(previous.engineId)
-          listeners.get(id)?.forEach(listener=>listener())
-          return manifest
-        }finally{if(!committed)engine.release(engineId)}
-      }).finally(()=>{if(pending.get(key)?.controller===controller)pending.delete(key)})
-      active={promise,controller,subscribers:0};pending.set(key,active)
+export interface ServerFareDataBridge extends FareProjectionBridge {
+  readonly coordinator: ProjectionCoordinator
+  getBinding(resourceKey: ResourceKey): FareScopeBinding
+  findBinding(datasetId: DatasetId): FareScopeBinding | undefined
+  findBindingForScope(scope: FareScope): FareScopeBinding | undefined
+  findCachedFare(fareId: string, resourceKey?: ResourceKey): FareItem | undefined
+  getCarrierLabel(carrierId: string, resourceKey?: ResourceKey): string | undefined
+}
+
+export type ServerFareDataBridgeOptions = {
+  client?: ServerQueryClient
+  fetch?: typeof globalThis.fetch
+  baseUrl?: string
+  maxProjectionItems?: number
+  maxPinnedItems?: number
+}
+
+type StoredResource = FareScopeBinding & { references: number; signature: string }
+type CachedItem = { item: FareItem; resourceKey: ResourceKey; touchedAt: number }
+type PendingScope = {
+  controller: AbortController
+  promise: Promise<FareScopeManifest>
+  subscribers: number
+}
+
+const requestId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`
+const scopeIdentity = (scope: FareScope) => stableFingerprint(scope, 'scope')
+const itemIdentity = (fareId: string, resourceKey: ResourceKey) => `${resourceKey}\u0000${fareId}`
+
+function projectionItems(result: ProjectionResult): FareItem[] {
+  switch (result.kind) {
+    case 'farePage': return result.items
+    case 'calendarDays': return result.days.flatMap(day => day.representative ? [day.representative] : [])
+    case 'fareHighlights': return [result.cheapest, result.fastest].filter((item): item is FareItem => item !== null)
+    case 'carrierFacets':
+    case 'modeSummary': return []
+    default: {
+      const exhaustive: never = result
+      return exhaustive
     }
-    active.subscribers++
-    const loadState=active
-    return new Promise((resolve,reject)=>{
-      let settled=false
-      function finish(){if(settled)return false;settled=true;signal.removeEventListener('abort',cancel);loadState.subscribers--;return true}
-      function cancel(){if(!finish())return;reject(abortError());if(!loadState.subscribers){loadState.controller.abort();if(pending.get(key)===loadState)pending.delete(key)}}
-      signal.addEventListener('abort',cancel,{once:true})
-      loadState.promise.then(manifest=>{if(!finish())return;const resource=resources.get(manifest.datasetId);if(resource)resource.references++;resolve(structuredClone(manifest))},error=>{if(finish())reject(error)})
+  }
+}
+
+export function createFareDataBridge(options: ServerFareDataBridgeOptions = {}): ServerFareDataBridge {
+  const rawClient = options.client ?? createServerQueryClient({ fetch: options.fetch, baseUrl: options.baseUrl })
+  const resources = new Map<ResourceKey, StoredResource>()
+  const resourcesByDataset = new Map<DatasetId, ResourceKey>()
+  const resourcesByScope = new Map<string, ResourceKey>()
+  const listeners = new Map<ResourceKey, Set<() => void>>()
+  const projectionItemsByKey = new Map<string, CachedItem>()
+  const pinnedItemsByKey = new Map<string, CachedItem>()
+  const pendingScopes = new Map<string, PendingScope>()
+  const maxProjectionItems = options.maxProjectionItems ?? 512
+  const maxPinnedItems = options.maxPinnedItems ?? 320
+  let disposed = false
+
+  function assertActive() {
+    if (disposed) throw new Error('Fare data bridge is disposed')
+  }
+
+  function trim(cache: Map<string, CachedItem>, maximum: number) {
+    if (cache.size <= maximum) return
+    const oldest = [...cache.entries()].sort((left, right) => left[1].touchedAt - right[1].touchedAt)
+    for (const [key] of oldest.slice(0, cache.size - maximum)) cache.delete(key)
+  }
+
+  function rememberItems(resourceKey: ResourceKey, items: readonly FareItem[], pinned: boolean) {
+    const cache = pinned ? pinnedItemsByKey : projectionItemsByKey
+    const now = Date.now()
+    for (const item of items) cache.set(itemIdentity(item.id, resourceKey), { item: structuredClone(item), resourceKey, touchedAt: now })
+    trim(cache, pinned ? maxPinnedItems : maxProjectionItems)
+  }
+
+  function rememberManifest(manifest: FareScopeManifest, addReference = false): StoredResource {
+    const resourceKey = manifest.resourceKey
+    const existing = resources.get(resourceKey)
+    const signature = stableFingerprint(manifest, 'manifest')
+    const datasetId = DatasetIdSchema.parse(resourceKey)
+    const datasetRevision = DatasetRevisionSchema.parse(existing
+      ? existing.signature === signature ? existing.datasetRevision : existing.datasetRevision + 1
+      : 1)
+    const stored: StoredResource = {
+      resourceKey,
+      datasetId,
+      datasetRevision,
+      manifest: structuredClone(manifest),
+      references: (existing?.references ?? 0) + (addReference ? 1 : 0),
+      signature,
+    }
+    resources.set(resourceKey, stored)
+    resourcesByDataset.set(datasetId, resourceKey)
+    resourcesByScope.set(scopeIdentity(manifest.coverage), resourceKey)
+    if (!existing || existing.signature !== signature) listeners.get(resourceKey)?.forEach(listener => listener())
+    return stored
+  }
+
+  function observe(response: QueryGroupsResponse) {
+    for (const group of response.groups) {
+      rememberManifest(group.manifest)
+      for (const projection of group.projections) rememberItems(group.manifest.resourceKey, projectionItems(projection), false)
+    }
+  }
+
+  const observedClient: ServerQueryClient = {
+    async queryGroups(request, signal) {
+      const response = await rawClient.queryGroups(request, signal)
+      observe(response)
+      return response
+    },
+    async lookupPins(input, signal) {
+      const response = await rawClient.lookupPins(input, signal)
+      for (const item of response.items) {
+        const pins = input.pins.filter(pin => pin.fareId === item.id)
+        for (const pin of pins) rememberItems(pin.resourceKey, [item], true)
+      }
+      return response
+    },
+  }
+  function waitForScope(active: PendingScope, signal: AbortSignal): Promise<FareScopeManifest> {
+    if (signal.aborted) return Promise.reject(new DOMException('Aborted', 'AbortError'))
+    active.subscribers += 1
+    return new Promise((resolve, reject) => {
+      let settled = false
+      const finish = () => {
+        if (settled) return false
+        settled = true
+        signal.removeEventListener('abort', cancel)
+        active.subscribers -= 1
+        return true
+      }
+      const cancel = () => {
+        if (!finish()) return
+        reject(new DOMException('Aborted', 'AbortError'))
+        if (active.subscribers === 0) active.controller.abort()
+      }
+      signal.addEventListener('abort', cancel, { once: true })
+      active.promise.then(
+        manifest => { if (finish()) resolve(structuredClone(manifest)) },
+        error => { if (finish()) reject(error) },
+      )
     })
   }
-  return {load,
-    getCarrierLabel(carrierId,datasetId){if(datasetId)return resources.get(datasetId)?.carrierNames.get(carrierId);const names=new Set([...resources.values()].flatMap(resource=>{const name=resource.carrierNames.get(carrierId);return name?[name]:[]}));return names.size===1?[...names][0]:undefined},
-    getManifest(id){const resource=resources.get(id);if(!resource)throw new Error('Expired dataset reference');return structuredClone(resource.manifest)},
-    async query(input,signal){
-      const query=parseQuery(input,[...resources.values()].map(resource=>resource.manifest))
-      const captured=query.sources.map(source=>{const resource=resources.get(source.datasetRef);if(!resource)throw new Error('Expired dataset reference');return{source,resource}})
-      const result=await engine.execute({...query,sources:captured.map(({source,resource})=>({...source,datasetRef:resource.engineId}))},signal)
-      if(captured.some(({source,resource})=>resources.get(source.datasetRef)!==resource))throw new Error('Stale query result')
-      return result
-    },
-    async lookupFare(id,_fields){for(const resource of resources.values()){const row=resource.byId.get(id);if(row){const {availableSeats:_seats,direct:_direct,...fact}=row;return BoundedFareFactSchema.parse(fact)}}throw new Error('Expired fare reference')},
-    subscribe(id,listener){const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
-    release(id){const resource=resources.get(id);if(resource&&--resource.references<=0){resources.delete(id);engine.release(resource.engineId);listeners.delete(id)}},
-    dispose(){for(const item of pending.values())item.controller.abort();pending.clear();for(const resource of resources.values())engine.release(resource.engineId);resources.clear();listeners.clear();if(ownsEngine)engine.dispose()},
+
+  function fetchScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest> {
+    const signature = scopeIdentity(scope)
+    let active = pendingScopes.get(signature)
+    if (!active) {
+      const controller = new AbortController()
+      const groupId = stableFingerprint({ scope, purpose: 'manifest' }, 'group')
+      const promise = observedClient.queryGroups({
+        version: 1,
+        requestId: requestId('scope'),
+        expectedSourceVersion: null,
+        groups: [{ groupId, scope, projections: [] }],
+      }, controller.signal).then(response => {
+        const group = response.groups[0]
+        if (!group) throw new Error('Scope response omitted its group')
+        return group.manifest
+      })
+      active = { controller, promise, subscribers: 0 }
+      pendingScopes.set(signature, active)
+      promise.then(
+        () => { if (pendingScopes.get(signature) === active) pendingScopes.delete(signature) },
+        () => { if (pendingScopes.get(signature) === active) pendingScopes.delete(signature) },
+      )
+    }
+    return waitForScope(active, signal)
   }
+
+  async function loadScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest> {
+    assertActive()
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+    const existingKey = resourcesByScope.get(scopeIdentity(scope))
+    const existing = existingKey ? resources.get(existingKey) : undefined
+    if (existing) {
+      existing.references += 1
+      return structuredClone(existing.manifest)
+    }
+    const manifest = await fetchScope(scope, signal)
+    rememberManifest(manifest, true)
+    return structuredClone(manifest)
+  }
+
+  async function refreshScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest> {
+    assertActive()
+    const manifest = await fetchScope(scope, signal)
+    rememberManifest(manifest)
+    return structuredClone(manifest)
+  }
+
+  const coordinator = createProjectionCoordinator(observedClient, {
+    async refreshAfterSourceChange(requirement, signal) {
+      const manifest = await refreshScope(requirement.scope, signal)
+      const binding = getBinding(manifest.resourceKey)
+      return {
+        ...requirement,
+        datasetId: binding.datasetId,
+        datasetRevision: binding.datasetRevision,
+        sourceVersion: manifest.source.sourceVersion,
+      }
+    },
+  })
+
+  async function executeGroup(group: QueryGroupRequest, signal: AbortSignal): Promise<QueryGroupResult> {
+    assertActive()
+    const resourceKey = resourcesByScope.get(scopeIdentity(group.scope))
+    const sourceVersion = resourceKey ? resources.get(resourceKey)?.manifest.source.sourceVersion ?? null : null
+    const response = await observedClient.queryGroups({
+      version: 1,
+      requestId: requestId('group'),
+      expectedSourceVersion: sourceVersion,
+      groups: [group],
+    }, signal)
+    const result = response.groups[0]
+    if (!result) throw new Error('Query response omitted its group')
+    return structuredClone(result)
+  }
+
+  async function lookupPins(input: LookupPinsRequest, signal: AbortSignal): Promise<LookupPinsResponse> {
+    assertActive()
+    return observedClient.lookupPins(input, signal)
+  }
+
+  function getBinding(resourceKey: ResourceKey): FareScopeBinding {
+    assertActive()
+    const stored = resources.get(resourceKey)
+    if (!stored) throw new Error('Expired fare scope reference')
+    const { references: _references, signature: _signature, ...binding } = stored
+    return structuredClone(binding)
+  }
+
+  function findBinding(datasetId: DatasetId): FareScopeBinding | undefined {
+    const resourceKey = resourcesByDataset.get(datasetId)
+    return resourceKey ? getBinding(resourceKey) : undefined
+  }
+
+  function findBindingForScope(scope: FareScope): FareScopeBinding | undefined {
+    const resourceKey = resourcesByScope.get(scopeIdentity(scope))
+    return resourceKey ? getBinding(resourceKey) : undefined
+  }
+
+  function findCachedFare(fareId: string, resourceKey?: ResourceKey): FareItem | undefined {
+    const candidates = resourceKey
+      ? [itemIdentity(fareId, resourceKey)]
+      : [...new Set([...pinnedItemsByKey.keys(), ...projectionItemsByKey.keys()])].filter(key => key.endsWith(`\u0000${fareId}`))
+    for (const key of candidates) {
+      const cached = pinnedItemsByKey.get(key) ?? projectionItemsByKey.get(key)
+      if (!cached) continue
+      cached.touchedAt = Date.now()
+      return structuredClone(cached.item)
+    }
+    return undefined
+  }
+
+  function getCarrierLabel(carrierId: string, resourceKey?: ResourceKey): string | undefined {
+    const labels = new Set([...pinnedItemsByKey.values(), ...projectionItemsByKey.values()]
+      .filter(cached => (!resourceKey || cached.resourceKey === resourceKey) && cached.item.carrierId === carrierId && cached.item.carrierName)
+      .map(cached => cached.item.carrierName as string))
+    return labels.size === 1 ? [...labels][0] : undefined
+  }
+
+  return {
+    coordinator,
+    loadScope,
+    refreshScope,
+    executeGroup,
+    lookupPins,
+    getBinding,
+    findBinding,
+    findBindingForScope,
+    findCachedFare,
+    getCarrierLabel,
+    getManifest(resourceKey) {
+      return getBinding(ResourceKeySchema.parse(resourceKey)).manifest
+    },
+    subscribe(resourceKey, listener) {
+      const parsed = ResourceKeySchema.parse(resourceKey)
+      const set = listeners.get(parsed) ?? new Set<() => void>()
+      set.add(listener)
+      listeners.set(parsed, set)
+      return () => {
+        set.delete(listener)
+        if (!set.size) listeners.delete(parsed)
+      }
+    },
+    release(resourceKey) {
+      const parsed = ResourceKeySchema.parse(resourceKey)
+      const stored = resources.get(parsed)
+      if (!stored || --stored.references > 0) return
+      resources.delete(parsed)
+      resourcesByDataset.delete(stored.datasetId)
+      if (resourcesByScope.get(scopeIdentity(stored.manifest.coverage)) === parsed) resourcesByScope.delete(scopeIdentity(stored.manifest.coverage))
+      listeners.delete(parsed)
+      for (const [key, cached] of projectionItemsByKey) if (cached.resourceKey === parsed) projectionItemsByKey.delete(key)
+    },
+    dispose() {
+      if (disposed) return
+      disposed = true
+      coordinator.dispose()
+      pendingScopes.forEach(pending => pending.controller.abort())
+      pendingScopes.clear()
+      resources.clear()
+      resourcesByDataset.clear()
+      resourcesByScope.clear()
+      listeners.clear()
+      projectionItemsByKey.clear()
+      pinnedItemsByKey.clear()
+    },
+  }
+}
+
+export function selectedPin(item: FareItem, resourceKey: ResourceKey, sourceVersion: string): SelectedFarePin {
+  return { fareId: item.id, resourceKey, sourceVersion }
 }

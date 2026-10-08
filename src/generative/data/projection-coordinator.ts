@@ -13,7 +13,7 @@ import {
   type ResultKey,
 } from '../contracts/query-groups'
 import type { DatasetId, DatasetRevision, UIStateRevision } from '../contracts'
-import type { ServerQueryClient } from './server-query-client'
+import { ServerQueryError, type ServerQueryClient } from './server-query-client'
 
 export type ProjectionRequirement = {
   group: QueryGroupScope
@@ -31,8 +31,13 @@ export interface ProjectionCoordinator {
   retry(queryKey: string): void
   getState(queryKey: string): QueryExecutionState | undefined
   subscribe(queryKey: string, listener: () => void): () => void
+  release(queryKey: string): void
   captureProjectionResult(resultKey: ResultKey): ProjectionResultSnapshot | undefined
   dispose(): void
+}
+
+export type ProjectionCoordinatorOptions = {
+  refreshAfterSourceChange?: (requirement: ProjectionRequirement, signal: AbortSignal) => Promise<ProjectionRequirement>
 }
 
 type ActiveRequirement = {
@@ -40,6 +45,8 @@ type ActiveRequirement = {
   state: QueryExecutionState
   inputVersion: number
   queued: boolean
+  sourceRefreshAttempts: number
+  lastErrorCode?: 'sourceChanged'
 }
 
 type Batch = {
@@ -80,7 +87,12 @@ function keys(requirement: ProjectionRequirement) {
   const groupKey = stableFingerprint(group, 'group')
   const projectionKey = stableFingerprint({ key: requirement.projectionKey, input: projection.kind }, 'projection')
   const queryKey = stableFingerprint({ groupKey, projectionKey }, 'query')
-  const inputHash = stableFingerprint({ scope: requirement.scope, projection: projectionInput(projection) }, 'input')
+  const inputHash = stableFingerprint({
+    scope: requirement.scope,
+    projection: projectionInput(projection),
+    datasetRevision: requirement.datasetRevision,
+    sourceVersion: requirement.sourceVersion ?? null,
+  }, 'input')
   return { group, projection, groupKey, projectionKey, queryKey, inputHash }
 }
 
@@ -106,7 +118,7 @@ function isAbort(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError'
 }
 
-export function createProjectionCoordinator(client: ServerQueryClient): ProjectionCoordinator {
+export function createProjectionCoordinator(client: ServerQueryClient, options: ProjectionCoordinatorOptions = {}): ProjectionCoordinator {
   const active = new Map<string, ActiveRequirement>()
   const listeners = new Map<string, Set<() => void>>()
   const snapshots = new Map<ResultKey, StoredSnapshot>()
@@ -263,7 +275,52 @@ export function createProjectionCoordinator(client: ServerQueryClient): Projecti
       }
     } catch (error) {
       if (isAbort(error)) return
+      const sourceChanged = error instanceof ServerQueryError && error.code === 'sourceChanged'
+      const retrying = new Set<string>()
+      const refreshAfterSourceChange = options.refreshAfterSourceChange
+      if (sourceChanged && refreshAfterSourceChange) {
+        await Promise.all(groups.flat().map(async ([queryKey, requested]) => {
+          const item = active.get(queryKey)
+          if (!item || item.sourceRefreshAttempts >= 1) return
+          const intent = item.state.intent
+          if (intent.desiredInputHash !== requested.state.intent.desiredInputHash
+            || intent.desiredInputVersion !== requested.state.intent.desiredInputVersion) return
+          try {
+            const refreshed = await refreshAfterSourceChange(item.requirement, controller.signal)
+            const current = active.get(queryKey)
+            if (!current || current.state.intent.desiredInputHash !== intent.desiredInputHash
+              || current.state.intent.desiredInputVersion !== intent.desiredInputVersion) return
+            const next = keys(refreshed)
+            if (next.queryKey !== queryKey) throw new Error('Source refresh changed the projection identity')
+            const currentResult = current.state.status === 'ready' || current.state.status === 'refreshing'
+              ? current.state.current
+              : current.state.status === 'error' ? current.state.previous : undefined
+            const nextIntent: QueryIntentIdentity = {
+              queryKey: next.queryKey,
+              groupKey: next.groupKey,
+              projectionKey: next.projectionKey,
+              desiredInputHash: next.inputHash,
+              desiredInputVersion: current.inputVersion + 1,
+              uiRevision: refreshed.uiRevision,
+            }
+            current.requirement = { ...refreshed, group: next.group, projection: next.projection }
+            current.inputVersion += 1
+            current.sourceRefreshAttempts = 1
+            current.lastErrorCode = undefined
+            current.queued = true
+            current.state = currentResult
+              ? { status: 'refreshing', intent: nextIntent, current: currentResult }
+              : { status: 'loading', intent: nextIntent }
+            retrying.add(queryKey)
+            notify(queryKey)
+          } catch {
+            // The normal error transition below preserves the prior committed result.
+          }
+        }))
+        if (retrying.size) schedule()
+      }
       for (const [queryKey, requested] of groups.flat()) {
+        if (retrying.has(queryKey)) continue
         const item = active.get(queryKey)
         if (!item) continue
         const intent = item.state.intent
@@ -273,6 +330,7 @@ export function createProjectionCoordinator(client: ServerQueryClient): Projecti
           : item.state.status === 'ready' ? item.state.current
             : item.state.status === 'error' ? item.state.previous
               : undefined
+        item.lastErrorCode = sourceChanged ? 'sourceChanged' : undefined
         item.state = { status: 'error', intent, ...(previous ? { previous } : {}) }
         notify(queryKey)
       }
@@ -313,7 +371,7 @@ export function createProjectionCoordinator(client: ServerQueryClient): Projecti
       const state: QueryExecutionState = current
         ? { status: 'refreshing', intent, current }
         : { status: 'loading', intent }
-      active.set(parsed.queryKey, { requirement, state, inputVersion, queued: true })
+      active.set(parsed.queryKey, { requirement, state, inputVersion, queued: true, sourceRefreshAttempts: 0 })
       notify(parsed.queryKey)
       cancelFullySupersededBatches()
       schedule()
@@ -323,6 +381,8 @@ export function createProjectionCoordinator(client: ServerQueryClient): Projecti
     retry(queryKey) {
       const item = active.get(queryKey)
       if (!item || item.state.status !== 'error') return
+      if (item.lastErrorCode === 'sourceChanged') item.sourceRefreshAttempts = 0
+      item.lastErrorCode = undefined
       item.state = item.state.previous
         ? { status: 'refreshing', intent: item.state.intent, current: item.state.previous }
         : { status: 'loading', intent: item.state.intent }
@@ -341,8 +401,21 @@ export function createProjectionCoordinator(client: ServerQueryClient): Projecti
       listeners.set(queryKey, current)
       return () => {
         current.delete(listener)
-        if (!current.size) listeners.delete(queryKey)
+        if (!current.size) {
+          listeners.delete(queryKey)
+          queueMicrotask(() => {
+            if (!listeners.has(queryKey)) {
+              active.delete(queryKey)
+              cancelFullySupersededBatches()
+            }
+          })
+        }
       }
+    },
+
+    release(queryKey) {
+      active.delete(queryKey)
+      cancelFullySupersededBatches()
     },
 
     captureProjectionResult(resultKey) {

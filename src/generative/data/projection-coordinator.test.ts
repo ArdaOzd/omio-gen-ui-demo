@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { ArtifactIdSchema, DatasetIdSchema, DatasetRevisionSchema, UIStateRevisionSchema } from '../contracts'
 import { QueryGroupsResponseSchema, type ProjectionFilters, type QueryGroupsRequest, type QueryGroupsResponse } from '../contracts/query-groups'
 import { createProjectionCoordinator, type ProjectionRequirement } from './projection-coordinator'
-import type { ServerQueryClient } from './server-query-client'
+import { ServerQueryError, type ServerQueryClient } from './server-query-client'
 
 const scope = { kind: 'fareScope' as const, originId: 'london', destinationId: 'paris', dateWindow: { from: '2026-10-26', to: '2026-10-26' }, passengers: 1, earliestDeparture: { date: '2026-10-26', minutes: 0 } }
 const filters: ProjectionFilters = { modes: ['train'], carrierIds: [], directOnly: false }
@@ -68,12 +68,65 @@ describe('projection coordinator', () => {
     const refreshing = coordinator.getState(initial.intent.queryKey)
     expect(refreshing).toMatchObject({ status: 'refreshing', current: { resultKey: oldResult } })
     await tick()
-    const latest = pending.at(-1)
-    if (!latest) throw new Error('Missing refresh request')
+    const superseded = pending.shift()
+    if (!superseded) throw new Error('Missing superseded refresh request')
+
+    coordinator.request(requirement('cards', 3, 5))
+    await tick()
+    const latest = pending.shift()
+    if (!latest) throw new Error('Missing latest refresh request')
     latest.resolve(response(latest.request, 3000))
     await tick()
+    superseded.resolve(response(superseded.request, 2800))
+    await tick()
     const committed = coordinator.getState(initial.intent.queryKey)
-    expect(committed).toMatchObject({ status: 'ready', current: { inputVersion: 2, resultFingerprint: 'result-3000' } })
+    expect(committed).toMatchObject({ status: 'ready', current: { inputVersion: 3, resultFingerprint: 'result-3000' } })
     if (committed?.status === 'ready') expect(coordinator.captureProjectionResult(committed.current.resultKey)?.projection).toMatchObject({ items: [{ priceCents: 3000 }] })
+  })
+
+  it('refreshes source metadata once before rerunning a stale projection', async () => {
+    const requests: QueryGroupsRequest[] = []
+    let projectionAttempts = 0
+    const client: ServerQueryClient = {
+      queryGroups: async request => {
+        requests.push(request)
+        projectionAttempts += 1
+        if (projectionAttempts === 1) throw new ServerQueryError(409, 'sourceChanged', 'changed', request.requestId)
+        return {
+          ...response(request),
+          sourceVersion: 'source-2',
+          groups: response(request).groups.map(result => ({
+            ...result,
+            manifest: {
+              ...result.manifest,
+              source: { ...result.manifest.source, sourceVersion: 'source-2' },
+            },
+          })),
+        }
+      },
+      lookupPins: async () => { throw new Error('unused') },
+    }
+    let metadataRefreshes = 0
+    const coordinator = createProjectionCoordinator(client, {
+      refreshAfterSourceChange: async current => {
+        metadataRefreshes += 1
+        return {
+          ...current,
+          sourceVersion: 'source-2',
+          datasetRevision: DatasetRevisionSchema.parse(2),
+        }
+      },
+    })
+    const initial = coordinator.request({ ...requirement('cards'), sourceVersion: 'source-1' })
+    await tick()
+    await tick()
+    expect(metadataRefreshes).toBe(1)
+    expect(requests).toHaveLength(2)
+    expect(requests[1]?.expectedSourceVersion).toBe('source-2')
+    expect(coordinator.getState(initial.intent.queryKey)).toMatchObject({
+      status: 'ready',
+      intent: { desiredInputVersion: 2 },
+      current: { sourceVersion: 'source-2', datasetRevision: 2 },
+    })
   })
 })

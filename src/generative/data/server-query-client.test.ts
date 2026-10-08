@@ -62,4 +62,59 @@ describe('server query client', () => {
       pins: [{ fareId: item.id, resourceKey: ResourceKeySchema.parse('scope-1') }],
     }, new AbortController().signal)).rejects.toThrow('omitted a requested pin')
   })
+
+  it('rejects a response bound to a different scope or projection kind', async () => {
+    const wrongScope = createServerQueryClient({
+      fetch: async () => new Response(JSON.stringify({
+        version: 1,
+        requestId: request.requestId,
+        sourceVersion: 'source-1',
+        groups: [{
+          groupId: 'group-1',
+          manifest: { ...manifest, coverage: { ...scope, destinationId: 'brussels' } },
+          projections: [],
+        }],
+      }), { status: 200 }),
+    })
+    await expect(wrongScope.queryGroups(request, new AbortController().signal)).rejects.toThrow('scope mismatch')
+
+    const pageRequest = QueryGroupsRequestSchema.parse({
+      version: 1,
+      requestId: 'request-kind',
+      expectedSourceVersion: null,
+      groups: [{
+        groupId: 'group-1',
+        scope,
+        projections: [{
+          projectionId: 'page',
+          kind: 'farePage',
+          filters: { modes: [], carrierIds: [], directOnly: false },
+          serviceDate: null,
+          sort: { field: 'departureMinutes', direction: 'asc' },
+          after: null,
+          limit: 20,
+        }],
+      }],
+    })
+    const wrongKind = createServerQueryClient({
+      fetch: async () => new Response(JSON.stringify({
+        version: 1,
+        requestId: pageRequest.requestId,
+        sourceVersion: 'source-1',
+        groups: [{
+          groupId: 'group-1',
+          manifest,
+          projections: [{
+            projectionId: 'page',
+            kind: 'modeSummary',
+            inputHash: 'input-1',
+            resultFingerprint: 'result-1',
+            baseline: 'active',
+            modes: [],
+          }],
+        }],
+      }), { status: 200 }),
+    })
+    await expect(wrongKind.queryGroups(pageRequest, new AbortController().signal)).rejects.toThrow('projection kind mismatch')
+  })
 })

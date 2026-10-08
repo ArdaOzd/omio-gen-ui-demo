@@ -380,6 +380,7 @@ export type ProjectionResultSnapshot = z.infer<typeof ProjectionResultSnapshotSc
 
 export interface FareProjectionBridge {
   loadScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest>
+  refreshScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest>
   executeGroup(group: QueryGroupRequest, signal: AbortSignal): Promise<QueryGroupResult>
   lookupPins(input: LookupPinsRequest, signal: AbortSignal): Promise<LookupPinsResponse>
   getManifest(resourceKey: ResourceKey): FareScopeManifest
