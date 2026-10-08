@@ -414,10 +414,15 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
   const dispatch = useTravelAction(artifactRef)
   const resolved = resolveLeg(plan, datasetRef, legIndex)
   const displayNode=useDisplayNode()
-  const result = useOrderedFares(artifactRef,{componentRef:componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,limit:compact?8:16})
+  const pageSize=compact?8:16
+  const [cursor,setCursor]=useState<string|null>(null)
+  const [cursorHistory,setCursorHistory]=useState<Array<string|null>>([])
+  const result = useOrderedFares(artifactRef,{componentRef:componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,cursor,limit:pageSize})
+  const pagingIdentity=JSON.stringify({datasetRef,datasetRevision:result.requirement.datasetRevision,sourceVersion:result.requirement.sourceVersion,filters:plan.state.filters,sort:resolved?plan.state.sortByLeg[resolved.leg.key]:undefined,window:resolved?plan.state.displayWindowByLeg[resolved.leg.key]:undefined,threshold:resolved?.leg.threshold})
+  useEffect(()=>{setCursor(null);setCursorHistory([])},[pagingIdentity])
   const rows = resolved?sortFares((result.data?.items??[]).filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold)), fareOrderFromState((plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).field,(plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).direction)):[]
-  const shown=rows.slice(0,compact?8:16),total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-shown.length)
-  useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:shown.map((row,index)=>({fareId:row.id,rank:index+1})),...(shown.length?{renderedRange:{fromRank:1,toRank:shown.length}}:{})},totalDisplayed:total,includedCount:shown.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(shown))
+  const shown=rows,total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-shown.length),pageIndex=cursorHistory.length,rankOffset=pageIndex*pageSize
+  useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:shown.map((row,index)=>({fareId:row.id,rank:rankOffset+index+1})),...(shown.length?{renderedRange:{fromRank:rankOffset+1,toRank:rankOffset+shown.length},viewport:{offset:rankOffset,limit:shown.length,...(cursor?{cursor}:{})}}:{})},totalDisplayed:total,includedCount:shown.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(shown,new Map(),rankOffset))
   if (!resolved) return <EmptyPlanningState />
   if (!result.data&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
   if (!result.data&&result.queryState.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
@@ -432,6 +437,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
         <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => {recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:selected?'deselect':'select'});dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}}>{selected ? 'Selected' : 'Choose fare'}</Button>
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}
+    <div className="travel-pagination" aria-label={`Fare pages for ${cityLabel(resolved.leg.originId)} to ${cityLabel(resolved.leg.destinationId)}`}><Button type="button" variant="outline" disabled={!cursorHistory.length} onClick={()=>{recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:'input',inputFields:['cursor']});const previous=cursorHistory.at(-1)??null;setCursorHistory(history=>history.slice(0,-1));setCursor(previous)}}>Previous</Button><span>Page {pageIndex+1}</span><Button type="button" variant="outline" disabled={!result.data?.pageInfo.hasNextPage||!result.data.pageInfo.nextCursor} onClick={()=>{const next=result.data?.pageInfo.nextCursor;if(next){recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:'input',inputFields:['cursor']});setCursorHistory(history=>[...history,cursor]);setCursor(next)}}}>Next</Button></div>
   </div>
 }
 
@@ -453,12 +459,12 @@ function dateRange(start: string, end: string): string[] {
   return dates
 }
 
-function ActiveDayDisplayRecord({identity,result,rows}:{identity:ComponentIdentity;result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items']}){
+function ActiveDayDisplayRecord({identity,result,rows,rankOffset,cursor}:{identity:ComponentIdentity;result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items'];rankOffset:number;cursor:string|null}){
  const total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-rows.length)
- return <DisplayNodeProvider identity={identity}><ActiveDayPublisher result={result} rows={rows} total={total} omitted={omitted}/></DisplayNodeProvider>
+ return <DisplayNodeProvider identity={identity}><ActiveDayPublisher result={result} rows={rows} total={total} omitted={omitted} rankOffset={rankOffset} cursor={cursor}/></DisplayNodeProvider>
 }
-function ActiveDayPublisher({result,rows,total,omitted}:{result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items'];total:number;omitted:number}){
- useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:rows.map((row,index)=>({fareId:row.id,rank:index+1})),...(rows.length?{renderedRange:{fromRank:1,toRank:rows.length}}:{})},totalDisplayed:total,includedCount:rows.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(rows))
+function ActiveDayPublisher({result,rows,total,omitted,rankOffset,cursor}:{result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items'];total:number;omitted:number;rankOffset:number;cursor:string|null}){
+ useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:rows.map((row,index)=>({fareId:row.id,rank:rankOffset+index+1})),...(rows.length?{renderedRange:{fromRank:rankOffset+1,toRank:rankOffset+rows.length},viewport:{offset:rankOffset,limit:rows.length,...(cursor?{cursor}:{})}}:{})},totalDisplayed:total,includedCount:rows.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(rows,new Map(),rankOffset))
  return null
 }
 
@@ -484,7 +490,12 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   const availableDates = new Set(days.filter(day=>day.count>0).map(day => day.date))
   const selectedDate = persistedDate && availableDates.has(persistedDate) ? persistedDate : dates.find(date => availableDates.has(date)) ?? visibleStart
   const activeRef=`${displayNode.componentRef??`${artifactRef}:leg-${legIndex}.calendar`}.active-day`
-  const selectedResult = useDayFares(artifactRef,{componentRef:activeRef,purpose:'trip-calendar-active-day',legKey:calendarKey,datasetRef,serviceDate:selectedDate,limit:8})
+  const activePageSize=8
+  const [activeCursor,setActiveCursor]=useState<string|null>(null)
+  const [activeCursorHistory,setActiveCursorHistory]=useState<Array<string|null>>([])
+  const selectedResult = useDayFares(artifactRef,{componentRef:activeRef,purpose:'trip-calendar-active-day',legKey:calendarKey,datasetRef,serviceDate:selectedDate,cursor:activeCursor,limit:activePageSize})
+  const activePagingIdentity=JSON.stringify({selectedDate,datasetRevision:selectedResult.requirement.datasetRevision,sourceVersion:selectedResult.requirement.sourceVersion,filters:plan.state.filters,sort:calendarKey?plan.state.sortByLeg[calendarKey]:undefined,threshold:resolved?.leg.threshold})
+  useEffect(()=>{setActiveCursor(null);setActiveCursorHistory([])},[activePagingIdentity])
   const cells=dates.map(date=>{const day=days.find(candidate=>candidate.date===date),representative=day?.representative;return{key:date,label:date,value:representative?.priceCents,unit:(representative?'priceCents':'count') as 'priceCents'|'count',fareId:representative?.id,available:(day?.count??0)>0}})
   useProjectionDisplay(representatives,{payload:{kind:'calendar',selectedDate,cells},totalDisplayed:cells.length,includedCount:cells.length,complete:true,omittedCount:0},fareInspectionItems(days.flatMap(day=>day.representative?[day.representative]:[])))
   const setCalendarDate = (date: string | undefined) => {
@@ -527,10 +538,11 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   if (outsideWindow) return <Card className="trip-planning-control trip-fare-calendar"><div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div></div><Alert role="status">No departures fit this trip window; adjust the previous fare or stay.</Alert></Card>
   if (!representatives.data || !selectedResult.data) return representatives.queryState.status==='error'||selectedResult.queryState.status==='error'?<Alert>Calendar fares could not load. Try the date again.</Alert>:<Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
   const byDate = new Map(days.flatMap(day=>day.representative?[[day.date,day.representative] as const]:[]))
-  const selectedRows = selectedResult.data.items.slice(0,8)
+  const selectedRows = selectedResult.data.items
+  const activePageIndex=activeCursorHistory.length,activeRankOffset=activePageIndex*activePageSize
   const activeIdentity:ComponentIdentity={componentRef:{value:activeRef,keySource:'tree-path'},componentType:'FareCalendarActiveDay',scope:{kind:'leg',artifactId:artifactRef,legIndex,legKey:resolved.leg.key,resourceKey:resolved.leg.resourceKey},authored:{title:'Active calendar day'}}
   return <Card className="trip-planning-control trip-fare-calendar">
-    <ActiveDayDisplayRecord identity={activeIdentity} result={selectedResult} rows={selectedRows}/>
+    <ActiveDayDisplayRecord identity={activeIdentity} result={selectedResult} rows={selectedRows} rankOffset={activeRankOffset} cursor={activeCursor}/>
     <div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div><p>{cityLabel(resolved.leg.originId)} <ArrowRight aria-hidden="true" /> {cityLabel(resolved.leg.destinationId)}</p></div>
     <FieldSet className="trip-order-control">
       <FieldLegend>Compare each day by</FieldLegend>
@@ -548,10 +560,11 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     <div className="trip-calendar-results" aria-live="polite">
       <h4>{new Date(`${selectedDate}T12:00:00.000Z`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}</h4>
       <p className="trip-fare-caption">Synthetic fares per passenger</p>
-      {selectedRows.length > 0 ? <div>{selectedRows.slice(0, 8).map(row => {
+      {selectedRows.length > 0 ? <div>{selectedRows.map(row => {
         const selected = plan.state.selectedFareIds.includes(row.id)
         return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose'}</Button></div>
       })}</div> : <p role="status">No synthetic fares match this day and transport selection.</p>}
+      <div className="travel-pagination" aria-label={`Calendar fare pages for ${selectedDate}`}><Button type="button" variant="outline" disabled={!activeCursorHistory.length} onClick={()=>{recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:activeRef,action:'input',inputFields:['cursor']});const previous=activeCursorHistory.at(-1)??null;setActiveCursorHistory(history=>history.slice(0,-1));setActiveCursor(previous)}}>Previous</Button><span>Page {activePageIndex+1}</span><Button type="button" variant="outline" disabled={!selectedResult.data.pageInfo.hasNextPage||!selectedResult.data.pageInfo.nextCursor} onClick={()=>{const next=selectedResult.data?.pageInfo.nextCursor;if(next){recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:activeRef,action:'input',inputFields:['cursor']});setActiveCursorHistory(history=>[...history,activeCursor]);setActiveCursor(next)}}}>Next</Button></div>
     </div>
   </Card>
 }

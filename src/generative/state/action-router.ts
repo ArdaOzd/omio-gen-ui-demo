@@ -215,9 +215,26 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     const selectedKey = JSON.stringify(store.get(artifactId).selectedFareIds)
     const promise = Promise.resolve().then(async () => {
       if (selections.get(artifactId)?.token !== token || JSON.stringify(store.get(artifactId).selectedFareIds) !== selectedKey) return
-      const state = store.get(artifactId)
+      let state = store.get(artifactId)
       const facts = cachedSelectedFacts(state, bridge)
       if (facts.length !== state.selectedFareIds.length) throw new Error('Selected fare is unavailable')
+      if (command?.selected && scope && !currentScope(artifactId, scope)) {
+        const current = store.get(artifactId)
+        if (current.selectedFareIds.includes(command.fareId)) store.dispatch({ kind: 'select', artifactId, fareId: command.fareId, selected: false, expectedRevision: current.revision })
+        await retry(artifactId, cachedSelectedFacts(store.get(artifactId), bridge))
+        return
+      }
+      const chosen = command?.selected ? facts.find(fact => fact.id === command.fareId) : undefined
+      const firstRoute = routePairs(state, bridge)[0]
+      if (chosen && !state.dates.end && firstRoute?.originId === chosen.originId && firstRoute.destinationId === chosen.destinationId) {
+        const offset = Date.parse(legDate(state, chosen.originId)) - Date.parse(state.dates.start)
+        const start = new Date(Date.parse(chosen.serviceDate) - offset).toISOString().slice(0, 10)
+        if (start !== state.dates.start) {
+          const aligned = store.dispatch({ kind: 'dates', artifactId, dates: { start }, expectedRevision: state.revision })
+          if (aligned.status === 'stale') throw new Error('Stale selected-date alignment')
+          state = store.get(artifactId)
+        }
+      }
       const plans = requestsFor(state, bridge, facts)
       const coverages = scheduleCoverages(plans)
       const stale = new Set(staleDownstreamFareIds(state, coverages, facts))
@@ -232,10 +249,6 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
         if (!stale.has(fact.id) && last.get(`${fact.originId}:${fact.destinationId}`) === fact.id) continue
         const current = store.get(artifactId)
         store.dispatch({ kind: 'select', artifactId, fareId: fact.id, selected: false, expectedRevision: current.revision })
-      }
-      if (command?.selected && scope && !currentScope(artifactId, scope)) {
-        const current = store.get(artifactId)
-        if (current.selectedFareIds.includes(command.fareId)) store.dispatch({ kind: 'select', artifactId, fareId: command.fareId, selected: false, expectedRevision: current.revision })
       }
       await retry(artifactId, cachedSelectedFacts(store.get(artifactId), bridge))
     }).catch(() => {
