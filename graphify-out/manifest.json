@@ -540,15 +540,15 @@
     "semantic_hash": "54649fbecfa5127f9094f782c02d8261"
   },
   "src/generative/state/persistence.test.ts": {
-    "mtime": 1791474412.891216,
-    "seen": 1791474417.6338391,
-    "ast_hash": "957d9ed954da35640cb7f75590f92717",
+    "mtime": 1791475044.5803926,
+    "seen": 1791475192.513003,
+    "ast_hash": "7e0712bdf9094e01ad7e433292ebf803",
     "semantic_hash": ""
   },
   "src/generative/state/persistence.ts": {
-    "mtime": 1791474412.8914285,
-    "seen": 1791474417.63384,
-    "ast_hash": "7e97d63ae3d340d3424033936c2d157c",
+    "mtime": 1791475071.8093805,
+    "seen": 1791475192.513004,
+    "ast_hash": "0aba1c63c92c7ca241c8e977f6a76e43",
     "semantic_hash": ""
   },
   "src/generative/state/snapshot-exporter.ts": {
@@ -1386,9 +1386,9 @@
     "semantic_hash": "b8b387fa7fee7023318da1c969c613cb"
   },
   "tests/browser/chat-sessions.spec.ts": {
-    "mtime": 1791474412.8959846,
-    "seen": 1791474417.6338549,
-    "ast_hash": "79629ae5195be022faa137df5ae7eaa4",
+    "mtime": 1791475227.4888859,
+    "seen": 1791475382.430238,
+    "ast_hash": "b0bede14a98fdf791fd4481afb07c735",
     "semantic_hash": ""
   },
   "docs/server-driven-generative-ui-implementation-plan.md": {
