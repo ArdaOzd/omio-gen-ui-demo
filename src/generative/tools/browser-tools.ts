@@ -49,6 +49,7 @@ export function createBrowserTools(options:{bridge:ServerFareDataBridge;store:UI
   }),
   create_artifact:wrap(z.strictObject({}),'Create and activate a separate empty artifact with a host-owned ID',async()=>{if(!options.createArtifact)throw new Error('Artifact creation unavailable');const artifactId=options.createArtifact();options.store.initializeMissing(artifactId,{});return {artifactId,revision:options.store.get(artifactId).revision};}),
   edit_artifact:wrap(EditArtifactInputSchema,'Apply a bounded typed state patch only at the observed revision',async({artifactRef,expectedRevision,commands},signal)=>{
+   if(commands.some(command=>command.kind==='select'&&command.selected)&&commands.length!==1)throw new Error('A positive fare selection must be the only command in an edit')
    signal.throwIfAborted();let current=options.store.get(artifactRef);if(current.revision!==expectedRevision)return {artifactId:artifactRef,status:'stale',revision:current.revision};
    for(const command of commands){
     let result:DispatchResult

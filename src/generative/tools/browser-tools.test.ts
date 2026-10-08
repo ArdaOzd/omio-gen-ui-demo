@@ -89,6 +89,39 @@ describe('bounded artifact browser tools', () => {
     expect(store.get(artifactId).selectedFareIds).toEqual([])
   })
 
+  it('rejects mixed positive-selection batches before applying any command', async () => {
+    const { store, bridge } = setup()
+    const dispatch = vi.fn<(command: UICommand) => DispatchResult>(command => store.dispatch(command))
+    const tools = createBrowserTools({ store, bridge, activeArtifactId: () => artifactId, dispatch })
+
+    expect(await tools.edit_artifact.execute({
+      artifactRef: artifactId,
+      expectedRevision: 0,
+      commands: [
+        { kind: 'dates', dates: { start: '2026-10-26' } },
+        { kind: 'select', fareId: 'fare-1', selected: true, captureId: 'capture-old', displayHandle: 'display-old', resultKey: 'result-old' },
+      ],
+    })).toMatchObject({ status: 'error', code: 'LOCAL_TOOL_FAILED' })
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(store.get(artifactId)).toMatchObject({ revision: 0, dates: { start: '2026-10-08' }, selectedFareIds: [] })
+  })
+
+  it('allows nonpositive batches that include deselection', async () => {
+    const { store, bridge } = setup()
+    expect(store.dispatch({ kind: 'select', artifactId, fareId: FareIdSchema.parse('fare-1'), selected: true, expectedRevision: UIStateRevisionSchema.parse(0) }).status).toBe('applied')
+    const tools = createBrowserTools({ store, bridge, activeArtifactId: () => artifactId })
+
+    expect(await tools.edit_artifact.execute({
+      artifactRef: artifactId,
+      expectedRevision: 1,
+      commands: [
+        { kind: 'filters', filters: { modes: ['train'], carrierIds: [], directOnly: false } },
+        { kind: 'select', fareId: 'fare-1', selected: false },
+      ],
+    })).toMatchObject({ status: 'applied', revision: 3 })
+    expect(store.get(artifactId)).toMatchObject({ revision: 3, filters: { modes: ['train'] }, selectedFareIds: [] })
+  })
+
   it('requires captured display metadata for agent selections', async () => {
     const { store, bridge } = setup()
     const tools = createBrowserTools({ store, bridge, activeArtifactId: () => artifactId })
