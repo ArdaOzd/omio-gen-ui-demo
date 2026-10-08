@@ -1,81 +1,57 @@
 import { z } from 'zod';
-import { EditArtifactInputSchema,ArtifactIdSchema,CoverageRequestSchema,DatasetIdSchema,FareIdSchema,parseQuery,DatasetManifestSchema,BoundedFareFactSchema,type FareDataBridge,type UIStateStore,type ArtifactId,type UICommand,type DispatchResult,LIMITS } from '../contracts';
-import {SummarizeFaresInputSchema} from './summarize-schema';
-import {filterPredicate} from '../state/filter-predicate';
-import {availableModes,legState,legRequest,resolveBoundDatasetId} from '../state/leg-bindings';
+import { EditArtifactInputSchema,UICommandPatchSchema, type UIStateStore,type ArtifactId,type UICommand,type DispatchResult,type UIStateRevision } from '../contracts';
 import { assertNoBulkData } from '../contracts/privacy';
-import { releaseDatasetWhenUnowned } from '../state/dataset-ownership';
-class LocalToolError extends Error{constructor(readonly code:'DATASET_CAPACITY_EXCEEDED'){super(code)}}
-export function createBrowserTools(options:{bridge:FareDataBridge;store:UIStateStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal;dispatch?:(command:UICommand)=>DispatchResult;whenIdle?:(id:ArtifactId)=>Promise<void>}) {
+import { InspectDisplayInputSchema, InspectDisplayOutputSchema } from '../contracts/display-context';
+import { DisplayInspectionError, type DisplayContextStore } from '../state/display-context';
+import type { InputField } from '../contracts/display-context';
+import type { ServerFareDataBridge } from '../data/fare-data-bridge';
+type UICommandPatch=z.infer<typeof UICommandPatchSchema>;
+function scopeMetadata(store:UIStateStore,bridge:ServerFareDataBridge,artifactId:ArtifactId){return store.get(artifactId).datasetRefs.flatMap((datasetRef,legIndex)=>{const binding=bridge.findBinding(datasetRef);if(!binding)return[];const {coverage,source,totalAvailable,complete}=binding.manifest;return[{datasetRef,resourceKey:binding.resourceKey,legIndex,originId:coverage.originId,destinationId:coverage.destinationId,dateWindow:coverage.dateWindow,sourceVersion:source.sourceVersion,totalAvailable,complete}]})}
+function completeCommand(command:UICommandPatch,artifactId:ArtifactId,expectedRevision:UIStateRevision):UICommand{
+ switch(command.kind){
+  case'filters':return{...command,artifactId,expectedRevision}
+  case'dates':return{...command,artifactId,expectedRevision}
+  case'route':return{...command,artifactId,expectedRevision}
+  case'sort':return{...command,artifactId,expectedRevision}
+  case'sortByLeg':return{...command,artifactId,expectedRevision}
+  case'stays':return{...command,artifactId,expectedRevision}
+  case'runtimeVariables':return{...command,artifactId,expectedRevision}
+  case'modesByLeg':return{...command,artifactId,expectedRevision}
+  case'availableModesByLeg':return{...command,artifactId,expectedRevision}
+  case'requestedModesByLeg':return{...command,artifactId,expectedRevision}
+  case'displayWindowByLeg':return{...command,artifactId,expectedRevision}
+  case'select':return{...command,artifactId,expectedRevision}
+  default:{const exhaustive:never=command;return exhaustive}
+ }
+}
+function commandInputFields(command:UICommandPatch):InputField[]{
+ switch(command.kind){
+  case 'filters':return['modes','carrierIds','minPriceCents','maxPriceCents','maxDurationMinutes','directOnly']
+  case 'dates':case 'displayWindowByLeg':return['dateWindow']
+  case 'sort':case 'sortByLeg':return['sort']
+  case 'stays':return['stayNights']
+  case 'route':return['originId','destinationId']
+  case 'modesByLeg':case 'availableModesByLeg':case 'requestedModesByLeg':return['modes']
+  default:return[]
+ }
+}
+export function createBrowserTools(options:{bridge:ServerFareDataBridge;store:UIStateStore;displayStore?:DisplayContextStore;activeArtifactId:()=>ArtifactId;createArtifact?:()=>ArtifactId;signal?:()=>AbortSignal;dispatch?:(command:UICommand)=>DispatchResult;whenIdle?:(id:ArtifactId)=>Promise<void>}) {
  const wrap=<T>(schema:z.ZodType<T>,description:string,execute:(input:T,signal:AbortSignal)=>Promise<unknown>)=>({
   description, parameters:schema,
-  execute:async(input:unknown,context?:{abortSignal?:AbortSignal})=>{const signals=[context?.abortSignal,options.signal?.()].filter((signal):signal is AbortSignal=>signal!==undefined);const signal=AbortSignal.any(signals);try{signal.throwIfAborted();const output=await execute(schema.parse(input),signal);signal.throwIfAborted();assertNoBulkData(output);return output;}catch(error){return {status:'error',code:signal.aborted?'LOCAL_TOOL_CANCELLED':error instanceof LocalToolError?error.code:'LOCAL_TOOL_FAILED'};}}
+  execute:async(input:unknown,context?:{abortSignal?:AbortSignal})=>{const signals=[context?.abortSignal,options.signal?.()].filter((signal):signal is AbortSignal=>signal!==undefined);const signal=AbortSignal.any(signals);try{signal.throwIfAborted();const output=await execute(schema.parse(input),signal);signal.throwIfAborted();assertNoBulkData(output);return output;}catch(error){const output=error instanceof DisplayInspectionError?{status:'error' as const,code:error.code,message:error.message}:{status:'error' as const,code:signal.aborted?'LOCAL_TOOL_CANCELLED':'LOCAL_TOOL_FAILED'};assertNoBulkData(output);return output;}}
  });
- const dataset=z.strictObject({datasetRef:DatasetIdSchema});
  return {
+  inspect_display:wrap(InspectDisplayInputSchema,'Inspect at most five items from one immutable display captured for this turn. The capture, handle, result and optional source version must match; this never runs a new fare query.',async input=>{
+   if(!options.displayStore)throw new Error('Display inspection unavailable')
+   return InspectDisplayOutputSchema.parse(options.displayStore.inspect(input))
+  }),
   create_artifact:wrap(z.strictObject({}),'Create and activate a separate empty artifact with a host-owned ID',async()=>{if(!options.createArtifact)throw new Error('Artifact creation unavailable');const artifactId=options.createArtifact();options.store.initializeMissing(artifactId,{});return {artifactId,revision:options.store.get(artifactId).revision};}),
   edit_artifact:wrap(EditArtifactInputSchema,'Apply a bounded typed state patch only at the observed revision',async({artifactRef,expectedRevision,commands},signal)=>{
-   for(const command of commands)if(command.kind==='select')await options.bridge.lookupFare(command.fareId,['id']);
+   for(const command of commands)if(command.kind==='select'&&!options.bridge.findCachedFare(command.fareId))throw new Error('Fare selection is outside the current displayed results');
    signal.throwIfAborted();let current=options.store.get(artifactRef);if(current.revision!==expectedRevision)return {artifactId:artifactRef,status:'stale',revision:current.revision};
-   for(const command of commands){const result=(options.dispatch??options.store.dispatch)({...command,artifactId:artifactRef,expectedRevision:current.revision});if(result.status==='stale')return {artifactId:artifactRef,...result};current=options.store.get(artifactRef);}
+   for(const command of commands){const result=(options.dispatch??options.store.dispatch)(completeCommand(command,artifactRef,current.revision));if(result.status==='stale')return {artifactId:artifactRef,...result};options.displayStore?.recordInteraction({artifactId:artifactRef,actor:'agent',action:command.kind==='select'?(command.selected?'select':'deselect'):'input',inputFields:commandInputFields(command)});current=options.store.get(artifactRef);}
    await options.whenIdle?.(artifactRef);
-   return {artifactId:artifactRef,status:'applied',revision:options.store.get(artifactRef).revision};
-  }),
-  load_fares:wrap(z.strictObject({coverage:CoverageRequestSchema,displayWindow:CoverageRequestSchema.shape.dateWindow.optional(),artifactRef:ArtifactIdSchema.optional()}),'Load or reuse a bounded browser resource; return only its manifest. coverage.dateWindow includes the chosen search margin. displayWindow is the exact user-facing trip range and excludes margin days. Coverage originIds/destinationIds use actual city slugs from the host location catalog, never dataset IDs.',async({coverage,displayWindow,artifactRef},signal)=>{
-   if(displayWindow&&(displayWindow.from<coverage.dateWindow.from||displayWindow.to>coverage.dateWindow.to))throw new Error('Display window must be inside loaded coverage')
-   const artifactId=artifactRef??options.activeArtifactId();const before=options.store.get(artifactId);
-   if(before.datasetRefs.length>=LIMITS.artifactDatasets&&!before.datasetRefs.some(id=>{const current=options.bridge.getManifest(id).coverage;return current.originIds.length===1&&current.destinationIds.length===1&&current.originIds[0]===coverage.originIds[0]&&current.destinationIds[0]===coverage.destinationIds[0]}))throw new LocalToolError('DATASET_CAPACITY_EXCEEDED');
-   const manifest=DatasetManifestSchema.parse(await options.bridge.load(coverage,signal));if(signal.aborted){options.bridge.release(manifest.datasetId);signal.throwIfAborted()}
-   const current=options.store.get(artifactId);
-   const replacesCurrent=current.datasetRefs.some(id=>{const active=options.bridge.getManifest(id).coverage;return active.originIds.length===1&&active.destinationIds.length===1&&active.originIds[0]===coverage.originIds[0]&&active.destinationIds[0]===coverage.destinationIds[0]})
-   if(!current.datasetRefs.includes(manifest.datasetId)&&current.datasetRefs.length>=LIMITS.artifactDatasets&&!replacesCurrent){options.bridge.release(manifest.datasetId);throw new LocalToolError('DATASET_CAPACITY_EXCEEDED')}
-   if(before.datasetRefs.length===0 && current.revision===before.revision){const visible=displayWindow??coverage.dateWindow;options.store.dispatch({artifactId,expectedRevision:before.revision,kind:'dates',dates:{start:visible.from,...(visible.to!==visible.from?{end:visible.to}:{})}})}
-   const state=options.store.get(artifactId);
-   const routeKey=coverage.originIds[0]&&coverage.destinationIds[0]?`${coverage.originIds[0]}:${coverage.destinationIds[0]}`:undefined
-   if(routeKey){const current=options.store.get(artifactId),actual=availableModes(manifest);options.store.dispatch({artifactId,kind:'availableModesByLeg',availableModesByLeg:{...current.availableModesByLeg,[routeKey]:actual}});const requested=options.store.get(artifactId);options.store.dispatch({artifactId,kind:'requestedModesByLeg',requestedModesByLeg:{...requested.requestedModesByLeg,[routeKey]:coverage.modes}});const scoped=options.store.get(artifactId),chosen=scoped.modesByLeg[routeKey];if(chosen){const retained=chosen.filter(mode=>actual.includes(mode));options.store.dispatch({artifactId,kind:'modesByLeg',modesByLeg:{...scoped.modesByLeg,[routeKey]:retained.length===actual.length?[]:retained}})}if(displayWindow){const updated=options.store.get(artifactId);options.store.dispatch({artifactId,kind:'displayWindowByLeg',displayWindowByLeg:{...updated.displayWindowByLeg,[routeKey]:displayWindow}})}}
-   const routedState=options.store.get(artifactId)
-   if(routedState.citySequence.length<2&&coverage.originIds[0]&&coverage.destinationIds[0])options.store.dispatch({artifactId,kind:'route',citySequence:[coverage.originIds[0],coverage.destinationIds[0]]})
-   else if(coverage.originIds[0]===routedState.citySequence.at(-1)&&coverage.destinationIds[0])options.store.dispatch({artifactId,kind:'route',citySequence:[...routedState.citySequence,coverage.destinationIds[0]]})
-   const routed=options.store.get(artifactId)
-   const replaced=routeKey?routed.datasetRefs.filter(datasetId=>{try{const current=options.bridge.getManifest(datasetId).coverage;return `${current.originIds[0]??''}:${current.destinationIds[0]??''}`===routeKey&&datasetId!==manifest.datasetId}catch{return false}}):[]
-   const datasetRefs=[...new Set([...routed.datasetRefs.filter(datasetId=>!replaced.includes(datasetId)),manifest.datasetId])]
-   const updated=options.store.dispatch({artifactId,kind:'datasets',datasetRefs})
-   if(updated.status==='stale'){options.bridge.release(manifest.datasetId);throw new Error('Stale dataset replacement')}
-   for(const datasetId of replaced)releaseDatasetWhenUnowned(options.store,options.bridge,artifactId,datasetId)
-   return manifest;
-  }),
-  summarize_fares:wrap(SummarizeFaresInputSchema,'Return at most30 grouped counts. Include artifactRef for the current artifact filters, leg dates and modes; omit artifactRef explicitly for a dataset-wide summary.',async({datasetRef,groupBy,artifactRef},signal)=>{
-   const scope=()=>{
-    if(!artifactRef)return{manifest:options.bridge.getManifest(datasetRef),where:undefined};
-    const state=options.store.get(artifactRef);if(!state.datasetRefs.includes(datasetRef))throw new Error('Dataset outside artifact');
-    const id=resolveBoundDatasetId(state,options.bridge,datasetRef),manifest=options.bridge.getManifest(id),request=legRequest(state,manifest.coverage);
-    if(!state.datasetRefs.includes(id)||request.passengers!==manifest.coverage.passengers||request.dateWindow.from<manifest.coverage.dateWindow.from||request.dateWindow.to>manifest.coverage.dateWindow.to||!request.modes.every(mode=>manifest.coverage.modes.includes(mode)))throw new Error('Current artifact coverage unavailable');
-    return{manifest,where:filterPredicate(legState(state,manifest.coverage))};
-   };
-   const captured=scope(),manifest=captured.manifest;
-   const query=parseQuery({version:1,sources:[{datasetRef:manifest.datasetId,alias:'f'}],where:captured.where,groupBy:[groupBy],metrics:[{as:'count',op:'count'}],limit:30},[manifest]);
-   const result=await options.bridge.query(query,signal),current=scope();
-   if(result.datasetRevision!==manifest.revision||current.manifest.datasetId!==manifest.datasetId||current.manifest.revision!==manifest.revision||current.manifest.source.sourceVersion!==manifest.source.sourceVersion||JSON.stringify(current.where)!==JSON.stringify(captured.where))throw new Error('Stale summary scope');
-   return {datasetId:manifest.datasetId,revision:manifest.revision,groups:result.rows.slice(0,30).map(row=>({label:String(row[groupBy]??''),count:Number(row.count??0)})),truncated:result.truncated};
-  }),
-  get_top_fares:wrap(z.strictObject({datasetRef:DatasetIdSchema,objective:z.enum(['cheapest','fastest'])}),'Return at most5 compact fare facts',async({datasetRef,objective},signal)=>{
-   const manifest=options.bridge.getManifest(datasetRef);const field=objective==='cheapest'?'priceCents':'durationMinutes';
-   const query=parseQuery({version:1,sources:[{datasetRef,alias:'d'}],project:['id',field],topK:{k:5,by:field,direction:'asc'},limit:5},[manifest]);
-   const result=await options.bridge.query(query,signal);const facts=[];
-   for(const row of result.rows.slice(0,5)){const id=FareIdSchema.parse(row.id);facts.push(BoundedFareFactSchema.parse(await options.bridge.lookupFare(id,['id','priceCents','durationMinutes'])));}
-   return {datasetId:datasetRef,revision:manifest.revision,facts};
-  }),
-  get_fare:wrap(z.strictObject({fareId:FareIdSchema}),'Return one compact fare fact',async({fareId})=>BoundedFareFactSchema.parse(await options.bridge.lookupFare(fareId,['id','priceCents','durationMinutes']))),
-  get_route:wrap(dataset,'Return compact route and mode coverage',async({datasetRef})=>{
-   const manifest=options.bridge.getManifest(datasetRef);return {datasetId:datasetRef,originIds:manifest.coverage.originIds,destinationIds:manifest.coverage.destinationIds,modes:manifest.coverage.modes};
-  }),
-  find_carriers:wrap(dataset,'Return at most20 carrier IDs with local readable names; unknown names use their stable IDs',async({datasetRef},signal)=>{
-   const manifest=options.bridge.getManifest(datasetRef);const query=parseQuery({version:1,sources:[{datasetRef,alias:'d'}],groupBy:['carrierId'],metrics:[{as:'count',op:'count'}],limit:20},[manifest]);
-   const result=await options.bridge.query(query,signal);return {datasetId:datasetRef,carriers:result.rows.slice(0,20).map(row=>{
-    const id=z.string().min(1).max(96).parse(row.carrierId);
-    const name=z.string().trim().min(1).max(120).parse(options.bridge.getCarrierLabel?.(id,datasetRef)??id);
-    return{id,name};
-   }),truncated:result.truncated};
+   return {artifactId:artifactRef,status:'applied',revision:options.store.get(artifactRef).revision,scopes:scopeMetadata(options.store,options.bridge,artifactRef)};
   }),
  };
 }

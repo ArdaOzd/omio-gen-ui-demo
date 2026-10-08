@@ -13,6 +13,7 @@ import { createUIStateStore } from './state/ui-state-store'
 import { createArtifactStore } from './state/artifact-store'
 import { createActionRouter } from './state/action-router'
 import { captureAgentContextWithSelectedFares } from './state/snapshot-exporter'
+import { createDisplayContextStore } from './state/display-context'
 import { createIndexedDBStorage, createThreadPersistence, ThreadConflictError, type PersistedThread } from './state/persistence'
 import { assertNoBulkData } from './contracts/privacy'
 import { GenerativeChat } from './chat/runtime-provider'
@@ -36,6 +37,7 @@ function createServices(onCoverageStatus: (message: string) => void) {
   const bridge = createFareDataBridge()
   const state = createUIStateStore()
   const artifacts = createArtifactStore()
+  const displayStore = createDisplayContextStore()
   const createArtifact = () => {
     if (artifacts.getIds().length >= 8) throw new Error('Eight-artifact limit reached')
     const id = ArtifactIdSchema.parse(`artifact-${crypto.randomUUID()}`)
@@ -47,6 +49,7 @@ function createServices(onCoverageStatus: (message: string) => void) {
   const router = createActionRouter(state, {
     bridge,
     activate: id => artifacts.activate(id),
+    onSourceChanged: artifactId => displayStore.recordInteraction({ artifactId, actor: 'derived', action: 'deselect', inputFields: [] }),
     onCoverageStatus: status => onCoverageStatus(status.status === 'loading'
       ? 'Loading the requested travel dates…'
       : status.status === 'error'
@@ -64,7 +67,7 @@ function createServices(onCoverageStatus: (message: string) => void) {
     whenIdle: router.whenIdle,
     createArtifact,
   }
-  return { services, artifacts, createArtifact, router }
+  return { services, artifacts, displayStore, createArtifact, router }
 }
 
 function isUIMessage(message: unknown): message is UIMessage {
@@ -127,18 +130,15 @@ function SessionConversation(props: SessionConversationProps) {
         state,
       })),
       descriptors: refs.map(datasetId => {
-        const manifest = runtime.services.bridge.getManifest(datasetId)
+        const binding = runtime.services.bridge.findBinding(datasetId)
+        if(!binding)throw new Error('Missing fare scope binding')
+        const manifest = binding.manifest
         return {
           datasetId,
-          request: {
-            originIds: manifest.coverage.originIds,
-            destinationIds: manifest.coverage.destinationIds,
-            dateWindow: manifest.coverage.dateWindow,
-            modes: manifest.coverage.modes,
-            passengers: manifest.coverage.passengers,
-          },
+          resourceKey:binding.resourceKey,
+          scope:manifest.coverage,
           sourceVersion: manifest.source.sourceVersion,
-          complete: manifest.coverage.complete,
+          complete: manifest.complete,
         }
       }),
     }
@@ -268,6 +268,7 @@ function SessionConversation(props: SessionConversationProps) {
       artifactIds: runtime.artifacts.getIds(),
       store: runtime.services.state,
       bridge: runtime.services.bridge,
+      displayStore: runtime.displayStore,
       layoutSummaries: layouts,
       componentBindings: bindings,
     })
@@ -283,8 +284,10 @@ function SessionConversation(props: SessionConversationProps) {
     const refs = [...new Set(artifactRecords.flatMap(record => record.state.datasetRefs))]
     const manifests = refs.map(datasetId => {
       try {
-        const manifest = runtime.services.bridge.getManifest(datasetId)
-        return { datasetId, rowCount: manifest.rowCount, coverage: manifest.coverage, sourceVersion: manifest.source.sourceVersion, compactSummary: manifest.compactSummary }
+        const binding = runtime.services.bridge.findBinding(datasetId)
+        if(!binding)throw new Error('Missing fare scope binding')
+        const manifest=binding.manifest
+        return { datasetId,resourceKey:binding.resourceKey,totalAvailable:manifest.totalAvailable, coverage: manifest.coverage,availableModes:manifest.availableModes, sourceVersion: manifest.source.sourceVersion,complete:manifest.complete }
       } catch {
         return { datasetId, error: 'Manifest unavailable' }
       }
@@ -314,6 +317,7 @@ function SessionConversation(props: SessionConversationProps) {
     {notice && <Alert role="status">{notice}</Alert>}
     <GenerativeChat
       services={runtime.services}
+      displayStore={runtime.displayStore}
       capture={capture}
       initialMessages={messages}
       initialRunMessageId={initialRunMessageId}

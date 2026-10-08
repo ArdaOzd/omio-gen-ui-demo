@@ -78,11 +78,13 @@ function usePlanningFares(): { fares: PlannedFare[]; loading: boolean } {
   useEffect(() => {
     let active = true
     setResult({ identity, status: 'loading' })
-    Promise.allSettled(selections.map(item => services.bridge.lookupFare(item.fareId, []))).then(results => {
+    Promise.resolve(selections.map(item => services.bridge.findCachedFare(item.fareId))).then(results => {
       if (!active || selectionIdentity(services) !== identity) return
       const fares = selections.map((item, index) => {
         const result = results[index]
-        return result?.status === 'fulfilled' ? { ...item, fact: result.value } : item
+        if (!result) return item
+        const { availableSeats: _availableSeats, ...fact } = result
+        return { ...item, fact }
       }).sort(comparePlannedFares)
       setResult({ identity, status: 'ready', fares })
     })

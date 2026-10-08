@@ -9,7 +9,20 @@ import { ArtifactIdSchema,DatasetIdSchema,type ArtifactUIState } from '../../con
 import { prunePresentTree, validatePresentTree, type PresentNode } from './tree'
 import { isDatasetBoundComponent,resolvePlannerDatasetRef } from '../../catalog/trip-planning/binding'
 import { legKey } from '../../state/leg-bindings'
+import type { ComponentRef } from '../../contracts/display-context'
 type Props=ToolCallMessagePartProps<Record<string,unknown>,Record<string,never>>
+export type DisplayRenderNode=Omit<PresentNode,'children'>&{__displayComponent:{componentRef:ComponentRef;childRefs:string[]};children?:DisplayRenderNode|DisplayRenderNode[]|string}
+export function withDisplayComponentIdentity(node:PresentNode,path='root',visit?:(node:PresentNode)=>void,sceneRef='scene'):DisplayRenderNode{
+ visit?.(node)
+ const value=`${node.artifactRef}:${sceneRef}:${node.$key??path}`,componentRef:ComponentRef={value,keySource:node.$key?'authored-key':'tree-path'}
+ const {children:authoredChildren,...scalar}=node
+ const rawChildren=Array.isArray(authoredChildren)?authoredChildren:authoredChildren&&typeof authoredChildren!=='string'?[authoredChildren]:[]
+ const children=rawChildren.map((child,index)=>withDisplayComponentIdentity(child,`${path}.${index}`,visit,sceneRef))
+ const childRefs=children.map(child=>child.__displayComponent.componentRef.value)
+ if(Array.isArray(authoredChildren))return{...scalar,__displayComponent:{componentRef,childRefs},children}
+ if(authoredChildren&&typeof authoredChildren!=='string')return{...scalar,__displayComponent:{componentRef,childRefs},children:children[0]}
+ return{...scalar,__displayComponent:{componentRef,childRefs},...(typeof authoredChildren==='string'?{children:authoredChildren}:{})}
+}
 function AcceptedSceneBindings({entries,children}:{entries:ReadonlyArray<{artifactId:ReturnType<typeof ArtifactIdSchema.parse>;bindings:ArtifactUIState['datasetBindings']}>;children:ReactNode}){
  const services=useTravelServices(),signature=JSON.stringify(entries)
  useEffect(()=>{for(const entry of entries)services.state.setDatasetBindings?.(entry.artifactId,entry.bindings)},[services.state,signature])
@@ -22,14 +35,11 @@ export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}
  try{
   let tree=partial?prunePresentTree(props.args,undefined,meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args)
   if(!tree)return <Skeleton className="travel-skeleton" role="status">Preparing your view…</Skeleton>
-  const normalize=(node:PresentNode):PresentNode=>{
-   services.state.get(ArtifactIdSchema.parse(node.artifactRef))
-   if(node.datasetRef&&!resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge))throw new Error('Unavailable leg binding')
-   const current=node
-   if(Array.isArray(current.children))return{...current,children:current.children.map(normalize)}
-   if(current.children&&typeof current.children!=='string')return{...current,children:normalize(current.children)}
-   return current
-  }
+  const sceneRef=`present-${props.toolCallId.replace(/[^a-zA-Z0-9_.:-]/g,'_').slice(-96)}`
+  const normalize=(node:PresentNode)=>withDisplayComponentIdentity(node,'root',current=>{
+   services.state.get(ArtifactIdSchema.parse(current.artifactRef))
+   if(current.datasetRef&&!resolvePlannerDatasetRef({kind:current.$type,artifactRef:current.artifactRef,datasetRef:current.datasetRef,legIndex:current.legIndex},services.state,services.bridge))throw new Error('Unavailable leg binding')
+  },sceneRef)
   tree=normalize(tree)
   const refs=(node:PresentNode):void=>{services.state.get(ArtifactIdSchema.parse(node.artifactRef));if(node.datasetRef&&!resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge))throw new Error('Unavailable dataset binding');if(Array.isArray(node.children))node.children.forEach(refs);else if(node.children&&typeof node.children!=='string')refs(node.children)}
   if(partial){
@@ -49,7 +59,8 @@ export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}
    if(node.datasetRef&&isDatasetBoundComponent(node.$type)){
     const seed=DatasetIdSchema.parse(node.datasetRef)
     const current=resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge)
-    const key=current?legKey(services.bridge.getManifest(DatasetIdSchema.parse(current)).coverage):undefined
+    const currentBinding=current?services.bridge.findBinding(DatasetIdSchema.parse(current)):undefined
+    const key=currentBinding?legKey(currentBinding.manifest.coverage):undefined
     if(key)grouped.set(artifactId,{...grouped.get(artifactId),[seed]:key})
    }
    if(Array.isArray(node.children))node.children.forEach(collectBindings);else if(node.children&&typeof node.children!=='string')collectBindings(node.children)

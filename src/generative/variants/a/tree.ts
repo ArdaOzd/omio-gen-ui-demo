@@ -7,7 +7,8 @@ export type PresentNode=z.infer<typeof nodePropsSchema>&{$type:string;$key?:stri
 const names=new Set<string>(catalogDescriptors.map(d=>d.name));const layouts=new Set<string>(catalogDescriptors.filter(d=>d.children).map(d=>d.name))
 export const registeredActions=new Set(['filters','dates','sort','sortByLeg','calendarDateByLeg','modesByLeg','select','stays','route','activate','retry'])
 export const registeredSelectors=new Set(['visibleFares','priceByDay','modeCounts','carrierCounts','cheapestFastest','selectedItinerary','syntheticTotal','coverage','route','timeline','legSchedule'])
-const nodeSchema:z.ZodType<PresentNode>=z.lazy(()=>nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name),'Unregistered component'),$key:z.string().max(96).optional(),children:z.union([z.string().max(160),nodeSchema,z.array(nodeSchema).max(LIMITS.treeNodes)]).optional()}))
+const componentKey=z.string().min(1).max(96).regex(/^[a-zA-Z0-9_.:-]+$/)
+const nodeSchema:z.ZodType<PresentNode>=z.lazy(()=>nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name),'Unregistered component'),$key:componentKey.optional(),children:z.union([z.string().max(160),nodeSchema,z.array(nodeSchema).max(LIMITS.treeNodes)]).optional()}))
 export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string>;datasetIds:Set<string>}):PresentNode {
  assertNoBulkData(input)
  if(new TextEncoder().encode(JSON.stringify(input)).length>24_000)throw new Error('Tree byte budget exceeded')
@@ -29,7 +30,7 @@ export function validatePresentTree(input:unknown,scope?:{artifactIds:Set<string
  visit(root,1);return root
 }
 
-const shallowNodeSchema=nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name)),$key:z.string().max(96).optional()})
+const shallowNodeSchema=nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name)),$key:componentKey.optional()})
 /** Only completed, allowlisted scalar props reach the native renderer. */
 export function prunePresentTree(input:unknown,scope?:{artifactIds:Set<string>;datasetIds:Set<string>},partialPath?:readonly string[]):PresentNode|undefined {
  let remaining=LIMITS.treeNodes;const keys=new Set<string>()

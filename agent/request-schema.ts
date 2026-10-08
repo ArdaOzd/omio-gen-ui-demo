@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import {SummarizeFaresInputSchema} from '../src/generative/tools/summarize-schema';
 import { HISTORY_LIMITS } from '../src/generative/chat/history-limits';
-import { EditArtifactInputSchema,CoverageRequestSchema,ArtifactIdSchema,DatasetIdSchema,FareIdSchema,DatasetManifestSchema,BoundedFareFactSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
+import { EditArtifactInputSchema,parseAgentContext, type AgentContextEnvelope } from '../src/generative/contracts';
 import { validatePresentTree } from '../src/generative/variants/a/tree';
 import { assertNoBulkData } from '../src/generative/contracts/privacy';
-export const TOOL_NAMES=['load_fares','summarize_fares','get_top_fares','get_fare','get_route','find_carriers','present','edit_artifact','create_artifact'] as const;
+import { InspectDisplayErrorSchema,InspectDisplayInputSchema,InspectDisplayOutputSchema } from '../src/generative/contracts/display-context';
+export const TOOL_NAMES=['inspect_display','present','edit_artifact','create_artifact'] as const;
 const ToolSchema=z.strictObject({description:z.string().max(30000).optional(),parameters:z.record(z.string(),z.unknown()),providerOptions:z.record(z.string(),z.unknown()).optional()});
 const PartSchema=z.object({type:z.string().max(80),text:z.string().max(HISTORY_LIMITS.textCharacters).optional(),state:z.string().max(40).optional(),toolCallId:z.string().max(128).optional(),toolName:z.string().max(80).optional(),input:z.unknown().optional(),output:z.unknown().optional(),errorText:z.string().max(200).optional()});
 const MessageSchema=z.object({id:z.string().min(1).max(128),role:z.enum(['user','assistant','system']),parts:z.array(PartSchema).max(HISTORY_LIMITS.parts)});
@@ -38,31 +38,21 @@ export function parseChatRequest(input:unknown):ChatRequest {
 
 const id=z.string().min(1).max(96);
 const revision=z.number().int().nonnegative();
-const ErrorOutput=z.strictObject({status:z.literal('error'),code:z.enum(['LOCAL_TOOL_FAILED','LOCAL_TOOL_CANCELLED','DATASET_CAPACITY_EXCEEDED'])});
+const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const ScopeOutputSchema=z.strictObject({datasetRef:id,resourceKey:id,legIndex:z.number().int().min(0).max(7),originId:id,destinationId:id,dateWindow:z.strictObject({from:date,to:date}),sourceVersion:id,totalAvailable:z.number().int().nonnegative(),complete:z.boolean()});
+const ErrorOutput=z.strictObject({status:z.literal('error'),code:z.enum(['LOCAL_TOOL_FAILED','LOCAL_TOOL_CANCELLED'])});
 export function parseToolOutput(name:string,input:unknown):unknown {
  if(ErrorOutput.safeParse(input).success)return ErrorOutput.parse(input);
- if(name==='load_fares')return DatasetManifestSchema.parse(input);
- if(name==='get_fare')return BoundedFareFactSchema.parse(input);
- if(name==='get_top_fares')return z.strictObject({datasetId:id,revision,facts:z.array(BoundedFareFactSchema).max(5)}).parse(input);
- if(name==='summarize_fares')return z.strictObject({datasetId:id,revision,groups:z.array(z.strictObject({label:z.string().max(160),count:z.number().int().nonnegative()})).max(30),truncated:z.boolean()}).parse(input);
- if(name==='get_route')return z.strictObject({datasetId:id,originIds:z.array(id).max(8),destinationIds:z.array(id).max(8),modes:z.array(z.enum(['train','bus','flight','ferry'])).max(4)}).parse(input);
- if(name==='find_carriers')return z.union([
-  z.strictObject({datasetId:id,carriers:z.array(z.strictObject({id,name:z.string().trim().min(1).max(120)})).max(20),truncated:z.boolean()}),
-  z.strictObject({datasetId:id,carrierIds:z.array(id).max(20),truncated:z.boolean()}),
- ]).parse(input);
+ if(name==='inspect_display')return z.union([InspectDisplayOutputSchema,InspectDisplayErrorSchema]).parse(input);
  if(name==='present')return z.strictObject({}).parse(input);
- if(name==='edit_artifact')return z.strictObject({artifactId:id,revision,status:z.enum(['applied','stale'])}).parse(input);
+ if(name==='edit_artifact')return z.strictObject({artifactId:id,revision,status:z.enum(['applied','stale']),scopes:z.array(ScopeOutputSchema).max(8).optional()}).parse(input);
  if(name==='create_artifact')return z.strictObject({artifactId:id,revision}).parse(input);
  throw new Error('Unregistered tool output');
 }
 
 export function parseToolInput(name:string,input:unknown):unknown {
  assertNoBulkData(input);
- if(name==='load_fares')return z.strictObject({coverage:CoverageRequestSchema,displayWindow:CoverageRequestSchema.shape.dateWindow.optional(),artifactRef:ArtifactIdSchema.optional()}).parse(input);
- if(name==='summarize_fares')return SummarizeFaresInputSchema.parse(input);
- if(name==='get_top_fares')return z.strictObject({datasetRef:DatasetIdSchema,objective:z.enum(['cheapest','fastest'])}).parse(input);
- if(name==='get_fare')return z.strictObject({fareId:FareIdSchema}).parse(input);
- if(name==='get_route'||name==='find_carriers')return z.strictObject({datasetRef:DatasetIdSchema}).parse(input);
+ if(name==='inspect_display')return InspectDisplayInputSchema.parse(input);
  if(name==='edit_artifact')return EditArtifactInputSchema.parse(input);
  if(name==='create_artifact')return z.strictObject({}).parse(input);
  if(name==='present')return validatePresentTree(input);

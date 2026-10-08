@@ -8,9 +8,9 @@ import { FieldLegend, FieldSet } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DateSchema, DatasetIdSchema, type FareRow, type TransportMode } from '../../contracts'
+import { DatasetIdSchema, DateSchema, type FareRow, type TransportMode } from '../../contracts'
 import { fareMeetsThreshold, thresholdDateTime } from '../../state/itinerary-schedule'
-import { availableModes as actualModes, legDate, tripDatesForLegDeparture } from '../../state/leg-bindings'
+import { legDate, tripDatesForLegDeparture } from '../../state/leg-bindings'
 import {
   carrierLabel,
   cityLabel,
@@ -18,13 +18,16 @@ import {
   duration,
   legKey,
   money,
-  useFareDayRepresentatives,
-  useLegFareRows,
-  useFareRowsForDate,
+  useCalendarDays,
+  useDayFares,
   useItineraryPlan,
+  useOrderedFares,
   useTravelAction,
 } from '../context'
 import type { WidgetProps } from '../layout'
+import { DisplayNodeProvider, recordDisplayInteraction, useDisplayNode, usePublishDisplay } from '../display-context-provider'
+import { fareInspectionItems, useProjectionDisplay } from '../display-records'
+import type { ComponentIdentity } from '../../contracts/display-context'
 
 type Plan = ReturnType<typeof useItineraryPlan>
 type PlanLeg = Plan['legs'][number]
@@ -94,8 +97,11 @@ function resolveLeg(plan: Plan, datasetRef?: string, legIndex?: number): { leg: 
     const leg = plan.legs[0]
     return leg ? { leg, index: 0 } : undefined
   }
-  const requested = plan.services.bridge.getManifest(DatasetIdSchema.parse(datasetRef))
-  const requestedKey = legKey(requested.coverage)
+  const parsed = DatasetIdSchema.safeParse(datasetRef)
+  if (!parsed.success) return undefined
+  const requested = plan.services.bridge.findBinding(parsed.data)
+  if(!requested)return undefined
+  const requestedKey = legKey(requested.manifest.coverage)
   const index = plan.legs.findIndex(leg => leg.key === requestedKey)
   const leg = plan.legs[index]
   return leg && index >= 0 ? { leg, index } : undefined
@@ -200,10 +206,22 @@ function CityFields({ plan, leg, legIndex, locations, onlyDestination = false }:
   onlyDestination?: boolean
 }) {
   const dispatch = useTravelAction(plan.state.artifactId)
+  const node = useDisplayNode()
+  const fields = ['originId', 'destinationId'] as const
+  const cities = routeCities(plan)
+  usePublishDisplay({
+    inputs: { originId: leg.originId, destinationId: leg.destinationId },
+    provenance: node.store?.provenance(plan.state.artifactId, fields),
+    display: { payload: { kind: 'route', cityIds: cities }, totalDisplayed: cities.length, includedCount: cities.length, complete: true, omittedCount: 0 },
+  })
+  const update = (cityIndex: number, cityId: string) => {
+    recordDisplayInteraction(node.store, { artifactId: plan.state.artifactId, componentRef: node.componentRef, action: 'input', inputFields: fields })
+    updateRoute(plan, dispatch, cityIndex, cityId)
+  }
   return <div className="trip-city-pair">
-    {!onlyDestination && <LocationInput label="From" value={leg.originId} locations={cityOptions(plan, legIndex, locations)} onSelect={city => updateRoute(plan, dispatch, legIndex, city)} />}
+    {!onlyDestination && <LocationInput label="From" value={leg.originId} locations={cityOptions(plan, legIndex, locations)} onSelect={city => update(legIndex, city)} />}
     {!onlyDestination && <ArrowRight className="trip-route-arrow" aria-hidden="true" />}
-    <LocationInput label="To" value={leg.destinationId} locations={cityOptions(plan, legIndex + 1, locations)} onSelect={city => updateRoute(plan, dispatch, legIndex + 1, city)} />
+    <LocationInput label="To" value={leg.destinationId} locations={cityOptions(plan, legIndex + 1, locations)} onSelect={city => update(legIndex + 1, city)} />
   </div>
 }
 
@@ -222,6 +240,7 @@ export function CityField(props: WidgetProps) {
 
 function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; label?: string }) {
   const dispatch = useTravelAction(plan.state.artifactId)
+  const node = useDisplayNode()
   const [error, setError] = useState('')
   const legIndex = plan.legs.findIndex(candidate => candidate.key === leg.key)
   const stayIndex = plan.state.stays.findIndex(stay => stay.cityId === leg.originId)
@@ -230,6 +249,7 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
   const change = (date: string) => {
     try {
       const valid = DateSchema.parse(date)
+      recordDisplayInteraction(node.store, { artifactId: plan.state.artifactId, componentRef: node.componentRef, action: 'input', inputFields: ['serviceDate'] })
       if (legIndex <= 0) {
         const dates = tripDatesForLegDeparture(plan.state, leg.originId, valid)
         dispatch({ kind: 'dates', artifactId: plan.state.artifactId, dates })
@@ -247,6 +267,7 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
       setError('Choose a valid date for this leg.')
     }
   }
+  usePublishDisplay({ inputs: { serviceDate: leg.threshold.date }, provenance: node.store?.provenance(plan.state.artifactId, ['serviceDate']) })
   return <div className="trip-date-control">
     <Label><CalendarDays aria-hidden="true" />{label ?? 'Departure'}
       <Input type="date" value={leg.threshold.date} min={minimumDate} onChange={event => change(event.target.value)} />
@@ -265,6 +286,7 @@ export function TravelDate(props: WidgetProps) {
 
 function StayDurationControl({ plan, leg, nextLeg, title }: { plan: Plan; leg: PlanLeg; nextLeg?: PlanLeg; title?: string }) {
   const dispatch = useTravelAction(plan.state.artifactId)
+  const node = useDisplayNode()
   const stay = plan.state.stays.find(item => item.cityId === leg.destinationId)
   const nights = stay?.nights ?? 0
   const setNights = (value: number) => {
@@ -273,8 +295,10 @@ function StayDurationControl({ plan, leg, nextLeg, title }: { plan: Plan; leg: P
     const stays = existing >= 0
       ? plan.state.stays.map((item, index) => index === existing ? { ...item, nights: value } : item)
       : [...plan.state.stays, { cityId: leg.destinationId, nights: value }]
+    recordDisplayInteraction(node.store, { artifactId: plan.state.artifactId, componentRef: node.componentRef, action: 'input', inputFields: ['stayNights'] })
     dispatch({ kind: 'stays', artifactId: plan.state.artifactId, stays })
   }
+  usePublishDisplay({ inputs: { stayNights: nights }, provenance: node.store?.provenance(plan.state.artifactId, ['stayNights']) })
   return <div className="trip-stay-control">
     <div><strong>{title ?? `Stay in ${cityLabel(leg.destinationId)}`}</strong><span>{nights} night{nights === 1 ? '' : 's'}</span></div>
     <Input type="range" min="0" max="30" step="1" value={nights} aria-label={`Stay in ${cityLabel(leg.destinationId)}`} onChange={event => setNights(Number(event.target.value))} />
@@ -298,8 +322,9 @@ function modeIcon(mode: TransportMode): ReactNode {
 
 function TransportSelectControl({ plan, leg, title, presentation = 'inline' }: { plan: Plan; leg: PlanLeg; title?: string; presentation?: 'inline' | 'dropdown' }) {
   const dispatch = useTravelAction(plan.state.artifactId)
+  const node = useDisplayNode()
   const explicit = plan.state.modesByLeg[leg.key] ?? []
-  const advertised = plan.state.availableModesByLeg[leg.key] ?? actualModes(plan.services.bridge.getManifest(leg.datasetId))
+  const advertised = plan.state.availableModesByLeg[leg.key] ?? leg.availableModes
   const available = modeOrder.filter(mode => advertised.includes(mode))
   const selected = explicit.length ? explicit.filter(mode => available.includes(mode)) : available
   const toggle = (mode: TransportMode) => {
@@ -309,9 +334,11 @@ function TransportSelectControl({ plan, leg, title, presentation = 'inline' }: {
         ? explicit.filter(candidate => candidate !== mode)
         : [...explicit, mode]
     const canonical = next.length === available.length ? [] : modeOrder.filter(candidate => next.includes(candidate))
+    recordDisplayInteraction(node.store, { artifactId: plan.state.artifactId, componentRef: node.componentRef, action: 'input', inputFields: ['modes'] })
     dispatch({ kind: 'modesByLeg', artifactId: plan.state.artifactId, modesByLeg: { ...plan.state.modesByLeg, [leg.key]: canonical } })
   }
   const selectedLabel = selected.length === available.length ? 'All available' : selected.map(cityLabel).join(', ')
+  usePublishDisplay({ inputs: { modes: selected }, provenance: node.store?.provenance(plan.state.artifactId, ['modes']) })
   return <FieldSet className={`trip-mode-control is-${presentation}`}>
     <FieldLegend>{title ?? 'Transport'}</FieldLegend>
     {presentation === 'dropdown' ? <DropdownMenu>
@@ -336,7 +363,7 @@ export function fareOrderFromState(field: Plan['state']['sort']['field'], direct
 
 const defaultLegSort: Plan['state']['sort'] = { field: 'departureMinutes', direction: 'asc' }
 
-export function sortFares(rows: readonly FareRow[], order: FareOrderKind): FareRow[] {
+export function sortFares<T extends FareRow>(rows: readonly T[], order: FareOrderKind): T[] {
   return [...rows].sort((left, right) => {
     if (order === 'cheapest') {
       const price = left.priceCents - right.priceCents
@@ -356,6 +383,7 @@ export function sortFares(rows: readonly FareRow[], order: FareOrderKind): FareR
 
 function FareOrderControl({ plan, leg, title }: { plan: Plan; leg: PlanLeg; title?: string }) {
   const dispatch = useTravelAction(plan.state.artifactId)
+  const node = useDisplayNode()
   const current = plan.state.sortByLeg[leg.key] ?? defaultLegSort
   const selected = fareOrderFromState(current.field, current.direction)
   const choose = (order: FareOrderKind) => {
@@ -364,8 +392,10 @@ function FareOrderControl({ plan, leg, title }: { plan: Plan; leg: PlanLeg; titl
       : order === 'fastest'
         ? { field: 'durationMinutes', direction: 'asc' }
         : { field: 'departureMinutes', direction: 'asc' }
+    recordDisplayInteraction(node.store, { artifactId: plan.state.artifactId, componentRef: node.componentRef, action: 'input', inputFields: ['sort'] })
     dispatch({ kind: 'sortByLeg', artifactId: plan.state.artifactId, sortByLeg: { ...plan.state.sortByLeg, [leg.key]: sort } })
   }
+  usePublishDisplay({ inputs: { sort: current }, provenance: node.store?.provenance(plan.state.artifactId, ['sort']) })
   return <FieldSet className="trip-order-control">
     <FieldLegend>{title ?? 'Order fares'}</FieldLegend>
     <div>{([['none', 'Departure'], ['cheapest', 'Cheapest'], ['fastest', 'Fastest']] satisfies ReadonlyArray<readonly [FareOrderKind, string]>).map(([value, label]) => <Button key={value} type="button" variant="outline" aria-pressed={selected === value} onClick={() => choose(value)}>{label}</Button>)}</div>
@@ -379,25 +409,27 @@ export function FareOrder(props: WidgetProps) {
   return <Card className="trip-planning-control"><FareOrderControl plan={plan} leg={resolved.leg} title={props.title} /></Card>
 }
 
-function FareStrip({ artifactRef, datasetRef, legIndex, compact = false }: { artifactRef: string; datasetRef: string; legIndex?: number; compact?: boolean }) {
+function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = false }: { artifactRef: string; datasetRef: string; legIndex?: number; componentRef?: string; compact?: boolean }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
-  const result = useLegFareRows(artifactRef, datasetRef)
   const resolved = resolveLeg(plan, datasetRef, legIndex)
+  const displayNode=useDisplayNode()
+  const result = useOrderedFares(artifactRef,{componentRef:componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,limit:compact?8:16})
+  const rows = resolved?sortFares((result.data?.items??[]).filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold)), fareOrderFromState((plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).field,(plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).direction)):[]
+  const shown=rows.slice(0,compact?8:16),total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-shown.length)
+  useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:shown.map((row,index)=>({fareId:row.id,rank:index+1})),...(shown.length?{renderedRange:{fromRank:1,toRank:shown.length}}:{})},totalDisplayed:total,includedCount:shown.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(shown))
   if (!resolved) return <EmptyPlanningState />
-  if (result.status === 'loading') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
-  if (result.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
-  const currentSort = result.state.sortByLeg[resolved.leg.key] ?? defaultLegSort
-  const rows = sortFares(result.rows.filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold)), fareOrderFromState(currentSort.field, currentSort.direction))
+  if (!result.data&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
+  if (!result.data&&result.queryState.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
   return <div className={`trip-fare-strip${compact ? ' is-compact' : ''}`}>
     <p className="trip-fare-caption">Synthetic fares per passenger</p>
-    {rows.length > 0 ? <div className="trip-fare-scroll">{rows.slice(0, compact ? 8 : 16).map(row => {
-      const selected = result.state.selectedFareIds.includes(row.id)
+    {shown.length > 0 ? <div className="trip-fare-scroll">{shown.map(row => {
+      const selected = plan.state.selectedFareIds.includes(row.id)
       return <Card key={row.id} className={`trip-fare-option${selected ? ' is-selected' : ''}`} role="article">
         <div className="trip-fare-option-top"><span>{modeIcon(row.mode)}{cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong></div>
         <p>{departure(row.departureMinutes)} · {duration(row.durationMinutes)}</p>
-        <small>{carrierLabel(row, result.services.bridge, result.datasetId)} · {row.serviceDate}</small>
-        <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: result.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose fare'}</Button>
+        <small>{carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.serviceDate} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small>
+        <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => {recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:selected?'deselect':'select'});dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}}>{selected ? 'Selected' : 'Choose fare'}</Button>
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}
   </div>
@@ -421,9 +453,19 @@ function dateRange(start: string, end: string): string[] {
   return dates
 }
 
+function ActiveDayDisplayRecord({identity,result,rows}:{identity:ComponentIdentity;result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items']}){
+ const total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-rows.length)
+ return <DisplayNodeProvider identity={identity}><ActiveDayPublisher result={result} rows={rows} total={total} omitted={omitted}/></DisplayNodeProvider>
+}
+function ActiveDayPublisher({result,rows,total,omitted}:{result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items'];total:number;omitted:number}){
+ useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:rows.map((row,index)=>({fareId:row.id,rank:index+1})),...(rows.length?{renderedRange:{fromRank:1,toRank:rows.length}}:{})},totalDisplayed:total,includedCount:rows.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(rows))
+ return null
+}
+
 function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifactRef: string; datasetRef: string; legIndex: number; title?: string }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
+  const displayNode=useDisplayNode()
   const resolved = resolveLeg(plan, datasetRef, legIndex)
   const displayWindow = resolved ? plan.state.displayWindowByLeg[resolved.leg.key] : undefined
   const legacyFrom = resolved ? legDate(plan.state, resolved.leg.originId, plan.state.dates.start) : plan.state.dates.start
@@ -436,18 +478,23 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   const dates = useMemo(() => outsideWindow ? [] : dateRange(visibleStart, requestedTo), [outsideWindow, visibleStart, requestedTo])
   const calendarKey = resolved?.leg.key
   const persistedDate = calendarKey ? plan.state.calendarDateByLeg[calendarKey] : undefined
-  const representatives = useFareDayRepresentatives(artifactRef, datasetRef)
-  const availableDates = new Set(representatives.rows.map(row => row.serviceDate))
-  const selectedDate = persistedDate && availableDates.has(persistedDate) ? persistedDate : dates.find(date => availableDates.has(date)) ?? visibleStart
-  const selectedResult = useFareRowsForDate(artifactRef, datasetRef, selectedDate)
   const calendarOrder: Extract<FareOrderKind, 'cheapest' | 'fastest'> = calendarKey && plan.state.sortByLeg[calendarKey]?.field === 'durationMinutes' ? 'fastest' : 'cheapest'
+  const representatives = useCalendarDays(artifactRef,{componentRef:displayNode.componentRef??`${artifactRef}:leg-${legIndex}.calendar`,purpose:'trip-fare-calendar',legKey:calendarKey,datasetRef,objective:calendarOrder})
+  const days=representatives.data?.days??[]
+  const availableDates = new Set(days.filter(day=>day.count>0).map(day => day.date))
+  const selectedDate = persistedDate && availableDates.has(persistedDate) ? persistedDate : dates.find(date => availableDates.has(date)) ?? visibleStart
+  const activeRef=`${displayNode.componentRef??`${artifactRef}:leg-${legIndex}.calendar`}.active-day`
+  const selectedResult = useDayFares(artifactRef,{componentRef:activeRef,purpose:'trip-calendar-active-day',legKey:calendarKey,datasetRef,serviceDate:selectedDate,limit:8})
+  const cells=dates.map(date=>{const day=days.find(candidate=>candidate.date===date),representative=day?.representative;return{key:date,label:date,value:representative?.priceCents,unit:(representative?'priceCents':'count') as 'priceCents'|'count',fareId:representative?.id,available:(day?.count??0)>0}})
+  useProjectionDisplay(representatives,{payload:{kind:'calendar',selectedDate,cells},totalDisplayed:cells.length,includedCount:cells.length,complete:true,omittedCount:0},fareInspectionItems(days.flatMap(day=>day.representative?[day.representative]:[])))
   const setCalendarDate = (date: string | undefined) => {
-    if (!calendarKey || !representatives.datasetId) return
-    const manifest=plan.services.bridge.getManifest(representatives.datasetId)
+    if (!calendarKey) return
+    const current=representatives.queryState.status==='ready'||representatives.queryState.status==='refreshing'?representatives.queryState.current:representatives.queryState.status==='error'?representatives.queryState.previous:undefined
+    if(!current)return
     const calendarDateByLeg={...plan.state.calendarDateByLeg}
     if(date)calendarDateByLeg[calendarKey]=date;else delete calendarDateByLeg[calendarKey]
     const command={kind:'calendarDateByLeg' as const,artifactId:plan.state.artifactId,calendarDateByLeg,expectedRevision:plan.state.revision}
-    const scope={legKey:calendarKey,date,availableDates:[...availableDates],datasetId:representatives.datasetId,revision:manifest.revision,sourceVersion:manifest.source.sourceVersion,queryKey:representatives.queryKey,currentQueryKey:representatives.currentQueryKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
+    const scope={legKey:calendarKey,date,availableDates:[...availableDates],resourceKey:current.resourceKey,datasetId:current.datasetId,datasetRevision:current.datasetRevision,sourceVersion:current.sourceVersion,resultKey:current.resultKey,currentResultKey:()=>representatives.captureResult()?.identity.resultKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
     return plan.services.dispatch?.calendarDateFromQuery?.(command,scope)??plan.services.state.dispatch(command)
   }
   const chooseDate = (date: string) => {
@@ -459,23 +506,31 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     dispatch({ kind: 'sortByLeg', artifactId: plan.state.artifactId, sortByLeg: { ...plan.state.sortByLeg, [calendarKey]: sort } })
   }
   useEffect(() => {
-    if (!calendarKey || representatives.status !== 'ready') return
+    if (!calendarKey || !representatives.data) return
     if (availableDates.size > 0) {
-      if (persistedDate !== selectedDate) chooseDate(selectedDate)
+      if (persistedDate !== selectedDate) {
+        plan.services.state.dispatch({
+          kind: 'calendarDateByLeg',
+          artifactId: plan.state.artifactId,
+          calendarDateByLeg: { ...plan.state.calendarDateByLeg, [calendarKey]: selectedDate },
+          expectedRevision: plan.state.revision,
+        })
+      }
       return
     }
     if (persistedDate) {
       const { [calendarKey]: _removed, ...calendarDateByLeg } = plan.state.calendarDateByLeg
-      setCalendarDate(undefined)
+      plan.services.state.dispatch({ kind: 'calendarDateByLeg', artifactId: plan.state.artifactId, calendarDateByLeg, expectedRevision: plan.state.revision })
     }
-  }, [availableDates.size, calendarKey, persistedDate, representatives.status, selectedDate])
+  }, [availableDates.size, calendarKey, persistedDate, representatives.data, selectedDate])
   if (!resolved) return <EmptyPlanningState />
   if (outsideWindow) return <Card className="trip-planning-control trip-fare-calendar"><div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div></div><Alert role="status">No departures fit this trip window; adjust the previous fare or stay.</Alert></Card>
-  if (representatives.status === 'loading' || selectedResult.status === 'loading') return <Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
-  if (representatives.status === 'error' || selectedResult.status === 'error') return <Alert>Calendar fares could not load. Try the date again.</Alert>
-  const byDate = new Map(representatives.rows.map(row => [row.serviceDate, row]))
-  const selectedRows = selectedResult.rows
+  if (!representatives.data || !selectedResult.data) return representatives.queryState.status==='error'||selectedResult.queryState.status==='error'?<Alert>Calendar fares could not load. Try the date again.</Alert>:<Skeleton className="trip-calendar-skeleton" role="status">Comparing days…</Skeleton>
+  const byDate = new Map(days.flatMap(day=>day.representative?[[day.date,day.representative] as const]:[]))
+  const selectedRows = selectedResult.data.items.slice(0,8)
+  const activeIdentity:ComponentIdentity={componentRef:{value:activeRef,keySource:'tree-path'},componentType:'FareCalendarActiveDay',scope:{kind:'leg',artifactId:artifactRef,legIndex,legKey:resolved.leg.key,resourceKey:resolved.leg.resourceKey},authored:{title:'Active calendar day'}}
   return <Card className="trip-planning-control trip-fare-calendar">
+    <ActiveDayDisplayRecord identity={activeIdentity} result={selectedResult} rows={selectedRows}/>
     <div className="trip-calendar-header"><div><span className="trip-kicker">Flexible dates</span><h3>{title ?? 'Fare calendar'}</h3></div><p>{cityLabel(resolved.leg.originId)} <ArrowRight aria-hidden="true" /> {cityLabel(resolved.leg.destinationId)}</p></div>
     <FieldSet className="trip-order-control">
       <FieldLegend>Compare each day by</FieldLegend>
@@ -494,8 +549,8 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
       <h4>{new Date(`${selectedDate}T12:00:00.000Z`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}</h4>
       <p className="trip-fare-caption">Synthetic fares per passenger</p>
       {selectedRows.length > 0 ? <div>{selectedRows.slice(0, 8).map(row => {
-        const selected = selectedResult.state.selectedFareIds.includes(row.id)
-        return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, selectedResult.services.bridge, selectedResult.datasetId)}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: selectedResult.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose'}</Button></div>
+        const selected = plan.state.selectedFareIds.includes(row.id)
+        return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}>{selected ? 'Selected' : 'Choose'}</Button></div>
       })}</div> : <p role="status">No synthetic fares match this day and transport selection.</p>}
     </div>
   </Card>
@@ -508,14 +563,25 @@ export function FareCalendar(props: WidgetProps) {
   return <FareCalendarView artifactRef={props.artifactRef} datasetRef={resolved.leg.datasetId} legIndex={resolved.index} title={props.title} />
 }
 
-function LegRow({ plan, leg, index, locations }: { plan: Plan; leg: PlanLeg; index: number; locations: LocationOption[] }) {
+function InternalLegNode({ plan, leg, index, parentRef, suffix, componentType, children }: { plan: Plan; leg: PlanLeg; index: number; parentRef: string; suffix: string; componentType: string; children: ReactNode }) {
+  const componentRef = `${parentRef}.leg-${index}.${suffix}`
+  const identity: ComponentIdentity = {
+    componentRef: { value: componentRef, keySource: 'tree-path' },
+    componentType,
+    scope: { kind: 'leg', artifactId: plan.state.artifactId, legIndex: index, legKey: leg.key, resourceKey: leg.resourceKey },
+    authored: {},
+  }
+  return <DisplayNodeProvider identity={identity}>{children}</DisplayNodeProvider>
+}
+
+function LegRow({ plan, leg, index, locations, parentRef }: { plan: Plan; leg: PlanLeg; index: number; locations: LocationOption[]; parentRef: string }) {
   return <Card className="trip-plan-leg" aria-label={`Leg ${index + 1}: ${cityLabel(leg.originId)} to ${cityLabel(leg.destinationId)}`}>
     <div className="trip-leg-number"><span>{index + 1}</span><div><small>LEG</small><strong>{cityLabel(leg.originId)} to {cityLabel(leg.destinationId)}</strong></div></div>
-    <CityFields plan={plan} leg={leg} legIndex={index} locations={locations} />
-    <TravelDateControl plan={plan} leg={leg} />
-    <TransportSelectControl plan={plan} leg={leg} presentation="dropdown" />
-    <FareOrderControl plan={plan} leg={leg} />
-    <FareStrip artifactRef={plan.state.artifactId} datasetRef={leg.datasetId} compact />
+    <InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="cities" componentType="CityFieldInternal"><CityFields plan={plan} leg={leg} legIndex={index} locations={locations} /></InternalLegNode>
+    <InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="date" componentType="TravelDateInternal"><TravelDateControl plan={plan} leg={leg} /></InternalLegNode>
+    <InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="modes" componentType="TransportSelectInternal"><TransportSelectControl plan={plan} leg={leg} presentation="dropdown" /></InternalLegNode>
+    <InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="sort" componentType="FareOrderInternal"><FareOrderControl plan={plan} leg={leg} /></InternalLegNode>
+    <InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="fares" componentType="FadeFaresInternal"><FareStrip artifactRef={plan.state.artifactId} datasetRef={leg.datasetId} compact /></InternalLegNode>
   </Card>
 }
 
@@ -526,14 +592,22 @@ function EmptyPlanningState() {
 export function MultiCityPlanGrid(props: WidgetProps) {
   const plan = useItineraryPlan(props.artifactRef)
   const catalog = useLocationCatalog()
+  const node = useDisplayNode()
+  const cities = routeCities(plan)
+  usePublishDisplay({
+    inputs: { ...(cities[0] ? { originId: cities[0] } : {}), ...(cities.at(-1) ? { destinationId: cities.at(-1) } : {}), dateWindow: { from: plan.state.dates.start, to: plan.state.dates.end ?? plan.state.dates.start } },
+    provenance: node.store?.provenance(plan.state.artifactId, ['originId', 'destinationId', 'dateWindow']),
+    display: { payload: { kind: 'route', cityIds: cities }, totalDisplayed: cities.length, includedCount: cities.length, complete: true, omittedCount: 0 },
+  })
   if (!plan.legs.length) return <EmptyPlanningState />
+  const parentRef = node.componentRef ?? `${props.artifactRef}:multi-city-plan`
   return <Card className="trip-multicity-plan" role="region" aria-label={props.title ?? 'Multi-city trip planner'}>
     <header className="trip-plan-header"><div><span className="trip-kicker">Build your route</span><h2>{props.title ?? 'Multi-city plan'}</h2><p>Adjust each leg locally. Dates, stays, transport, and selected fares remain attached to this plan.</p></div><div className="trip-plan-summary"><Clock3 aria-hidden="true" /><span>{plan.legs.length} leg{plan.legs.length === 1 ? '' : 's'}</span></div></header>
     {plan.status === 'loading' && <p className="trip-plan-status" role="status">Checking selected fare times…</p>}
     {catalog.status === 'error' && <Alert>City suggestions are unavailable. Your current route remains visible.</Alert>}
     <div className="trip-plan-grid">{plan.legs.map((leg, index) => <div className="trip-plan-step" key={leg.key}>
-      <LegRow plan={plan} leg={leg} index={index} locations={catalog.locations} />
-      {index < plan.legs.length - 1 && <div className="trip-stay-bridge"><span aria-hidden="true" /><Card><StayDurationControl plan={plan} leg={leg} nextLeg={plan.legs[index + 1]} /></Card></div>}
+      <LegRow plan={plan} leg={leg} index={index} locations={catalog.locations} parentRef={parentRef} />
+      {index < plan.legs.length - 1 && <div className="trip-stay-bridge"><span aria-hidden="true" /><Card><InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="stay" componentType="StayDurationInternal"><StayDurationControl plan={plan} leg={leg} nextLeg={plan.legs[index + 1]} /></InternalLegNode></Card></div>}
     </div>)}</div>
     <p className="trip-synthetic-note">All fares and totals are synthetic demo data. Prices are per passenger and include demo fees.</p>
   </Card>
