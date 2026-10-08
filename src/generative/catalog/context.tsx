@@ -252,7 +252,7 @@ function committedResultKey(state: QueryExecutionState) {
 }
 
 function currentResultKey(state: QueryExecutionState): ResultKey | undefined {
-  const current = state.status === 'ready' || state.status === 'refreshing' ? state.current : undefined
+  const current = state.status === 'ready' || state.status === 'refreshing' ? state.current : state.status === 'error' ? state.previous : undefined
   return current?.inputHash === state.intent.desiredInputHash ? current.resultKey : undefined
 }
 

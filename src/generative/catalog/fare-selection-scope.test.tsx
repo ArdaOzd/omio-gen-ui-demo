@@ -51,6 +51,68 @@ async function loadedBridge(client?: ServerQueryClient) {
   return { fixed, bridge, binding: bridge.getBinding(manifest.resourceKey) }
 }
 
+async function retryFailureBridge() {
+  const fixed = createFixedProjectionFixture({ rows, sourceVersion: 'selection-source-v1' })
+  let failure: 'none' | 'all' | 'train-filter' = 'none'
+  const client: ServerQueryClient = {
+    queryGroups: async (request, signal) => {
+      const trainFilter = request.groups.some(group => group.projections.some(projection => 'filters' in projection && projection.filters.modes.includes('train')))
+      if (failure === 'all' || (failure === 'train-filter' && trainFilter)) throw new Error('fixture query failure')
+      return fixed.client.queryGroups(request, signal)
+    },
+    lookupPins: (request, signal) => fixed.client.lookupPins(request, signal),
+  }
+  const bridge = createFareDataBridge({ client })
+  const manifest = await bridge.loadScope(fixed.scope({ originId: 'london', destinationId: 'paris', dateWindow: { from: '2026-10-09', to: '2026-10-09' }, passengers: 1, earliestDeparture: { date: '2026-10-09', minutes: 0 } }), new AbortController().signal)
+  return { bridge, binding: bridge.getBinding(manifest.resourceKey), failWith(value: typeof failure) { failure = value } }
+}
+
+function captureRequestedQueryKey(bridge: ServerFareDataBridge): () => string | undefined {
+  const request = bridge.coordinator.request.bind(bridge.coordinator)
+  let queryKey: string | undefined
+  bridge.coordinator.request = requirement => {
+    const result = request(requirement)
+    queryKey = result.intent.queryKey
+    return result
+  }
+  return () => queryKey
+}
+
+function withForcedSameInputError(storedBridge: ServerFareDataBridge) {
+  const coordinator = storedBridge.coordinator
+  const forced = new Map<string, NonNullable<ReturnType<typeof coordinator.getState>>>()
+  const listeners = new Map<string, Set<() => void>>()
+  const bridge: ServerFareDataBridge = {
+    ...storedBridge,
+    coordinator: {
+      ...coordinator,
+      getState(queryKey) {
+        return forced.get(queryKey) ?? coordinator.getState(queryKey)
+      },
+      subscribe(queryKey, listener) {
+        const subscribed = listeners.get(queryKey) ?? new Set<() => void>()
+        subscribed.add(listener)
+        listeners.set(queryKey, subscribed)
+        const unsubscribe = coordinator.subscribe(queryKey, listener)
+        return () => {
+          unsubscribe()
+          subscribed.delete(listener)
+          if (!subscribed.size) listeners.delete(queryKey)
+        }
+      },
+    },
+  }
+  return {
+    bridge,
+    fail(queryKey: string) {
+      const current = coordinator.getState(queryKey)
+      if (current?.status !== 'ready') throw new Error('Expected a committed query result')
+      forced.set(queryKey, { status: 'error', intent: current.intent, previous: current.current })
+      listeners.get(queryKey)?.forEach(listener => listener())
+    },
+  }
+}
+
 function renderFareCards(bridge: ServerFareDataBridge, datasetId: DatasetId, beforeSelect: () => void = () => {}) {
   const state = createUIStateStore()
   state.initializeMissing(artifactId, { datasetRefs: [datasetId], citySequence: ['london', 'paris'], dates: { start: '2026-10-09' } })
@@ -123,6 +185,39 @@ describe('query-scoped fare selection', () => {
 
     releaseFiltered()
     await waitFor(() => expect(screen.queryByRole('button', { name: /Select Bus FlixBus/ })).not.toBeInTheDocument())
+    router.dispose()
+  })
+
+  it('accepts the visible result after a same-input retry fails', async () => {
+    const loaded = await loadedBridge()
+    const forced = withForcedSameInputError(loaded.bridge)
+    const bridge = forced.bridge
+    const requestedQueryKey = captureRequestedQueryKey(bridge)
+    const { state, router } = renderFareCards(bridge, loaded.binding.datasetId)
+    const button = await screen.findByRole('button', { name: /Select Bus FlixBus/ })
+    const queryKey = requestedQueryKey()
+    if (!queryKey) throw new Error('FareCards query key missing')
+
+    act(() => forced.fail(queryKey))
+    await waitFor(() => expect(bridge.coordinator.getState(queryKey)?.status).toBe('error'))
+    fireEvent.click(button)
+    expect(state.get(artifactId).selectedFareIds).toEqual([rows[1]!.id])
+    router.dispose()
+  })
+
+  it('rejects the previous visible result after a different input fails', async () => {
+    const { bridge, binding, failWith } = await retryFailureBridge()
+    const requestedQueryKey = captureRequestedQueryKey(bridge)
+    const { state, router } = renderFareCards(bridge, binding.datasetId)
+    const button = await screen.findByRole('button', { name: /Select Bus FlixBus/ })
+    const queryKey = requestedQueryKey()
+    if (!queryKey) throw new Error('FareCards query key missing')
+
+    failWith('train-filter')
+    act(() => state.dispatch({ kind: 'filters', artifactId, filters: { ...state.get(artifactId).filters, modes: ['train'] } }))
+    await waitFor(() => expect(bridge.coordinator.getState(queryKey)?.status).toBe('error'))
+    fireEvent.click(button)
+    expect(state.get(artifactId).selectedFareIds).toEqual([])
     router.dispose()
   })
 

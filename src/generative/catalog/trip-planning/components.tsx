@@ -586,6 +586,10 @@ function dateRange(start: string, end: string): string[] {
   return dates
 }
 
+function dateRangeSize(start: string, end: string): number {
+  return Math.floor((Date.parse(`${end}T00:00:00.000Z`) - Date.parse(`${start}T00:00:00.000Z`)) / 86_400_000) + 1
+}
+
 function ActiveDayDisplayRecord({identity,result,rows,rankOffset,cursor}:{identity:ComponentIdentity;result:ReturnType<typeof useDayFares>;rows:NonNullable<ReturnType<typeof useDayFares>['data']>['items'];rankOffset:number;cursor:string|null}){
  const total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-rows.length)
  return <DisplayNodeProvider identity={identity}><ActiveDayPublisher result={result} rows={rows} total={total} omitted={omitted} rankOffset={rankOffset} cursor={cursor}/></DisplayNodeProvider>
@@ -625,7 +629,7 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
   const activePagingIdentity=JSON.stringify({selectedDate,datasetRevision:selectedResult.requirement.datasetRevision,sourceVersion:selectedResult.requirement.sourceVersion,filters:plan.state.filters,sort:calendarKey?plan.state.sortByLeg[calendarKey]:undefined,threshold:resolved?.leg.threshold})
   useEffect(()=>{setActiveCursor(null);setActiveCursorHistory([])},[activePagingIdentity])
   const cells=dates.map(date=>{const day=days.find(candidate=>candidate.date===date),representative=day?.representative;return{key:date,label:date,value:representative?.priceCents,unit:(representative?'priceCents':'count') as 'priceCents'|'count',fareId:representative?.id,available:(day?.count??0)>0}})
-  const totalCalendarDays=Math.max(days.length,cells.length)
+  const totalCalendarDays=outsideWindow?0:dateRangeSize(visibleStart,requestedTo)
   const omittedDays=Math.max(0,totalCalendarDays-cells.length)
   const visibleRepresentatives=dates.flatMap(date=>{const representative=days.find(day=>day.date===date)?.representative;return representative?[representative]:[]})
   useProjectionDisplay(representatives,{payload:{kind:'calendar',selectedDate,cells},totalDisplayed:totalCalendarDays,includedCount:cells.length,complete:omittedDays===0,omittedCount:omittedDays},fareInspectionItems(visibleRepresentatives))

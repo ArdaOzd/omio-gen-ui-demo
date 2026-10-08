@@ -374,9 +374,9 @@ describe('interactive selector pagination',()=>{
   })
 })
 
-it('reports omitted FareCalendar days when a window exceeds the 62-day display cap',async()=>{
+it('reports omitted FareCalendar days when requested coverage exceeds the 62-day display cap',async()=>{
   const start=Date.parse('2026-10-01T00:00:00.000Z')
-  const calendarRows=Array.from({length:63},(_,index)=>{
+  const calendarRows=Array.from({length:62},(_,index)=>{
     const serviceDate=new Date(start+index*86_400_000).toISOString().slice(0,10)
     return FareItemSchema.parse({
       ...items[0],
@@ -386,7 +386,7 @@ it('reports omitted FareCalendar days when a window exceeds the 62-day display c
       legs:[{...items[0]!.legs[0],carrierName:`Calendar Rail ${index+1}`}],
     })
   })
-  const fixture=createFixedProjectionFixture({rows:calendarRows,sourceVersion:'long-calendar-source-1',sourceDateWindow:{from:'2026-10-01',to:'2026-12-02'}})
+  const fixture=createFixedProjectionFixture({rows:calendarRows,sourceVersion:'long-calendar-source-1',sourceDateWindow:{from:'2026-10-01',to:'2026-12-01'}})
   const requestedScope:FareScope={...scope,dateWindow:{from:'2026-10-01',to:'2026-12-02'},earliestDeparture:{date:'2026-10-01',minutes:0}}
   const manifest=await fixture.bridge.loadScope(requestedScope,new AbortController().signal)
   const binding=fixture.bridge.getBinding(manifest.resourceKey)
