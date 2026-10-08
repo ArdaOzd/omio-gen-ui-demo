@@ -9,11 +9,9 @@ import json
 import re
 import sqlite3
 import time
-from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import date, timedelta
 from http import HTTPStatus
-from threading import Lock
 from typing import Never
 
 
@@ -27,14 +25,10 @@ MAX_GROUPS = 8
 MAX_PROJECTIONS = 8
 MAX_CALENDAR_DAYS = 732
 MAX_LOOKUP_PINS = 160
-MAX_REGISTERED_SCOPES = 4_096
 MAX_CURSOR_LENGTH = 2_048
 QUERY_TIMEOUT_SECONDS = 8.0
 REF_PATTERN = re.compile(r"^[a-zA-Z0-9_.:-]+$")
 MAX_SAFE_INTEGER = 9_007_199_254_740_991
-
-_REGISTERED_SCOPES: OrderedDict[tuple[str, str], dict[str, object]] = OrderedDict()
-_REGISTERED_SCOPES_LOCK = Lock()
 
 
 @dataclass(frozen=True)
@@ -106,24 +100,6 @@ def _canonical(value: object) -> str:
 def _fingerprint(prefix: str, value: object) -> str:
     digest = hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
     return f"{prefix}-{digest[:32]}"
-
-
-def _register_scope(source_version: str, resource_key: str, scope: dict[str, object]) -> None:
-    key = (source_version, resource_key)
-    with _REGISTERED_SCOPES_LOCK:
-        _REGISTERED_SCOPES.pop(key, None)
-        _REGISTERED_SCOPES[key] = scope
-        while len(_REGISTERED_SCOPES) > MAX_REGISTERED_SCOPES:
-            _REGISTERED_SCOPES.popitem(last=False)
-
-
-def _registered_scope(source_version: str, resource_key: str) -> dict[str, object] | None:
-    key = (source_version, resource_key)
-    with _REGISTERED_SCOPES_LOCK:
-        scope = _REGISTERED_SCOPES.get(key)
-        if scope is not None:
-            _REGISTERED_SCOPES.move_to_end(key)
-        return scope
 
 
 def _stable_fingerprint(prefix: str, value: object) -> str:
@@ -336,12 +312,26 @@ def parse_query_groups_request(value: object) -> dict[str, object]:
 
 
 def parse_lookup_request(value: object) -> dict[str, object]:
-    request = _object(value, "request", {"version", "requestId", "sourceVersion", "pins"})
+    request = _object(value, "request", {"version", "requestId", "sourceVersion", "resources", "pins"})
     version = _required(request, "version", "request")
     if isinstance(version, bool) or version != 1:
         _fail("invalidRequest", "request.version must be 1.")
     request_id = _string(_required(request, "requestId", "request"), "request.requestId")
     source_version = _string(_required(request, "sourceVersion", "request"), "request.sourceVersion")
+    resources = _required(request, "resources", "request")
+    if not isinstance(resources, list) or not 1 <= len(resources) <= MAX_LOOKUP_PINS:
+        _fail("invalidRequest", f"request.resources must contain 1 through {MAX_LOOKUP_PINS} resources.")
+    parsed_resources: dict[str, dict[str, object]] = {}
+    for index, raw_resource in enumerate(resources):
+        field = f"request.resources[{index}]"
+        resource = _object(raw_resource, field, {"resourceKey", "scope"})
+        resource_key = _string(_required(resource, "resourceKey", field), f"{field}.resourceKey")
+        if resource_key in parsed_resources:
+            _fail("invalidRequest", "request.resources must use unique resourceKey values.")
+        scope = _parse_scope(_required(resource, "scope", field), f"{field}.scope")
+        if _fingerprint("scope", scope) != resource_key:
+            _fail("invalidRequest", f"{field}.resourceKey does not identify its scope.")
+        parsed_resources[resource_key] = scope
     pins = _required(request, "pins", "request")
     if not isinstance(pins, list) or not 1 <= len(pins) <= MAX_LOOKUP_PINS:
         _fail("invalidRequest", f"request.pins must contain 1 through {MAX_LOOKUP_PINS} pins.")
@@ -352,12 +342,20 @@ def parse_lookup_request(value: object) -> dict[str, object]:
         pin = _object(raw_pin, field, {"fareId", "resourceKey"})
         fare_id = _string(_required(pin, "fareId", field), f"{field}.fareId")
         resource_key = _string(_required(pin, "resourceKey", field), f"{field}.resourceKey")
+        if resource_key not in parsed_resources:
+            _fail("invalidRequest", f"{field}.resourceKey is not declared in request.resources.")
         identity = (resource_key, fare_id)
         if identity in seen:
             _fail("invalidRequest", "request.pins must not contain duplicate resourceKey and fareId pairs.")
         seen.add(identity)
         parsed.append({"fareId": fare_id, "resourceKey": resource_key})
-    return {"version": 1, "requestId": request_id, "sourceVersion": source_version, "pins": parsed}
+    return {
+        "version": 1,
+        "requestId": request_id,
+        "sourceVersion": source_version,
+        "resources": parsed_resources,
+        "pins": parsed,
+    }
 
 
 def _minute_expression(alias: str = "f") -> str:
@@ -1057,12 +1055,6 @@ def execute_query_groups(connection: sqlite3.Connection, value: object, source_v
                 projections.append(result)
             groups.append({"groupId": group["groupId"], "manifest": manifest, "projections": projections})
         connection.commit()
-        for group in groups:
-            manifest = group["manifest"]
-            assert isinstance(manifest, dict)
-            coverage = manifest["coverage"]
-            assert isinstance(coverage, dict)
-            _register_scope(source_version, str(manifest["resourceKey"]), coverage)
         return {"version": 1, "requestId": request["requestId"], "sourceVersion": source_version, "groups": groups}
     except sqlite3.OperationalError as error:
         connection.rollback()
@@ -1078,7 +1070,9 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
     if request["sourceVersion"] != source_version:
         _fail("sourceChanged", "The fare source changed. Refresh the displayed results.", HTTPStatus.CONFLICT)
     pins = request["pins"]
+    resources = request["resources"]
     assert isinstance(pins, list)
+    assert isinstance(resources, dict)
     integer_ids: list[int] = []
     pin_ids: list[int | None] = []
     pin_scopes: list[dict[str, object] | None] = []
@@ -1089,7 +1083,9 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
             integer_id = int(fare_id[5:])
             integer_ids.append(integer_id)
         pin_ids.append(integer_id)
-        pin_scopes.append(_registered_scope(source_version, str(pin["resourceKey"])))
+        scope = resources[str(pin["resourceKey"])]
+        assert isinstance(scope, dict)
+        pin_scopes.append(scope)
     by_id: dict[int, dict[str, object]] = {}
     deadline = time.monotonic() + QUERY_TIMEOUT_SECONDS
     connection.set_progress_handler(lambda: int(time.monotonic() >= deadline), 10_000)
@@ -1112,12 +1108,10 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
     finally:
         connection.set_progress_handler(None, 0)
     resolved: list[dict[str, object] | None] = []
-    invalid_fare_ids: set[str] = set()
-    for pin, integer_id, scope in zip(pins, pin_ids, pin_scopes, strict=True):
+    for integer_id, scope in zip(pin_ids, pin_scopes, strict=True):
         item = by_id.get(integer_id) if integer_id is not None else None
         if item is None or scope is None or not _fare_matches_scope(item, scope):
             resolved.append(None)
-            invalid_fare_ids.add(str(pin["fareId"]))
         else:
             resolved.append(item)
 
@@ -1126,7 +1120,7 @@ def execute_lookup(connection: sqlite3.Connection, value: object, source_version
     missing: list[dict[str, str]] = []
     for pin, item in zip(pins, resolved, strict=True):
         fare_id = str(pin["fareId"])
-        if item is None or fare_id in invalid_fare_ids:
+        if item is None:
             missing.append(pin)
         elif fare_id not in emitted:
             emitted.add(fare_id)

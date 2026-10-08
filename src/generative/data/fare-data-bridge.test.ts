@@ -4,6 +4,7 @@ import {
   FareItemSchema,
   QueryGroupsResponseSchema,
   ResourceKeySchema,
+  type LookupPinsRequest,
   type QueryGroupsRequest,
 } from '../contracts/query-groups'
 import { createFareDataBridge } from './fare-data-bridge'
@@ -85,15 +86,19 @@ describe('server fare data bridge', () => {
   })
 
   it('keeps looked-up pins independently from evicted projection items', async () => {
+    let lookupRequest: LookupPinsRequest | undefined
     const client: ServerQueryClient = {
       queryGroups: async request => response(request),
-      lookupPins: async input => ({
-        version: 1,
-        requestId: input.requestId,
-        sourceVersion: input.sourceVersion,
-        items: [item],
-        missingPins: [],
-      }),
+      lookupPins: async input => {
+        lookupRequest = input
+        return {
+          version: 1,
+          requestId: input.requestId,
+          sourceVersion: input.sourceVersion,
+          items: [item],
+          missingPins: [],
+        }
+      },
     }
     const bridge = createFareDataBridge({ client, maxProjectionItems: 1, maxPinnedItems: 2 })
     const manifest = await bridge.loadScope(scope, new AbortController().signal)
@@ -103,8 +108,59 @@ describe('server fare data bridge', () => {
       sourceVersion: 'source-1',
       pins: [{ fareId: item.id, resourceKey: ResourceKeySchema.parse('scope-1') }],
     }, new AbortController().signal)
+    expect(lookupRequest?.resources).toEqual([{ resourceKey: manifest.resourceKey, scope }])
     bridge.release(manifest.resourceKey)
     expect(bridge.findCachedFare(item.id, manifest.resourceKey)).toEqual(item)
+  })
+
+  it('caches a mixed lookup result only under resources whose scope contains the fare', async () => {
+    const wrongScope = { ...scope, originId: 'paris', destinationId: 'london' }
+    const client: ServerQueryClient = {
+      queryGroups: async request => QueryGroupsResponseSchema.parse({
+        version: 1,
+        requestId: request.requestId,
+        sourceVersion: 'source-1',
+        groups: request.groups.map(group => {
+          const resourceKey = group.scope.originId === 'london' ? 'scope-correct' : 'scope-wrong'
+          return {
+            groupId: group.groupId,
+            manifest: {
+              kind: 'fareScopeManifest',
+              resourceKey,
+              source: { kind: 'search', descriptorId: resourceKey, sourceVersion: 'source-1' },
+              coverage: group.scope,
+              totalAvailable: 1,
+              availableModes: ['train'],
+              availableDateWindow: group.scope.dateWindow,
+              complete: true,
+            },
+            projections: [],
+          }
+        }),
+      }),
+      lookupPins: async input => ({
+        version: 1,
+        requestId: input.requestId,
+        sourceVersion: input.sourceVersion,
+        items: [item],
+        missingPins: [input.pins[1]!],
+      }),
+    }
+    const bridge = createFareDataBridge({ client })
+    const correct = await bridge.loadScope(scope, new AbortController().signal)
+    const wrong = await bridge.loadScope(wrongScope, new AbortController().signal)
+    const lookup = await bridge.lookupPins({
+      version: 1,
+      requestId: 'lookup-mixed',
+      sourceVersion: 'source-1',
+      pins: [
+        { fareId: item.id, resourceKey: correct.resourceKey },
+        { fareId: item.id, resourceKey: wrong.resourceKey },
+      ],
+    }, new AbortController().signal)
+    expect(lookup.missingPins).toEqual([{ fareId: item.id, resourceKey: wrong.resourceKey }])
+    expect(bridge.findCachedFare(item.id, correct.resourceKey)).toEqual(item)
+    expect(bridge.findCachedFare(item.id, wrong.resourceKey)).toBeUndefined()
   })
 
   it('caches a stable unavailable manifest instead of retrying an outside horizon', async () => {

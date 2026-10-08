@@ -19,7 +19,7 @@ from unittest.mock import patch
 from backend import app as app_module
 from backend.app import MAX_REQUEST_BODY_BYTES, dispatch, dispatch_post, make_handler
 from backend.generate_db import directional_routes, generate_database
-from backend.query_groups import QueryApiError, _cursor_hash, _encode_cursor, execute_query_groups, stable_ref
+from backend.query_groups import QueryApiError, _cursor_hash, _encode_cursor, _fingerprint, execute_query_groups, parse_lookup_request, stable_ref
 
 
 class QueryGroupsTestCase(unittest.TestCase):
@@ -241,6 +241,7 @@ class QueryGroupsTestCase(unittest.TestCase):
             "version": 1,
             "requestId": "lookup-1",
             "sourceVersion": self.source_version,
+            "resources": [{"resourceKey": resource_key, "scope": self.scope()}],
             "pins": [
                 {"fareId": fare["id"], "resourceKey": resource_key},
                 {"fareId": "fare_999999999", "resourceKey": resource_key},
@@ -276,6 +277,7 @@ class QueryGroupsTestCase(unittest.TestCase):
             "version": 1,
             "requestId": "lookup-wrong-resource",
             "sourceVersion": self.source_version,
+            "resources": [{"resourceKey": wrong_pin["resourceKey"], "scope": wrong_scope}],
             "pins": [wrong_pin],
         }
         status, wrong_payload = dispatch_post(
@@ -291,6 +293,10 @@ class QueryGroupsTestCase(unittest.TestCase):
         mixed_lookup = {
             **wrong_lookup,
             "requestId": "lookup-mixed-resources",
+            "resources": [
+                {"resourceKey": resource_key, "scope": self.scope()},
+                {"resourceKey": wrong_pin["resourceKey"], "scope": wrong_scope},
+            ],
             "pins": [correct_pin, wrong_pin],
         }
         status, mixed_payload = dispatch_post(
@@ -299,13 +305,64 @@ class QueryGroupsTestCase(unittest.TestCase):
             mixed_lookup,
         )
         self.assertEqual(status, HTTPStatus.OK)
-        self.assertEqual(mixed_payload["items"], [])
-        self.assertEqual(mixed_payload["missingPins"], [correct_pin, wrong_pin])
+        self.assertEqual([item["id"] for item in mixed_payload["items"]], [fare["id"]])
+        self.assertEqual(mixed_payload["missingPins"], [wrong_pin])
+
+        malformed_requests = [
+            {**request, "resources": []},
+            {**request, "resources": [{"resourceKey": resource_key, "scope": wrong_scope}]},
+            {**request, "pins": [wrong_pin]},
+        ]
+        for malformed in malformed_requests:
+            with self.subTest(malformed=malformed), self.assertRaises(QueryApiError) as raised:
+                dispatch_post(self.database, "/api/lookup", malformed)
+            self.assertEqual((raised.exception.status, raised.exception.code), (HTTPStatus.BAD_REQUEST, "invalidRequest"))
 
         request["sourceVersion"] = "sqlite-demo-v2-stale"
         with self.assertRaises(QueryApiError) as raised:
             dispatch_post(self.database, "/api/lookup", request)
         self.assertEqual((raised.exception.status, raised.exception.code), (HTTPStatus.CONFLICT, "sourceChanged"))
+
+    def test_lookup_authorizes_scope_without_prior_manifest_request(self) -> None:
+        scope = self.scope()
+        resource_key = _fingerprint("scope", scope)
+        for index in range(4_097):
+            unrelated_scope = self.scope(
+                passengers=index // 1_440 + 1,
+                earliestDeparture={"date": "2026-10-02", "minutes": index % 1_440},
+            )
+            unrelated_key = _fingerprint("scope", unrelated_scope)
+            parse_lookup_request({
+                "version": 1,
+                "requestId": f"unrelated-{index}",
+                "sourceVersion": self.source_version,
+                "resources": [{"resourceKey": unrelated_key, "scope": unrelated_scope}],
+                "pins": [{"fareId": "fare_000000001", "resourceKey": unrelated_key}],
+            })
+        with sqlite3.connect(self.database) as connection:
+            fare_id = connection.execute(
+                """
+                SELECT f.id FROM fares f
+                JOIN routes r ON r.id = f.route_id
+                JOIN locations origin ON origin.id = r.origin_location_id
+                JOIN locations destination ON destination.id = r.destination_location_id
+                WHERE origin.slug = ? AND destination.slug = ?
+                  AND f.service_date BETWEEN ? AND ? AND f.available_seats >= ?
+                ORDER BY f.id LIMIT 1
+                """,
+                ("london", "paris", "2026-10-02", "2026-10-04", 1),
+            ).fetchone()[0]
+        pin = {"fareId": f"fare_{fare_id:09d}", "resourceKey": resource_key}
+        status, payload = dispatch_post(self.database, "/api/lookup", {
+            "version": 1,
+            "requestId": "lookup-without-manifest",
+            "sourceVersion": self.source_version,
+            "resources": [{"resourceKey": resource_key, "scope": scope}],
+            "pins": [pin],
+        })
+        self.assertEqual(status, HTTPStatus.OK)
+        self.assertEqual([item["id"] for item in payload["items"]], [pin["fareId"]])
+        self.assertEqual(payload["missingPins"], [])
 
     def test_strict_contract_rejects_unknown_fields_scope_injection_and_large_windows(self) -> None:
         cases = []
@@ -404,6 +461,10 @@ class QueryGroupsTestCase(unittest.TestCase):
             "version": 1,
             "requestId": "connected-lookup",
             "sourceVersion": payload["sourceVersion"],
+            "resources": [{
+                "resourceKey": payload["groups"][0]["manifest"]["resourceKey"],
+                "scope": self.scope(),
+            }],
             "pins": [{
                 "fareId": connected[0]["id"],
                 "resourceKey": payload["groups"][0]["manifest"]["resourceKey"],

@@ -11,7 +11,7 @@ import {
   type FareScope,
   type FareScopeBinding,
   type FareScopeManifest,
-  type LookupPinsRequest,
+  type LookupPinsInput,
   type LookupPinsResponse,
   type ProjectionResult,
   type QueryGroupRequest,
@@ -21,7 +21,7 @@ import {
   type SelectedFarePin,
 } from '../contracts/query-groups'
 import { createProjectionCoordinator, stableFingerprint, type ProjectionCoordinator } from './projection-coordinator'
-import { createServerQueryClient, type ServerQueryClient } from './server-query-client'
+import { createServerQueryClient, fareMatchesScope, type ServerQueryClient } from './server-query-client'
 
 export interface ServerFareDataBridge extends FareProjectionBridge {
   readonly coordinator: ProjectionCoordinator
@@ -149,8 +149,12 @@ export function createFareDataBridge(options: ServerFareDataBridgeOptions = {}):
     },
     async lookupPins(input, signal) {
       const response = await rawClient.lookupPins(input, signal)
+      const scopes = new Map(input.resources.map(resource => [resource.resourceKey, resource.scope]))
       for (const item of response.items) {
-        const pins = input.pins.filter(pin => pin.fareId === item.id)
+        const pins = input.pins.filter(pin => {
+          const scope = scopes.get(pin.resourceKey)
+          return pin.fareId === item.id && scope !== undefined && fareMatchesScope(item, scope)
+        })
         for (const pin of pins) rememberItems(pin.resourceKey, [item], true)
       }
       return response
@@ -256,9 +260,13 @@ export function createFareDataBridge(options: ServerFareDataBridgeOptions = {}):
     return structuredClone(result)
   }
 
-  async function lookupPins(input: LookupPinsRequest, signal: AbortSignal): Promise<LookupPinsResponse> {
+  async function lookupPins(input: LookupPinsInput, signal: AbortSignal): Promise<LookupPinsResponse> {
     assertActive()
-    return observedClient.lookupPins(input, signal)
+    const resources = [...new Set(input.pins.map(pin => pin.resourceKey))].map(resourceKey => {
+      const binding = getBinding(resourceKey)
+      return { resourceKey, scope: binding.manifest.coverage }
+    })
+    return observedClient.lookupPins({ ...input, resources }, signal)
   }
 
   function getBinding(resourceKey: ResourceKey): FareScopeBinding {

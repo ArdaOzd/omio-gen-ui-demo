@@ -6,6 +6,7 @@ const scope = { kind: 'fareScope' as const, originId: 'london', destinationId: '
 const request = QueryGroupsRequestSchema.parse({ version: 1, requestId: 'request-1', expectedSourceVersion: null, groups: [{ groupId: 'group-1', scope, projections: [] }] })
 const manifest = { kind: 'fareScopeManifest', resourceKey: 'scope-1', source: { kind: 'search', descriptorId: 'scope-1', sourceVersion: 'source-1' }, coverage: scope, totalAvailable: 1, availableModes: ['train'], availableDateWindow: scope.dateWindow, complete: true }
 const item = FareItemSchema.parse({ id: 'fare-1', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-26', mode: 'train', carrierId: 'carrier-rail', carrierName: 'Rail', priceCents: 2500, durationMinutes: 160, departureMinutes: 1080, availableSeats: 4, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true, legs: [{ legIndex: 0, mode: 'train', carrierName: 'Rail', durationMinutes: 160, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }] })
+const lookupResource = { resourceKey: ResourceKeySchema.parse('scope-1'), scope }
 
 describe('server query client', () => {
   it('posts and validates query groups and source identity', async () => {
@@ -20,7 +21,7 @@ describe('server query client', () => {
     await expect(failed.queryGroups(request, new AbortController().signal)).rejects.toMatchObject({ code: 'staleCursor', status: 409 } satisfies Partial<ServerQueryError>)
 
     const lookup = createServerQueryClient({ fetch: async () => new Response(JSON.stringify({ version: 1, requestId: 'lookup-1', sourceVersion: 'source-1', items: [item], missingPins: [] }), { status: 200 }) })
-    await expect(lookup.lookupPins({ version: 1, requestId: 'lookup-1', sourceVersion: 'source-1', pins: [{ fareId: item.id, resourceKey: ResourceKeySchema.parse('scope-1') }] }, new AbortController().signal)).resolves.toMatchObject({ items: [{ id: 'fare-1' }] })
+    await expect(lookup.lookupPins({ version: 1, requestId: 'lookup-1', sourceVersion: 'source-1', resources: [lookupResource], pins: [{ fareId: item.id, resourceKey: ResourceKeySchema.parse('scope-1') }] }, new AbortController().signal)).resolves.toMatchObject({ items: [{ id: 'fare-1' }] })
   })
 
   it('rejects duplicate group identities and omitted lookup pins', async () => {
@@ -59,7 +60,52 @@ describe('server query client', () => {
       version: 1,
       requestId: 'lookup-2',
       sourceVersion: 'source-1',
+      resources: [lookupResource],
       pins: [{ fareId: item.id, resourceKey: ResourceKeySchema.parse('scope-1') }],
+    }, new AbortController().signal)).rejects.toThrow('omitted a requested pin')
+  })
+
+  it('uses resource scopes to distinguish mixed pins with the same fare ID', async () => {
+    const wrongResource = {
+      resourceKey: ResourceKeySchema.parse('scope-wrong'),
+      scope: { ...scope, originId: 'paris', destinationId: 'london' },
+    }
+    const pins = [
+      { fareId: item.id, resourceKey: lookupResource.resourceKey },
+      { fareId: item.id, resourceKey: wrongResource.resourceKey },
+    ]
+    const valid = createServerQueryClient({
+      fetch: async () => new Response(JSON.stringify({
+        version: 1,
+        requestId: 'lookup-mixed',
+        sourceVersion: 'source-1',
+        items: [item],
+        missingPins: [pins[1]],
+      }), { status: 200 }),
+    })
+    await expect(valid.lookupPins({
+      version: 1,
+      requestId: 'lookup-mixed',
+      sourceVersion: 'source-1',
+      resources: [lookupResource, wrongResource],
+      pins,
+    }, new AbortController().signal)).resolves.toMatchObject({ items: [{ id: item.id }], missingPins: [pins[1]] })
+
+    const poisoned = createServerQueryClient({
+      fetch: async () => new Response(JSON.stringify({
+        version: 1,
+        requestId: 'lookup-poisoned',
+        sourceVersion: 'source-1',
+        items: [item],
+        missingPins: [],
+      }), { status: 200 }),
+    })
+    await expect(poisoned.lookupPins({
+      version: 1,
+      requestId: 'lookup-poisoned',
+      sourceVersion: 'source-1',
+      resources: [lookupResource, wrongResource],
+      pins,
     }, new AbortController().signal)).rejects.toThrow('omitted a requested pin')
   })
 

@@ -87,6 +87,7 @@ live('server query client live wire', () => {
       version: 1,
       requestId: 'live-lookup',
       sourceVersion: firstResponse.sourceVersion,
+      resources: [{ resourceKey: firstGroup.manifest.resourceKey, scope: firstGroup.manifest.coverage }],
       pins: [{ fareId: fare.id, resourceKey: firstGroup.manifest.resourceKey }],
     }, signal())
     const lookedUp = lookup.items[0]

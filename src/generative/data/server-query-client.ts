@@ -6,6 +6,7 @@ import {
   QueryGroupsResponseSchema,
   type LookupPinsRequest,
   type LookupPinsResponse,
+  type FareItem,
   type FareScope,
   type QueryErrorCode,
   type QueryGroupsRequest,
@@ -41,6 +42,18 @@ function sameScope(left: FareScope, right: FareScope): boolean {
     && left.passengers === right.passengers
     && left.earliestDeparture.date === right.earliestDeparture.date
     && left.earliestDeparture.minutes === right.earliestDeparture.minutes
+}
+
+export function fareMatchesScope(item: FareItem, scope: FareScope): boolean {
+  return item.originId === scope.originId
+    && item.destinationId === scope.destinationId
+    && item.serviceDate >= scope.dateWindow.from
+    && item.serviceDate <= scope.dateWindow.to
+    && item.availableSeats >= scope.passengers
+    && item.availableSeats > 0
+    && (item.serviceDate > scope.earliestDeparture.date
+      || (item.serviceDate === scope.earliestDeparture.date
+        && item.departureMinutes >= scope.earliestDeparture.minutes))
 }
 
 async function responseBody(response: Response): Promise<unknown> {
@@ -118,18 +131,26 @@ export function createServerQueryClient(options: { fetch?: Fetch; baseUrl?: stri
         throw new ServerQueryError(409, 'sourceChanged', 'The fare source changed. Refresh the displayed results.', request.requestId)
       }
       const requested = new Set(request.pins.map(pin => `${pin.resourceKey}\u0000${pin.fareId}`))
-      const requestedFareIds = new Set(request.pins.map(pin => pin.fareId))
       const returnedFareIds = response.items.map(item => item.id)
       const missingKeys = response.missingPins.map(pin => `${pin.resourceKey}\u0000${pin.fareId}`)
-      if (new Set(returnedFareIds).size !== returnedFareIds.length || returnedFareIds.some(fareId => !requestedFareIds.has(fareId))) {
+      const resources = new Map(request.resources.map(resource => [resource.resourceKey, resource.scope]))
+      const returned = new Map(response.items.map(item => [item.id, item]))
+      if (new Set(returnedFareIds).size !== returnedFareIds.length || response.items.some(item => !request.pins.some(pin => {
+        const scope = resources.get(pin.resourceKey)
+        return pin.fareId === item.id && scope !== undefined && fareMatchesScope(item, scope)
+      }))) {
         throw new Error('Unexpected looked-up fare')
       }
       if (new Set(missingKeys).size !== missingKeys.length || missingKeys.some(key => !requested.has(key))) {
         throw new Error('Unexpected missing fare pin')
       }
-      const returned = new Set(returnedFareIds)
       const missing = new Set(missingKeys)
-      if (request.pins.some(pin => !returned.has(pin.fareId) && !missing.has(`${pin.resourceKey}\u0000${pin.fareId}`))) {
+      if (request.pins.some(pin => {
+        const item = returned.get(pin.fareId)
+        const scope = resources.get(pin.resourceKey)
+        const resolved = item !== undefined && scope !== undefined && fareMatchesScope(item, scope)
+        return resolved === missing.has(`${pin.resourceKey}\u0000${pin.fareId}`)
+      })) {
         throw new Error('Fare lookup omitted a requested pin')
       }
       return response

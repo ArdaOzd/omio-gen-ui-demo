@@ -343,16 +343,40 @@ export type QueryErrorResponse = z.infer<typeof QueryErrorResponseSchema>
 export const LookupPinSchema = z.strictObject({ fareId, resourceKey: ResourceKeySchema })
 export type LookupPin = z.infer<typeof LookupPinSchema>
 
-export const LookupPinsRequestSchema = z.strictObject({
+const lookupBase = {
   version: z.literal(1),
   requestId: ref,
   sourceVersion: ref,
   pins: z.array(LookupPinSchema).min(1).max(160),
-}).superRefine((request, context) => {
+}
+const validateLookupPins = (request: { pins: LookupPin[] }, context: z.RefinementCtx) => {
   const keys = request.pins.map(pin => `${pin.resourceKey}\u0000${pin.fareId}`)
   if (new Set(keys).size !== keys.length) {
     context.addIssue({ code: 'custom', path: ['pins'], message: 'Duplicate lookup pin' })
   }
+}
+
+export const LookupPinsInputSchema = z.strictObject(lookupBase).superRefine(validateLookupPins)
+export type LookupPinsInput = z.infer<typeof LookupPinsInputSchema>
+
+export const LookupResourceSchema = z.strictObject({ resourceKey: ResourceKeySchema, scope: FareScopeSchema })
+export type LookupResource = z.infer<typeof LookupResourceSchema>
+
+export const LookupPinsRequestSchema = z.strictObject({
+  ...lookupBase,
+  resources: z.array(LookupResourceSchema).min(1).max(160),
+}).superRefine((request, context) => {
+  validateLookupPins(request, context)
+  const resourceKeys = request.resources.map(resource => resource.resourceKey)
+  if (new Set(resourceKeys).size !== resourceKeys.length) {
+    context.addIssue({ code: 'custom', path: ['resources'], message: 'Duplicate lookup resource' })
+  }
+  const declared = new Set(resourceKeys)
+  request.pins.forEach((pin, index) => {
+    if (!declared.has(pin.resourceKey)) {
+      context.addIssue({ code: 'custom', path: ['pins', index, 'resourceKey'], message: 'Undeclared lookup resource' })
+    }
+  })
 })
 export type LookupPinsRequest = z.infer<typeof LookupPinsRequestSchema>
 
@@ -408,7 +432,7 @@ export interface FareProjectionBridge {
   loadScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest>
   refreshScope(scope: FareScope, signal: AbortSignal): Promise<FareScopeManifest>
   executeGroup(group: QueryGroupRequest, signal: AbortSignal): Promise<QueryGroupResult>
-  lookupPins(input: LookupPinsRequest, signal: AbortSignal): Promise<LookupPinsResponse>
+  lookupPins(input: LookupPinsInput, signal: AbortSignal): Promise<LookupPinsResponse>
   getManifest(resourceKey: ResourceKey): FareScopeManifest
   subscribe(resourceKey: ResourceKey, listener: () => void): () => void
   release(resourceKey: ResourceKey): void
