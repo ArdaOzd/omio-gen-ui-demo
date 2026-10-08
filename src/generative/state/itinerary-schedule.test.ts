@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import { ArtifactIdSchema, FareIdSchema, UIStateRevisionSchema, type ArtifactUIState, type BoundedFareFact, type Coverage } from '../contracts'
+import type { FareScope } from '../contracts/query-groups'
 import { fareMeetsThreshold, legThreshold, scheduleLegs, staleDownstreamFareIds } from './itinerary-schedule'
 import {legState} from './leg-bindings'
 
@@ -11,8 +12,10 @@ const state = (nights = 3): ArtifactUIState => ({
 })
 const fare = (id:string, originId:string, destinationId:string, serviceDate:string, departureMinutes:number, durationMinutes:number):BoundedFareFact => ({
   id:FareIdSchema.parse(id),originId,destinationId,serviceDate,departureMinutes,durationMinutes,mode:'train',carrierId:'rail',carrierName:'Rail',priceCents:1000,currency:'EUR',synthetic:true,priceBasis:'per-passenger-including-demo-fees',
+  direct:true,legs:[{legIndex:0,mode:'train',carrierName:'Rail',durationMinutes,originId,destinationId,originLabel:originId,destinationLabel:destinationId}],
 })
 const coverage=(originId:string,destinationId:string):Coverage=>({originIds:[originId],destinationIds:[destinationId],dateWindow:{from:'2026-10-01',to:'2026-11-30'},modes:['train'],passengers:1,complete:true,truncated:false})
+const scope=(originId:string,destinationId:string):FareScope=>({kind:'fareScope',originId,destinationId,dateWindow:{from:'2026-10-01',to:'2026-11-30'},passengers:1,earliestDeparture:{date:'2026-10-01',minutes:0}})
 
 it('cascades 26th 21:00 plus 20 hours plus a three-day stay to 30th 17:00',()=>{
  const preceding=fare('first','london','paris','2026-10-26',21*60,20*60)
@@ -45,14 +48,14 @@ it('invalidates every later selected leg after the first broken dependency',()=>
 it('returns an empty query state when a selected-arrival threshold exceeds the requested window',()=>{
  const first=fare('first','london','paris','2026-10-26',21*60,20*60)
  const windowed={...state(),dates:{start:'2026-10-26',end:'2026-10-27'},displayWindowByLeg:{'paris:rome':{from:'2026-10-26',to:'2026-10-27'}}}
- expect(legState(windowed,coverage('paris','rome'),[first]).dates).toEqual({start:'2026-10-27',end:'2026-10-27'})
- expect(legState(windowed,coverage('paris','rome'),[first]).runtimeVariables.$outsideDisplayWindow).toBe(true)
+ expect(legState(windowed,scope('paris','rome'),[first]).dates).toEqual({start:'2026-10-27',end:'2026-10-27'})
+ expect(legState(windowed,scope('paris','rome'),[first]).runtimeVariables.$outsideDisplayWindow).toBe(true)
 })
 
 it('excludes coverage margins before the display window without carrying an earlier minute threshold',()=>{
  const first=fare('first','london','paris','2026-10-26',8*60,60)
  const windowed={...state(),displayWindowByLeg:{'paris:rome':{from:'2026-10-30',to:'2026-11-01'}}}
- const scoped=legState(windowed,coverage('paris','rome'),[first])
+ const scoped=legState(windowed,scope('paris','rome'),[first])
  expect(scoped.dates).toEqual({start:'2026-10-30',end:'2026-11-01'})
  expect(scoped.runtimeVariables.$earliestDepartureMinutes).toBe(0)
 })
