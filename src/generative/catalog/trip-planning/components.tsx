@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react'
 import { ArrowRight, BusFront, CalendarDays, ChevronDown, Clock3, MapPin, Plane, Ship, TrainFront } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ import {
 import type { WidgetProps } from '../layout'
 import { DisplayNodeProvider, recordDisplayInteraction, useDisplayNode, usePublishDisplay } from '../display-context-provider'
 import { fareInspectionItems, useProjectionDisplay } from '../display-records'
-import type { ComponentIdentity } from '../../contracts/display-context'
+import { DISPLAY_LIMITS, type ComponentIdentity } from '../../contracts/display-context'
 
 type Plan = ReturnType<typeof useItineraryPlan>
 type PlanLeg = Plan['legs'][number]
@@ -409,26 +409,135 @@ export function FareOrder(props: WidgetProps) {
   return <Card className="trip-planning-control"><FareOrderControl plan={plan} leg={resolved.leg} title={props.title} /></Card>
 }
 
+type OrderedFaresQuery = ReturnType<typeof useOrderedFares>
+type OrderedFaresData = NonNullable<OrderedFaresQuery['data']>
+type FareStripPage = {
+  cursor: string | null
+  resultKey: string
+  rankOffset: number
+  rows: OrderedFaresData['items']
+  source: {
+    requirement: OrderedFaresQuery['requirement']
+    queryState: OrderedFaresQuery['queryState']
+    data: OrderedFaresData
+  }
+}
+
+function FareStripPageDisplay({ page }: { page: FareStripPage }) {
+  const shown = page.rows
+  const total = page.source.data.pageInfo.total
+  const omitted = Math.max(0, total - shown.length)
+  useProjectionDisplay(page.source, {
+    payload: {
+      kind: 'fare-order',
+      orderedFareRefs: shown.map((row, index) => ({ fareId: row.id, rank: page.rankOffset + index + 1 })),
+      ...(shown.length ? { renderedRange: { fromRank: page.rankOffset + 1, toRank: page.rankOffset + shown.length }, viewport: { offset: page.rankOffset, limit: shown.length, ...(page.cursor ? { cursor: page.cursor } : {}) } } : {}),
+    },
+    totalDisplayed: total,
+    includedCount: shown.length,
+    complete: omitted === 0,
+    omittedCount: omitted,
+  }, fareInspectionItems(shown, new Map(), page.rankOffset))
+  return null
+}
+
+function FareStripPagePublisher({ artifactRef, baseRef, legIndex, legKey: resolvedLegKey, resourceKey, page, pageIndex }: { artifactRef: string; baseRef: string; legIndex: number; legKey: string; resourceKey: string; page: FareStripPage; pageIndex: number }) {
+  const identity: ComponentIdentity = {
+    componentRef: { value: `${baseRef}.page-${pageIndex + 1}`, keySource: 'tree-path' },
+    componentType: 'FareStripPage',
+    scope: { kind: 'leg', artifactId: artifactRef, legIndex, legKey: resolvedLegKey, resourceKey },
+    authored: { title: `Loaded fare results ${pageIndex + 1}` },
+  }
+  return <DisplayNodeProvider identity={identity}><FareStripPageDisplay page={page} /></DisplayNodeProvider>
+}
+
 function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = false }: { artifactRef: string; datasetRef: string; legIndex?: number; componentRef?: string; compact?: boolean }) {
   const plan = useItineraryPlan(artifactRef)
   const dispatch = useTravelAction(artifactRef)
   const resolved = resolveLeg(plan, datasetRef, legIndex)
   const displayNode=useDisplayNode()
+  const loadSentinelRef=useRef<HTMLDivElement>(null)
   const pageSize=compact?8:16
+  const baseRef=componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`
   const [cursor,setCursor]=useState<string|null>(null)
-  const [cursorHistory,setCursorHistory]=useState<Array<string|null>>([])
-  const result = useOrderedFares(artifactRef,{componentRef:componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,cursor,limit:pageSize})
-  const pagingIdentity=JSON.stringify({datasetRef,datasetRevision:result.requirement.datasetRevision,sourceVersion:result.requirement.sourceVersion,filters:result.requirement.projection.filters,sort:resolved?plan.state.sortByLeg[resolved.leg.key]:undefined,window:resolved?plan.state.displayWindowByLeg[resolved.leg.key]:undefined,threshold:resolved?.leg.threshold})
-  useEffect(()=>{setCursor(null);setCursorHistory([])},[pagingIdentity])
-  const rows = resolved?sortFares((result.data?.items??[]).filter(row => row.originId === resolved.leg.originId && row.destinationId === resolved.leg.destinationId && fareMeetsThreshold(row, resolved.leg.threshold)), fareOrderFromState((plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).field,(plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).direction)):[]
-  const shown=rows,total=result.data?.pageInfo.total??0,omitted=Math.max(0,total-shown.length),pageIndex=cursorHistory.length,rankOffset=pageIndex*pageSize
-  useProjectionDisplay(result,{payload:{kind:'fare-order',orderedFareRefs:shown.map((row,index)=>({fareId:row.id,rank:rankOffset+index+1})),...(shown.length?{renderedRange:{fromRank:rankOffset+1,toRank:rankOffset+shown.length},viewport:{offset:rankOffset,limit:shown.length,...(cursor?{cursor}:{})}}:{})},totalDisplayed:total,includedCount:shown.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(shown,new Map(),rankOffset))
+  const [accumulated,setAccumulated]=useState<{identity:string;pages:FareStripPage[]}>({identity:'',pages:[]})
+  const result = useOrderedFares(artifactRef,{componentRef:baseRef,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,cursor,limit:pageSize})
+  const pagingIdentity=JSON.stringify({
+    datasetId:result.requirement.datasetId,
+    datasetRevision:result.requirement.datasetRevision,
+    sourceVersion:result.requirement.sourceVersion,
+    scope:result.requirement.scope,
+    projection:{...result.requirement.projection,after:null},
+  })
+  const committedResult=result.queryState.status==='ready'?result.queryState.current:undefined
+  const committedDesiredResult=!!committedResult
+    &&committedResult.inputHash===result.queryState.intent.desiredInputHash
+    &&result.data?.resultFingerprint===committedResult.resultFingerprint
+  const readyResultKey=committedDesiredResult?committedResult.resultKey:undefined
+  useEffect(()=>{
+    setCursor(null)
+    setAccumulated(current=>current.identity===pagingIdentity&&current.pages.length===0?current:{identity:pagingIdentity,pages:[]})
+  },[pagingIdentity])
+  useEffect(()=>{
+    if(!resolved||!result.data||!committedDesiredResult||result.queryState.status!=='ready'||result.requirement.projection.kind!=='farePage'||result.requirement.projection.after!==cursor)return
+    const rows=sortFares(result.data.items.filter(row=>row.originId===resolved.leg.originId&&row.destinationId===resolved.leg.destinationId&&fareMeetsThreshold(row,resolved.leg.threshold)),fareOrderFromState((plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).field,(plan.state.sortByLeg[resolved.leg.key]??defaultLegSort).direction))
+    const page:FareStripPage={cursor,resultKey:result.queryState.current.resultKey,rankOffset:0,rows,source:{requirement:result.requirement,queryState:result.queryState,data:result.data}}
+    setAccumulated(current=>{
+      const pages=current.identity===pagingIdentity?current.pages:[]
+      if(pages.some(candidate=>candidate.cursor===cursor))return current.identity===pagingIdentity?current:{identity:pagingIdentity,pages}
+      const expectedCursor=pages.length?pages.at(-1)!.source.data.pageInfo.nextCursor:null
+      if(expectedCursor!==cursor)return current.identity===pagingIdentity?current:{identity:pagingIdentity,pages}
+      const seen=new Set(pages.flatMap(candidate=>candidate.rows.map(row=>row.id)))
+      const distinctRows=page.rows.filter(row=>!seen.has(row.id))
+      const rankOffset=pages.reduce((total,candidate)=>total+candidate.rows.length,0)
+      return{identity:pagingIdentity,pages:[...pages,{...page,rankOffset,rows:distinctRows}]}
+    })
+  },[cursor,pagingIdentity,readyResultKey,resolved?.leg.key,resolved?.leg.originId,resolved?.leg.destinationId,resolved?.leg.threshold.date,resolved?.leg.threshold.minutes])
+  const pages=accumulated.identity===pagingIdentity?accumulated.pages:[]
+  const shown=pages.flatMap(page=>page.rows)
+  const total=pages.at(-1)?.source.data.pageInfo.total??0
+  const serialized=shown.slice(0,DISPLAY_LIMITS.orderedFareRefs)
+  const omitted=Math.max(0,total-serialized.length)
+  usePublishDisplay({display:{payload:{kind:'fare-order',orderedFareRefs:serialized.map((row,index)=>({fareId:row.id,rank:index+1})),...(serialized.length?{renderedRange:{fromRank:1,toRank:serialized.length},viewport:{offset:0,limit:serialized.length}}:{})},totalDisplayed:total,includedCount:serialized.length,complete:omitted===0,omittedCount:omitted}})
+  const lastPage=pages.at(-1)
+  const nextCursor=lastPage?.source.data.pageInfo.nextCursor
+  const canLoadMore=!!nextCursor&&!pages.some(page=>page.cursor===nextCursor)
+  const loadingMore=!!lastPage&&cursor!==lastPage.cursor&&result.queryState.status==='loading'
+  const appendFailed=!!lastPage&&cursor!==lastPage.cursor&&result.queryState.status==='error'
+  const requestNext=useCallback(()=>{
+    if(!lastPage)return
+    if(appendFailed){
+      recordDisplayInteraction(displayNode.store,{artifactId:plan.state.artifactId,componentRef:displayNode.componentRef,action:'retry',inputFields:['cursor']})
+      result.refresh()
+      return
+    }
+    if(!canLoadMore||!nextCursor||cursor!==lastPage.cursor)return
+    recordDisplayInteraction(displayNode.store,{artifactId:plan.state.artifactId,componentRef:displayNode.componentRef,action:'scroll',inputFields:['cursor']})
+    setCursor(nextCursor)
+  },[appendFailed,canLoadMore,cursor,displayNode.componentRef,displayNode.store,lastPage,nextCursor,plan.state.artifactId,result.refresh])
+  const loadMore=(event:UIEvent<HTMLDivElement>)=>{
+    const region=event.currentTarget
+    if(region.scrollHeight-region.scrollTop-region.clientHeight>48)return
+    requestNext()
+  }
+  useEffect(()=>{
+    const sentinel=loadSentinelRef.current
+    if(!sentinel||typeof IntersectionObserver==='undefined'||!canLoadMore||appendFailed)return
+    const observer=new IntersectionObserver(entries=>{
+      if(entries.some(entry=>entry.isIntersecting))requestNext()
+    },{root:sentinel.parentElement,rootMargin:'48px'})
+    observer.observe(sentinel)
+    return()=>observer.disconnect()
+  },[appendFailed,canLoadMore,requestNext])
+  const loadStatus=loadingMore?'Loading more fares…':appendFailed?'More fares could not load.':canLoadMore?'Scroll down to load more fares.':`All ${shown.length} matching fares loaded.`
   if (!resolved) return <EmptyPlanningState />
-  if (!result.data&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
-  if (!result.data&&result.queryState.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
+  if (!pages.length&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
+  if (!pages.length&&result.queryState.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
   return <div className={`trip-fare-strip${compact ? ' is-compact' : ''}`}>
     <p className="trip-fare-caption">Synthetic fares per passenger</p>
-    {shown.length > 0 ? <div className="trip-fare-scroll">{shown.map(row => {
+    {pages.map((page,pageIndex)=><FareStripPagePublisher key={page.resultKey} artifactRef={artifactRef} baseRef={baseRef} legIndex={resolved.index} legKey={resolved.leg.key} resourceKey={resolved.leg.resourceKey} page={page} pageIndex={pageIndex}/>)}
+    <div key={pagingIdentity} className="trip-fare-results-scroll" role="region" aria-label={`Scrollable fares from ${cityLabel(resolved.leg.originId)} to ${cityLabel(resolved.leg.destinationId)}`} tabIndex={0} onScroll={loadMore}>
+    {shown.length > 0 ? <div className="trip-fare-results-grid">{shown.map(row => {
       const selected = plan.state.selectedFareIds.includes(row.id)
       return <Card key={row.id} className={`trip-fare-option${selected ? ' is-selected' : ''}`} role="article">
         <div className="trip-fare-option-top"><span>{modeIcon(row.mode)}{cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong></div>
@@ -437,7 +546,8 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
         <Button type="button" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => {recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:selected?'deselect':'select'});dispatch({ kind: 'select', artifactId: plan.state.artifactId, fareId: row.id, selected: !selected })}}>{selected ? 'Selected' : 'Choose fare'}</Button>
       </Card>
     })}</div> : <p role="status">No departures meet the current date, arrival time, and transport choices.</p>}
-    <div className="travel-pagination" aria-label={`Fare pages for ${cityLabel(resolved.leg.originId)} to ${cityLabel(resolved.leg.destinationId)}`}><Button type="button" variant="outline" disabled={!cursorHistory.length} onClick={()=>{recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:'input',inputFields:['cursor']});const previous=cursorHistory.at(-1)??null;setCursorHistory(history=>history.slice(0,-1));setCursor(previous)}}>Previous</Button><span>Page {pageIndex+1}</span><Button type="button" variant="outline" disabled={!result.data?.pageInfo.hasNextPage||!result.data.pageInfo.nextCursor} onClick={()=>{const next=result.data?.pageInfo.nextCursor;if(next){recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:displayNode.componentRef,action:'input',inputFields:['cursor']});setCursorHistory(history=>[...history,cursor]);setCursor(next)}}}>Next</Button></div>
+      <div ref={loadSentinelRef} className="trip-fare-load-sentinel"><span className="trip-fare-load-status" role="status">{loadStatus}</span>{appendFailed?<Button type="button" variant="outline" onClick={requestNext}>Retry loading fares</Button>:null}</div>
+    </div>
   </div>
 }
 

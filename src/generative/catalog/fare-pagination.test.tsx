@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { ArtifactIdSchema, DatasetIdSchema, QueryGroupsResponseSchema } from '../contracts'
 import { FareItemSchema, type FareScope } from '../contracts/query-groups'
 import { createFareDataBridge } from '../data/fare-data-bridge'
@@ -11,7 +11,7 @@ import { createFixedProjectionFixture } from '../testing/fixed-projection-fixtur
 import { DisplayContextProvider, DisplayNodeProvider } from './display-context-provider'
 import { TravelProvider, type TravelServices } from './context'
 import { FareCards, FarePicker } from './views'
-import { FadeFares, FareCalendar, TransportSelect } from './trip-planning/components'
+import { FadeFares, FareCalendar, TransportSelect, TravelDate } from './trip-planning/components'
 
 const scope: FareScope = { kind: 'fareScope', originId: 'london', destinationId: 'paris', dateWindow: { from: '2026-10-26', to: '2026-10-26' }, passengers: 1, earliestDeparture: { date: '2026-10-26', minutes: 0 } }
 const items = Array.from({ length: 9 }, (_, index) => FareItemSchema.parse({
@@ -30,19 +30,30 @@ const selectorItems = Array.from({ length: 18 }, (_, index) => FareItemSchema.pa
   legs: [{ ...items[0]!.legs[0], carrierName: `Selector Rail ${index + 1}` }],
 }))
 
-async function renderSelector(component: 'picker'|'strip'|'calendar') {
-  const fixture=createFixedProjectionFixture({rows:selectorItems,sourceVersion:'selector-source-1'})
-  const manifest=await fixture.bridge.loadScope(scope,new AbortController().signal)
-  const binding=fixture.bridge.getBinding(manifest.resourceKey)
+async function renderSelector(component: 'picker'|'strip'|'calendar', rows=selectorItems, wrapClient?: (client: ServerQueryClient)=>ServerQueryClient) {
+  const fixedFixture=createFixedProjectionFixture({rows,sourceVersion:'selector-source-1'})
+  const bridge=wrapClient?createFareDataBridge({client:wrapClient(fixedFixture.client)}):fixedFixture.bridge
+  const fixture={...fixedFixture,bridge}
+  const manifest=await bridge.loadScope(scope,new AbortController().signal)
+  const binding=bridge.getBinding(manifest.resourceKey)
   const artifactId=ArtifactIdSchema.parse(`artifact-${component}`)
   const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
   state.initializeMissing(artifactId,{datasetRefs:[binding.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-26'},availableModesByLeg:{'london:paris':['train']}})
-  const router=createActionRouter(state,{bridge:fixture.bridge})
-  const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+  const router=createActionRouter(state,{bridge})
+  const services={bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
   const displayStore=createDisplayContextStore()
   const child=component==='picker'?<FarePicker artifactRef={artifactId} datasetRef={binding.datasetId}/>:component==='strip'?<FadeFares artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/>:<FareCalendar artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/>
   render(<DisplayContextProvider store={displayStore}><TravelProvider services={services}><DisplayNodeProvider identity={{componentRef:{value:`${artifactId}:present:${component}`,keySource:'authored-key'},componentType:component==='picker'?'FarePicker':component==='strip'?'FadeFares':'FareCalendar',scope:{kind:'leg',artifactId,legIndex:0,legKey:'london:paris',resourceKey:binding.resourceKey},authored:{}}}>{child}</DisplayNodeProvider></TravelProvider></DisplayContextProvider>)
-  return{artifactId,state,displayStore,router}
+  return{artifactId,state,displayStore,router,fixture}
+}
+
+function scrollFareResultsToEnd(region:HTMLElement) {
+  Object.defineProperties(region,{
+    scrollTop:{value:180,writable:true,configurable:true},
+    clientHeight:{value:240,configurable:true},
+    scrollHeight:{value:400,configurable:true},
+  })
+  fireEvent.scroll(region)
 }
 
 describe('FareCards keyset pagination', () => {
@@ -107,21 +118,118 @@ describe('interactive selector pagination',()=>{
     router.dispose()
   })
 
-  it('reaches a second FareStrip page and keeps a prior-page selection pinned',async()=>{
-    const {artifactId,state,displayStore,router}=await renderSelector('strip')
-    const first=(await screen.findAllByRole('article'))[0]!
+  it('appends FareStrip pages while preserving their exact display handles and earlier selections',async()=>{
+    const {artifactId,state,displayStore,router,fixture}=await renderSelector('strip')
+    const region=await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+    expect(screen.getAllByRole('article')).toHaveLength(16)
+    expect(screen.queryByLabelText('Fare pages for London to Paris')).not.toBeInTheDocument()
+
+    scrollFareResultsToEnd(region)
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(18))
+    const first=screen.getAllByRole('article')[0]!
+    const appended=screen.getAllByRole('article')[17]!
     fireEvent.click(within(first).getByRole('button',{name:'Choose fare'}))
-    const pages=screen.getByLabelText('Fare pages for London to Paris')
-    fireEvent.click(within(pages).getByRole('button',{name:'Next'}))
-    await waitFor(()=>expect(within(pages).getByText('Page 2')).toBeVisible())
-    expect(state.get(artifactId).selectedFareIds).toEqual([selectorItems[0]!.id])
-    const capture=displayStore.capture({captureId:'strip-page-2',artifactIds:[artifactId]})
-    expect(capture.exposedOrderedIds).toEqual(selectorItems.slice(16).map(item=>item.id))
-    expect(capture.components[0]?.display?.payload).toMatchObject({kind:'fare-order',renderedRange:{fromRank:17,toRank:18},viewport:{offset:16,limit:2,cursor:'fixture-cursor-16'}})
+    fireEvent.click(within(appended).getByRole('button',{name:'Choose fare'}))
+    expect(state.get(artifactId).selectedFareIds).toEqual([selectorItems[0]!.id,selectorItems[17]!.id])
+    expect(fixture.bridge.findCachedFare(selectorItems[17]!.id)?.id).toBe(selectorItems[17]!.id)
+
+    const capture=displayStore.capture({captureId:'strip-scroll',artifactIds:[artifactId]})
+    expect(capture.exposedOrderedIds).toEqual(selectorItems.map(item=>item.id))
+    const root=capture.components.find(component=>component.identity.componentType==='FadeFares')
+    expect(root?.display?.displayHandle).toBeUndefined()
+    expect(root?.execution).toBeUndefined()
+    expect(root?.display?.payload).toMatchObject({kind:'fare-order',renderedRange:{fromRank:1,toRank:18},viewport:{offset:0,limit:18}})
+    const pages=capture.components.filter(component=>component.identity.componentType==='FareStripPage')
+    expect(pages).toHaveLength(2)
+    expect(pages.map(page=>page.identity.componentRef.value)).toEqual([`${artifactId}:present:strip.page-1`,`${artifactId}:present:strip.page-2`])
+    expect(pages.every(page=>page.identity.scope.kind==='leg'&&page.identity.scope.legKey==='london:paris')).toBe(true)
+    expect(pages.map(page=>page.display?.displayHandle).every(Boolean)).toBe(true)
+    expect(new Set(pages.map(page=>page.display?.displayHandle)).size).toBe(2)
+    expect(new Set(pages.map(page=>page.execution?.status==='ready'?page.execution.current.resultKey:undefined)).size).toBe(2)
+    expect(pages[0]?.display?.payload).toMatchObject({kind:'fare-order',renderedRange:{fromRank:1,toRank:16}})
+    expect(pages[1]?.display?.payload).toMatchObject({kind:'fare-order',renderedRange:{fromRank:17,toRank:18}})
+    const firstPage=pages[0]!,firstHandle=firstPage.display?.displayHandle,firstExecution=firstPage.execution
+    const appendedPage=pages[1]!,appendedHandle=appendedPage.display?.displayHandle,appendedExecution=appendedPage.execution
+    expect(firstHandle).toBeDefined()
+    expect(firstExecution?.status).toBe('ready')
+    expect(appendedHandle).toBeDefined()
+    expect(appendedExecution?.status).toBe('ready')
+    if(!firstHandle||firstExecution?.status!=='ready'||!appendedHandle||appendedExecution?.status!=='ready')throw new Error('Expected inspectable fare pages')
+    const inspected=displayStore.inspect({captureId:'strip-scroll',displayHandle:firstHandle,resultKey:firstExecution.current.resultKey,itemIds:[selectorItems[0]!.id],limit:5})
+    expect(inspected.items[0]?.fact?.id).toBe(selectorItems[0]!.id)
+    const appendedInspection=displayStore.inspect({captureId:'strip-scroll',displayHandle:appendedHandle,resultKey:appendedExecution.current.resultKey,itemIds:[selectorItems[17]!.id],limit:5})
+    expect(appendedInspection.items[0]?.fact?.id).toBe(selectorItems[17]!.id)
+    expect(capture.shownFareFacts.slice(0,2).map(item=>item.fact.id)).toEqual(selectorItems.slice(0,2).map(item=>item.id))
     router.dispose()
   })
 
-  it('returns a second-page fare strip to page one when its leg modes change',async()=>{
+  it('loads the next FareStrip page when its sentinel is already visible',async()=>{
+    let reveal:undefined|(()=>void)
+    class VisibleSentinelObserver {
+      constructor(callback:IntersectionObserverCallback){reveal=()=>callback([{isIntersecting:true} as IntersectionObserverEntry],this as unknown as IntersectionObserver)}
+      observe(){}
+      disconnect(){}
+    }
+    vi.stubGlobal('IntersectionObserver',VisibleSentinelObserver)
+    try{
+      const {router}=await renderSelector('strip')
+      await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+      expect(screen.getAllByRole('article')).toHaveLength(16)
+      expect(reveal).toBeDefined()
+      act(()=>reveal?.())
+      await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(18))
+      router.dispose()
+    }finally{
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('keeps loaded FareStrip rows and retries a failed progressive page',async()=>{
+    let failAppend=true
+    const wrapClient=(client:ServerQueryClient):ServerQueryClient=>({
+      queryGroups:async(request,signal)=>{
+        const hasAppend=request.groups.some(group=>group.projections.some(projection=>projection.kind==='farePage'&&projection.after!==null))
+        if(hasAppend&&failAppend){failAppend=false;throw new Error('temporary append failure')}
+        return client.queryGroups(request,signal)
+      },
+      lookupPins:(request,signal)=>client.lookupPins(request,signal),
+    })
+    const {router}=await renderSelector('strip',selectorItems,wrapClient)
+    const region=await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+    scrollFareResultsToEnd(region)
+    const retry=await screen.findByRole('button',{name:'Retry loading fares'})
+    expect(screen.getAllByRole('article')).toHaveLength(16)
+    expect(screen.getByText('More fares could not load.')).toBeVisible()
+    fireEvent.click(retry)
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(18))
+    expect(screen.queryByRole('button',{name:'Retry loading fares'})).not.toBeInTheDocument()
+    router.dispose()
+  })
+
+  it('progressively renders more than the serialized 100-fare context bound',async()=>{
+    const manyItems=Array.from({length:112},(_,index)=>FareItemSchema.parse({
+      ...items[0],
+      id:`many-fare-${index+1}`,
+      carrierName:`Many Rail ${index+1}`,
+      departureMinutes:300+index*5,
+      legs:[{...items[0]!.legs[0],carrierName:`Many Rail ${index+1}`}],
+    }))
+    const {artifactId,displayStore,router}=await renderSelector('strip',manyItems)
+    const region=await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+    expect(screen.getAllByRole('article')).toHaveLength(16)
+    for(const expected of [32,48,64,80,96,112]){
+      scrollFareResultsToEnd(region)
+      await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(expected))
+    }
+    const capture=displayStore.capture({captureId:'strip-over-context-bound',artifactIds:[artifactId]})
+    const root=capture.components.find(component=>component.identity.componentType==='FadeFares')
+    expect(root?.display).toMatchObject({totalDisplayed:112,includedCount:100,complete:false,omittedCount:12})
+    expect(capture.exposedOrderedIds).toEqual(manyItems.slice(0,100).map(item=>item.id))
+    expect(screen.getAllByRole('article')).toHaveLength(112)
+    router.dispose()
+  })
+
+  it('resets accumulated FareStrip pages and rejects a late append when its leg modes change',async()=>{
     const mixedItems=(['train','bus'] as const).flatMap((mode,modeIndex)=>Array.from({length:18},(_,index)=>FareItemSchema.parse({
       ...items[0],
       id:`${mode}-fare-${index+1}`,
@@ -132,23 +240,83 @@ describe('interactive selector pagination',()=>{
       legs:[{...items[0]!.legs[0],mode,carrierName:mode==='train'?`Mode Rail ${index+1}`:`Mode Bus ${index+1}`}],
     })))
     const fixture=createFixedProjectionFixture({rows:mixedItems,sourceVersion:'mode-page-source-1'})
-    const manifest=await fixture.bridge.loadScope(scope,new AbortController().signal)
-    const binding=fixture.bridge.getBinding(manifest.resourceKey)
+    let releaseLateAppend:()=>void=()=>{}
+    const lateAppendGate=new Promise<void>(resolve=>{releaseLateAppend=resolve})
+    let lateAppendStarted=false
+    const client:ServerQueryClient={
+      queryGroups:async(request,signal)=>{
+        const isThirdPage=request.groups.some(group=>group.projections.some(projection=>projection.kind==='farePage'&&projection.after==='fixture-cursor-32'))
+        if(!isThirdPage)return fixture.client.queryGroups(request,signal)
+        lateAppendStarted=true
+        await lateAppendGate
+        return fixture.client.queryGroups(request,new AbortController().signal)
+      },
+      lookupPins:(request,signal)=>fixture.client.lookupPins(request,signal),
+    }
+    const bridge=createFareDataBridge({client})
+    const manifest=await bridge.loadScope(scope,new AbortController().signal)
+    const binding=bridge.getBinding(manifest.resourceKey)
     const artifactId=ArtifactIdSchema.parse('artifact-mode-pages')
     const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
     state.initializeMissing(artifactId,{datasetRefs:[binding.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-26'},availableModesByLeg:{'london:paris':['train','bus']}})
-    const router=createActionRouter(state,{bridge:fixture.bridge})
-    const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+    const router=createActionRouter(state,{bridge})
+    const services={bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
     render(<TravelProvider services={services}><TransportSelect artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/><FadeFares artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></TravelProvider>)
 
-    const pages=await screen.findByLabelText('Fare pages for London to Paris')
-    fireEvent.click(within(pages).getByRole('button',{name:'Next'}))
-    await waitFor(()=>expect(within(pages).getByText('Page 2')).toBeVisible())
+    const region=await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+    scrollFareResultsToEnd(region)
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(32))
+    scrollFareResultsToEnd(region)
+    await waitFor(()=>expect(lateAppendStarted).toBe(true))
 
     fireEvent.click(screen.getByRole('button',{name:'Train'}))
-    await waitFor(()=>expect(within(pages).getByText('Page 1')).toBeVisible())
-    expect(screen.getAllByRole('article')).toHaveLength(16)
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(16))
+    await act(async()=>{releaseLateAppend();await lateAppendGate})
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(16))
     expect(screen.getAllByRole('article').every(article=>article.textContent?.includes('Mode Bus'))).toBe(true)
+    expect((await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})).scrollTop).toBe(0)
+    router.dispose()
+  })
+
+  it('discards accumulated pages and resets the viewport when the trip departure date changes',async()=>{
+    const datedItems=['2026-10-26','2026-10-27'].flatMap(serviceDate=>Array.from({length:24},(_,index)=>FareItemSchema.parse({
+      ...items[0],
+      id:`date-${serviceDate}-fare-${index+1}`,
+      serviceDate,
+      carrierName:`Date ${serviceDate} Rail ${index+1}`,
+      departureMinutes:300+index*20,
+      legs:[{...items[0]!.legs[0],carrierName:`Date ${serviceDate} Rail ${index+1}`}],
+    })))
+    const fixture=createFixedProjectionFixture({rows:datedItems,sourceVersion:'date-page-source-1',sourceDateWindow:{from:'2026-10-26',to:'2026-10-27'}})
+    const manifest=await fixture.bridge.loadScope({...scope,dateWindow:{from:'2026-10-26',to:'2026-10-27'}},new AbortController().signal)
+    const binding=fixture.bridge.getBinding(manifest.resourceKey)
+    const artifactId=ArtifactIdSchema.parse('artifact-date-pages')
+    const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
+    state.initializeMissing(artifactId,{
+      datasetRefs:[binding.datasetId],
+      citySequence:['london','paris'],
+      dates:{start:'2026-10-26'},
+      displayWindowByLeg:{'london:paris':{from:'2026-10-26',to:'2026-10-26'}},
+      availableModesByLeg:{'london:paris':['train']},
+    })
+    const router=createActionRouter(state,{bridge:fixture.bridge})
+    const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+    render(<TravelProvider services={services}><TravelDate artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/><FadeFares artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></TravelProvider>)
+
+    const oldRegion=await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+    scrollFareResultsToEnd(oldRegion)
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(24))
+    expect(screen.getAllByRole('article').every(article=>article.textContent?.includes('2026-10-26'))).toBe(true)
+    Object.defineProperty(oldRegion,'scrollTop',{value:1153,writable:true,configurable:true})
+
+    fireEvent.change(screen.getByLabelText('Departure'),{target:{value:'2026-10-27'}})
+    await router.whenIdle(artifactId)
+    await waitFor(()=>expect(screen.getAllByRole('article')).toHaveLength(16))
+    const newRegion=await screen.findByRole('region',{name:'Scrollable fares from London to Paris'})
+    expect(newRegion).not.toBe(oldRegion)
+    expect(newRegion.scrollTop).toBe(0)
+    expect(screen.getAllByRole('article').every(article=>article.textContent?.includes('2026-10-27'))).toBe(true)
+    expect(screen.queryByText(/2026-10-26/)).not.toBeInTheDocument()
     router.dispose()
   })
 
