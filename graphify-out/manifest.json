@@ -1350,10 +1350,10 @@
     "semantic_hash": "0ae2ee7ebefe644d2bdd3a00959a7237"
   },
   "src/generative/catalog/trip-planning/components.tsx": {
-    "mtime": 1791459370.334715,
-    "seen": 1791460096.2062001,
-    "ast_hash": "78aae0718cac11828b5f3537bb509f78",
-    "semantic_hash": "78aae0718cac11828b5f3537bb509f78"
+    "mtime": 1791463664.1471522,
+    "seen": 1791463983.0278752,
+    "ast_hash": "7976caae7fbaf9c35d263dd71c3232cc",
+    "semantic_hash": ""
   },
   "src/generative/contracts/route-shape.test.ts": {
     "mtime": 1791449095.1027253,
@@ -1494,10 +1494,10 @@
     "semantic_hash": "56b8be60bf71992c4fa27176938d1195"
   },
   "src/generative/catalog/fare-pagination.test.tsx": {
-    "mtime": 1791459401.3629525,
-    "seen": 1791460096.2061892,
-    "ast_hash": "01c77379f1c4057169009c83753fe202",
-    "semantic_hash": "01c77379f1c4057169009c83753fe202"
+    "mtime": 1791463619.7535043,
+    "seen": 1791463983.027863,
+    "ast_hash": "a2358fdabd5dfe870f4d6264074321b2",
+    "semantic_hash": ""
   },
   "src/generative/catalog/views/fare-list.tsx": {
     "mtime": 1791450740.212376,
@@ -1644,9 +1644,9 @@
     "semantic_hash": "557b59ebb508f4aeb0ffeafea6ed71fb"
   },
   "docs/server-driven-generative-ui-implementation-plan.md": {
-    "mtime": 1791459765.1233437,
-    "seen": 1791460096.206295,
-    "ast_hash": "157a9aac856c30e33cc7b0e57034cedd",
-    "semantic_hash": "157a9aac856c30e33cc7b0e57034cedd"
+    "mtime": 1791463932.6727924,
+    "seen": 1791463983.0279832,
+    "ast_hash": "f1060c01574eb0d941a41dc0407d05e7",
+    "semantic_hash": ""
   }
 }
