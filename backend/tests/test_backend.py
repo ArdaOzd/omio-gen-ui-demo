@@ -446,7 +446,7 @@ class BackendTestCase(unittest.TestCase):
             },
         )
     def test_default_dataset_size_and_seeded_variation(self) -> None:
-        self.assertEqual(DEFAULT_ROW_COUNT, 10_000_000)
+        self.assertEqual(DEFAULT_ROW_COUNT, 50_000_000)
         self.assertEqual(DEFAULT_START_DATE, date(2026, 10, 8))
         self.assertEqual(DEFAULT_END_DATE, date(2027, 12, 31))
         self.assertEqual((DEFAULT_END_DATE - DEFAULT_START_DATE).days + 1, 450)
@@ -626,7 +626,12 @@ class BackendTestCase(unittest.TestCase):
         self.assertEqual(metadata["location_count"], len(LOCATIONS))
         self.assertEqual(metadata["route_count"], len(directional_routes()))
         self.assertEqual(metadata["timetable"]["start_date"], "2026-10-08")
+        self.assertEqual(metadata["timetable"]["fare_count"], self.summary["fare_count"])
         self.assertEqual(set(metadata["modes"]), {"train", "bus", "flight", "ferry"})
+        self.assertEqual(
+            sum(mode["fare_count"] for mode in metadata["modes"].values()),
+            self.summary["fare_count"],
+        )
         self.assertEqual(
             {route["source_kind"] for route in metadata["routes"]},
             {"coverage", "curated"},

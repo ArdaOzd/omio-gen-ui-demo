@@ -1,7 +1,7 @@
 # Omio generative UI demo
 
 The classic Omio-style search and conversational travel interface share a deterministic
-SQLite fixture of 10,000,000 synthetic fares across 120 cities in geographic Europe.
+SQLite fixture of 50,000,000 synthetic fares across 120 cities in geographic Europe.
 The fixture covers every ordered city pair on every day from 2026-10-08 through
 2027-12-31. Routes can contain multiple train, bus, flight, or ferry legs.
 The generative interface uses native React component composition with the signed-in
@@ -33,7 +33,7 @@ For a production build and local preview, run `npm start` and open `http://127.0
 ## Verify
 
 ```sh
-npm run seed       # regenerate data/omio.sqlite3 with 10,000,000 fares
+npm run seed       # regenerate data/omio.sqlite3 with 50,000,000 fares
 npm run typecheck
 npm run check:catalog
 npm test

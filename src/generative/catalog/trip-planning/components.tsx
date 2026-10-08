@@ -537,7 +537,7 @@ export function MultiCityPlanGrid(props: WidgetProps) {
       <LegRow plan={plan} leg={leg} index={index} locations={catalog.locations} />
       {index < plan.legs.length - 1 && <div className="trip-stay-bridge"><span aria-hidden="true" /><Card><StayDurationControl plan={plan} leg={leg} nextLeg={plan.legs[index + 1]} /></Card></div>}
     </div>)}</div>
-    <p className="trip-synthetic-note">All fares and totals are synthetic demo data. Prices are per passenger and include demo fees.</p>
+    <p className="trip-synthetic-note">Explore 50 million synthetic fares. All fares and totals are demo data; prices are per passenger and include demo fees.</p>
   </Card>
 }
 

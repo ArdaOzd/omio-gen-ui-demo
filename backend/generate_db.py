@@ -24,9 +24,9 @@ from backend.seeds import (
 
 DEFAULT_START_DATE = date(2026, 10, 8)
 DEFAULT_END_DATE = date(2027, 12, 31)
-DEFAULT_ROW_COUNT = 10_000_000
+DEFAULT_ROW_COUNT = 50_000_000
 DEFAULT_SEED = 20261002
-GENERATOR_VERSION = "3"
+GENERATOR_VERSION = "4"
 SCHEMA_VERSION = "3"
 
 
@@ -280,6 +280,7 @@ def _fare_rows(
     company_ids: dict[str, int],
     row_count: int,
     seed: int,
+    mode_counts: dict[str, int],
 ) -> Iterator[tuple[int, int, int, str, str, str, int, int, int]]:
     cells = len(routes) * len(service_dates)
     if row_count < cells:
@@ -310,6 +311,7 @@ def _fare_rows(
             cumulative_weight += _cell_weight(route, service_day, day_index, seed)
             allocated_rows = cumulative_weight * remaining_rows // total_weight
             departures = 1 + allocated_rows - previous_allocated
+            mode_counts[route.mode] += departures
             start_minute, end_minute = service_windows[route.mode]
             service_span = end_minute - start_minute + 1
             for sequence in range(departures):
@@ -488,15 +490,14 @@ def generate_database(
             "schedule_disclaimer": "Generated examples; not live schedules or bookable fares",
             "timestamp_semantics": "naive ISO local scheduled datetimes; duration_minutes is authoritative",
         }
-        connection.executemany(
-            "INSERT INTO metadata VALUES (?, ?)", sorted(metadata.items())
-        )
+        fare_counts_by_mode = {mode: 0 for mode in MODE_PRIORITY}
         rows = _fare_rows(
             routes=routes,
             service_dates=service_dates,
             company_ids=company_ids,
             row_count=row_count,
             seed=seed,
+            mode_counts=fare_counts_by_mode,
         )
         insert_sql = """
             INSERT INTO fares (
@@ -512,6 +513,17 @@ def generate_database(
             if progress is not None and inserted_count >= next_progress:
                 progress(inserted_count)
                 next_progress += 2_000_000
+        if sum(fare_counts_by_mode.values()) != row_count:
+            raise RuntimeError("per-mode fare counts do not sum to the requested row count")
+        metadata.update(
+            {
+                f"fare_count_{mode}": str(count)
+                for mode, count in fare_counts_by_mode.items()
+            }
+        )
+        connection.executemany(
+            "INSERT INTO metadata VALUES (?, ?)", sorted(metadata.items())
+        )
         connection.executescript(INDEXES)
         connection.execute("ANALYZE")
         connection.commit()

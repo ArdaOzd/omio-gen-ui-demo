@@ -31,7 +31,7 @@ async function waitFor(url, child, service) {
 }
 process.once('SIGINT',()=>stop(0));process.once('SIGTERM',()=>stop(0))
 try {
- if(!existsSync(databasePath))runChecked('python3',['-m','backend.generate_db','--output',databasePath,'--rows','10000000'])
+ if(!existsSync(databasePath))runChecked('python3',['-m','backend.generate_db','--output',databasePath,'--rows','50000000'])
  runChecked('python3',['-m','backend.app','--database',databasePath,'--check-contract'])
  if(mode==='preview')runChecked('npm',['run','build'])
  const backend=start('python3',['-m','backend.app','--port',String(apiPort),'--database',databasePath])

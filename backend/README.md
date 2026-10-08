@@ -16,10 +16,10 @@ the longest leg, with flight, ferry, train, then bus used as the tie order.
 Run from the repository root:
 
 ```sh
-python3 -m backend.generate_db --output data/omio.sqlite3 --rows 10000000
+python3 -m backend.generate_db --output data/omio.sqlite3 --rows 50000000
 ```
 
-The default seed always produces exactly 10,000,000 synthetic fares from 2026-10-08
+The default seed always produces exactly 50,000,000 synthetic fares from 2026-10-08
 through 2027-12-31. Every directional route has service on every day in that range.
 Weighted, seeded allocation varies service frequency, operators, departure times,
 prices, durations, and availability while remaining reproducible. These are generated
@@ -31,7 +31,7 @@ Verify the saved artifact, including the 120-city manifest, ordered-pair daily
 coverage, route legs, and required query indexes:
 
 ```sh
-python3 -m backend.verify_db data/omio.sqlite3 --expected-rows 10000000
+python3 -m backend.verify_db data/omio.sqlite3 --expected-rows 50000000
 ```
 
 ## Run the API

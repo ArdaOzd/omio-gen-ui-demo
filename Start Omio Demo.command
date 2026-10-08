@@ -67,6 +67,8 @@ fare_api_is_current() {
   local response
   response="$(/usr/bin/curl --fail --silent --max-time 1 "${APP_URL}api/health" 2>/dev/null)" || return 1
   printf '%s' "$response" | /usr/bin/grep -Eq '"service"[[:space:]]*:[[:space:]]*"omio-fare-api"' &&
+    printf '%s' "$response" | /usr/bin/grep -Eq '"fare_count"[[:space:]]*:[[:space:]]*50000000' &&
+    printf '%s' "$response" | /usr/bin/grep -Eq '"generator_version"[[:space:]]*:[[:space:]]*4' &&
     printf '%s' "$response" | /usr/bin/grep -Eq '"schema_version"[[:space:]]*:[[:space:]]*3' &&
     printf '%s' "$response" | /usr/bin/grep -Eq '"coverage_model"[[:space:]]*:[[:space:]]*"all_ordered_pairs_daily"'
 }

@@ -26,6 +26,7 @@ from backend.generate_db import (
 
 DEFAULT_DATABASE = Path(__file__).resolve().parents[1] / "data" / "omio.sqlite3"
 MODES = ("train", "bus", "flight", "ferry")
+MODE_FARE_COUNT_KEYS = {mode: f"fare_count_{mode}" for mode in MODES}
 EXPECTED_COVERAGE_MODEL = "all_ordered_pairs_daily"
 EXPECTED_LOCATION_SCOPE = "strict_geographic_europe"
 EXPECTED_LOCATION_COUNT = 120
@@ -178,6 +179,22 @@ def validate_database_contract(database: Path) -> dict[str, str]:
             for key, expected_value in expected.items()
             if values.get(key) != expected_value
         ]
+        mode_fare_counts: dict[str, int] = {}
+        for mode, key in MODE_FARE_COUNT_KEYS.items():
+            raw_count = values.get(key)
+            try:
+                count = int(raw_count) if raw_count is not None else -1
+            except ValueError:
+                count = -1
+            if count < 0:
+                mismatches.append(f"{key}={raw_count!r} (expected a non-negative integer)")
+            else:
+                mode_fare_counts[mode] = count
+        if len(mode_fare_counts) == len(MODES) and sum(mode_fare_counts.values()) != DEFAULT_ROW_COUNT:
+            mismatches.append(
+                "cached mode fare counts do not sum to "
+                f"{DEFAULT_ROW_COUNT!r}"
+            )
         location_count = connection.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
         if location_count != EXPECTED_LOCATION_COUNT:
             mismatches.append(
@@ -285,12 +302,9 @@ def get_metadata(database: Path) -> dict[str, object]:
     with closing(_connect(database)) as connection:
         values = _metadata_values(connection)
         mode_rows = connection.execute(
-            """
-            SELECT r.mode, COUNT(*) AS fare_count, COUNT(DISTINCT r.id) AS route_count
-            FROM fares f JOIN routes r ON r.id = f.route_id
-            GROUP BY r.mode ORDER BY r.mode
-            """
+            "SELECT mode, COUNT(*) AS route_count FROM routes GROUP BY mode ORDER BY mode"
         ).fetchall()
+        route_counts = {row["mode"]: row["route_count"] for row in mode_rows}
         company_rows = connection.execute(
             "SELECT name, mode FROM companies ORDER BY mode, name"
         ).fetchall()
@@ -322,11 +336,11 @@ def get_metadata(database: Path) -> dict[str, object]:
             "timestamp_semantics": values["timestamp_semantics"],
         },
         "modes": {
-            row["mode"]: {
-                "fare_count": row["fare_count"],
-                "directional_route_count": row["route_count"],
+            mode: {
+                "fare_count": int(values[MODE_FARE_COUNT_KEYS[mode]]),
+                "directional_route_count": route_counts.get(mode, 0),
             }
-            for row in mode_rows
+            for mode in MODES
         },
         "companies": [dict(row) for row in company_rows],
         "routes": [dict(row) for row in route_rows],
@@ -593,6 +607,7 @@ def dispatch(
         return HTTPStatus.OK, {
             "status": "ok",
             "fare_count": fare_count,
+            "generator_version": int(values["generator_version"]),
             "schema_version": int(values["schema_version"]),
             "coverage_model": values["coverage_model"],
             "source_version": _verified_source_version(database, source_version),

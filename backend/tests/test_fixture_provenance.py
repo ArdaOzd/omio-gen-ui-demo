@@ -98,6 +98,23 @@ class VerifierContractTests(unittest.TestCase):
                 expected_end_date=FIXTURE_DATE,
             )
 
+    def test_verifier_rejects_per_mode_fare_count_drift(self) -> None:
+        with sqlite3.connect(self.database) as connection:
+            connection.execute(
+                """
+                UPDATE metadata
+                SET value=CAST(CAST(value AS INTEGER) + 1 AS TEXT)
+                WHERE key='fare_count_bus'
+                """
+            )
+        with self.assertRaisesRegex(RuntimeError, "per-mode fare_count metadata"):
+            verify_database(
+                self.database,
+                expected_rows=self.rows,
+                expected_start_date=FIXTURE_DATE,
+                expected_end_date=FIXTURE_DATE,
+            )
+
     def test_verifier_rejects_location_manifest_drift(self) -> None:
         with sqlite3.connect(self.database) as connection:
             connection.execute(

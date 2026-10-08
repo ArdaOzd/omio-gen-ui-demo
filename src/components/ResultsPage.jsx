@@ -282,7 +282,7 @@ export default function ResultsPage({
         <div className="results-header__actions">
           <span>€</span>
           <span>EN</span>
-          <Badge className="demo-label">Synthetic schedule demo</Badge>
+          <Badge className="demo-label">50M synthetic fares</Badge>
         </div>
       </header>
 

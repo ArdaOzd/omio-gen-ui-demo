@@ -79,7 +79,7 @@ def _distance_km(
 def verify_database(
     database: Path,
     *,
-    expected_rows: int,
+    expected_rows: int = DEFAULT_ROW_COUNT,
     expected_start_date: date = DEFAULT_START_DATE,
     expected_end_date: date = DEFAULT_END_DATE,
 ) -> dict[str, object]:
@@ -128,6 +128,23 @@ def verify_database(
         _require("route_legs" in tables, "route_legs table is missing")
 
         fare_count = connection.execute("SELECT COUNT(*) FROM fares").fetchone()[0]
+        mode_fare_counts: dict[str, int] = {}
+        for mode in MAX_MODE_SPEED_KMH:
+            value = metadata.get(f"fare_count_{mode}")
+            _require(
+                value is not None and value.isdigit(),
+                f"fare_count_{mode} metadata must be a nonnegative integer",
+            )
+            mode_fare_counts[mode] = int(value)
+        actual_mode_fare_counts = dict(
+            connection.execute(
+                """
+                SELECT r.mode, COUNT(*)
+                FROM fares f JOIN routes r ON r.id = f.route_id
+                GROUP BY r.mode
+                """
+            )
+        )
         route_count = connection.execute("SELECT COUNT(*) FROM routes").fetchone()[0]
         company_count = connection.execute("SELECT COUNT(*) FROM companies").fetchone()[0]
         location_count = connection.execute("SELECT COUNT(*) FROM locations").fetchone()[0]
@@ -408,6 +425,14 @@ def verify_database(
     _require(fare_count == expected_rows, f"expected {expected_rows} fares, found {fare_count}")
     _require(metadata["fare_count"] == str(expected_rows), "metadata fare_count mismatch")
     _require(
+        sum(mode_fare_counts.values()) == expected_rows,
+        "per-mode fare_count metadata does not sum to the total fare count",
+    )
+    _require(
+        mode_fare_counts == actual_mode_fare_counts,
+        "per-mode fare_count metadata differs from fare facts",
+    )
+    _require(
         location_count == len(seed_location_rows),
         "database location count differs from current seeds",
     )
@@ -487,6 +512,7 @@ def verify_database(
             "location_slugs": sorted(locations),
         },
         "fare_count": fare_count,
+        "fare_count_by_mode": mode_fare_counts,
         "directional_route_count": route_count,
         "route_leg_count": route_leg_count,
         "route_day_count": route_days,

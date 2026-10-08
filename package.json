@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "frontend:preview": "vite preview --host 127.0.0.1",
-    "seed": "python3 -m backend.generate_db --output data/omio.sqlite3 --rows 10000000",
+    "seed": "python3 -m backend.generate_db --output data/omio.sqlite3 --rows 50000000",
     "start": "node scripts/run.mjs preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
