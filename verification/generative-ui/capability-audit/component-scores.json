@@ -22,7 +22,7 @@
     {"name":"DateStrip","dailyUsefulness":4,"completeness":5,"correctness":5,"rationale":"Selecting a date persisted the one-day window and stayed local."},
     {"name":"ModeChips","dailyUsefulness":4,"completeness":5,"correctness":5,"rationale":"Mode changes constrained returned rows to the selected transport."},
     {"name":"CarrierFilter","dailyUsefulness":4,"completeness":5,"correctness":5,"rationale":"FlixBus filtering produced only matching cards."},
-    {"name":"PriceRange","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"The price ceiling produced exact under-budget rows in successful runs."},
+    {"name":"PriceRange","dailyUsefulness":5,"completeness":5,"correctness":4,"rationale":"The price ceiling produced exact under-budget rows in the accepted run, but one exact budget repeat ended empty and remains an unresolved reliability finding."},
     {"name":"DurationRange","dailyUsefulness":4,"completeness":3,"correctness":3,"rationale":"The control rendered, but its prompt family was confounded by the scoped-sort failure."},
     {"name":"DirectToggle","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"Direct-only filtering remained reflected in the bounded shortlist."},
     {"name":"SortSelect","dailyUsefulness":4,"completeness":4,"correctness":1,"rationale":"The control persisted duration ascending but dataset-bound FarePicker remained departure ordered."},

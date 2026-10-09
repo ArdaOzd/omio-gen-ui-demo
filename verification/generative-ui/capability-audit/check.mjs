@@ -80,6 +80,10 @@ if (final) {
   assert.deepEqual(defaultSuggestions.map(item => item.prompt), report.topDefaults.map(item => item.prompt), 'Chat defaults must match the ranked top four exact prompts')
   assert.equal(new Set(report.topDefaults.map(item => item.family)).size, 4, 'Final defaults must have distinct task families')
   assert.equal(report.components.filter(component => component.score?.rationale && component.componentFacts.length).length, 49, 'Every component needs a score, rationale, and evidence fact')
+  for (const component of report.components) {
+    assert.equal(new Set(component.directCases).size, component.directCases.length, `${component.name} direct case aliases must be deduplicated`)
+    assert.equal(new Set(component.componentFacts.map(fact => `${fact.caseId}:${fact.sourceEvidenceSha256 ?? ''}:${fact.observation ?? ''}`)).size, component.componentFacts.length, `${component.name} component facts must be deduplicated`)
+  }
   assert.equal(report.ranking.filter(testCase => testCase.score).length, manifest.cases.length, 'Every prompt case needs a score and rationale')
   for (const selected of report.ranking.filter(testCase => testCase.eligibleForDefault)) {
     assert.equal(selected.failedSibling, false, `${selected.id} has a failed sibling attempt`)

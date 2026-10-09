@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-09T16:08:54.943Z",
+  "generatedAt": "2026-10-09T16:10:18.522Z",
   "catalogVersion": "1.1.0",
   "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
   "rubric": {
@@ -14313,10 +14313,8 @@
       "children": true,
       "directCases": [
         "mode-dashboard",
-        "mode-dashboard",
         "multi-city-workspace",
         "status-empty-partial",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -14415,7 +14413,6 @@
       ],
       "children": true,
       "directCases": [
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -14490,7 +14487,6 @@
       "children": false,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "local-failure-retry",
         "pending-refresh-loading"
       ],
@@ -14502,12 +14498,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -14584,10 +14574,6 @@
       "directCases": [
         "compact-fare-picker",
         "duration-picker",
-        "duration-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "fixed-date-picker"
       ],
       "internalCases": [],
@@ -14605,12 +14591,6 @@
         {
           "caseId": "duration-picker",
           "evidenceFile": "duration-picker-repeat-2.json",
-          "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "duration-picker",
-          "evidenceFile": "duration-picker.json",
           "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -14698,35 +14678,21 @@
       "children": false,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "compact-fare-picker",
         "date-strip-price-calendar",
         "departure-board",
-        "departure-board",
-        "departure-board",
-        "departure-board",
-        "departure-board",
-        "duration-picker",
         "duration-picker",
         "fare-cards-controls",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "fixed-date-picker",
         "flexible-calendar",
         "local-failure-retry",
         "manual-leg-editor",
-        "mode-dashboard",
-        "mode-dashboard",
         "mode-dashboard",
         "multi-city-workspace",
         "pending-refresh-loading",
         "status-empty-partial",
         "status-stale-saved-comparison",
         "story-layouts",
-        "story-layouts",
-        "tradeoff-dashboard",
-        "tradeoff-dashboard",
         "tradeoff-dashboard"
       ],
       "internalCases": [],
@@ -14737,12 +14703,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -14791,12 +14751,6 @@
         {
           "caseId": "duration-picker",
           "evidenceFile": "duration-picker-repeat-2.json",
-          "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "duration-picker",
-          "evidenceFile": "duration-picker.json",
           "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -14911,12 +14865,6 @@
         {
           "caseId": "tradeoff-dashboard",
           "evidenceFile": "tradeoff-dashboard-repeat-2.json",
-          "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "tradeoff-dashboard",
-          "evidenceFile": "tradeoff-dashboard.json",
           "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
           "observation": "Appeared in this archived accepted model-authored scene."
         }
@@ -14975,35 +14923,21 @@
       "children": true,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "compact-fare-picker",
         "date-strip-price-calendar",
         "departure-board",
-        "departure-board",
-        "departure-board",
-        "departure-board",
-        "departure-board",
-        "duration-picker",
         "duration-picker",
         "fare-cards-controls",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "fixed-date-picker",
         "flexible-calendar",
         "local-failure-retry",
         "manual-leg-editor",
-        "mode-dashboard",
-        "mode-dashboard",
         "mode-dashboard",
         "multi-city-workspace",
         "pending-refresh-loading",
         "status-empty-partial",
         "status-stale-saved-comparison",
         "story-layouts",
-        "story-layouts",
-        "tradeoff-dashboard",
-        "tradeoff-dashboard",
         "tradeoff-dashboard"
       ],
       "internalCases": [],
@@ -15014,12 +14948,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -15068,12 +14996,6 @@
         {
           "caseId": "duration-picker",
           "evidenceFile": "duration-picker-repeat-2.json",
-          "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "duration-picker",
-          "evidenceFile": "duration-picker.json",
           "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -15190,12 +15112,6 @@
           "evidenceFile": "tradeoff-dashboard-repeat-2.json",
           "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
           "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "tradeoff-dashboard",
-          "evidenceFile": "tradeoff-dashboard.json",
-          "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
-          "observation": "Appeared in this archived accepted model-authored scene."
         }
       ],
       "status": "model-generated",
@@ -15252,15 +15168,10 @@
       "children": true,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "departure-board",
-        "departure-board",
-        "departure-board",
-        "duration-picker",
         "duration-picker",
         "manual-leg-editor",
         "status-stale-saved-comparison",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -15271,12 +15182,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -15301,12 +15206,6 @@
         {
           "caseId": "duration-picker",
           "evidenceFile": "duration-picker-repeat-2.json",
-          "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "duration-picker",
-          "evidenceFile": "duration-picker.json",
           "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -15389,9 +15288,6 @@
       "children": true,
       "directCases": [
         "fare-cards-controls",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "fixed-date-picker",
         "story-layouts"
       ],
@@ -15491,7 +15387,6 @@
       "children": true,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "fare-cards-controls",
         "manual-leg-editor",
         "multi-city-workspace"
@@ -15504,12 +15399,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -15586,8 +15475,6 @@
       "children": true,
       "directCases": [
         "manual-leg-editor",
-        "mode-dashboard",
-        "mode-dashboard",
         "mode-dashboard",
         "multi-city-workspace",
         "tradeoff-dashboard"
@@ -15688,13 +15575,8 @@
       "children": true,
       "directCases": [
         "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "flexible-calendar",
         "story-layouts",
-        "story-layouts",
-        "tradeoff-dashboard",
         "tradeoff-dashboard"
       ],
       "internalCases": [],
@@ -15748,12 +15630,6 @@
         {
           "caseId": "tradeoff-dashboard",
           "evidenceFile": "tradeoff-dashboard-repeat-2.json",
-          "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "tradeoff-dashboard",
-          "evidenceFile": "tradeoff-dashboard.json",
           "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
           "observation": "Appeared in this archived accepted model-authored scene."
         }
@@ -15812,12 +15688,8 @@
       "children": true,
       "directCases": [
         "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "flexible-calendar",
         "manual-leg-editor",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -15928,7 +15800,6 @@
       ],
       "children": true,
       "directCases": [
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -16003,7 +15874,6 @@
       "children": true,
       "directCases": [
         "status-stale-saved-comparison",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -16158,7 +16028,6 @@
       "children": false,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "fare-cards-controls"
       ],
       "internalCases": [],
@@ -16170,12 +16039,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -16245,7 +16108,6 @@
       "children": false,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "fare-cards-controls"
       ],
       "internalCases": [],
@@ -16258,12 +16120,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -16327,7 +16183,6 @@
       ],
       "children": false,
       "directCases": [
-        "budget-shortlist",
         "budget-shortlist"
       ],
       "internalCases": [],
@@ -16340,12 +16195,6 @@
           "evidenceFile": "budget-shortlist-repeat-3.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
         }
       ],
       "status": "model-generated",
@@ -16353,9 +16202,9 @@
         "name": "PriceRange",
         "dailyUsefulness": 5,
         "completeness": 5,
-        "correctness": 5,
-        "rationale": "The price ceiling produced exact under-budget rows in successful runs.",
-        "total": 5
+        "correctness": 4,
+        "rationale": "The price ceiling produced exact under-budget rows in the accepted run, but one exact budget repeat ended empty and remains an unresolved reliability finding.",
+        "total": 4.7
       }
     },
     {
@@ -16401,7 +16250,6 @@
       ],
       "children": false,
       "directCases": [
-        "duration-picker",
         "duration-picker"
       ],
       "internalCases": [],
@@ -16412,12 +16260,6 @@
         {
           "caseId": "duration-picker",
           "evidenceFile": "duration-picker-repeat-2.json",
-          "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "duration-picker",
-          "evidenceFile": "duration-picker.json",
           "sourceEvidenceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
           "observation": "Appeared in this archived accepted model-authored scene."
         }
@@ -16475,7 +16317,6 @@
       ],
       "children": false,
       "directCases": [
-        "budget-shortlist",
         "budget-shortlist"
       ],
       "internalCases": [],
@@ -16486,12 +16327,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         }
@@ -16763,21 +16598,12 @@
       "children": false,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "fixed-date-picker",
         "local-failure-retry",
-        "mode-dashboard",
-        "mode-dashboard",
         "mode-dashboard",
         "pending-refresh-loading",
         "status-stale-saved-comparison",
         "story-layouts",
-        "story-layouts",
-        "tradeoff-dashboard",
-        "tradeoff-dashboard",
         "tradeoff-dashboard"
       ],
       "internalCases": [],
@@ -16788,12 +16614,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -16880,12 +16700,6 @@
           "evidenceFile": "tradeoff-dashboard-repeat-2.json",
           "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
           "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "tradeoff-dashboard",
-          "evidenceFile": "tradeoff-dashboard.json",
-          "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
-          "observation": "Appeared in this archived accepted model-authored scene."
         }
       ],
       "status": "model-generated",
@@ -16947,9 +16761,6 @@
       "children": false,
       "directCases": [
         "mode-dashboard",
-        "mode-dashboard",
-        "mode-dashboard",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -17119,8 +16930,6 @@
       ],
       "children": false,
       "directCases": [
-        "mode-dashboard",
-        "mode-dashboard",
         "mode-dashboard"
       ],
       "internalCases": [],
@@ -17201,11 +17010,7 @@
       "children": false,
       "directCases": [
         "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "manual-leg-editor",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -17443,10 +17248,6 @@
       ],
       "children": false,
       "directCases": [
-        "departure-board",
-        "departure-board",
-        "departure-board",
-        "departure-board",
         "departure-board"
       ],
       "internalCases": [],
@@ -17543,10 +17344,6 @@
       ],
       "children": false,
       "directCases": [
-        "departure-board",
-        "departure-board",
-        "departure-board",
-        "departure-board",
         "departure-board",
         "story-layouts"
       ],
@@ -17650,8 +17447,6 @@
       ],
       "children": false,
       "directCases": [
-        "tradeoff-dashboard",
-        "tradeoff-dashboard",
         "tradeoff-dashboard"
       ],
       "internalCases": [],
@@ -17668,12 +17463,6 @@
         {
           "caseId": "tradeoff-dashboard",
           "evidenceFile": "tradeoff-dashboard-repeat-2.json",
-          "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "tradeoff-dashboard",
-          "evidenceFile": "tradeoff-dashboard.json",
           "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
           "observation": "Appeared in this archived accepted model-authored scene."
         }
@@ -17732,11 +17521,7 @@
       "children": false,
       "directCases": [
         "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
-        "fixed-date-picker",
         "manual-leg-editor",
-        "story-layouts",
         "story-layouts"
       ],
       "internalCases": [],
@@ -18249,7 +18034,6 @@
       "children": false,
       "directCases": [
         "budget-shortlist",
-        "budget-shortlist",
         "multi-city-workspace"
       ],
       "internalCases": [],
@@ -18260,12 +18044,6 @@
         {
           "caseId": "budget-shortlist",
           "evidenceFile": "budget-shortlist-repeat-3.json",
-          "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
-          "observation": "Appeared in this archived accepted model-authored scene."
-        },
-        {
-          "caseId": "budget-shortlist",
-          "evidenceFile": "budget-shortlist.json",
           "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
           "observation": "Appeared in this archived accepted model-authored scene."
         },
@@ -18380,19 +18158,6 @@
       }
     },
     {
-      "name": "PriceRange",
-      "group": "control",
-      "status": "model-generated",
-      "score": {
-        "name": "PriceRange",
-        "dailyUsefulness": 5,
-        "completeness": 5,
-        "correctness": 5,
-        "rationale": "The price ceiling produced exact under-budget rows in successful runs.",
-        "total": 5
-      }
-    },
-    {
       "name": "RetryAction",
       "group": "status",
       "status": "model-generated",
@@ -18441,6 +18206,19 @@
         "completeness": 5,
         "correctness": 4,
         "rationale": "Direct selection and summary hydration work; ordering is incorrect only when paired with the defective global SortSelect.",
+        "total": 4.7
+      }
+    },
+    {
+      "name": "PriceRange",
+      "group": "control",
+      "status": "model-generated",
+      "score": {
+        "name": "PriceRange",
+        "dailyUsefulness": 5,
+        "completeness": 5,
+        "correctness": 4,
+        "rationale": "The price ceiling produced exact under-budget rows in the accepted run, but one exact budget repeat ended empty and remains an unresolved reliability finding.",
         "total": 4.7
       }
     },

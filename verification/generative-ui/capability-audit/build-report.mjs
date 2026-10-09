@@ -134,11 +134,14 @@ for (const item of evidence) {
   }
 }
 const components = catalogDescriptors.map(descriptor => {
-  const directCases = generatedBy.get(descriptor.name) ?? []
-  const internalCases = internalBy.get(descriptor.name) ?? []
+  const directCases = [...new Set(generatedBy.get(descriptor.name) ?? [])]
+  const internalCases = [...new Set(internalBy.get(descriptor.name) ?? [])]
   const targetedBy = manifest.cases.filter(testCase => testCase.targets.includes(descriptor.name)).map(testCase => testCase.id)
   const explicitFacts = evidence.flatMap(item => item.componentEvidence?.[descriptor.name] ? [{ caseId: item.id, evidenceFile: item.evidenceFile, ...item.componentEvidence[descriptor.name] }] : [])
-  const componentFacts = explicitFacts.length ? explicitFacts : [...(generatedFactsBy.get(descriptor.name) ?? []), ...(internalFactsBy.get(descriptor.name) ?? [])]
+  const fallbackFacts = [...(generatedFactsBy.get(descriptor.name) ?? []), ...(internalFactsBy.get(descriptor.name) ?? [])]
+  const componentFacts = (explicitFacts.length ? explicitFacts : fallbackFacts).filter((fact, index, facts) =>
+    facts.findIndex(candidate => candidate.caseId === fact.caseId && candidate.sourceEvidenceSha256 === fact.sourceEvidenceSha256 && candidate.observation === fact.observation) === index
+  )
   const score = componentScoresByName.get(descriptor.name)
   return {
     ...descriptor,
