@@ -11,12 +11,14 @@ import { ThreadShell } from './thread-shell'
 import { normalizeToolContinuations } from './continuation-history'
 import { completeSmartPlannerHandoff } from '../smart-planner-handoff'
 import { PlanningTracker } from '../tracker/planning-tracker'
+import type { PlanningStore } from '../tracker/planning-store'
+import { SceneLifecycleProvider, type SceneLifecycle } from '../presentation/scene-lifecycle'
 import { Alert } from '@/components/ui/alert'
 import '../catalog/tokens.css'
 import '../catalog/trip-planning/trip-planning.css'
 import { DisplayContextProvider } from '../catalog/display-context-provider'
 import { createDisplayContextStore, type DisplayContextStore } from '../state/display-context'
-export type GenerativeChatProps={services:TravelServices;displayStore?:DisplayContextStore;capture:()=>AgentContextEnvelope|Promise<AgentContextEnvelope>;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];initialRunMessageId?:string;initialDraft?:string;onMessages?:(messages:UIMessage[])=>void|Promise<void>;onLiveMessages?:(messages:UIMessage[])=>void;onDraft?:(draft:string)=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand';sidebar?:ReactNode;registerRunStop?:(stop:(()=>Promise<void>)|null)=>void}
+export type GenerativeChatProps={services:TravelServices;planning:PlanningStore;sceneLifecycle:SceneLifecycle;displayStore?:DisplayContextStore;capture:()=>AgentContextEnvelope|Promise<AgentContextEnvelope>;sceneToolkit?:Toolkit;initialMessages?:UIMessage[];initialRunMessageId?:string;initialDraft?:string;onMessages?:(messages:UIMessage[])=>void|Promise<void>;onLiveMessages?:(messages:UIMessage[])=>void;onDraft?:(draft:string)=>void;provider?:'codex'|'fixture';theme?:'blue'|'sand';sidebar?:ReactNode;registerRunStop?:(stop:(()=>Promise<void>)|null)=>void}
 function isUIMessage(value:unknown):value is UIMessage{return typeof value==='object'&&value!==null&&'id'in value&&typeof value.id==='string'&&'role'in value&&'parts'in value&&Array.isArray(value.parts)}
 function exportedMessages(value:unknown):UIMessage[]{
  if(typeof value!=='object'||value===null||!('messages'in value)||!Array.isArray(value.messages))return[]
@@ -38,7 +40,7 @@ export function GenerativeChat(props:GenerativeChatProps){
  const transport=useMemo(()=>createSnapshotTransport({capture:props.capture,transport:{body:{provider:props.provider??'codex'}}}),[props.capture,props.provider])
  const messages=useMemo(()=>props.initialMessages?normalizeToolContinuations(props.initialMessages):undefined,[props.initialMessages])
  const finishWaiters=useRef(new Set<()=>void>())
- const runtime=useChatRuntime({transport,messages,sendAutomaticallyWhen:lastAssistantMessageIsCompleteWithToolCalls,onFinish:async({messages})=>{try{await props.onMessages?.(normalizeToolContinuations(messages))}finally{finishWaiters.current.forEach(resolve=>resolve());finishWaiters.current.clear()}}})
+ const runtime=useChatRuntime({transport,messages,sendAutomaticallyWhen:lastAssistantMessageIsCompleteWithToolCalls,onFinish:async({messages,isAbort,isDisconnect,isError})=>{const normalized=normalizeToolContinuations(messages);props.sceneLifecycle.finishTurn(normalized,{failed:isError||isAbort||isDisconnect,willContinue:lastAssistantMessageIsCompleteWithToolCalls({messages})});try{await props.onMessages?.(normalized)}finally{finishWaiters.current.forEach(resolve=>resolve());finishWaiters.current.clear()}}})
  const stopRun=useCallback(async()=>{
   props.onDraft?.(runtime.thread.composer.getState().text)
   if(!runtime.thread.getState().isRunning)return
@@ -76,5 +78,5 @@ export function GenerativeChat(props:GenerativeChatProps){
   start()
   return unsubscribe
  },[runtime,props.initialRunMessageId])
- return <div className="travel-app" data-theme={props.theme??'blue'}><DisplayContextProvider store={displayStore}><TravelProvider services={props.services}><AssistantRuntimeProvider runtime={runtime} config={AuiConfig({tools:Tools({toolkit})})}><div className="travel-workspace">{props.sidebar}<ThreadShell/><PlanningTracker/></div></AssistantRuntimeProvider></TravelProvider></DisplayContextProvider></div>
+ return <div className="travel-app" data-theme={props.theme??'blue'}><DisplayContextProvider store={displayStore}><TravelProvider services={props.services}><SceneLifecycleProvider value={props.sceneLifecycle}><AssistantRuntimeProvider runtime={runtime} config={AuiConfig({tools:Tools({toolkit})})}><div className="travel-workspace">{props.sidebar}<ThreadShell/><PlanningTracker store={props.planning}/></div></AssistantRuntimeProvider></SceneLifecycleProvider></TravelProvider></DisplayContextProvider></div>
 }

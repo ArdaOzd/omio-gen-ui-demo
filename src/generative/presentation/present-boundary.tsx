@@ -1,16 +1,16 @@
 import { useEffect,type ComponentType,type ReactNode } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAuiState,type ToolCallMessagePartProps } from '@assistant-ui/react'
-import { hasLaterAcceptedScene } from '../chat/tool-supersession'
+import { type ToolCallMessagePartProps } from '@assistant-ui/react'
 import { getPartialJsonObjectMeta } from 'assistant-stream/utils'
 import { useTravelServices,type TravelServices } from '../catalog/context'
 import { ArtifactIdSchema,DatasetIdSchema,type ArtifactUIState } from '../contracts'
-import { presentTreesOverlapForSupersession,prunePresentTree,validatePresentTree,type PresentNode } from './tree'
+import { prunePresentTree,validatePresentTree,type PresentNode } from './tree'
 import { isDatasetBoundComponent,resolvePlannerDatasetRef } from '../catalog/trip-planning/binding'
 import { legKey } from '../state/leg-bindings'
 import { createRuntimePresentValidationScopeForTree } from './present-scope'
 import type { ComponentRef } from '../contracts/display-context'
+import { FrozenScene,useSceneView } from './scene-lifecycle'
 type Props=ToolCallMessagePartProps<Record<string,unknown>,Record<string,never>>
 export type DisplayRenderNode=Omit<PresentNode,'children'>&{__displayComponent:{componentRef:ComponentRef;childRefs:string[]};children?:DisplayRenderNode|DisplayRenderNode[]|string}
 export function withDisplayComponentIdentity(node:PresentNode,path='root',visit?:(node:PresentNode)=>void,sceneRef='scene'):DisplayRenderNode{
@@ -33,10 +33,9 @@ function validateRuntimePresent(input:unknown,services:TravelServices):PresentNo
  const tree=validatePresentTree(input)
  return validatePresentTree(input,createRuntimePresentValidationScopeForTree(tree,services))
 }
-export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}){
+function PresentContent(props:Props&{nativeRender?:ComponentType<Props>}){
  const services=useTravelServices()
- const superseded=useAuiState(state=>hasLaterAcceptedScene(state.thread.messages.flatMap(message=>message.parts),props.toolCallId,'present',typeof props.args.artifactRef==='string'?props.args.artifactRef:undefined,part=>{if(part.isError||typeof part.result!=='object'||part.result===null||Object.keys(part.result).length)return false;try{validateRuntimePresent(part.args,services);return true}catch{return false}},(current,later)=>{try{return presentTreesOverlapForSupersession(validateRuntimePresent(current.args,services),validateRuntimePresent(later.args,services))}catch{return false}}))
- if(superseded||props.isError||props.status.type==='incomplete')return null;const meta=getPartialJsonObjectMeta(props.args)
+ if(props.isError||props.status.type==='incomplete')return null;const meta=getPartialJsonObjectMeta(props.args)
  const partial=props.status.type!=='complete'&&(props.status.type!=='requires-action'||meta?.state==='partial')
  try{
   const candidate=partial?prunePresentTree(props.args,undefined,meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args)
@@ -71,4 +70,10 @@ export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}
   const entries=[...grouped].map(([artifactId,bindings])=>({artifactId,bindings}))
   return <AcceptedSceneBindings entries={entries}><NativeRender {...props} args={tree}/></AcceptedSceneBindings>
  }catch{return <Alert className="travel-tools-error">This view could not be displayed. Retry with the current travel state.</Alert>}
+}
+export function PresentBoundary(props:Props&{nativeRender?:ComponentType<Props>}){
+ const view=useSceneView(props.toolCallId)
+ if(view.kind==='hidden')return null
+ if(view.kind==='frozen')return <FrozenScene services={view.services}><PresentContent {...props}/></FrozenScene>
+ return <PresentContent {...props}/>
 }

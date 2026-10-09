@@ -1,5 +1,5 @@
 import type { UIMessage } from 'ai'
-import { presentTreesOverlapForSupersession,validatePresentTree,type PresentNode,type PresentValidationScope } from './presentation/tree'
+import { validatePresentTree,type PresentNode,type PresentValidationScope } from './presentation/tree'
 import { DatasetIdSchema,type ComponentBinding } from './contracts'
 
 type ActiveScene={toolCallId:string;tree:PresentNode}
@@ -7,16 +7,16 @@ const sceneRef=(toolCallId:string)=>`present-${toolCallId.replace(/[^a-zA-Z0-9_.
 const bindingKey=(scene:string,key:string)=>`${scene}:${key.slice(-(95-scene.length))}`
 
 export function getSceneMetadata(messages:UIMessage[],scope?:PresentValidationScope){
- const active=new Map<string,ActiveScene[]>()
+ let latest:ActiveScene|undefined
  for(const message of messages)for(const part of message.parts){
   if(part.type!=='tool-present'||!part.input)continue
   try{
-   const tree=validatePresentTree(part.input,scope),current=active.get(tree.artifactRef)??[]
-   active.set(tree.artifactRef,[...current.filter(scene=>!presentTreesOverlapForSupersession(scene.tree,tree)),{toolCallId:part.toolCallId,tree}])
+   latest={toolCallId:part.toolCallId,tree:validatePresentTree(part.input,scope)}
   }catch{}
  }
  const sources=new Map<string,string>(),layouts=new Map<string,string>(),bindings=new Map<string,ComponentBinding[]>()
- for(const [artifactRef,scenes] of active){
+ if(latest){
+  const artifactRef=latest.tree.artifactRef,scenes=[latest]
   const current:ComponentBinding[]=[],descriptions:string[]=[]
   for(const scene of scenes){
    const ref=sceneRef(scene.toolCallId)

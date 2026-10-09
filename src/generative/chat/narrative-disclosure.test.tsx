@@ -7,6 +7,8 @@ import {createUIStateStore} from '../state/ui-state-store'
 import {createFareDataBridge} from '../data/fare-data-bridge'
 import {ArtifactIdSchema} from '../contracts'
 import {createDisplayContextStore} from '../state/display-context'
+import {createPlanningStore} from '../tracker/planning-store'
+import {createSceneLifecycle} from '../presentation/scene-lifecycle'
 type TestNode={$type:string;artifactRef:string;title?:string;children?:TestNode[]}
 vi.mock('../presentation/toolkit-client',async()=>{const {z}=await import('zod');const {CatalogNode}=await import('../catalog/component');const renderNode=(node:TestNode)=><CatalogNode kind={node.$type} artifactRef={node.artifactRef} title={node.title}>{node.children?.map((child,index)=><span key={index}>{renderNode(child)}</span>)}</CatalogNode>;return{default:{present:{type:'frontend',parameters:z.record(z.string(),z.unknown()),execute:async()=>({}),render:({args}:{args:TestNode})=>renderNode(args)}}}})
 afterEach(()=>{cleanup();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
@@ -15,7 +17,8 @@ function setup(parts:UIMessage['parts']){
  const state=createUIStateStore();state.initializeMissing(ArtifactIdSchema.parse('art'),{filters:{modes:['bus'],carrierIds:[],directOnly:false}})
  const messages:UIMessage[]=[{id:'assistant-steps',role:'assistant',parts}],before=JSON.stringify(messages)
  const displayContext=createDisplayContextStore().capture({captureId:'test',artifactIds:[]})
- render(<GenerativeChat services={{state,bridge:createFareDataBridge(),activeId:()=>'art',activate:()=>{}}} capture={()=>({schemaVersion:'2.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[],plannedFareIds:[],displayContext})} initialMessages={messages}/>)
+ const services={state,bridge:createFareDataBridge(),activeId:()=>ArtifactIdSchema.parse('art'),activate:()=>{}}
+ render(<GenerativeChat services={services} planning={createPlanningStore()} sceneLifecycle={createSceneLifecycle(services,{initialMessages:messages})} capture={()=>({schemaVersion:'2.0.0',turnId:'test',artifacts:[],olderArtifactSummaries:[],datasets:[],selectedFareFacts:[],plannedFareIds:[],displayContext})} initialMessages={messages}/>)
  return {messages,before,state}
 }
 const scene:UIMessage['parts'][number]={type:'tool-present',toolCallId:'scene',state:'output-available',input:{$type:'TravelSurface',artifactRef:'art',title:'Usable travel view',children:[{$type:'ModeChips',artifactRef:'art'}]},output:{}}

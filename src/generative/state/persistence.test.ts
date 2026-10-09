@@ -91,6 +91,8 @@ async function fixture(partial = false, sourceVersion = 'persistence-v1') {
     parserVersion: 'native-present-1',
     queryVersion: '1',
     messages: [{ role: 'assistant', content: [{ type: 'text', text: 'Synthetic journey' }] }],
+    plannedFares: [],
+    sceneSnapshots: [],
     artifacts: [{ source: '{"$type":"TravelSurface","artifactRef":"a"}', state: store.get(id) }],
     descriptors: [{
       datasetId: binding.datasetId,
@@ -335,6 +337,18 @@ describe('descriptor-only thread persistence', () => {
     expect(loaded?.messages).toEqual([{ id: 'latest', role: 'user', parts: [] }])
   })
 
+  it('persists the bounded fare buying basket with its owning artifact', async () => {
+    const item = await fixture()
+    const io = memory()
+    const persistence = createThreadPersistence(io.storage)
+    const { availableSeats: _availableSeats, ...fact } = row
+    const plannedFares = [{ fact, owners: [item.id] }]
+
+    await persistence.save('basket', { ...item.record, plannedFares })
+
+    expect((await persistence.load('basket'))?.plannedFares).toEqual(plannedFares)
+  })
+
   it('round-trips complete browser history beyond the compact model-history limit', async () => {
     const item = await fixture()
     const io = memory()
@@ -405,6 +419,8 @@ it('saves and restores 21 unique descriptors across three valid artifact states'
     activeArtifactId,
     artifacts,
     descriptors,
+    plannedFares: [],
+    sceneSnapshots: [],
   }
   const io = memory()
   const persistence = createThreadPersistence(io.storage)

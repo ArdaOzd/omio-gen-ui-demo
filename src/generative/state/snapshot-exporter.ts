@@ -4,7 +4,7 @@ import { assertNoBulkData } from '../contracts/privacy'
 import type { FrozenDisplayContext } from '../contracts/display-context'
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
 import type { DisplayContextStore } from './display-context'
-type ExportInput={turnId:string;activeArtifactId?:ArtifactId;artifactIds:ArtifactId[];store:UIStateStore;bridge:ServerFareDataBridge;displayStore:DisplayContextStore;selectedFareFacts?:BoundedFareFact[];olderArtifactSummaries?:OlderArtifactSummary[];layoutSummaries?:ReadonlyMap<string,string>;componentBindings?:ReadonlyMap<string,readonly ComponentBinding[]>}
+type ExportInput={turnId:string;activeArtifactId?:ArtifactId;artifactIds:ArtifactId[];store:UIStateStore;bridge:ServerFareDataBridge;displayStore:DisplayContextStore;selectedFareFacts?:BoundedFareFact[];plannedFareFacts?:readonly BoundedFareFact[];olderArtifactSummaries?:OlderArtifactSummary[];layoutSummaries?:ReadonlyMap<string,string>;componentBindings?:ReadonlyMap<string,readonly ComponentBinding[]>}
 type SnapshotRecord={snapshot:CompactArtifactSnapshot;lastInteractionAt:string;authoredBindingCount:number}
 type PreparedCapture={turnId:string;activeArtifactId?:ArtifactId;records:SnapshotRecord[];bindings:Map<string,FareScopeBinding>;plannedFareIds:ReturnType<UIStateStore['get']>['selectedFareIds'];displayContext:FrozenDisplayContext;pinsBySource:Map<string,LookupPin[]>;cachedFacts:BoundedFareFact[]}
 function prioritizeRecords(records:SnapshotRecord[],activeArtifactId?:ArtifactId):SnapshotRecord[]{
@@ -76,11 +76,11 @@ function prepareCapture(input:Omit<ExportInput,'olderArtifactSummaries'|'selecte
  const records=prioritizeRecords(snapshots(input).map(snapshot=>({snapshot,lastInteractionAt:input.store.get(snapshot.artifactId).lastInteractionAt,authoredBindingCount:currentAuthoredBindings(input,input.store.exportSnapshot(snapshot.artifactId)).length})),input.activeArtifactId)
  const bindings=new Map<string,FareScopeBinding>()
  for(const datasetId of new Set(records.flatMap(record=>record.snapshot.datasetRefs)))bindings.set(datasetId,structuredClone(bindingFor(input,datasetId)))
- const plannedFareIds=[...new Set(records.flatMap(record=>record.snapshot.selectedFareIds))]
+ const plannedFareIds=[...new Set([...records.flatMap(record=>record.snapshot.selectedFareIds),...(input.plannedFareFacts??[]).map(fact=>fact.id)])]
  const displayContext=input.displayStore.capture({captureId:input.turnId,artifactIds:records.map(record=>record.snapshot.artifactId)})
  const componentByRef=new Map(displayContext.components.map(component=>[component.identity.componentRef.value,component]))
  const pinsBySource=new Map<string,LookupPin[]>()
- const cachedFacts:BoundedFareFact[]=[]
+ const cachedFacts:BoundedFareFact[]=(input.plannedFareFacts??[]).map(fact=>structuredClone(fact))
  for(const fareId of plannedFareIds){
   const shown=displayContext.shownFareFacts.find(candidate=>candidate.fact.id===fareId)
   const displayedBy=shown?.displayedBy.flatMap(owner=>componentByRef.get(owner.componentRef)??[]).find(component=>component.execution)

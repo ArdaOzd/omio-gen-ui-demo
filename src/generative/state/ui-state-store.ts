@@ -74,6 +74,12 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
     return {status:'applied',revision:next.revision}
   }
   return {get,initializeMissing,dispatch,getIds:()=>[...states.keys()],
+    replace(state) {
+      const next=ArtifactUIStateSchema.parse(state)
+      states.set(next.artifactId,structuredClone(next))
+      authoredDatasetBindings.set(next.artifactId,next.datasetBindings)
+      listeners.get(next.artifactId)?.forEach(listener=>listener())
+    },
     setDatasetBindings(id,bindings) {get(id);authoredDatasetBindings.set(id,ArtifactUIStateSchema.shape.datasetBindings.parse(bindings))},
     subscribe(id,listener) {const set=listeners.get(id)??new Set<()=>void>();set.add(listener);listeners.set(id,set);return()=>{set.delete(listener)}},
     exportSnapshot(id) {const state=get(id);return CompactArtifactSnapshotSchema.parse({artifactId:state.artifactId,revision:state.revision,datasetRefs:state.datasetRefs,selectedFareIds:state.selectedFareIds,filters:state.filters,dates:state.dates,citySequence:state.citySequence,stays:state.stays,modesByLeg:state.modesByLeg,availableModesByLeg:state.availableModesByLeg,requestedModesByLeg:state.requestedModesByLeg,displayWindowByLeg:state.displayWindowByLeg,pending:state.pending,sort:state.sort,sortByLeg:state.sortByLeg,calendarDateByLeg:state.calendarDateByLeg,runtimeVariables:state.runtimeVariables,legThresholds:[],componentBindings:[],layoutSummary:'Travel artifact with local dates, filters and selections.',catalogVersion:CATALOG_VERSION})},

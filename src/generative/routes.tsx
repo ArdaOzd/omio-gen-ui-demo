@@ -31,12 +31,15 @@ import {
   type SessionSummary,
 } from './chat/session-history'
 import { SessionSidebar } from './chat/session-sidebar'
+import { createPlanningStore } from './tracker/planning-store'
+import { createSceneLifecycle, type SceneLifecycle } from './presentation/scene-lifecycle'
 
 function createServices(onCoverageStatus: (message: string) => void) {
   const bridge = createFareDataBridge()
   const state = createUIStateStore()
   const artifacts = createArtifactStore()
   const displayStore = createDisplayContextStore()
+  const planning = createPlanningStore()
   const createArtifact = () => {
     if (artifacts.getIds().length >= 8) throw new Error('Eight-artifact limit reached')
     const id = ArtifactIdSchema.parse(`artifact-${crypto.randomUUID()}`)
@@ -47,6 +50,7 @@ function createServices(onCoverageStatus: (message: string) => void) {
   }
   const router = createActionRouter(state, {
     bridge,
+    planning,
     activate: id => artifacts.activate(id),
     onSourceChanged: artifactId => displayStore.recordInteraction({ artifactId, actor: 'derived', action: 'deselect', inputFields: [] }),
     onCoverageStatus: status => onCoverageStatus(status.status === 'loading'
@@ -66,7 +70,7 @@ function createServices(onCoverageStatus: (message: string) => void) {
     whenIdle: router.whenIdle,
     createArtifact,
   }
-  return { services, artifacts, displayStore, createArtifact, router }
+  return { services, artifacts, displayStore, planning, createArtifact, router }
 }
 
 function isUIMessage(message: unknown): message is UIMessage {
@@ -105,7 +109,9 @@ function SessionConversation(props: SessionConversationProps) {
   const [ready, setReady] = useState(false)
   const [messages, setMessages] = useState<UIMessage[]>([])
   const [initialRunMessageId, setInitialRunMessageId] = useState<string>()
+  const [sceneLifecycle, setSceneLifecycle] = useState<SceneLifecycle>()
   const messagesRef = useRef<UIMessage[]>([])
+  const sceneLifecycleRef = useRef<SceneLifecycle | undefined>(undefined)
   const readyRef = useRef(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const messageSaveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -115,7 +121,9 @@ function SessionConversation(props: SessionConversationProps) {
     assertNoBulkData(next)
     const { sources } = getSceneMetadata(next,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
     const states = runtime.artifacts.getIds().map(id => runtime.services.state.get(id))
-    const refs = [...new Set(states.flatMap(state => state.datasetRefs))]
+    const sceneSnapshots = sceneLifecycleRef.current?.exportSnapshots() ?? []
+    const refs = [...new Set([...states, ...sceneSnapshots.flatMap(snapshot => snapshot.artifactStates)].flatMap(state => state.datasetRefs))]
+    const frozenBindings = new Map((sceneLifecycleRef.current?.bindings() ?? []).map(binding => [binding.datasetId, binding]))
     return {
       schemaVersion: CONTRACT_VERSION,
       catalogVersion: CATALOG_VERSION,
@@ -128,7 +136,7 @@ function SessionConversation(props: SessionConversationProps) {
         state,
       })),
       descriptors: refs.map(datasetId => {
-        const binding = runtime.services.bridge.findBinding(datasetId)
+        const binding = runtime.services.bridge.findBinding(datasetId) ?? frozenBindings.get(datasetId)
         if(!binding)throw new Error('Missing fare scope binding')
         const manifest = binding.manifest
         return {
@@ -139,6 +147,8 @@ function SessionConversation(props: SessionConversationProps) {
           complete: manifest.complete,
         }
       }),
+      plannedFares: [...runtime.planning.get()],
+      sceneSnapshots,
     }
   }, [runtime])
 
@@ -200,11 +210,32 @@ function SessionConversation(props: SessionConversationProps) {
             ? 'Synthetic fare data changed. Coverage was refreshed and previous fare selections were cleared; your conversation and travel preferences are preserved.'
             : 'Synthetic fare data changed. Coverage was refreshed; your conversation and travel preferences are preserved.')
         })
+        runtime.planning.restore(record.plannedFares)
+        if (!record.plannedFares.length) {
+          for (const artifact of record.artifacts) {
+            for (const fareId of artifact.state.selectedFareIds) {
+              const fare = runtime.services.bridge.findCachedFare(fareId)
+              if (!fare) continue
+              const { availableSeats: _availableSeats, ...fact } = fare
+              runtime.planning.select(artifact.state.artifactId, fact)
+            }
+          }
+        }
         if (controller.signal.aborted) return
         for (const artifact of record.artifacts) runtime.artifacts.register(artifact.state.artifactId)
         if (record.activeArtifactId) runtime.artifacts.activate(record.activeArtifactId)
       }
       if (!runtime.artifacts.getIds().length) runtime.createArtifact()
+      const lifecycle = createSceneLifecycle(runtime.services, {
+        initialMessages: valid,
+        initialSnapshots: record?.sceneSnapshots,
+        restoreSelectedFareIds: (artifactId, capturedIds) => {
+          const retained = new Set(runtime.planning.get().flatMap(entry => entry.owners.includes(artifactId) ? [entry.fact.id] : []))
+          return capturedIds.filter(fareId => retained.has(fareId))
+        },
+      })
+      sceneLifecycleRef.current = lifecycle
+      setSceneLifecycle(lifecycle)
       const promptHandoff = props.handoff?.kind === 'prompt' ? props.handoff : null
       if (promptHandoff && !valid.some(message => message.id === promptHandoff.id)) {
         valid = [...valid, { id: promptHandoff.id, role: 'user', parts: [{ type: 'text', text: promptHandoff.prompt }] }]
@@ -247,6 +278,7 @@ function SessionConversation(props: SessionConversationProps) {
     }
     const unsubscribe = runtime.artifacts.getIds().map(id => runtime.services.state.subscribe(id, changed))
     const stopActive = runtime.artifacts.subscribe(changed)
+    const stopPlanning = runtime.planning.subscribe(changed)
     return () => {
       if (saveTimer.current) {
         clearTimeout(saveTimer.current)
@@ -254,19 +286,27 @@ function SessionConversation(props: SessionConversationProps) {
         persist()
       }
       stopActive()
+      stopPlanning()
       unsubscribe.forEach(stop => stop())
     }
   }, [ready, registryRevision, runtime, save])
 
-  const capture = (): Promise<AgentContextEnvelope> => {
+  const capture = async (): Promise<AgentContextEnvelope> => {
+    const lifecycle = sceneLifecycleRef.current
+    if (!lifecycle) throw new Error('Scene lifecycle unavailable')
+    await lifecycle.prepareTurn(messagesRef.current)
     const { layouts, bindings } = getSceneMetadata(messagesRef.current,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
+    const activeArtifactIds = lifecycle.activeArtifactIds(messagesRef.current)
+    const currentActiveArtifactId = runtime.artifacts.getActiveId()
+    const activeArtifactId = currentActiveArtifactId && activeArtifactIds.includes(currentActiveArtifactId) ? currentActiveArtifactId : activeArtifactIds[0]
     return captureAgentContextWithSelectedFares({
       turnId: `turn-${crypto.randomUUID()}`,
-      activeArtifactId: runtime.artifacts.getActiveId(),
-      artifactIds: runtime.artifacts.getIds(),
+      activeArtifactId,
+      artifactIds: activeArtifactIds,
       store: runtime.services.state,
       bridge: runtime.services.bridge,
       displayStore: runtime.displayStore,
+      plannedFareFacts: runtime.planning.get().map(entry => entry.fact),
       layoutSummaries: layouts,
       componentBindings: bindings,
     })
@@ -303,7 +343,7 @@ function SessionConversation(props: SessionConversationProps) {
     onCollapsedChange={props.onCollapsedChange}
   />
 
-  if (!ready) return <div className="travel-app">
+  if (!ready || !sceneLifecycle) return <div className="travel-app">
     {sidebar}
     {restoreError
       ? <><Alert>{notice}</Alert><Button type="button" onClick={() => setRestoreAttempt(value => value + 1)}>Retry restoring conversation</Button><Card aria-label="Saved conversation">{messages.map(message => <p key={message.id}>{message.parts.flatMap(part => part.type === 'text' ? [part.text] : []).join(' ')}</p>)}</Card></>
@@ -315,6 +355,8 @@ function SessionConversation(props: SessionConversationProps) {
     {notice && <Alert role="status">{notice}</Alert>}
     <GenerativeChat
       services={runtime.services}
+      planning={runtime.planning}
+      sceneLifecycle={sceneLifecycle}
       displayStore={runtime.displayStore}
       capture={capture}
       initialMessages={messages}

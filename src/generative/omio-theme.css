@@ -76,6 +76,34 @@ html .travel-app .travel-workspace {
   padding: 0 20px 0 0;
 }
 
+@media (min-width: 901px) {
+  html .travel-app .travel-workspace:has(.travel-planning-tracker) {
+    grid-template-areas: 'sessions tracker chat';
+    grid-template-columns: minmax(220px, 260px) minmax(280px, 320px) minmax(0, 1fr);
+  }
+
+  html .travel-app .travel-workspace:not(:has(.travel-session-sidebar)):has(.travel-planning-tracker) {
+    grid-template-areas: 'tracker chat';
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  }
+
+  html .travel-app .travel-workspace:has(.travel-session-sidebar[data-collapsed]):has(.travel-planning-tracker) {
+    grid-template-columns: 72px minmax(280px, 320px) minmax(0, 1fr);
+  }
+
+  html .travel-app .travel-session-sidebar {
+    grid-area: sessions;
+  }
+
+  html .travel-app .travel-planning-tracker {
+    grid-area: tracker;
+  }
+
+  html .travel-app .travel-chat {
+    grid-area: chat;
+  }
+}
+
 html .travel-app .travel-session-sidebar {
   top: 52px;
   height: calc(100vh - 52px);

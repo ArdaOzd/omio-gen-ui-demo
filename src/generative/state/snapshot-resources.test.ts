@@ -251,6 +251,30 @@ it('captures one immutable selection version while fare lookup is pending', asyn
   expect(store.get(artifactId).selectedFareIds).toEqual([newFareId])
 })
 
+it('includes host basket facts without restoring archived artifact resources', async () => {
+  const artifactId = ArtifactIdSchema.parse('current-scene')
+  const archivedFare = fare({ id: 'archived-fare', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-08', carrierName: 'Archive Rail' })
+  const { availableSeats: _availableSeats, ...plannedFareFact } = archivedFare
+  const fixed = createFixedProjectionFixture({ rows: [], sourceVersion: 'current-source-v1' })
+  const store = createUIStateStore()
+  store.initializeMissing(artifactId, { citySequence: ['madrid', 'barcelona'] })
+
+  const context = await captureAgentContextWithSelectedFares({
+    turnId: 'host-basket',
+    activeArtifactId: artifactId,
+    artifactIds: [artifactId],
+    store,
+    bridge: fixed.bridge,
+    displayStore: displayStore(),
+    plannedFareFacts: [plannedFareFact],
+  })
+
+  expect(context.artifacts.map(artifact => artifact.artifactId)).toEqual([artifactId])
+  expect(context.datasets).toEqual([])
+  expect(context.plannedFareIds).toEqual([archivedFare.id])
+  expect(context.selectedFareFacts).toEqual([plannedFareFact])
+})
+
 it('exports bounded host-derived leg thresholds and selected facts without browser fare rows', async () => {
   const fixed = createFixedProjectionFixture({
     sourceVersion: 'threshold-source-v1',

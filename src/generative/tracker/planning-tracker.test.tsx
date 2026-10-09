@@ -5,12 +5,14 @@ import { TravelProvider, type TravelServices } from '../catalog/context'
 import { FareCards } from '../catalog/views'
 import {
   ArtifactIdSchema,
+  type UICommand,
 } from '../contracts'
 import { FareItemSchema, type FareItem } from '../contracts/query-groups'
 import { createUIStateStore } from '../state/ui-state-store'
 import { createActionRouter } from '../state/action-router'
 import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
 import { PlanningTracker } from './planning-tracker'
+import { createPlanningStore } from './planning-store'
 
 const rows = [
   FareItemSchema.parse({ id: 'fare-late', originId: 'prague', destinationId: 'vienna', serviceDate: '2026-10-08', mode: 'train', carrierId: 'night-rail', carrierName: 'Night Rail', priceCents: 9000, durationMinutes: 240, departureMinutes: 1080, availableSeats: 4, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true, legs: [{ legIndex: 0, mode: 'train', carrierName: 'Night Rail', durationMinutes: 240, originId: 'prague', destinationId: 'vienna', originLabel: 'Prague', destinationLabel: 'Vienna' }] }),
@@ -32,24 +34,38 @@ async function fixture(selected = true) {
   const state = createUIStateStore()
   state.initializeMissing(first, { datasetRefs: [late.datasetId], selectedFareIds: selected ? [rows[0]!.id] : [] })
   state.initializeMissing(second, { datasetRefs: [early.datasetId, late.datasetId], selectedFareIds: selected ? [rows[1]!.id, rows[0]!.id] : [] })
+  const planning = createPlanningStore()
+  if (selected) {
+    const [lateFare, earlyFare] = rows
+    if (!lateFare || !earlyFare) throw new Error('Missing tracker fixture fares')
+    const { availableSeats: _lateSeats, ...lateFact } = lateFare
+    const { availableSeats: _earlySeats, ...earlyFact } = earlyFare
+    planning.select(first, lateFact)
+    planning.select(second, earlyFact)
+    planning.select(second, lateFact)
+  }
+  const dispatch = (command: UICommand) => {
+    const result = state.dispatch({ ...command, expectedRevision: command.expectedRevision ?? state.get(command.artifactId).revision })
+    if (result.status === 'applied' && command.kind === 'select' && !command.selected) planning.deselect(command.artifactId, command.fareId)
+    return result
+  }
   let active = first
-  const services = { bridge: fixed.bridge, state, activeId: () => active, artifactIds: () => [first, second], activate: id => { active = ArtifactIdSchema.parse(id) } } satisfies TravelServices
-  return { first, second, services, state }
+  const services = { bridge: fixed.bridge, state, dispatch, activeId: () => active, artifactIds: () => [first, second], activate: id => { active = ArtifactIdSchema.parse(id) } } satisfies TravelServices
+  return { first, second, planning, services, state }
 }
 
 describe('planning tracker', () => {
   it('stays hidden until a fare is selected', async () => {
-    const { services } = await fixture(false)
-    render(<TravelProvider services={services}><PlanningTracker /></TravelProvider>)
-    expect(screen.queryByRole('complementary', { name: 'Planning tracker' })).toBeNull()
+    const { planning, services } = await fixture(false)
+    render(<TravelProvider services={services}><PlanningTracker store={planning} /></TravelProvider>)
+    expect(screen.queryByRole('complementary', { name: 'Fare buying tracker' })).toBeNull()
   })
 
   it('sorts all artifacts chronologically, deduplicates fares, and keeps source cards in sync', async () => {
     const user = userEvent.setup()
-    const { first, second, services, state } = await fixture()
-    render(<TravelProvider services={services}><FareCards artifactRef={first} /><PlanningTracker /></TravelProvider>)
-    const tracker = await screen.findByRole('complementary', { name: 'Planning tracker' })
-    await waitFor(() => expect(within(tracker).queryByText('Loading selected fares…')).toBeNull())
+    const { first, second, planning, services, state } = await fixture()
+    render(<TravelProvider services={services}><FareCards artifactRef={first} /><PlanningTracker store={planning} /></TravelProvider>)
+    const tracker = await screen.findByRole('complementary', { name: 'Fare buying tracker' })
     const items = within(tracker).getAllByRole('listitem')
     expect(items).toHaveLength(2)
     expect(items[0]).toHaveTextContent('Berlin → Prague')
@@ -67,8 +83,8 @@ describe('planning tracker', () => {
 
   it('opens an accessible confirmation and restores focus after Escape', async () => {
     const user = userEvent.setup()
-    const { services } = await fixture()
-    render(<TravelProvider services={services}><PlanningTracker /></TravelProvider>)
+    const { planning, services } = await fixture()
+    render(<TravelProvider services={services}><PlanningTracker store={planning} /></TravelProvider>)
     const buy = await screen.findByRole('button', { name: 'Buy' })
     await user.click(buy)
     const dialog = screen.getByRole('dialog')
@@ -79,7 +95,7 @@ describe('planning tracker', () => {
     expect(buy).toHaveFocus()
   })
 
-  it('removes a selected fare from the tracker after its route leg is replaced', async () => {
+  it('keeps a selected fare with full buying details after its active route is replaced', async () => {
     const selected = FareItemSchema.parse({ id: 'london-paris', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-08', mode: 'train', carrierId: 'rail', carrierName: 'Test Rail', priceCents: 4000, durationMinutes: 160, departureMinutes: 540, availableSeats: 4, currency: 'EUR', synthetic: true, priceBasis: 'per-passenger-including-demo-fees', direct: true, legs: [{ legIndex: 0, mode: 'train', carrierName: 'Test Rail', durationMinutes: 160, originId: 'london', destinationId: 'paris', originLabel: 'London', destinationLabel: 'Paris' }] })
     const fixed = createFixedProjectionFixture({ sourceVersion: 'route-tracker-v1', sourceDateWindow: { from: '2026-10-08', to: '2026-10-08' }, rows: scope => [FareItemSchema.parse({ ...selected, id: scope.originId + '-' + scope.destinationId, originId: scope.originId, destinationId: scope.destinationId, legs: [{ ...selected.legs[0]!, originId: scope.originId, destinationId: scope.destinationId, originLabel: scope.originId, destinationLabel: scope.destinationId }] })] })
     const seededManifest = await fixed.bridge.loadScope({ kind: 'fareScope', originId: 'london', destinationId: 'paris', dateWindow: { from: '2026-10-08', to: '2026-10-08' }, passengers: 1, earliestDeparture: { date: '2026-10-08', minutes: 0 } }, signal())
@@ -88,16 +104,27 @@ describe('planning tracker', () => {
     const artifactId = ArtifactIdSchema.parse('route-tracker')
     const state = createUIStateStore()
     state.initializeMissing(artifactId, { datasetRefs: [seeded.datasetId], citySequence: ['london', 'paris'], dates: { start: '2026-10-08' }, selectedFareIds: [selected.id] })
-    const router = createActionRouter(state, { bridge: fixed.bridge })
+    const planning = createPlanningStore()
+    const { availableSeats: _availableSeats, ...selectedFact } = selected
+    planning.select(artifactId, selectedFact)
+    const router = createActionRouter(state, { bridge: fixed.bridge, planning })
     const services = { bridge: fixed.bridge, state, dispatch: router, whenIdle: router.whenIdle, activeId: () => artifactId, artifactIds: () => [artifactId], activate: () => {} } satisfies TravelServices
-    render(<TravelProvider services={services}><PlanningTracker /></TravelProvider>)
-    await screen.findByRole('complementary', { name: 'Planning tracker' })
+    render(<TravelProvider services={services}><PlanningTracker store={planning} /></TravelProvider>)
+    const tracker = await screen.findByRole('complementary', { name: 'Fare buying tracker' })
 
     router({ kind: 'route', artifactId, citySequence: ['london', 'rome'] })
     await router.whenIdle(artifactId)
 
     expect(state.exportSnapshot(artifactId).selectedFareIds).toEqual([])
-    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Planning tracker' })).toBeNull())
+    expect(within(tracker).getByText('London → Paris')).toBeInTheDocument()
+    expect(within(tracker).getByText('2026-10-08 · 09:00–11:40')).toBeInTheDocument()
+    expect(within(tracker).getByText('Train · Test Rail')).toBeInTheDocument()
+    const buy=within(tracker).getByRole('button',{name:'Buy'})
+    await userEvent.setup().click(buy)
+    expect(screen.getByRole('dialog')).toHaveTextContent('Congrats, you are set for the trip.')
+    await userEvent.setup().click(screen.getByRole('button',{name:'Close'}))
+    await userEvent.setup().click(within(tracker).getByRole('button', { name: 'Cancel London to Paris on 2026-10-08' }))
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Fare buying tracker' })).toBeNull())
     router.dispose()
   })
 })

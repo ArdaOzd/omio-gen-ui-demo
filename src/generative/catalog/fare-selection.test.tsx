@@ -2,9 +2,11 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { PlanningTracker } from '../tracker/planning-tracker'
+import { createPlanningStore } from '../tracker/planning-store'
 import { ArtifactIdSchema } from '../contracts'
 import { FareItemSchema, type FareItem } from '../contracts/query-groups'
 import { createUIStateStore } from '../state/ui-state-store'
+import { createActionRouter } from '../state/action-router'
 import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
 import { CatalogNode } from './component'
 import { TravelProvider, type TravelServices } from './context'
@@ -22,15 +24,17 @@ async function fixture(fares: FareItem[] = rows) {
   const binding = bridge.getBinding(manifest.resourceKey)
   const state = createUIStateStore()
   state.initializeMissing(artifactId, { datasetRefs: [binding.datasetId], dates: { start: '2026-10-09' } })
-  const services = { bridge, state, activeId: () => artifactId, artifactIds: () => [artifactId], activate: () => {} } satisfies TravelServices
-  return { binding, services, state }
+  const planning = createPlanningStore()
+  const router = createActionRouter(state, { bridge, planning })
+  const services = { bridge, state, dispatch: router, activeId: () => artifactId, artifactIds: () => [artifactId], activate: () => {} } satisfies TravelServices
+  return { binding, planning, services, state }
 }
 
 describe('generated fare selection', () => {
   it('adds cheapest and fastest summaries to the persistent tracker and demo Buy flow', async () => {
     const user = userEvent.setup()
-    const { services, state } = await fixture()
-    render(<TravelProvider services={services}><CatalogNode kind="CheapestFastest" artifactRef={artifactId} /><PlanningTracker /></TravelProvider>)
+    const { planning, services, state } = await fixture()
+    render(<TravelProvider services={services}><CatalogNode kind="CheapestFastest" artifactRef={artifactId} /><PlanningTracker store={planning} /></TravelProvider>)
 
     const lowest = (await screen.findByText('Lowest fare')).closest<HTMLElement>('.travel-insight')
     const fastest = screen.getByText('Fastest journey').closest<HTMLElement>('.travel-insight')
@@ -44,7 +48,7 @@ describe('generated fare selection', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Add lowest fare Bus €23.00 to trip' }))
     expect(state.get(artifactId).selectedFareIds).toEqual([rows[0]!.id])
-    const tracker = await screen.findByRole('complementary', { name: 'Planning tracker' })
+    const tracker = await screen.findByRole('complementary', { name: 'Fare buying tracker' })
     await within(tracker).findByText('London → Paris')
     expect(within(tracker).getByText('€23.00')).toBeInTheDocument()
     await user.click(within(tracker).getByRole('button', { name: 'Buy' }))
@@ -53,8 +57,8 @@ describe('generated fare selection', () => {
 
   it('keeps duplicate cheapest and fastest summaries synchronized and deduplicated', async () => {
     const user = userEvent.setup()
-    const { services, state } = await fixture([rows[0]!])
-    render(<TravelProvider services={services}><CatalogNode kind="CheapestFastest" artifactRef={artifactId} /><PlanningTracker /></TravelProvider>)
+    const { planning, services, state } = await fixture([rows[0]!])
+    render(<TravelProvider services={services}><CatalogNode kind="CheapestFastest" artifactRef={artifactId} /><PlanningTracker store={planning} /></TravelProvider>)
 
     await user.click(await screen.findByRole('button', { name: 'Add lowest fare Bus €23.00 to trip' }))
     expect(screen.getAllByText('FlixBus')).toHaveLength(2)
@@ -62,12 +66,12 @@ describe('generated fare selection', () => {
     expect(screen.getAllByText('9 Oct 2026 · 17:50')).toHaveLength(2)
     expect(await screen.findAllByRole('button', { name: /Remove .* €23\.00 from trip/ })).toHaveLength(2)
     expect(state.get(artifactId).selectedFareIds).toEqual([rows[0]!.id])
-    const tracker = screen.getByRole('complementary', { name: 'Planning tracker' })
+    const tracker = screen.getByRole('complementary', { name: 'Fare buying tracker' })
     expect(within(tracker).getAllByRole('listitem')).toHaveLength(1)
 
     await user.click(screen.getByRole('button', { name: 'Remove fastest journey Bus €23.00 from trip' }))
     expect(state.get(artifactId).selectedFareIds).toEqual([])
-    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Planning tracker' })).toBeNull())
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Fare buying tracker' })).toBeNull())
   })
 
   it('selects exact fare IDs from comparison tables and timelines', async () => {

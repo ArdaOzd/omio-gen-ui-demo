@@ -3,8 +3,10 @@ import { ArtifactIdSchema,ArtifactUIStateSchema,DatasetIdSchema,CONTRACT_VERSION
 import { FareScopeSchema,ResourceKeySchema,type FareScopeBinding,type LookupPin } from '../contracts/query-groups'
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
 import { assertNoBulkData } from '../contracts/privacy'
+import { PlannedFareSchema } from '../tracker/planning-store'
+import { SceneSnapshotSchema } from '../presentation/scene-lifecycle'
 const descriptor=z.strictObject({datasetId:DatasetIdSchema,resourceKey:ResourceKeySchema,scope:FareScopeSchema,sourceVersion:z.string().min(1).max(96),complete:z.boolean()})
-export const PersistedThreadSchema=z.strictObject({recordRevision:z.number().int().nonnegative().optional(),schemaVersion:z.literal(CONTRACT_VERSION),catalogVersion:z.literal(CATALOG_VERSION),activeArtifactId:ArtifactIdSchema.optional(),parserVersion:z.literal('native-present-1'),queryVersion:z.literal('1'),messages:z.array(z.unknown()),artifacts:z.array(z.strictObject({source:z.string().max(60000),state:ArtifactUIStateSchema})).max(LIMITS.storedArtifacts),descriptors:z.array(descriptor).max(LIMITS.storedArtifacts*LIMITS.artifactDatasets)})
+export const PersistedThreadSchema=z.strictObject({recordRevision:z.number().int().nonnegative().optional(),schemaVersion:z.literal(CONTRACT_VERSION),catalogVersion:z.literal(CATALOG_VERSION),activeArtifactId:ArtifactIdSchema.optional(),parserVersion:z.literal('native-present-1'),queryVersion:z.literal('1'),messages:z.array(z.unknown()),artifacts:z.array(z.strictObject({source:z.string().max(60000),state:ArtifactUIStateSchema})).max(LIMITS.storedArtifacts),descriptors:z.array(descriptor).max(LIMITS.storedArtifacts*LIMITS.artifactDatasets),plannedFares:z.array(PlannedFareSchema).max(LIMITS.plannedFares).default([]),sceneSnapshots:z.array(SceneSnapshotSchema).max(LIMITS.storedArtifacts).default([])})
 const LegacyPersistedThreadSchema=PersistedThreadSchema.extend({artifacts:z.array(z.strictObject({variant:z.literal('a'),source:z.string().max(60000),state:ArtifactUIStateSchema})).max(LIMITS.storedArtifacts)})
 export type PersistedThread=z.infer<typeof PersistedThreadSchema>
 export interface ThreadStorage {read(key:string):Promise<unknown>;write(key:string,value:PersistedThread,expectedRevision?:number):Promise<void>}

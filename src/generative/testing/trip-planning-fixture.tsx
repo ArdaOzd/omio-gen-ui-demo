@@ -10,6 +10,7 @@ import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createUIStateStore } from '../state/ui-state-store'
 import { createActionRouter } from '../state/action-router'
 import { PlanningTracker } from '../tracker/planning-tracker'
+import { createPlanningStore } from '../tracker/planning-store'
 import { validatePresentTree, type PresentNode } from '../presentation/tree'
 
 const artifactId=ArtifactIdSchema.parse('trip-planning-fixture')
@@ -34,7 +35,7 @@ export function TripPlanningFixture(){
  const [fixture]=useState(()=>{
   const bridge=createFareDataBridge()
   const state=createUIStateStore({now:()=> '2026-10-06T12:00:00.000Z'})
-  return{bridge,state}
+    return{bridge,state,planning:createPlanningStore()}
  })
  const [ready,setReady]=useState<{services:TravelServices;tree:PresentNode}|{error:true}>()
  useEffect(()=>{
@@ -48,7 +49,7 @@ export function TripPlanningFixture(){
    if(controller.signal.aborted)return
    const firstBinding=fixture.bridge.getBinding(first.resourceKey),secondBinding=fixture.bridge.getBinding(second.resourceKey)
    fixture.state.initializeMissing(artifactId,{datasetRefs:[firstBinding.datasetId,secondBinding.datasetId],citySequence:['london','paris','rome'],dates:{start:'2026-10-26',end:'2026-11-01'},stays:[{cityId:'paris',nights:3},{cityId:'rome',nights:0}],availableModesByLeg:{'london:paris':first.availableModes,'paris:rome':second.availableModes},displayWindowByLeg:{'london:paris':{from:'2026-10-26',to:'2026-11-01'},'paris:rome':{from:'2026-10-29',to:'2026-11-01'}}})
-   const router=createActionRouter(fixture.state,{bridge:fixture.bridge})
+   const router=createActionRouter(fixture.state,{bridge:fixture.bridge,planning:fixture.planning})
    const services:TravelServices={bridge:fixture.bridge,state:fixture.state,activeId:()=>artifactId,artifactIds:()=>[artifactId],activate:()=>{},dispatch:router,whenIdle:router.whenIdle}
    const tree=createTripPlanningFixtureTree([firstBinding.datasetId,secondBinding.datasetId],workflow)
    setReady({services,tree})
@@ -57,5 +58,5 @@ export function TripPlanningFixture(){
  },[fixture,workflow])
  if(!ready)return <div className="travel-app"><Skeleton className="travel-skeleton" role="status">Preparing the multi-city fixture…</Skeleton></div>
  if('error' in ready)return <div className="travel-app"><Alert>Fixture data could not be prepared.</Alert></div>
- return <div className="travel-app"><TravelProvider services={ready.services}><div className="travel-workspace"><main className="travel-chat"><div className="travel-viewport"><FixtureScene node={ready.tree}/></div></main><PlanningTracker/></div></TravelProvider></div>
+ return <div className="travel-app"><TravelProvider services={ready.services}><div className="travel-workspace"><main className="travel-chat"><div className="travel-viewport"><FixtureScene node={ready.tree}/></div></main><PlanningTracker store={fixture.planning}/></div></TravelProvider></div>
 }

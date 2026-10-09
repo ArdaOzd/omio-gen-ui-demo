@@ -14,14 +14,14 @@ describe('active approved artifact scenes',()=>{
   expect(next.layouts.get('artifact-a')).toBe('TravelSurface(ItineraryTimeline)')
   expect(next.bindings.get('artifact-a')).toEqual([{key:'present-second:root-second',type:'TravelSurface'},{key:'present-second:leaf-second',type:'ItineraryTimeline',datasetRef:'dataset-1',selectorRef:'legSchedule'}])
  })
- it('retains booking and supplementary scenes together for next-turn bindings',()=>{
+ it('uses only the latest whole scene for next-turn bindings',()=>{
   const scope=createPresentValidationScope([{artifactId:'artifact-a',legDatasetIds:[new Set(['dataset-1']),new Set(['dataset-2'])]}],['dataset-1','dataset-2'])
   const booking=present('booking',[{$type:'FareCalendar',$key:'leg-1',artifactRef:'artifact-a',datasetRef:'dataset-1',legIndex:0},{$type:'FareCalendar',$key:'leg-2',artifactRef:'artifact-a',datasetRef:'dataset-2',legIndex:1}])
   const comparison=present('comparison',[{$type:'CheapestFastest',$key:'compare',artifactRef:'artifact-a',datasetRef:'dataset-1',legIndex:0}])
   const metadata=getSceneMetadata([booking,comparison],scope),types=metadata.bindings.get('artifact-a')?.map(binding=>binding.type)
-  expect(types).toEqual(['TravelSurface','FareCalendar','FareCalendar','TravelSurface','CheapestFastest'])
-  expect(new Set(metadata.bindings.get('artifact-a')?.map(binding=>binding.key)).size).toBe(5)
-  expect(metadata.sources.get('artifact-a')).toContain('FareCalendar');expect(metadata.sources.get('artifact-a')).toContain('CheapestFastest')
+  expect(types).toEqual(['TravelSurface','CheapestFastest'])
+  expect(new Set(metadata.bindings.get('artifact-a')?.map(binding=>binding.key)).size).toBe(2)
+  expect(metadata.sources.get('artifact-a')).not.toContain('FareCalendar');expect(metadata.sources.get('artifact-a')).toContain('CheapestFastest')
  })
  it('excludes a completed flexible booking missing one authoritative leg',()=>{
   const scope=createPresentValidationScope([{artifactId:'artifact-a',legDatasetIds:[new Set(['dataset-1']),new Set(['dataset-2'])]}],['dataset-1','dataset-2'])

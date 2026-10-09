@@ -1,6 +1,7 @@
 import type { ArtifactId, ArtifactUIState, BoundedFareFact, DatasetId, DatasetRevision, DispatchResult, FareId, UICommand, UIStateStore } from '../contracts'
 import type { FareScope, ResourceKey, ResultKey } from '../contracts/query-groups'
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
+import type { PlanningStore } from '../tracker/planning-store'
 import { availableModes, legDate, legKey, legRequest, manifestCovers, orderedLegResources } from './leg-bindings'
 import { scheduleLegs, staleDownstreamFareIds } from './itinerary-schedule'
 import { releaseDatasetWhenUnowned } from './dataset-ownership'
@@ -70,7 +71,7 @@ function requestsFor(state: ArtifactUIState, bridge: ServerFareDataBridge, selec
 
 const scheduleCoverages = (scopes: readonly FareScope[]) => scopes.map(scope => ({ originIds: [scope.originId], destinationIds: [scope.destinationId] }))
 
-export function createActionRouter(store: UIStateStore, options: { bridge?: ServerFareDataBridge; activate?: (id: ArtifactId) => void; onCoverageStatus?: (status: CoverageLoadStatus) => void; onSourceChanged?: (artifactId: ArtifactId, resourceKey: ResourceKey) => void } = {}) {
+export function createActionRouter(store: UIStateStore, options: { bridge?: ServerFareDataBridge; planning?: PlanningStore; activate?: (id: ArtifactId) => void; onCoverageStatus?: (status: CoverageLoadStatus) => void; onSourceChanged?: (artifactId: ArtifactId, resourceKey: ResourceKey) => void } = {}) {
   const requests = new Map<ArtifactId, { controller: AbortController; promise: Promise<void> }>()
   const selections = new Map<ArtifactId, { token: symbol; controller: AbortController; promise: Promise<void> }>()
   type SourceWatch = { sourceVersion: string; selectedLegByFare: ReadonlyMap<FareId, string>; stop: () => void }
@@ -263,6 +264,10 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
         store.dispatch({ kind: 'select', artifactId, fareId: fact.id, selected: false, expectedRevision: current.revision })
       }
       await retry(artifactId, cachedSelectedFacts(store.get(artifactId), bridge))
+      if (command?.selected && store.get(artifactId).selectedFareIds.includes(command.fareId)) {
+        const fact = facts.find(candidate => candidate.id === command.fareId)
+        if (fact) options.planning?.select(artifactId, fact)
+      }
     }).catch(() => {
       if(controller.signal.aborted||selections.get(artifactId)?.token!==token)return
       if (command?.selected && selections.get(artifactId)?.token === token) {
@@ -281,6 +286,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     if (command.kind === 'calendarDateByLeg' && (!calendarScope || !currentCalendarScope(command.artifactId, command, calendarScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
     const result = store.dispatch({ ...command, expectedRevision: command.expectedRevision ?? store.get(command.artifactId).revision })
     if (result.status !== 'applied') return result
+    if (command.kind === 'select' && !command.selected) options.planning?.deselect(command.artifactId, command.fareId)
     options.activate?.(command.artifactId)
     if (!options.bridge) return result
     if (command.kind === 'select') reconcileSelection(command.artifactId, command, selectionScope)
