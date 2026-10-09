@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "mode-dashboard",
+  "title": "Transport mode comparison",
+  "family": "mode-comparison",
+  "prompt": "Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "ResponsiveGrid",
+    "ModeBreakdown",
+    "ComparisonMatrix",
+    "CheapestFastest",
+    "ComparisonTable"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "ResponsiveGrid",
+    "ModeBreakdown",
+    "ComparisonMatrix",
+    "CheapestFastest",
+    "ComparisonTable"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "ModeBreakdown",
+    "ComparisonMatrix"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 66840,
+  "interactionEvidence": {
+    "selectedRow": "Bus\tNational Express\t2026-11-08\t04:26\t5h 35m\t€21.58\tAdd",
+    "selectedFareIds": [
+      "fare_003484753"
+    ],
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "noHorizontalOverflow": true,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "mode-dashboard.json",
+  "sourceEvidenceSha256": "a6ea25e51348eab4274b003e28f30e94a2a7434913d36aa81e380e3be49d71b9",
+  "screenshots": [
+    {
+      "path": "screenshots/mode-dashboard-repeat-2-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1086
+      },
+      "sha256": "e28793081c885d0da1950123e4dee7d59122332077de0566751511b51fed4ab4",
+      "condition": "accepted model scene after named successful local interaction"
+    },
+    {
+      "path": "screenshots/mode-dashboard-repeat-2-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1502
+      },
+      "sha256": "712de87722076b9a1f5f8d109e738d6eba145cea2368f6d9aeae64e3581c797b",
+      "condition": "same accepted model scene and persisted local interaction at 390 CSS pixels"
+    }
+  ]
+}

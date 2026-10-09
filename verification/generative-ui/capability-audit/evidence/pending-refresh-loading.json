@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "pending-refresh-loading",
+  "title": "Pending date-window refresh",
+  "family": "loading-status",
+  "prompt": "I just extended the London to Paris search through 9 November 2026 and the local synthetic fare refresh is still loading. Keep the previous committed comparison visible, show a concise loading placeholder inside the travel view, and keep the cheapest-versus-fastest choice. Do not claim the new day's fares until the refresh completes.",
+  "runAt": "2026-10-09T15:25:49.220Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "DateWindow",
+    "ArtifactSkeleton",
+    "CheapestFastest",
+    "ComparisonTable"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "DateWindow",
+    "ArtifactSkeleton",
+    "CheapestFastest",
+    "ComparisonTable"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "ArtifactSkeleton"
+  ],
+  "acceptedSceneCount": 2,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": null,
+  "interactionEvidence": {
+    "releaseHeldQueries": 4,
+    "afterReady": {
+      "passedQueries": 1,
+      "skeletonStillVisible": true,
+      "statusText": "Refreshing through 9 November…"
+    },
+    "chatRequestDelta": null
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "pending-refresh-loading.json",
+  "sourceEvidenceSha256": "7cc1a275f25dfa9e16c3e41eb117a86851315ebd571acdc96e493aa5d31b0629",
+  "screenshots": [
+    {
+      "path": "screenshots/pending-refresh-loading-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1086
+      },
+      "sha256": "cd7098bf6479f4eceec4414be6b50ae59e90a11527c2b0e766d1017c7b559cd3"
+    },
+    {
+      "path": "screenshots/pending-refresh-loading-desktop-2.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1086
+      },
+      "sha256": "84df73c0074531c749602e76e31c52598651631b2afe36f2a56294bb84ff3f7a"
+    },
+    {
+      "path": "screenshots/pending-refresh-loading-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1133
+      },
+      "sha256": "708bb943493de82c60a6f65a5e310753e789ba5ed9d5b36168f302daece406fa"
+    },
+    {
+      "path": "screenshots/pending-refresh-loading-mobile-2.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1133
+      },
+      "sha256": "708bb943493de82c60a6f65a5e310753e789ba5ed9d5b36168f302daece406fa"
+    },
+    {
+      "path": "screenshots/pending-refresh-loading-desktop-3.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "05b04be7494f2958ee8d49e8c1282732cc99012bdecf598b99349b39aa4564c9"
+    }
+  ]
+}

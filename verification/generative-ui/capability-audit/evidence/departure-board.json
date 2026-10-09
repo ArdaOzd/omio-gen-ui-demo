@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "departure-board",
+  "title": "Visual departure board",
+  "family": "schedule",
+  "prompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+  "runAt": "2026-10-09T14:37:33.541Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "RouteMap",
+    "ItineraryTimeline",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "RouteMap",
+    "ItineraryTimeline",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "RouteMap",
+    "ItineraryTimeline"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 48254,
+  "interactionEvidence": {
+    "summary": "clicked Add to trip",
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "case-3.json",
+  "sourceEvidenceSha256": "785166d6bfee520b0ccd7f39602f2595a0b1a7ed289ff57454350ee03dafa5db",
+  "screenshots": [
+    {
+      "path": "screenshots/departure-board-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1186
+      },
+      "sha256": "f860a24c80ab3376636a2e0a3abc1a78b66475ffda9a6162ca692f938e71ad8b"
+    },
+    {
+      "path": "screenshots/departure-board-detail.png",
+      "role": "detail",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1186
+      },
+      "sha256": "3e5c5fe35a89c2b27a0ef581a7e0e382cdf38f3195c7b15bb698ac13a207549b"
+    }
+  ]
+}

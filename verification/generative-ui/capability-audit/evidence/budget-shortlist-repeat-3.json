@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "budget-shortlist",
+  "title": "Direct budget shortlist",
+  "family": "filtering",
+  "prompt": "Find me a direct London to Paris trip between 26 October and 1 November 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "Inline",
+    "DateWindow",
+    "ModeChips",
+    "CarrierFilter",
+    "PriceRange",
+    "DirectToggle",
+    "ComparisonTable",
+    "CheapestFastest",
+    "SelectedFareCount"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "Inline",
+    "DateWindow",
+    "ModeChips",
+    "CarrierFilter",
+    "PriceRange",
+    "DirectToggle",
+    "ComparisonTable",
+    "CheapestFastest",
+    "SelectedFareCount"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "Section",
+    "Inline",
+    "DateWindow",
+    "ModeChips",
+    "CarrierFilter",
+    "PriceRange",
+    "DirectToggle",
+    "FareOrder"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 103648,
+  "interactionEvidence": {
+    "priceLimitEur": 25,
+    "mode": "train",
+    "rowTexts": [
+      "Train\tEurostar\t2026-10-26\t08:40\t3h 14m\t€22.55\tAdd",
+      "Train\tEurostar\t2026-10-26\t22:37\t3h 13m\t€21.89\tAdd",
+      "Train\tEurostar\t2026-10-27\t11:33\t3h 12m\t€22.68\tAdd",
+      "Train\tEurostar\t2026-10-27\t21:57\t3h 8m\t€19.78\tAdd",
+      "Train\tEurostar\t2026-10-28\t20:31\t3h 10m\t€21.63\tAdd",
+      "Train\tEurostar\t2026-10-29\t17:08\t3h 13m\t€24.33\tAdd",
+      "Train\tEurostar\t2026-10-29\t18:38\t3h 10m\t€22.55\tAdd",
+      "Train\tEurostar\t2026-10-29\t23:25\t3h 8m\t€22.95\tAdd",
+      "Train\tEurostar\t2026-10-30\t13:50\t3h 4m\t€22.05\tAdd",
+      "Train\tEurostar\t2026-11-01\t06:31\t3h 9m\t€24.81\tAdd"
+    ],
+    "selectedRow": "Train\tEurostar\t2026-10-26\t08:40\t3h 14m\t€22.55\tAdd",
+    "selectedFareIds": [
+      "fare_002073770"
+    ],
+    "filters": {
+      "modes": [],
+      "carrierIds": [],
+      "maxPriceCents": 2500,
+      "directOnly": true
+    },
+    "modesByLeg": {
+      "london:paris": [
+        "train"
+      ]
+    },
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-10-26 · 08:40\nTrain · Eurostar\n€22.55\nCancel\nBuy",
+    "chatRequestsBefore": 4,
+    "chatRequestsAfter": 4,
+    "noHorizontalOverflow": true,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "budget-shortlist.json",
+  "sourceEvidenceSha256": "1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838",
+  "screenshots": [
+    {
+      "path": "screenshots/budget-shortlist-repeat-3-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1086
+      },
+      "sha256": "1f8e66955cd328d542f63d98f70312833cc4ef185c926651fe311d07f4765eef"
+    },
+    {
+      "path": "screenshots/budget-shortlist-repeat-3-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1502
+      },
+      "sha256": "d1974c9a57d197cdccff9f42d7eada2ae47b23dae1ed96e06fa4d2fd9abd7204"
+    },
+    {
+      "path": "screenshots/budget-shortlist-repeat-3-interaction.png",
+      "role": "interaction",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1086
+      },
+      "sha256": "1f8e66955cd328d542f63d98f70312833cc4ef185c926651fe311d07f4765eef"
+    }
+  ]
+}

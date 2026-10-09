@@ -1,4 +1,24 @@
 {
   "schemaVersion": 1,
-  "scores": []
+  "scores": [
+    {"id":"tradeoff-dashboard","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"Repeated real-data table and price-duration plot runs stayed grounded; the final run added an exact fare locally at desktop and 390 px with no extra model turn."},
+    {"id":"budget-shortlist","dailyUsefulness":5,"completeness":5,"correctness":4,"rationale":"The successful runs support exact budget, mode, directness and add-to-trip decisions, but one exact repeat ended empty and remains an unresolved reliability finding."},
+    {"id":"departure-board","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"Repeated route-map and chronological-timeline scenes matched source fares; after the covered-scope race fix, Add remained local and error-free at desktop and 390 px."},
+    {"id":"fixed-date-picker","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"The compact picker, alternatives, selected itinerary and total stayed synchronized with the chosen fare; post-fix desktop and mobile selection remained error-free."},
+    {"id":"mode-dashboard","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"Two independent runs reproduced exact per-mode counts and separate price and duration minima, plus a local add action and responsive evidence."},
+    {"id":"weekly-fare-browser","dailyUsefulness":4,"completeness":1,"correctness":1,"rationale":"The broad compound target was not accepted as one complete scene; its useful leaves were tested in narrower cases and the sort interaction has a known defect."},
+    {"id":"duration-picker","dailyUsefulness":4,"completeness":3,"correctness":1,"rationale":"The duration control and fare views rendered, but a repeat exposed the scoped-sort mismatch and ended with an empty refreshing picker."},
+    {"id":"fare-cards-controls","dailyUsefulness":4,"completeness":5,"correctness":5,"rationale":"Date, mode and carrier edits produced seven exact matching cards, and Add hydrated the tracker without another model request at both viewports."},
+    {"id":"date-strip-price-calendar","dailyUsefulness":4,"completeness":5,"correctness":5,"rationale":"Day selection, exact seven-day paging, return navigation and add-to-trip were verified against persisted state with desktop and mobile evidence."},
+    {"id":"compact-fare-picker","dailyUsefulness":3,"completeness":4,"correctness":1,"rationale":"The picker can select a fare, but SortSelect writes global sort while this dataset-bound picker reads leg sort, so duration ascending did not reorder rows."},
+    {"id":"flexible-calendar","dailyUsefulness":4,"completeness":4,"correctness":4,"rationale":"FareCalendar rendered grounded date choices responsively, but the saved run lacks a complete named local interaction trace."},
+    {"id":"multi-city-workspace","dailyUsefulness":3,"completeness":4,"correctness":4,"rationale":"The accepted all-leg workspace represented route, stays and coverage correctly; interaction evidence is shallower than the single-leg decision cases."},
+    {"id":"manual-leg-editor","dailyUsefulness":3,"completeness":4,"correctness":4,"rationale":"The direct editor generated every leg control and live checks proved stay, mode, route and stale-fare behavior, though it is denser than the usual one-way task."},
+    {"id":"story-layouts","dailyUsefulness":3,"completeness":5,"correctness":5,"rationale":"Two accepted scenes exercised tabs, carousel, split summary and local Add correctly, but the story-first workflow is less common than direct comparison."},
+    {"id":"coverage-recovery","dailyUsefulness":2,"completeness":0,"correctness":0,"rationale":"The broad all-status prompt never produced an accepted terminal scene; narrower condition-specific cases provide the valid status evidence."},
+    {"id":"status-empty-partial","dailyUsefulness":4,"completeness":5,"correctness":5,"rationale":"A genuine empty incomplete scope produced an honest coverage explanation without claiming real-world unavailability or offering an invalid retry."},
+    {"id":"pending-refresh-loading","dailyUsefulness":4,"completeness":4,"correctness":2,"rationale":"ArtifactSkeleton rendered during four held refreshes, but remained after the requests completed because the authored status node is static."},
+    {"id":"local-failure-retry","dailyUsefulness":5,"completeness":5,"correctness":5,"rationale":"A real local refresh failure preserved committed results; Retry issued two local requests, no chat request, and recovered successfully."},
+    {"id":"status-stale-saved-comparison","dailyUsefulness":3,"completeness":3,"correctness":4,"rationale":"The preview correctly isolated a user-described old comparison from live fares, but automatic revision-driven stale behavior remains unverified after two timeouts."}
+  ]
 }

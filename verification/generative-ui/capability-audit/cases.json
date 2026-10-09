@@ -58,6 +58,27 @@
       "targets": ["DurationRange", "FadeFares"]
     },
     {
+      "id": "fare-cards-controls",
+      "title": "Expanded fare cards with local controls",
+      "family": "fare-browsing",
+      "prompt": "Show expanded fare cards for Berlin to Amsterdam on 30 October 2026. Put a simple one-day departure picker plus mode and carrier filters directly above them so I can change the day or operator and add a fare.",
+      "targets": ["TravelDate", "ModeChips", "CarrierFilter", "FareCards"]
+    },
+    {
+      "id": "date-strip-price-calendar",
+      "title": "Date strip and price-by-day calendar",
+      "family": "date-browsing",
+      "prompt": "Track Berlin to Amsterdam fares from 30 October to 5 November 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.",
+      "targets": ["DateStrip", "PriceCalendar"]
+    },
+    {
+      "id": "compact-fare-picker",
+      "title": "Compact fare picker with sort control",
+      "family": "compact-selection",
+      "prompt": "I need one compact choice from Madrid to Paris on 2 November 2026. Give me a small fare picker, a simple sort dropdown for price, duration, or departure, and the cheapest-versus-fastest comparison—no full trip planner.",
+      "targets": ["SortSelect", "FarePicker"]
+    },
+    {
       "id": "flexible-calendar",
       "title": "Flexible-date booking calendar",
       "family": "flexible-dates",
@@ -69,21 +90,25 @@
       "title": "Editable multi-city workspace",
       "family": "multi-city",
       "prompt": "Plan London to Paris to Barcelona starting 8 November 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.",
-      "targets": ["TravelHero", "MultiCityPlanGrid", "CitySequence", "StayAllocation", "SelectedFareCount", "CoverageSummary", "Callout"]
+      "targets": ["TravelHero", "MultiCityPlanGrid", "CitySequence", "StayAllocation", "SelectedFareCount", "CoverageSummary", "Callout"],
+      "internallyRendered": ["CityField", "TravelDate", "StayDuration", "TransportSelect", "FareOrder", "FadeFares"],
+      "interactions": ["add-first"]
     },
     {
       "id": "manual-leg-editor",
       "title": "Direct leg editing controls",
       "family": "trip-editing",
-      "prompt": "Help me adjust the London to Paris leg of a longer trip. Keep the city fields, departure date, transport choices, stay length, fare ordering, and a scrollable fare list together so I can see how each edit changes the leg before I add a fare.",
-      "targets": ["CityField", "TravelDate", "TransportSelect", "StayDuration"]
+      "prompt": "Build a manual editor for a London to Paris to Barcelona trip starting 8 November 2026, with two nights in Paris. For the first leg, show separate origin and destination fields, its local departure date, transport selector, Paris stay slider, fare order, and scrollable fares outside the combined planner so I can see each edit before I add a fare.",
+      "targets": ["CityField", "TravelDate", "TransportSelect", "StayDuration"],
+      "interactions": ["add-first"]
     },
     {
       "id": "story-layouts",
       "title": "Tabbed journey story",
       "family": "story-layout",
       "prompt": "Turn my London to Paris options on 8 November 2026 into a compact journey story. Use a hero, a two-tab comparison, and a swipeable set of option panels. Keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic.",
-      "targets": ["TravelHero", "Tabs", "Carousel", "SplitPane", "StickySummary", "Callout"]
+      "targets": ["TravelHero", "Tabs", "Carousel", "SplitPane", "StickySummary", "Callout"],
+      "interactions": ["tabs", "carousel", "add-first"]
     },
     {
       "id": "coverage-recovery",
@@ -91,6 +116,34 @@
       "family": "resilience",
       "prompt": "Search the synthetic data for a London to Paris trip far outside the loaded date range. If results are loading, incomplete, empty, stale, or fail locally, show the matching honest status in the travel view and give me a retry action. Do not claim fares that were not returned.",
       "targets": ["ArtifactSkeleton", "CoverageNotice", "EmptyState", "InlineError", "StaleBadge", "RetryAction"]
+    },
+    {
+      "id": "status-empty-partial",
+      "title": "Honest out-of-coverage empty state",
+      "family": "coverage-status",
+      "prompt": "Search the synthetic data for London to Paris on 15 January 2030. If that date falls outside the loaded timetable, show an honest coverage explanation and empty-result status inside the travel view. Offer a retry only if a local operation truly failed, and do not imply that real-world travel is unavailable.",
+      "targets": ["CoverageNotice", "EmptyState"]
+    },
+    {
+      "id": "pending-refresh-loading",
+      "title": "Pending date-window refresh",
+      "family": "loading-status",
+      "prompt": "I just extended the London to Paris search through 9 November 2026 and the local synthetic fare refresh is still loading. Keep the previous committed comparison visible, show a concise loading placeholder inside the travel view, and keep the cheapest-versus-fastest choice. Do not claim the new day's fares until the refresh completes.",
+      "targets": ["ArtifactSkeleton"]
+    },
+    {
+      "id": "local-failure-retry",
+      "title": "Local query failure and retry",
+      "family": "failure-recovery",
+      "prompt": "The fare table's latest local refresh just failed while the older committed results remain visible. Keep those results, add a concise inline error and a retry control inside the travel view, and keep the cheapest-versus-fastest choice. Do not invent a cause or new fares.",
+      "targets": ["InlineError", "RetryAction"]
+    },
+    {
+      "id": "status-stale-saved-comparison",
+      "title": "Old saved comparison versus live fares",
+      "family": "stale-status-preview",
+      "prompt": "I saved a London-to-Paris comparison earlier, then changed its date locally to 8 November 2026, so that old saved comparison is stale. Show the current bounded fare options for 8 November and put the interface's standard stale-status badge only inside a clearly labelled Old saved comparison panel. Keep that panel separate from the live fares and do not mark the current results as stale.",
+      "targets": ["StaleBadge"]
     }
   ]
 }

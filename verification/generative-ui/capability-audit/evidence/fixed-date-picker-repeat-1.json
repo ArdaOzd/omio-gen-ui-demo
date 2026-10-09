@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "fixed-date-picker",
+  "title": "Compact pick-one workspace",
+  "family": "single-choice",
+  "prompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "SplitPane",
+    "Stack",
+    "FarePicker",
+    "ComparisonTable",
+    "CheapestFastest",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface"
+  ],
+  "componentClaimMismatch": true,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "SplitPane",
+    "Stack",
+    "FarePicker",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "acceptedSceneCount": 2,
+  "rejectedSceneCount": 1,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 101109,
+  "interactionEvidence": {
+    "selectedOption": {
+      "value": "fare_003408527",
+      "text": "Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82"
+    },
+    "selectedItinerary": "Selected fares\nMadrid → Paris\n2026-11-08 · Bus · €77.82 per passenger",
+    "syntheticTotal": "Synthetic total\n€77.82\n\n1 passenger\n\nSynthetic total, including demo fees. No booking is available.",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "fixed-date-picker-madrid-paris.json",
+  "sourceEvidenceSha256": "2802bee56cbfdbba88eb1cc3c51b45684e7873c730af438b93f41a837b1893e7",
+  "screenshots": [
+    {
+      "path": "screenshots/fixed-date-picker-repeat-1-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1286
+      },
+      "sha256": "0b345a7417b11056572d752c55cc23381fab12d254c67cfa89752098d12d48d4"
+    }
+  ]
+}

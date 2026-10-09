@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "fare-cards-controls",
+  "title": "Expanded fare cards with local controls",
+  "family": "fare-browsing",
+  "prompt": "Show expanded fare cards for Berlin to Amsterdam on 30 October 2026. Put a simple one-day departure picker plus mode and carrier filters directly above them so I can change the day or operator and add a fare.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "Stack",
+    "Inline",
+    "TravelDate",
+    "ModeChips",
+    "CarrierFilter",
+    "FareCards",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "Stack",
+    "Inline",
+    "TravelDate",
+    "ModeChips",
+    "CarrierFilter",
+    "FareCards",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "TravelDate",
+    "ModeChips",
+    "CarrierFilter",
+    "FareCards"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 62134,
+  "interactionEvidence": {
+    "date": "2026-10-31",
+    "mode": "bus",
+    "carrierIds": [
+      "carrier-1hc5s74"
+    ],
+    "cardTexts": [
+      "BUS\nFlixBus\n\n04:09 · 8h 53m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€40.14\nSelect",
+      "BUS\nFlixBus\n\n07:57 · 9h 39m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€43.45\nSelect",
+      "BUS\nFlixBus\n\n08:23 · 9h 45m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€47.90\nSelect",
+      "BUS\nFlixBus\n\n11:40 · 9h 24m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€36.49\nSelect",
+      "BUS\nFlixBus\n\n13:52 · 9h 6m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€34.06\nSelect",
+      "BUS\nFlixBus\n\n16:14 · 9h 24m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€41.74\nSelect",
+      "BUS\nFlixBus\n\n21:31 · 9h 25m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€34.36\nSelect"
+    ],
+    "selectedCardText": "BUS\nFlixBus\n\n04:09 · 8h 53m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€40.14\nSelect",
+    "selectedFareIds": [
+      "fare_002541442"
+    ],
+    "dates": {
+      "start": "2026-10-31",
+      "end": "2026-10-31"
+    },
+    "modesByLeg": {
+      "berlin:amsterdam": [
+        "bus"
+      ]
+    },
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nBerlin → Amsterdam\n2026-10-31 · 04:09\nBus · FlixBus\n€40.14\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "fare-cards-controls.json",
+  "sourceEvidenceSha256": "0b0a0776d40f473f2e811d334366f3ac8e15833313b0f0489c4d36fdb61fe02c",
+  "screenshots": [
+    {
+      "path": "screenshots/fare-cards-controls-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1286
+      },
+      "sha256": "d98f667c5e509b569322ef17923d5825a6c3328d5697bc2c9420f5cdf1bf490f"
+    },
+    {
+      "path": "screenshots/fare-cards-controls-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1502
+      },
+      "sha256": "a360fd960ee56cd867679ca2956e6aa71baf190f41d5da32609ee21dd595859d"
+    },
+    {
+      "path": "screenshots/fare-cards-controls-interaction.png",
+      "role": "interaction",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1286
+      },
+      "sha256": "d98f667c5e509b569322ef17923d5825a6c3328d5697bc2c9420f5cdf1bf490f"
+    }
+  ]
+}

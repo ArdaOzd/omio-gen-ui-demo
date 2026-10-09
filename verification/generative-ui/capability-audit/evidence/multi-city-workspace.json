@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "multi-city-workspace",
+  "title": "Editable multi-city workspace",
+  "family": "multi-city",
+  "prompt": "Plan London to Paris to Barcelona starting 8 November 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.",
+  "runAt": "2026-10-09T14:52:33.998Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "TravelHero",
+    "CitySequence",
+    "StayAllocation",
+    "MultiCityPlanGrid",
+    "ResponsiveGrid",
+    "CheapestFastest",
+    "Inline",
+    "SelectedFareCount",
+    "CoverageSummary"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "TravelHero",
+    "CitySequence",
+    "StayAllocation",
+    "MultiCityPlanGrid",
+    "ResponsiveGrid",
+    "CheapestFastest",
+    "Inline",
+    "SelectedFareCount",
+    "CoverageSummary"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [
+    "CityField",
+    "TravelDate",
+    "StayDuration",
+    "TransportSelect",
+    "FareOrder",
+    "FadeFares"
+  ],
+  "targetComponents": [
+    "TravelHero",
+    "MultiCityPlanGrid",
+    "CitySequence",
+    "StayAllocation",
+    "SelectedFareCount",
+    "CoverageSummary",
+    "Callout"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 60315,
+  "interactionEvidence": null,
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "multi-city-workspace.json",
+  "sourceEvidenceSha256": "f40bec65ba5efcdf9468451859feaaa54af64fc81e15307e24a5379699d8b907",
+  "screenshots": [
+    {
+      "path": "screenshots/multi-city-workspace-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "2ce350c97772d38606d797eea74cbd8ae539bdedf79acb6948e26e1d084c929f",
+      "condition": null
+    },
+    {
+      "path": "screenshots/multi-city-workspace-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1079
+      },
+      "sha256": "3d3b3494efa034bcef4853d533b61d804987e0a5d4600d7345c94f16bfc249c0",
+      "condition": null
+    }
+  ]
+}

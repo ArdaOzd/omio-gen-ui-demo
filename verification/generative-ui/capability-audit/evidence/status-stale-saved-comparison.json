@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "status-stale-saved-comparison",
+  "title": "Old saved comparison versus live fares",
+  "family": "stale-status-preview",
+  "prompt": "I saved a London-to-Paris comparison earlier, then changed its date locally to 8 November 2026, so that old saved comparison is stale. Show the current bounded fare options for 8 November and put the interface's standard stale-status badge only inside a clearly labelled Old saved comparison panel. Keep that panel separate from the live fares and do not mark the current results as stale.",
+  "runAt": "2026-10-09T15:50:32.065Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "CheapestFastest",
+    "ComparisonTable",
+    "StaleBadge",
+    "Callout"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "CheapestFastest",
+    "ComparisonTable",
+    "StaleBadge",
+    "Callout"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [
+    "PlanningTracker"
+  ],
+  "targetComponents": [
+    "StaleBadge"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 68938,
+  "interactionEvidence": {
+    "steps": [
+      {
+        "kind": "add",
+        "label": "Add to trip",
+        "localChatDelta": 0,
+        "trackerVisible": true
+      }
+    ],
+    "chatRequestDelta": null
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": "Genuine production agent call in a fresh isolated browser context; no fixture or manually authored scene.",
+  "sourceEvidence": "status_stale_saved_comparison.json",
+  "sourceEvidenceSha256": "7bb7988ff26629a53b2d5215f6f2aac0c22dd480e051afbc771eb8c2da6a9bba",
+  "screenshots": [
+    {
+      "path": "screenshots/status-stale-saved-comparison-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1132
+      },
+      "sha256": "a01ed8897a5b780f6fbcfd76894a9769580dc3316ae9d3d71ffab4a08c1348f1",
+      "condition": null
+    },
+    {
+      "path": "screenshots/status-stale-saved-comparison-desktop-2.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1132
+      },
+      "sha256": "c999662eb7369677dde12caf96ede2bcae2a5eb3b3e45ad77b34b1af2b646731",
+      "condition": null
+    },
+    {
+      "path": "screenshots/status-stale-saved-comparison-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "5d0e147610cb33a574d12d21f491c0c8dd614e41e52369d192c762a9809ea6d2",
+      "condition": null
+    },
+    {
+      "path": "screenshots/status-stale-saved-comparison-mobile-2.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "c72f0ddaab8c5a8fccb9849827bf54142b82f3fb98026472710cf7abb5d63c2a",
+      "condition": null
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "id": "local-failure-retry",
+  "title": "Local query failure and retry",
+  "family": "failure-recovery",
+  "prompt": "The fare table's latest local refresh just failed while the older committed results remain visible. Keep those results, add a concise inline error and a retry control inside the travel view, and keep the cheapest-versus-fastest choice. Do not invent a cause or new fares.",
+  "runAt": "2026-10-09T15:22:38.934Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "DateWindow",
+    "InlineError",
+    "RetryAction",
+    "CheapestFastest",
+    "ComparisonTable"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "DateWindow",
+    "InlineError",
+    "RetryAction",
+    "CheapestFastest",
+    "ComparisonTable"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "InlineError",
+    "RetryAction"
+  ],
+  "acceptedSceneCount": 2,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": null,
+  "interactionEvidence": {
+    "label": "Retry fare refresh",
+    "queryDelta": 2,
+    "chatDelta": 0,
+    "passingQueriesAfterFailure": 2,
+    "chatRequestDelta": null
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "local-failure-retry.json",
+  "sourceEvidenceSha256": "5725357cfb42d280cebe556790cf0de7c96b8c33add7ea73c75809e4dfe666a8",
+  "screenshots": [
+    {
+      "path": "screenshots/local-failure-retry-failure.png",
+      "role": "failure",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "1fce7fb483ae7d69fd7f1b1379d4b570d6837051643931c872d009d1bb527d13"
+    },
+    {
+      "path": "screenshots/local-failure-retry-failure-2.png",
+      "role": "failure",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "4de391eb96dc8f436d0f22053e03e3becb384f695ad80df5fb1a778471b50dba"
+    },
+    {
+      "path": "screenshots/local-failure-retry-failure-3.png",
+      "role": "failure",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1079
+      },
+      "sha256": "4495eaef54b35c6a6944bd81b715834fa9a4c2b988bd720dbb5c55484615ca61"
+    },
+    {
+      "path": "screenshots/local-failure-retry-failure-4.png",
+      "role": "failure",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1079
+      },
+      "sha256": "4495eaef54b35c6a6944bd81b715834fa9a4c2b988bd720dbb5c55484615ca61"
+    }
+  ]
+}

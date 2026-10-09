@@ -58,7 +58,10 @@ async function waitForTurn(page, network, startedAt) {
     const lastToolIndex = lastParts.findLastIndex(part => typeof part.type === 'string' && part.type.startsWith('tool-'))
     const lastTextIndex = lastParts.findLastIndex(part => part.type === 'text' && typeof part.text === 'string' && part.text.trim())
     const finalTextAfterTools = lastTextIndex > lastToolIndex
-    if (acceptedScene && finalTextAfterTools && network.inflight === 0 && Date.now() - network.lastActivity > 6_000 && stopped) return
+    const terminal = network.terminalResponses > 0
+    if (terminal && network.inflight === 0 && Date.now() - network.lastActivity > 6_000 && stopped) {
+      return { acceptedScene, finalTextAfterTools }
+    }
   }
   throw new Error(`Agent turn did not finish within ${timeoutMs}ms`)
 }
@@ -69,7 +72,7 @@ try {
   for (const testCase of selected) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 1000 }, reducedMotion: 'reduce' })
     const page = await context.newPage()
-    const network = { requests: [], responses: [], inflight: 0, lastActivity: Date.now() }
+    const network = { requests: [], responses: [], inflight: 0, terminalResponses: 0, lastActivity: Date.now() }
     const consoleErrors = []
     const pageErrors = []
     const startedAt = Date.now()
@@ -79,9 +82,21 @@ try {
       network.inflight += 1
       network.lastActivity = Date.now()
     })
-    page.on('response', response => {
+    page.on('response', async response => {
       if (!response.url().endsWith('/api/chat')) return
       network.responses.push({ status: response.status(), at: new Date().toISOString() })
+      network.lastActivity = Date.now()
+      await response.finished().catch(() => undefined)
+      const body = await response.text().catch(() => '')
+      if (/"finishReason"\s*:\s*"stop"|"finish_reason"\s*:\s*"stop"/.test(body)) network.terminalResponses += 1
+    })
+    page.on('requestfinished', request => {
+      if (!request.url().endsWith('/api/chat')) return
+      network.inflight = Math.max(0, network.inflight - 1)
+      network.lastActivity = Date.now()
+    })
+    page.on('requestfailed', request => {
+      if (!request.url().endsWith('/api/chat')) return
       network.inflight = Math.max(0, network.inflight - 1)
       network.lastActivity = Date.now()
     })
@@ -94,12 +109,40 @@ try {
       await page.goto(`${baseUrl}/generative`)
       await page.getByRole('textbox', { name: 'Message' }).fill(testCase.prompt)
       await page.getByRole('button', { name: 'Send message' }).click()
-      await waitForTurn(page, network, startedAt)
+      const completion = await waitForTurn(page, network, startedAt)
       const record = await readLatestThread(page)
       const presentParts = (record?.messages ?? []).flatMap(message => message.parts ?? []).filter(part => part.type === 'tool-present')
       const accepted = presentParts.filter(part => part.state === 'output-available')
       const latestScene = accepted.at(-1)?.input
       const generatedComponents = [...new Set(walkTypes(latestScene))]
+      const chatRequestsBeforeInteractions = network.requests.length
+      const interactionEvidence = {}
+      if (testCase.interactions?.includes('tabs')) {
+        const tabs = page.getByRole('tab')
+        interactionEvidence.tabs = []
+        for (let index = 0; index < await tabs.count(); index += 1) {
+          const tab = tabs.nth(index)
+          await tab.click()
+          interactionEvidence.tabs.push({ label: await tab.innerText(), selected: await tab.getAttribute('aria-selected') === 'true' })
+        }
+      }
+      if (testCase.interactions?.includes('carousel')) {
+        interactionEvidence.carousels = await page.locator('.travel-carousel').evaluateAll(elements => elements.map(element => {
+          const before = element.scrollLeft
+          element.scrollLeft = element.scrollWidth
+          return { panels: element.children.length, scrollable: element.scrollWidth > element.clientWidth, before, after: element.scrollLeft }
+        }))
+      }
+      if (testCase.interactions?.includes('add-first')) {
+        const add = page.getByRole('button', { name: /^Add(?: cheapest fare)?/ }).first()
+        if (await add.count() && await add.isEnabled()) {
+          const label = await add.getAttribute('aria-label') ?? await add.innerText()
+          await add.click()
+          await page.waitForTimeout(500)
+          interactionEvidence.add = { label, trackerVisible: await page.getByText('Planning tracker', { exact: true }).count() > 0 }
+        }
+      }
+      interactionEvidence.chatRequestDelta = network.requests.length - chatRequestsBeforeInteractions
       const desktopPath = path.join(output, `${testCase.id}-1280.png`)
       const mobilePath = path.join(output, `${testCase.id}-390.png`)
       await page.screenshot({ path: desktopPath, fullPage: true })
@@ -121,17 +164,22 @@ try {
         acceptedSceneCount: accepted.length,
         rejectedSceneCount: presentParts.length - accepted.length,
         chatStatuses: network.responses.map(response => response.status),
+        terminalResponses: network.terminalResponses,
+        completion,
         elapsedMs: Date.now() - startedAt,
+        interactionEvidence,
         screenshots: { desktop: desktopPath, mobile: mobilePath },
         noHorizontalOverflowAt390: !overflow,
         consoleErrors,
         pageErrors,
         assistantText: (record?.messages ?? []).filter(message => message.role === 'assistant').flatMap(message => (message.parts ?? []).filter(part => part.type === 'text').map(part => part.text)).filter(Boolean),
+        artifactStates: (record?.artifacts ?? []).map(artifact => artifact.state),
         visibleText: await page.locator('body').innerText(),
-        latestScene
+        latestScene,
+        error: accepted.length ? undefined : 'Agent turn ended without an accepted generated UI scene'
       }
       await writeFile(path.join(output, `${testCase.id}.json`), `${JSON.stringify(result, null, 2)}\n`)
-      console.log(JSON.stringify({ id: testCase.id, status: 'pass', generatedComponents, elapsedMs: result.elapsedMs }))
+      console.log(JSON.stringify({ id: testCase.id, status: result.error ? 'fail' : 'pass', generatedComponents, elapsedMs: result.elapsedMs, error: result.error }))
     } catch (error) {
       result = {
         schemaVersion: 1,

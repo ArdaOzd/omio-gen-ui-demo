@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Generative travel UI capability audit</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#17233c;background:#f4f6fb}*{box-sizing:border-box}html,body{max-width:100%;overflow-x:hidden}body{margin:0}header{padding:48px clamp(20px,5vw,72px);color:white;background:linear-gradient(135deg,#111b3f,#2954c8)}h1{max-width:880px;font-size:clamp(2rem,5vw,4.5rem);line-height:1;margin:.2em 0}header p{max-width:760px;font-size:1.08rem;line-height:1.6}.summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.summary span{padding:10px 14px;border-radius:999px;background:#ffffff1f;border:1px solid #ffffff38}main{max-width:1440px;min-width:0;margin:auto;padding:28px clamp(16px,4vw,56px) 80px}nav{position:sticky;top:0;z-index:2;display:flex;gap:8px;overflow:auto;padding:12px 0;background:#f4f6fbe8;backdrop-filter:blur(14px)}button,input,select{font:inherit}nav button,.copy{white-space:nowrap;border:1px solid #cbd3e7;background:white;border-radius:999px;padding:9px 14px;cursor:pointer}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.filters input,.filters select{min-width:min(260px,100%);padding:10px 12px;border:1px solid #cbd3e7;border-radius:10px;background:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:18px}.card{min-width:0;background:white;border:1px solid #dce2ef;border-radius:18px;padding:20px;box-shadow:0 12px 30px #1d31580d}.rank{font-weight:800;color:#2954c8}.family{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:#66718a}.prompt{padding:14px;border-radius:12px;background:#f2f5fb;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.travel-finding{padding:12px;border-left:4px solid #b13b2e;background:#fff2ef;color:#70261e}.scores{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.scores span,.scores strong{padding:6px 9px;border-radius:8px;background:#eaf0ff;font-size:.82rem}.scores strong{background:#17233c;color:white}.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:8px;margin-top:14px}.shots figure{min-width:0;margin:0}.shots img{width:100%;max-height:420px;object-fit:cover;object-position:top;border:1px solid #dce2ef;border-radius:10px}.shots figcaption{font-size:.74rem;color:#66718a}.components{display:flex;flex-wrap:wrap;gap:6px}.components span{font-size:.76rem;padding:5px 8px;border-radius:999px;background:#eef1f7}.coverage-wrap{max-width:100%;overflow:auto;border-radius:12px}.coverage{width:100%;min-width:820px;border-collapse:collapse;background:white}.coverage th,.coverage td{text-align:left;padding:11px;border-bottom:1px solid #e1e6f0;vertical-align:top}.coverage th{position:sticky;top:57px;background:#17233c;color:white}.status{font-weight:700}.model-generated{color:#087443}.attempted-not-observed{color:#a25800}.internal-only{color:#6e49a8}.not-targeted{color:#7a8192}.host{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px}.host article{padding:16px;background:#fff4de;border-radius:12px}section{min-width:0;scroll-margin-top:70px}details{max-width:100%;margin-top:10px}pre{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}footer{padding:24px;color:#66718a}@media(max-width:620px){header{padding-top:32px}.coverage th{position:static}}
+</style></head><body>
+<header><p class="family">Real agent, real synthetic fare data</p><h1>Generative travel UI capability audit</h1><p>This report tests the finite registered catalog, not an open-ended set of component combinations. It separates model-authored nodes from fixed internal composites and host-owned UI.</p><div class="summary"><span>49 registered</span><span>49 model-generated</span><span>32 prompts run</span><span>4 default candidates</span></div></header>
+<main><nav><button onclick="document.querySelector('#defaults').scrollIntoView()">Top defaults</button><button onclick="document.querySelector('#ranking').scrollIntoView()">Ranking</button><button onclick="document.querySelector('#coverage').scrollIntoView()">49-component ledger</button><button onclick="document.querySelector('#host').scrollIntoView()">Host-owned UI</button></nav>
+<section id="defaults"><h2>Top four verified defaults</h2><div class="grid"><article class="card"><div class="rank">#1</div><h3>Visual departure board</h3><div class="prompt">Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.</div><button class="copy" data-prompt="Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.">Copy prompt</button></article><article class="card"><div class="rank">#2</div><h3>Compact pick-one workspace</h3><div class="prompt">My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.</div><button class="copy" data-prompt="My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.">Copy prompt</button></article><article class="card"><div class="rank">#3</div><h3>Transport mode comparison</h3><div class="prompt">Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</div><button class="copy" data-prompt="Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.">Copy prompt</button></article><article class="card"><div class="rank">#4</div><h3>Price versus time dashboard</h3><div class="prompt">I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.</div><button class="copy" data-prompt="I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.">Copy prompt</button></article></div></section>
+<section id="ranking"><h2>Prompt ranking</h2><p>Score = 40% daily usefulness + 30% completeness + 30% correctness. A default needs completeness ≥4, correctness ≥4, a named successful local action, genuine desktop and 390 px evidence, two distinct successful runs, no failed sibling or open error, and a distinct primary task family.</p><div class="filters"><label>Search <input id="case-search" type="search" placeholder="Prompt, component, or finding"></label><label>Family <select id="family-filter"><option value="">All families</option><option>calendar-browsing</option><option>compact-selection</option><option>coverage-status</option><option>date-browsing</option><option>duration-filtering</option><option>failure-recovery</option><option>fare-browsing</option><option>filtering</option><option>flexible-dates</option><option>loading-status</option><option>mode-comparison</option><option>multi-city</option><option>resilience</option><option>schedule</option><option>single-choice</option><option>stale-status-preview</option><option>story-layout</option><option>tradeoff</option><option>trip-editing</option></select></label></div><div class="grid" id="case-grid">
+<article class="card case-card" data-family="schedule" data-search="visual departure board show me the london to paris journeys on 8 november 2026 as a visual departure board. start with simple route orientation, then put the options in chronological departure and arrival order so i can understand the day at a glance. finish with a small actionable shortlist and help me choose between saving time and saving money. schedule travelsurface routemap itinerarytimeline cheapestfastest travelsurface routemap section itinerarytimeline cheapestfastest travelsurface routemap section itinerarytimeline cheapestfastest travelsurface routemap section itinerarytimeline cheapestfastest travelsurface section routemap itinerarytimeline cheapestfastest before the fix, a successful add showed a persistent false coverage error even though query and pin lookup responses were 200."><div class="rank">#1</div><p class="family">schedule · 5 distinct successful runs · default eligible</p><h3>Visual departure board</h3><div class="scores"><span>Daily 5/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>5/5</strong></div><div class="prompt">Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.</div><button class="copy" data-prompt="Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.">Copy prompt</button><p>Repeated route-map and chronological-timeline scenes matched source fares; after the covered-scope race fix, Add remained local and error-free at desktop and 390 px.</p><p class="travel-finding"><strong>covered-selection-false-coverage</strong>: Before the fix, a successful Add showed a persistent false coverage error even though query and pin lookup responses were 200.</p><div class="components"><span>TravelSurface</span><span>RouteMap</span><span>ItineraryTimeline</span><span>CheapestFastest</span><span>Section</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/departure-board-post-fix-desktop.png"><img loading="lazy" src="screenshots/departure-board-post-fix-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/departure-board-post-fix-mobile.png"><img loading="lazy" src="screenshots/departure-board-post-fix-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;departure-board-post-fix.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;8c6bbab4b58749cee8dbd26a0380f3956278ce776e291b54021d47257792c26a&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 70257,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;action&quot;: &quot;add-first-timeline-fare&quot;,
+    &quot;success&quot;: true,
+    &quot;routeLabel&quot;: &quot;Schematic route: London to Paris&quot;,
+    &quot;timelineRows&quot;: [
+      &quot;2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:42\nLondon → Paris\n\nTrain · 3h 16m · €46.68\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:45\nLondon → Paris\n\nFlight · 5h 2m · €27.70\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:49\nLondon → Paris\n\nBus · 5h 47m · €27.14\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 07:31\nLondon → Paris\n\nTrain · 3h 5m · €26.44\n\nAdd to trip&quot;
+    ],
+    &quot;departureMinutes&quot;: [
+      266,
+      402,
+      405,
+      409,
+      451
+    ],
+    &quot;chronological&quot;: true,
+    &quot;selectedRow&quot;: &quot;2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003484753&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 2 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/departure-board-repeat-1-desktop.png"><img loading="lazy" src="screenshots/departure-board-repeat-1-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/departure-board-repeat-1-detail.png"><img loading="lazy" src="screenshots/departure-board-repeat-1-detail.png" alt="detail evidence screenshot"></a><figcaption>detail · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;departure-board-repeat-1.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;16d4d72cbad5ad4ccb16ddf5c976b53f125818c0467926fcd861c53bcf068b12&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 61706,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;summary&quot;: &quot;clicked Add to trip&quot;,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 3 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/departure-board-responsive-1-desktop.png"><img loading="lazy" src="screenshots/departure-board-responsive-1-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/departure-board-responsive-1-mobile.png"><img loading="lazy" src="screenshots/departure-board-responsive-1-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/departure-board-responsive-1-interaction.png"><img loading="lazy" src="screenshots/departure-board-responsive-1-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · 1280×1000 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;departure-board-responsive-1.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;1bc6d0d171f081c6dfbb3ccdec1157b4834c104fe91b2e06773858122c288ef9&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 68974,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;action&quot;: &quot;add-first-timeline-fare&quot;,
+    &quot;success&quot;: true,
+    &quot;routeLabel&quot;: &quot;Schematic route: London to Paris&quot;,
+    &quot;timelineRows&quot;: [
+      &quot;2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:42\nLondon → Paris\n\nTrain · 3h 16m · €46.68\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:45\nLondon → Paris\n\nFlight · 5h 2m · €27.70\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:49\nLondon → Paris\n\nBus · 5h 47m · €27.14\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 07:31\nLondon → Paris\n\nTrain · 3h 5m · €26.44\n\nAdd to trip&quot;
+    ],
+    &quot;departureMinutes&quot;: [
+      266,
+      402,
+      405,
+      409,
+      451
+    ],
+    &quot;chronological&quot;: true,
+    &quot;selectedRow&quot;: &quot;2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003484753&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 4 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/departure-board-responsive-2-desktop.png"><img loading="lazy" src="screenshots/departure-board-responsive-2-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/departure-board-responsive-2-mobile.png"><img loading="lazy" src="screenshots/departure-board-responsive-2-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/departure-board-responsive-2-interaction.png"><img loading="lazy" src="screenshots/departure-board-responsive-2-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · 1280×1000 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;departure-board-responsive-2.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;90abe67bb3cc8867958613001f9d32be0bfd827dc8e2a31645bc55358b86b728&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 68974,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;action&quot;: &quot;add-first-timeline-fare&quot;,
+    &quot;success&quot;: true,
+    &quot;routeLabel&quot;: &quot;Schematic route: London to Paris&quot;,
+    &quot;timelineRows&quot;: [
+      &quot;2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:42\nLondon → Paris\n\nTrain · 3h 16m · €46.68\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:45\nLondon → Paris\n\nFlight · 5h 2m · €27.70\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 06:49\nLondon → Paris\n\nBus · 5h 47m · €27.14\n\nAdd to trip&quot;,
+      &quot;2026-11-08 · 07:31\nLondon → Paris\n\nTrain · 3h 5m · €26.44\n\nAdd to trip&quot;
+    ],
+    &quot;departureMinutes&quot;: [
+      266,
+      402,
+      405,
+      409,
+      451
+    ],
+    &quot;chronological&quot;: true,
+    &quot;selectedRow&quot;: &quot;2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003484753&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 5 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/departure-board-desktop.png"><img loading="lazy" src="screenshots/departure-board-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/departure-board-detail.png"><img loading="lazy" src="screenshots/departure-board-detail.png" alt="detail evidence screenshot"></a><figcaption>detail · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;departure-board.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;785166d6bfee520b0ccd7f39602f2595a0b1a7ed289ff57454350ee03dafa5db&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 48254,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;summary&quot;: &quot;clicked Add to trip&quot;,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="single-choice" data-search="compact pick-one workspace my travel date is fixed: madrid to paris on 8 november 2026. i don't need a calendar or a trip planner, and i don't want a long list. give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as i choose. single-choice travelsurface splitpane stack farepicker comparisontable cheapestfastest stickysummary selecteditinerary synthetictotal travelsurface splitpane stack farepicker comparisontable cheapestfastest stickysummary selecteditinerary synthetictotal travelsurface splitpane stack farepicker cheapestfastest comparisontable stickysummary selecteditinerary synthetictotal travelsurface splitpane stack farepicker cheapestfastest comparisontable stickysummary selecteditinerary synthetictotal before the fix, selection succeeded and lookup returned the exact fare, then a persistent false coverage error appeared."><div class="rank">#2</div><p class="family">single-choice · 4 distinct successful runs · default eligible</p><h3>Compact pick-one workspace</h3><div class="scores"><span>Daily 5/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>5/5</strong></div><div class="prompt">My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.</div><button class="copy" data-prompt="My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.">Copy prompt</button><p>The compact picker, alternatives, selected itinerary and total stayed synchronized with the chosen fare; post-fix desktop and mobile selection remained error-free.</p><p class="travel-finding"><strong>covered-selection-false-coverage-fixed-picker</strong>: Before the fix, selection succeeded and lookup returned the exact fare, then a persistent false coverage error appeared.</p><div class="components"><span>TravelSurface</span><span>SplitPane</span><span>Stack</span><span>FarePicker</span><span>ComparisonTable</span><span>CheapestFastest</span><span>StickySummary</span><span>SelectedItinerary</span><span>SyntheticTotal</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/fixed-date-picker-post-fix-desktop.png"><img loading="lazy" src="screenshots/fixed-date-picker-post-fix-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/fixed-date-picker-post-fix-mobile.png"><img loading="lazy" src="screenshots/fixed-date-picker-post-fix-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;fixed-date-picker-post-fix.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;8630d7d389b743483386b15b3e3f30849879917e22f6c76756cab9ad1b655aef&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 63127,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;action&quot;: &quot;select-fixed-date-fare&quot;,
+    &quot;success&quot;: true,
+    &quot;options&quot;: [
+      {
+        &quot;value&quot;: &quot;fare_003408527&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408529&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 08:33 · 17h 6m · Direct · €81.29&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408530&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 10:35 · 15h 54m · Direct · €73.93&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408531&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 12:53 · 16h 7m · Direct · €51.14&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408532&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 16:09 · 16h 37m · Direct · €50.65&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408533&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 17:51 · 16h 9m · Direct · €88.80&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408534&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 20:54 · 15h 33m · Direct · €46.13&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408535&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 23:39 · 17h 4m · Direct · €52.25&quot;
+      }
+    ],
+    &quot;selectedOption&quot;: {
+      &quot;value&quot;: &quot;fare_003408527&quot;,
+      &quot;text&quot;: &quot;Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82&quot;
+    },
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003408527&quot;
+    ],
+    &quot;selectedItineraryText&quot;: &quot;Selected fares\nMadrid → Paris\n2026-11-08 · Bus · €77.82 per passenger&quot;,
+    &quot;syntheticTotalText&quot;: &quot;Synthetic total\n€77.82\n\n1 passenger\n\nSynthetic total, including demo fees. No booking is available.&quot;,
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nMadrid → Paris\n2026-11-08 · 06:07\nBus · Alsa\n€77.82\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 2 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/fixed-date-picker-repeat-1-desktop.png"><img loading="lazy" src="screenshots/fixed-date-picker-repeat-1-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;fixed-date-picker-repeat-1.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;2802bee56cbfdbba88eb1cc3c51b45684e7873c730af438b93f41a837b1893e7&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 101109,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;selectedOption&quot;: {
+      &quot;value&quot;: &quot;fare_003408527&quot;,
+      &quot;text&quot;: &quot;Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82&quot;
+    },
+    &quot;selectedItinerary&quot;: &quot;Selected fares\nMadrid → Paris\n2026-11-08 · Bus · €77.82 per passenger&quot;,
+    &quot;syntheticTotal&quot;: &quot;Synthetic total\n€77.82\n\n1 passenger\n\nSynthetic total, including demo fees. No booking is available.&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 3 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/fixed-date-picker-responsive-2-desktop.png"><img loading="lazy" src="screenshots/fixed-date-picker-responsive-2-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/fixed-date-picker-responsive-2-mobile.png"><img loading="lazy" src="screenshots/fixed-date-picker-responsive-2-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/fixed-date-picker-responsive-2-interaction.png"><img loading="lazy" src="screenshots/fixed-date-picker-responsive-2-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · 1280×1000 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;fixed-date-picker-responsive-2.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;5e22f81c3f3a17abf8b831c0de28de1a015f03dbf07908520de77a6b7c9e3ea8&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 74416,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;action&quot;: &quot;select-fixed-date-fare&quot;,
+    &quot;success&quot;: true,
+    &quot;options&quot;: [
+      {
+        &quot;value&quot;: &quot;fare_003408527&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408529&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 08:33 · 17h 6m · Direct · €81.29&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408530&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 10:35 · 15h 54m · Direct · €73.93&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408531&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 12:53 · 16h 7m · Direct · €51.14&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408532&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 16:09 · 16h 37m · Direct · €50.65&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408533&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 17:51 · 16h 9m · Direct · €88.80&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408534&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 20:54 · 15h 33m · Direct · €46.13&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_003408535&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 23:39 · 17h 4m · Direct · €52.25&quot;
+      }
+    ],
+    &quot;selectedOption&quot;: {
+      &quot;value&quot;: &quot;fare_003408527&quot;,
+      &quot;text&quot;: &quot;Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82&quot;
+    },
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003408527&quot;
+    ],
+    &quot;selectedItineraryText&quot;: &quot;Selected fares\nMadrid → Paris\n2026-11-08 · Bus · €77.82 per passenger&quot;,
+    &quot;syntheticTotalText&quot;: &quot;Synthetic total\n€77.82\n\n1 passenger\n\nSynthetic total, including demo fees. No booking is available.&quot;,
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nMadrid → Paris\n2026-11-08 · 06:07\nBus · Alsa\n€77.82\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 4 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/fixed-date-picker-desktop.png"><img loading="lazy" src="screenshots/fixed-date-picker-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;fixed-date-picker.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;118cd8829d4cf37a42e50d17ee4841241646d1e803ae515d02b229dc108dcce7&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 63728,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: null
+}</pre></details></article><article class="card case-card" data-family="mode-comparison" data-search="transport mode comparison help me choose how to travel from london to paris on 8 november 2026. make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. keep a short comparison table visible so i can choose one, and tell me whether paying more for the faster option looks worthwhile. mode-comparison travelsurface travelhero responsivegrid modebreakdown comparisonmatrix cheapestfastest comparisontable travelsurface responsivegrid modebreakdown comparisonmatrix cheapestfastest comparisontable travelsurface travelhero responsivegrid modebreakdown comparisonmatrix cheapestfastest comparisontable"><div class="rank">#3</div><p class="family">mode-comparison · 3 distinct successful runs · default eligible</p><h3>Transport mode comparison</h3><div class="scores"><span>Daily 5/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>5/5</strong></div><div class="prompt">Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</div><button class="copy" data-prompt="Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.">Copy prompt</button><p>Two independent runs reproduced exact per-mode counts and separate price and duration minima, plus a local add action and responsive evidence.</p><div class="components"><span>TravelSurface</span><span>TravelHero</span><span>ResponsiveGrid</span><span>ModeBreakdown</span><span>ComparisonMatrix</span><span>CheapestFastest</span><span>ComparisonTable</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/mode-dashboard-repeat-1-desktop.png"><img loading="lazy" src="screenshots/mode-dashboard-repeat-1-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/mode-dashboard-repeat-1-mobile.png"><img loading="lazy" src="screenshots/mode-dashboard-repeat-1-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/mode-dashboard-repeat-1-interaction.png"><img loading="lazy" src="screenshots/mode-dashboard-repeat-1-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · 1280×1000 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;mode-dashboard-repeat-1.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;a123e1e97f72f3a758805762e3a7c1c246af7b2b1602202afbeaf366b1194b16&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 77495,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;selectedRow&quot;: &quot;Bus\tNational Express\t2026-11-08\t04:26\t5h 35m\t€21.58\tAdd&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003484753&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;noHorizontalOverflow&quot;: true,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 2 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/mode-dashboard-repeat-2-desktop.png"><img loading="lazy" src="screenshots/mode-dashboard-repeat-2-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/mode-dashboard-repeat-2-mobile.png"><img loading="lazy" src="screenshots/mode-dashboard-repeat-2-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;mode-dashboard-repeat-2.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;a6ea25e51348eab4274b003e28f30e94a2a7434913d36aa81e380e3be49d71b9&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 66840,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;selectedRow&quot;: &quot;Bus\tNational Express\t2026-11-08\t04:26\t5h 35m\t€21.58\tAdd&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003484753&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;noHorizontalOverflow&quot;: true,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 3 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/mode-dashboard-desktop.png"><img loading="lazy" src="screenshots/mode-dashboard-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/mode-dashboard-mobile.png"><img loading="lazy" src="screenshots/mode-dashboard-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/mode-dashboard-interaction.png"><img loading="lazy" src="screenshots/mode-dashboard-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;mode-dashboard.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;23e89ef134a78b5f9d7bd91182b8300d06a2862de29b51645f01940ef2251cfc&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 77495,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;selectedRow&quot;: &quot;Bus\tNational Express\t2026-11-08\t04:26\t5h 35m\t€21.58\tAdd&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003484753&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;noHorizontalOverflow&quot;: true,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="tradeoff" data-search="price versus time dashboard i’m going from london to paris on 28 october 2026. help me choose between saving money and saving time. show the exact options and make the price-versus-duration tradeoff obvious. tradeoff travelsurface cheapestfastest responsivegrid comparisontable durationpriceplot travelsurface cheapestfastest splitpane comparisontable durationpriceplot"><div class="rank">#4</div><p class="family">tradeoff · 2 distinct successful runs · default eligible</p><h3>Price versus time dashboard</h3><div class="scores"><span>Daily 5/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>5/5</strong></div><div class="prompt">I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.</div><button class="copy" data-prompt="I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.">Copy prompt</button><p>Repeated real-data table and price-duration plot runs stayed grounded; the final run added an exact fare locally at desktop and 390 px with no extra model turn.</p><div class="components"><span>TravelSurface</span><span>CheapestFastest</span><span>ResponsiveGrid</span><span>ComparisonTable</span><span>DurationPricePlot</span><span>SplitPane</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/tradeoff-dashboard-final-repeat-desktop.png"><img loading="lazy" src="screenshots/tradeoff-dashboard-final-repeat-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/tradeoff-dashboard-final-repeat-mobile.png"><img loading="lazy" src="screenshots/tradeoff-dashboard-final-repeat-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;tradeoff-dashboard-final-repeat.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;655c7e7c8f2a439d448b11c59165bbf2db35268ffabc6e2ba251eafbdf52c0c5&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 58150,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;action&quot;: &quot;add-first-tradeoff-fare&quot;,
+    &quot;success&quot;: true,
+    &quot;selectedRow&quot;: &quot;Bus\tNational Express\t2026-10-28\t04:53\t6h 0m\t€13.19\tAdd&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_002275272&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-10-28 · 04:53\nBus · National Express\n€13.19\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 2 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/tradeoff-dashboard-repeat-2-desktop.png"><img loading="lazy" src="screenshots/tradeoff-dashboard-repeat-2-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/tradeoff-dashboard-repeat-2-mobile.png"><img loading="lazy" src="screenshots/tradeoff-dashboard-repeat-2-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;tradeoff-dashboard-repeat-2.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 60750,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: null
+}</pre></details></article><article class="card case-card" data-family="failure-recovery" data-search="local query failure and retry the fare table's latest local refresh just failed while the older committed results remain visible. keep those results, add a concise inline error and a retry control inside the travel view, and keep the cheapest-versus-fastest choice. do not invent a cause or new fares. failure-recovery travelsurface datewindow inlineerror retryaction cheapestfastest comparisontable"><div class="rank">#5</div><p class="family">failure-recovery · 1 distinct successful run · not default eligible</p><h3>Local query failure and retry</h3><div class="scores"><span>Daily 5/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>5/5</strong></div><div class="prompt">The fare table's latest local refresh just failed while the older committed results remain visible. Keep those results, add a concise inline error and a retry control inside the travel view, and keep the cheapest-versus-fastest choice. Do not invent a cause or new fares.</div><button class="copy" data-prompt="The fare table's latest local refresh just failed while the older committed results remain visible. Keep those results, add a concise inline error and a retry control inside the travel view, and keep the cheapest-versus-fastest choice. Do not invent a cause or new fares.">Copy prompt</button><p>A real local refresh failure preserved committed results; Retry issued two local requests, no chat request, and recovered successfully.</p><div class="components"><span>TravelSurface</span><span>DateWindow</span><span>InlineError</span><span>RetryAction</span><span>CheapestFastest</span><span>ComparisonTable</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/local-failure-retry-failure.png"><img loading="lazy" src="screenshots/local-failure-retry-failure.png" alt="failure evidence screenshot"></a><figcaption>failure · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/local-failure-retry-failure-2.png"><img loading="lazy" src="screenshots/local-failure-retry-failure-2.png" alt="failure evidence screenshot"></a><figcaption>failure · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/local-failure-retry-failure-3.png"><img loading="lazy" src="screenshots/local-failure-retry-failure-3.png" alt="failure evidence screenshot"></a><figcaption>failure · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/local-failure-retry-failure-4.png"><img loading="lazy" src="screenshots/local-failure-retry-failure-4.png" alt="failure evidence screenshot"></a><figcaption>failure · 1280×1000 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;local-failure-retry.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;5725357cfb42d280cebe556790cf0de7c96b8c33add7ea73c75809e4dfe666a8&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: null,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [
+    &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;,
+    &quot;Failed to load resource: net::ERR_FAILED&quot;,
+    &quot;Failed to load resource: net::ERR_FAILED&quot;,
+    &quot;Failed to load resource: net::ERR_FAILED&quot;,
+    &quot;Failed to load resource: net::ERR_FAILED&quot;
+  ],
+  &quot;interaction&quot;: {
+    &quot;label&quot;: &quot;Retry fare refresh&quot;,
+    &quot;queryDelta&quot;: 2,
+    &quot;chatDelta&quot;: 0,
+    &quot;passingQueriesAfterFailure&quot;: 2,
+    &quot;chatRequestDelta&quot;: null
+  }
+}</pre></details></article><article class="card case-card" data-family="filtering" data-search="direct budget shortlist find me a direct london to paris trip between 26 october and 1 november 2026 for at most €80. give me a compact shortlist i can add to my trip, with useful filters close by. filtering travelsurface section inline datewindow modechips carrierfilter pricerange directtoggle comparisontable cheapestfastest selectedfarecount one exact repeat produced zero rows and a coverage alert after valid local €25 and train inputs; later repeats passed, but the failed attempt lacked query-body capture."><div class="rank">#6</div><p class="family">filtering · 1 distinct successful run · not default eligible</p><h3>Direct budget shortlist</h3><div class="scores"><span>Daily 5/5</span><span>Complete 5/5</span><span>Correct 4/5</span><strong>4.7/5</strong></div><div class="prompt">Find me a direct London to Paris trip between 26 October and 1 November 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.</div><button class="copy" data-prompt="Find me a direct London to Paris trip between 26 October and 1 November 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.">Copy prompt</button><p>The successful runs support exact budget, mode, directness and add-to-trip decisions, but one exact repeat ended empty and remains an unresolved reliability finding.</p><p class="travel-finding"><strong>budget-repeat-empty</strong>: One exact repeat produced zero rows and a coverage alert after valid local €25 and Train inputs; later repeats passed, but the failed attempt lacked query-body capture.</p><div class="components"><span>TravelSurface</span><span>Section</span><span>Inline</span><span>DateWindow</span><span>ModeChips</span><span>CarrierFilter</span><span>PriceRange</span><span>DirectToggle</span><span>ComparisonTable</span><span>CheapestFastest</span><span>SelectedFareCount</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/budget-shortlist-repeat-3-desktop.png"><img loading="lazy" src="screenshots/budget-shortlist-repeat-3-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/budget-shortlist-repeat-3-mobile.png"><img loading="lazy" src="screenshots/budget-shortlist-repeat-3-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/budget-shortlist-repeat-3-interaction.png"><img loading="lazy" src="screenshots/budget-shortlist-repeat-3-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;budget-shortlist-repeat-3.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;1aad2d9f92be7e7e1ff98dc27c882fdca796163156e80ade9c256c7cff434838&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 103648,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;priceLimitEur&quot;: 25,
+    &quot;mode&quot;: &quot;train&quot;,
+    &quot;rowTexts&quot;: [
+      &quot;Train\tEurostar\t2026-10-26\t08:40\t3h 14m\t€22.55\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-26\t22:37\t3h 13m\t€21.89\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-27\t11:33\t3h 12m\t€22.68\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-27\t21:57\t3h 8m\t€19.78\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-28\t20:31\t3h 10m\t€21.63\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-29\t17:08\t3h 13m\t€24.33\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-29\t18:38\t3h 10m\t€22.55\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-29\t23:25\t3h 8m\t€22.95\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-10-30\t13:50\t3h 4m\t€22.05\tAdd&quot;,
+      &quot;Train\tEurostar\t2026-11-01\t06:31\t3h 9m\t€24.81\tAdd&quot;
+    ],
+    &quot;selectedRow&quot;: &quot;Train\tEurostar\t2026-10-26\t08:40\t3h 14m\t€22.55\tAdd&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_002073770&quot;
+    ],
+    &quot;filters&quot;: {
+      &quot;modes&quot;: [],
+      &quot;carrierIds&quot;: [],
+      &quot;maxPriceCents&quot;: 2500,
+      &quot;directOnly&quot;: true
+    },
+    &quot;modesByLeg&quot;: {
+      &quot;london:paris&quot;: [
+        &quot;train&quot;
+      ]
+    },
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-10-26 · 08:40\nTrain · Eurostar\n€22.55\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 4,
+    &quot;chatRequestsAfter&quot;: 4,
+    &quot;noHorizontalOverflow&quot;: true,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="date-browsing" data-search="date strip and price-by-day calendar track berlin to amsterdam fares from 30 october to 5 november 2026. put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar. date-browsing travelsurface datestrip pricecalendar cheapestfastest"><div class="rank">#7</div><p class="family">date-browsing · 1 distinct successful run · not default eligible</p><h3>Date strip and price-by-day calendar</h3><div class="scores"><span>Daily 4/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>4.6/5</strong></div><div class="prompt">Track Berlin to Amsterdam fares from 30 October to 5 November 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.</div><button class="copy" data-prompt="Track Berlin to Amsterdam fares from 30 October to 5 November 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.">Copy prompt</button><p>Day selection, exact seven-day paging, return navigation and add-to-trip were verified against persisted state with desktop and mobile evidence.</p><div class="components"><span>TravelSurface</span><span>DateStrip</span><span>PriceCalendar</span><span>CheapestFastest</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/date-strip-price-calendar-desktop.png"><img loading="lazy" src="screenshots/date-strip-price-calendar-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/date-strip-price-calendar-mobile.png"><img loading="lazy" src="screenshots/date-strip-price-calendar-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/date-strip-price-calendar-interaction.png"><img loading="lazy" src="screenshots/date-strip-price-calendar-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;date-strip-price-calendar.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;91b27cac5f8f6e147bb840e2ebc1f81a308b04cc1ead902f1027bd1ca6ef42a3&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 61632,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;initialLabels&quot;: [
+      &quot;Fri 30 Oct\n€22.80\n8 options&quot;,
+      &quot;Sat 31 Oct\n€22.80\n8 options&quot;,
+      &quot;Sun 1 Nov\n€23.72\n8 options&quot;,
+      &quot;Mon 2 Nov\n€21.28\n8 options&quot;,
+      &quot;Tue 3 Nov\n€24.57\n7 options&quot;,
+      &quot;Wed 4 Nov\n€25.71\n7 options&quot;,
+      &quot;Thu 5 Nov\n€20.73\n7 options&quot;
+    ],
+    &quot;labelsAfterDay&quot;: [
+      &quot;Fri 30 Oct\n€22.80\n8 options&quot;,
+      &quot;Sat 31 Oct\n€22.80\n8 options&quot;,
+      &quot;Sun 1 Nov\n€23.72\n8 options&quot;,
+      &quot;Mon 2 Nov\n€21.28\n8 options&quot;,
+      &quot;Tue 3 Nov\n€24.57\n7 options&quot;,
+      &quot;Wed 4 Nov\n€25.71\n7 options&quot;,
+      &quot;Thu 5 Nov\n€20.73\n7 options&quot;
+    ],
+    &quot;nextLabels&quot;: [
+      &quot;Fri 6 Nov\n€24.02\n6 options&quot;,
+      &quot;Sat 7 Nov\n€28.58\n9 options&quot;,
+      &quot;Sun 8 Nov\n€23.72\n8 options&quot;,
+      &quot;Mon 9 Nov\n€21.56\n7 options&quot;,
+      &quot;Tue 10 Nov\n€29.03\n6 options&quot;,
+      &quot;Wed 11 Nov\n€22.39\n7 options&quot;,
+      &quot;Thu 12 Nov\n€21.56\n7 options&quot;
+    ],
+    &quot;restoredLabels&quot;: [
+      &quot;Fri 30 Oct\n€22.80\n8 options&quot;,
+      &quot;Sat 31 Oct\n€22.80\n8 options&quot;,
+      &quot;Sun 1 Nov\n€23.72\n8 options&quot;,
+      &quot;Mon 2 Nov\n€21.28\n8 options&quot;,
+      &quot;Tue 3 Nov\n€24.57\n7 options&quot;,
+      &quot;Wed 4 Nov\n€25.71\n7 options&quot;,
+      &quot;Thu 5 Nov\n€20.73\n7 options&quot;
+    ],
+    &quot;labelsAfterAdd&quot;: [
+      &quot;Fri 30 Oct\n€22.80\n8 options&quot;,
+      &quot;Sat 31 Oct\n€22.80\n8 options&quot;,
+      &quot;Sun 1 Nov\n€23.72\n8 options&quot;,
+      &quot;Mon 2 Nov\n€21.28\n8 options&quot;,
+      &quot;Tue 3 Nov\n€24.57\n7 options&quot;,
+      &quot;Wed 4 Nov\n€25.71\n7 options&quot;,
+      &quot;Thu 5 Nov\n€20.73\n7 options&quot;
+    ],
+    &quot;calendarDateByLeg&quot;: {
+      &quot;berlin:amsterdam&quot;: &quot;2026-11-02&quot;
+    },
+    &quot;displayWindowByLeg&quot;: {
+      &quot;berlin:amsterdam&quot;: {
+        &quot;from&quot;: &quot;2026-11-03&quot;,
+        &quot;to&quot;: &quot;2026-11-03&quot;
+      }
+    },
+    &quot;dateStripValue&quot;: &quot;2026-11-03&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_003080663&quot;
+    ],
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nBerlin → Amsterdam\n2026-11-05 · 11:39\nBus · FlixBus\n€20.73\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;noHorizontalOverflow&quot;: true,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="fare-browsing" data-search="expanded fare cards with local controls show expanded fare cards for berlin to amsterdam on 30 october 2026. put a simple one-day departure picker plus mode and carrier filters directly above them so i can change the day or operator and add a fare. fare-browsing travelsurface stack inline traveldate modechips carrierfilter farecards cheapestfastest"><div class="rank">#8</div><p class="family">fare-browsing · 1 distinct successful run · not default eligible</p><h3>Expanded fare cards with local controls</h3><div class="scores"><span>Daily 4/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>4.6/5</strong></div><div class="prompt">Show expanded fare cards for Berlin to Amsterdam on 30 October 2026. Put a simple one-day departure picker plus mode and carrier filters directly above them so I can change the day or operator and add a fare.</div><button class="copy" data-prompt="Show expanded fare cards for Berlin to Amsterdam on 30 October 2026. Put a simple one-day departure picker plus mode and carrier filters directly above them so I can change the day or operator and add a fare.">Copy prompt</button><p>Date, mode and carrier edits produced seven exact matching cards, and Add hydrated the tracker without another model request at both viewports.</p><div class="components"><span>TravelSurface</span><span>Stack</span><span>Inline</span><span>TravelDate</span><span>ModeChips</span><span>CarrierFilter</span><span>FareCards</span><span>CheapestFastest</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/fare-cards-controls-desktop.png"><img loading="lazy" src="screenshots/fare-cards-controls-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/fare-cards-controls-mobile.png"><img loading="lazy" src="screenshots/fare-cards-controls-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/fare-cards-controls-interaction.png"><img loading="lazy" src="screenshots/fare-cards-controls-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;fare-cards-controls.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;0b0a0776d40f473f2e811d334366f3ac8e15833313b0f0489c4d36fdb61fe02c&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 62134,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;date&quot;: &quot;2026-10-31&quot;,
+    &quot;mode&quot;: &quot;bus&quot;,
+    &quot;carrierIds&quot;: [
+      &quot;carrier-1hc5s74&quot;
+    ],
+    &quot;cardTexts&quot;: [
+      &quot;BUS\nFlixBus\n\n04:09 · 8h 53m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€40.14\nSelect&quot;,
+      &quot;BUS\nFlixBus\n\n07:57 · 9h 39m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€43.45\nSelect&quot;,
+      &quot;BUS\nFlixBus\n\n08:23 · 9h 45m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€47.90\nSelect&quot;,
+      &quot;BUS\nFlixBus\n\n11:40 · 9h 24m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€36.49\nSelect&quot;,
+      &quot;BUS\nFlixBus\n\n13:52 · 9h 6m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€34.06\nSelect&quot;,
+      &quot;BUS\nFlixBus\n\n16:14 · 9h 24m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€41.74\nSelect&quot;,
+      &quot;BUS\nFlixBus\n\n21:31 · 9h 25m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€34.36\nSelect&quot;
+    ],
+    &quot;selectedCardText&quot;: &quot;BUS\nFlixBus\n\n04:09 · 8h 53m\n\nBerlin → Amsterdam · 2026-10-31\nDirect\n€40.14\nSelect&quot;,
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_002541442&quot;
+    ],
+    &quot;dates&quot;: {
+      &quot;start&quot;: &quot;2026-10-31&quot;,
+      &quot;end&quot;: &quot;2026-10-31&quot;
+    },
+    &quot;modesByLeg&quot;: {
+      &quot;berlin:amsterdam&quot;: [
+        &quot;bus&quot;
+      ]
+    },
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nBerlin → Amsterdam\n2026-10-31 · 04:09\nBus · FlixBus\n€40.14\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="coverage-status" data-search="honest out-of-coverage empty state search the synthetic data for london to paris on 15 january 2030. if that date falls outside the loaded timetable, show an honest coverage explanation and empty-result status inside the travel view. offer a retry only if a local operation truly failed, and do not imply that real-world travel is unavailable. coverage-status travelsurface travelhero coveragenotice emptystate cheapestfastest"><div class="rank">#9</div><p class="family">coverage-status · 1 distinct successful run · not default eligible</p><h3>Honest out-of-coverage empty state</h3><div class="scores"><span>Daily 4/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>4.6/5</strong></div><div class="prompt">Search the synthetic data for London to Paris on 15 January 2030. If that date falls outside the loaded timetable, show an honest coverage explanation and empty-result status inside the travel view. Offer a retry only if a local operation truly failed, and do not imply that real-world travel is unavailable.</div><button class="copy" data-prompt="Search the synthetic data for London to Paris on 15 January 2030. If that date falls outside the loaded timetable, show an honest coverage explanation and empty-result status inside the travel view. Offer a retry only if a local operation truly failed, and do not imply that real-world travel is unavailable.">Copy prompt</button><p>A genuine empty incomplete scope produced an honest coverage explanation without claiming real-world unavailability or offering an invalid retry.</p><div class="components"><span>TravelSurface</span><span>TravelHero</span><span>CoverageNotice</span><span>EmptyState</span><span>CheapestFastest</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/status-empty-partial-desktop.png"><img loading="lazy" src="screenshots/status-empty-partial-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1440×1100 CSS px</figcaption></figure><figure><a href="screenshots/status-empty-partial-desktop-2.png"><img loading="lazy" src="screenshots/status-empty-partial-desktop-2.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1440×1100 CSS px</figcaption></figure><figure><a href="screenshots/status-empty-partial-mobile.png"><img loading="lazy" src="screenshots/status-empty-partial-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;status-empty-partial.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;c4ebaa9438bbe813541246d71c92417e3960662f17ed236f1b8ea641080eee52&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 53980,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [
+    &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  ],
+  &quot;interaction&quot;: null
+}</pre></details></article><article class="card case-card" data-family="story-layout" data-search="tabbed journey story turn my london to paris options on 8 november 2026 into a compact journey story. use a hero, a two-tab comparison, and a swipeable set of option panels. keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic. story-layout travelsurface travelhero splitpane tabs section carousel cheapestfastest comparisonmatrix comparisontable stickysummary selecteditinerary synthetictotal callout travelsurface travelhero splitpane stack tabs section cheapestfastest comparisonmatrix carousel comparisontable itinerarytimeline stickysummary selecteditinerary synthetictotal callout"><div class="rank">#10</div><p class="family">story-layout · 2 distinct successful runs · not default eligible</p><h3>Tabbed journey story</h3><div class="scores"><span>Daily 3/5</span><span>Complete 5/5</span><span>Correct 5/5</span><strong>4.2/5</strong></div><div class="prompt">Turn my London to Paris options on 8 November 2026 into a compact journey story. Use a hero, a two-tab comparison, and a swipeable set of option panels. Keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic.</div><button class="copy" data-prompt="Turn my London to Paris options on 8 November 2026 into a compact journey story. Use a hero, a two-tab comparison, and a swipeable set of option panels. Keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic.">Copy prompt</button><p>Two accepted scenes exercised tabs, carousel, split summary and local Add correctly, but the story-first workflow is less common than direct comparison.</p><div class="components"><span>TravelSurface</span><span>TravelHero</span><span>SplitPane</span><span>Tabs</span><span>Section</span><span>Carousel</span><span>CheapestFastest</span><span>ComparisonMatrix</span><span>ComparisonTable</span><span>StickySummary</span><span>SelectedItinerary</span><span>SyntheticTotal</span><span>Callout</span><span>Stack</span><span>ItineraryTimeline</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/story-layouts-repeat-2-desktop.png"><img loading="lazy" src="screenshots/story-layouts-repeat-2-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/story-layouts-repeat-2-mobile.png"><img loading="lazy" src="screenshots/story-layouts-repeat-2-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;story-layouts-repeat-2.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;489cab987548a3d9a71a36ad0d7fb47c05b2226875b317b8d31ede492a7a3a15&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 71074,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;tabs&quot;: [
+      {
+        &quot;label&quot;: &quot;View 1&quot;,
+        &quot;selected&quot;: true
+      },
+      {
+        &quot;label&quot;: &quot;View 2&quot;,
+        &quot;selected&quot;: true
+      }
+    ],
+    &quot;carousels&quot;: [],
+    &quot;add&quot;: {
+      &quot;label&quot;: &quot;Add Bus €21.58 to trip&quot;,
+      &quot;trackerVisible&quot;: true
+    },
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details><details class="attempt"><summary>Attempt 2 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/story-layouts-desktop.png"><img loading="lazy" src="screenshots/story-layouts-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/story-layouts-mobile.png"><img loading="lazy" src="screenshots/story-layouts-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;story-layouts.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;9524541d798e3501b8caa87517a627d86b2577afa793500d4c64af3f7784bfa6&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 76008,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: null
+}</pre></details></article><article class="card case-card" data-family="flexible-dates" data-search="flexible-date booking calendar i want a flexible-date booking workspace for london to paris from 31 october through 6 november 2026. show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible. flexible-dates travelsurface splitpane farecalendar stickysummary cheapestfastest"><div class="rank">#11</div><p class="family">flexible-dates · 1 distinct successful run · not default eligible</p><h3>Flexible-date booking calendar</h3><div class="scores"><span>Daily 4/5</span><span>Complete 4/5</span><span>Correct 4/5</span><strong>4/5</strong></div><div class="prompt">I want a flexible-date booking workspace for London to Paris from 31 October through 6 November 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.</div><button class="copy" data-prompt="I want a flexible-date booking workspace for London to Paris from 31 October through 6 November 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.">Copy prompt</button><p>FareCalendar rendered grounded date choices responsively, but the saved run lacks a complete named local interaction trace.</p><div class="components"><span>TravelSurface</span><span>SplitPane</span><span>FareCalendar</span><span>StickySummary</span><span>CheapestFastest</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/flexible-calendar-desktop.png"><img loading="lazy" src="screenshots/flexible-calendar-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/flexible-calendar-mobile.png"><img loading="lazy" src="screenshots/flexible-calendar-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;flexible-calendar.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;9bd924d73db62024aecc2ab0670bdd12344381091b4ef50d3f8b55c69f4406e4&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 48339,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="trip-editing" data-search="direct leg editing controls build a manual editor for a london to paris to barcelona trip starting 8 november 2026, with two nights in paris. for the first leg, show separate origin and destination fields, its local departure date, transport selector, paris stay slider, fare order, and scrollable fares outside the combined planner so i can see each edit before i add a fare. trip-editing travelsurface section cityfield inline traveldate transportselect stayduration fareorder fadefares responsivegrid cheapestfastest multicityplangrid stickysummary selecteditinerary synthetictotal"><div class="rank">#12</div><p class="family">trip-editing · 1 distinct successful run · not default eligible</p><h3>Direct leg editing controls</h3><div class="scores"><span>Daily 3/5</span><span>Complete 4/5</span><span>Correct 4/5</span><strong>3.6/5</strong></div><div class="prompt">Build a manual editor for a London to Paris to Barcelona trip starting 8 November 2026, with two nights in Paris. For the first leg, show separate origin and destination fields, its local departure date, transport selector, Paris stay slider, fare order, and scrollable fares outside the combined planner so I can see each edit before I add a fare.</div><button class="copy" data-prompt="Build a manual editor for a London to Paris to Barcelona trip starting 8 November 2026, with two nights in Paris. For the first leg, show separate origin and destination fields, its local departure date, transport selector, Paris stay slider, fare order, and scrollable fares outside the combined planner so I can see each edit before I add a fare.">Copy prompt</button><p>The direct editor generated every leg control and live checks proved stay, mode, route and stale-fare behavior, though it is denser than the usual one-way task.</p><div class="components"><span>TravelSurface</span><span>Section</span><span>CityField</span><span>Inline</span><span>TravelDate</span><span>TransportSelect</span><span>StayDuration</span><span>FareOrder</span><span>FadeFares</span><span>ResponsiveGrid</span><span>CheapestFastest</span><span>MultiCityPlanGrid</span><span>StickySummary</span><span>SelectedItinerary</span><span>SyntheticTotal</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/manual-leg-editor-desktop.png"><img loading="lazy" src="screenshots/manual-leg-editor-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/manual-leg-editor-mobile.png"><img loading="lazy" src="screenshots/manual-leg-editor-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;manual-leg-editor.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;bc1bb8b6fee9e4f51e3bf008cc7116c96003cfbd724892b87265a5ea609e3594&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 73680,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;add&quot;: {
+      &quot;label&quot;: &quot;Add lowest fare Bus €14.33 to trip&quot;,
+      &quot;trackerVisible&quot;: true
+    },
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="multi-city" data-search="editable multi-city workspace plan london to paris to barcelona starting 8 november 2026, with two nights in paris and four in barcelona. give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects. multi-city travelsurface travelhero citysequence stayallocation multicityplangrid responsivegrid cheapestfastest inline selectedfarecount coveragesummary"><div class="rank">#13</div><p class="family">multi-city · 1 distinct successful run · not default eligible</p><h3>Editable multi-city workspace</h3><div class="scores"><span>Daily 3/5</span><span>Complete 4/5</span><span>Correct 4/5</span><strong>3.6/5</strong></div><div class="prompt">Plan London to Paris to Barcelona starting 8 November 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.</div><button class="copy" data-prompt="Plan London to Paris to Barcelona starting 8 November 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.">Copy prompt</button><p>The accepted all-leg workspace represented route, stays and coverage correctly; interaction evidence is shallower than the single-leg decision cases.</p><div class="components"><span>TravelSurface</span><span>TravelHero</span><span>CitySequence</span><span>StayAllocation</span><span>MultiCityPlanGrid</span><span>ResponsiveGrid</span><span>CheapestFastest</span><span>Inline</span><span>SelectedFareCount</span><span>CoverageSummary</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/multi-city-workspace-desktop.png"><img loading="lazy" src="screenshots/multi-city-workspace-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/multi-city-workspace-mobile.png"><img loading="lazy" src="screenshots/multi-city-workspace-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;multi-city-workspace.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;f40bec65ba5efcdf9468451859feaaa54af64fc81e15307e24a5379699d8b907&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 60315,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: null
+}</pre></details></article><article class="card case-card" data-family="loading-status" data-search="pending date-window refresh i just extended the london to paris search through 9 november 2026 and the local synthetic fare refresh is still loading. keep the previous committed comparison visible, show a concise loading placeholder inside the travel view, and keep the cheapest-versus-fastest choice. do not claim the new day's fares until the refresh completes. loading-status travelsurface datewindow artifactskeleton cheapestfastest comparisontable the model-authored artifactskeleton remained visible after all held requests completed."><div class="rank">#14</div><p class="family">loading-status · 1 distinct successful run · not default eligible</p><h3>Pending date-window refresh</h3><div class="scores"><span>Daily 4/5</span><span>Complete 4/5</span><span>Correct 2/5</span><strong>3.4/5</strong></div><div class="prompt">I just extended the London to Paris search through 9 November 2026 and the local synthetic fare refresh is still loading. Keep the previous committed comparison visible, show a concise loading placeholder inside the travel view, and keep the cheapest-versus-fastest choice. Do not claim the new day's fares until the refresh completes.</div><button class="copy" data-prompt="I just extended the London to Paris search through 9 November 2026 and the local synthetic fare refresh is still loading. Keep the previous committed comparison visible, show a concise loading placeholder inside the travel view, and keep the cheapest-versus-fastest choice. Do not claim the new day's fares until the refresh completes.">Copy prompt</button><p>ArtifactSkeleton rendered during four held refreshes, but remained after the requests completed because the authored status node is static.</p><p class="travel-finding"><strong>static-loading-status</strong>: The model-authored ArtifactSkeleton remained visible after all held requests completed.</p><div class="components"><span>TravelSurface</span><span>DateWindow</span><span>ArtifactSkeleton</span><span>CheapestFastest</span><span>ComparisonTable</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/pending-refresh-loading-desktop.png"><img loading="lazy" src="screenshots/pending-refresh-loading-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/pending-refresh-loading-desktop-2.png"><img loading="lazy" src="screenshots/pending-refresh-loading-desktop-2.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure><figure><a href="screenshots/pending-refresh-loading-mobile.png"><img loading="lazy" src="screenshots/pending-refresh-loading-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/pending-refresh-loading-mobile-2.png"><img loading="lazy" src="screenshots/pending-refresh-loading-mobile-2.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/pending-refresh-loading-desktop-3.png"><img loading="lazy" src="screenshots/pending-refresh-loading-desktop-3.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1280×1000 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;pending-refresh-loading.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;7cc1a275f25dfa9e16c3e41eb117a86851315ebd571acdc96e493aa5d31b0629&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: null,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [
+    &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  ],
+  &quot;interaction&quot;: {
+    &quot;releaseHeldQueries&quot;: 4,
+    &quot;afterReady&quot;: {
+      &quot;passedQueries&quot;: 1,
+      &quot;skeletonStillVisible&quot;: true,
+      &quot;statusText&quot;: &quot;Refreshing through 9 November…&quot;
+    },
+    &quot;chatRequestDelta&quot;: null
+  }
+}</pre></details></article><article class="card case-card" data-family="stale-status-preview" data-search="old saved comparison versus live fares i saved a london-to-paris comparison earlier, then changed its date locally to 8 november 2026, so that old saved comparison is stale. show the current bounded fare options for 8 november and put the interface's standard stale-status badge only inside a clearly labelled old saved comparison panel. keep that panel separate from the live fares and do not mark the current results as stale. stale-status-preview travelsurface section cheapestfastest comparisontable stalebadge callout the user-described old-saved preview was correct, but two automatic browser-revision attempts timed out without a terminal accepted scene."><div class="rank">#15</div><p class="family">stale-status-preview · 1 distinct successful run · not default eligible</p><h3>Old saved comparison versus live fares</h3><div class="scores"><span>Daily 3/5</span><span>Complete 3/5</span><span>Correct 4/5</span><strong>3.3/5</strong></div><div class="prompt">I saved a London-to-Paris comparison earlier, then changed its date locally to 8 November 2026, so that old saved comparison is stale. Show the current bounded fare options for 8 November and put the interface's standard stale-status badge only inside a clearly labelled Old saved comparison panel. Keep that panel separate from the live fares and do not mark the current results as stale.</div><button class="copy" data-prompt="I saved a London-to-Paris comparison earlier, then changed its date locally to 8 November 2026, so that old saved comparison is stale. Show the current bounded fare options for 8 November and put the interface's standard stale-status badge only inside a clearly labelled Old saved comparison panel. Keep that panel separate from the live fares and do not mark the current results as stale.">Copy prompt</button><p>The preview correctly isolated a user-described old comparison from live fares, but automatic revision-driven stale behavior remains unverified after two timeouts.</p><p class="travel-finding"><strong>adaptive-stale-status-unverified</strong>: The user-described old-saved preview was correct, but two automatic browser-revision attempts timed out without a terminal accepted scene.</p><div class="components"><span>TravelSurface</span><span>Section</span><span>CheapestFastest</span><span>ComparisonTable</span><span>StaleBadge</span><span>Callout</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/status-stale-saved-comparison-desktop.png"><img loading="lazy" src="screenshots/status-stale-saved-comparison-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1440×1100 CSS px</figcaption></figure><figure><a href="screenshots/status-stale-saved-comparison-desktop-2.png"><img loading="lazy" src="screenshots/status-stale-saved-comparison-desktop-2.png" alt="desktop evidence screenshot"></a><figcaption>desktop · 1440×1100 CSS px</figcaption></figure><figure><a href="screenshots/status-stale-saved-comparison-mobile.png"><img loading="lazy" src="screenshots/status-stale-saved-comparison-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure><figure><a href="screenshots/status-stale-saved-comparison-mobile-2.png"><img loading="lazy" src="screenshots/status-stale-saved-comparison-mobile-2.png" alt="mobile evidence screenshot"></a><figcaption>mobile · 390×844 CSS px</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;status-stale-saved-comparison.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;7bb7988ff26629a53b2d5215f6f2aac0c22dd480e051afbc771eb8c2da6a9bba&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 68938,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [
+    &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  ],
+  &quot;interaction&quot;: {
+    &quot;steps&quot;: [
+      {
+        &quot;kind&quot;: &quot;add&quot;,
+        &quot;label&quot;: &quot;Add to trip&quot;,
+        &quot;localChatDelta&quot;: 0,
+        &quot;trackerVisible&quot;: true
+      }
+    ],
+    &quot;chatRequestDelta&quot;: null
+  }
+}</pre></details></article><article class="card case-card" data-family="duration-filtering" data-search="shortest-trip picker find the easiest prague to vienna option on 8 november 2026. i want one clear pick, with the shortest trips first and a duration control so i can widen the choices if needed. duration-filtering travelsurface section cheapestfastest durationrange farepicker a repeat ended with an empty refreshing picker after the assistant tried to correct departure ordering."><div class="rank">#16</div><p class="family">duration-filtering · 1 distinct successful run · not default eligible</p><h3>Shortest-trip picker</h3><div class="scores"><span>Daily 4/5</span><span>Complete 3/5</span><span>Correct 1/5</span><strong>2.8/5</strong></div><div class="prompt">Find the easiest Prague to Vienna option on 8 November 2026. I want one clear pick, with the shortest trips first and a duration control so I can widen the choices if needed.</div><button class="copy" data-prompt="Find the easiest Prague to Vienna option on 8 November 2026. I want one clear pick, with the shortest trips first and a duration control so I can widen the choices if needed.">Copy prompt</button><p>The duration control and fare views rendered, but a repeat exposed the scoped-sort mismatch and ended with an empty refreshing picker.</p><p class="travel-finding"><strong>duration-picker-scoped-sort</strong>: A repeat ended with an empty refreshing picker after the assistant tried to correct departure ordering.</p><div class="components"><span>TravelSurface</span><span>Section</span><span>CheapestFastest</span><span>DurationRange</span><span>FarePicker</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/duration-picker-repeat-2-desktop.png"><img loading="lazy" src="screenshots/duration-picker-repeat-2-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/duration-picker-repeat-2-mobile.png"><img loading="lazy" src="screenshots/duration-picker-repeat-2-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;duration-picker-repeat-2.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 86706,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: null
+}</pre></details></article><article class="card case-card" data-family="compact-selection" data-search="compact fare picker with sort control i need one compact choice from madrid to paris on 2 november 2026. give me a small fare picker, a simple sort dropdown for price, duration, or departure, and the cheapest-versus-fastest comparison—no full trip planner. compact-selection travelsurface sortselect farepicker cheapestfastest the state persisted durationminutes:asc, but the picker stayed departure ordered with durations 991, 950, 1043, 956, 969, 983, 988 minutes."><div class="rank">#17</div><p class="family">compact-selection · 1 distinct successful run · not default eligible</p><h3>Compact fare picker with sort control</h3><div class="scores"><span>Daily 3/5</span><span>Complete 4/5</span><span>Correct 1/5</span><strong>2.7/5</strong></div><div class="prompt">I need one compact choice from Madrid to Paris on 2 November 2026. Give me a small fare picker, a simple sort dropdown for price, duration, or departure, and the cheapest-versus-fastest comparison—no full trip planner.</div><button class="copy" data-prompt="I need one compact choice from Madrid to Paris on 2 November 2026. Give me a small fare picker, a simple sort dropdown for price, duration, or departure, and the cheapest-versus-fastest comparison—no full trip planner.">Copy prompt</button><p>The picker can select a fare, but SortSelect writes global sort while this dataset-bound picker reads leg sort, so duration ascending did not reorder rows.</p><p class="travel-finding"><strong>sort-select-fare-picker-ordering</strong>: The state persisted durationMinutes:asc, but the picker stayed departure ordered with durations 991, 950, 1043, 956, 969, 983, 988 minutes.</p><div class="components"><span>TravelSurface</span><span>SortSelect</span><span>FarePicker</span><span>CheapestFastest</span></div><details class="attempt"><summary>Attempt 1 · accepted scene · no recorded error</summary><div class="shots"><figure><a href="screenshots/compact-fare-picker-desktop.png"><img loading="lazy" src="screenshots/compact-fare-picker-desktop.png" alt="desktop evidence screenshot"></a><figcaption>desktop · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/compact-fare-picker-mobile.png"><img loading="lazy" src="screenshots/compact-fare-picker-mobile.png" alt="mobile evidence screenshot"></a><figcaption>mobile · CSS viewport not recorded</figcaption></figure><figure><a href="screenshots/compact-fare-picker-interaction.png"><img loading="lazy" src="screenshots/compact-fare-picker-interaction.png" alt="interaction evidence screenshot"></a><figcaption>interaction · CSS viewport not recorded</figcaption></figure></div><pre>{
+  &quot;evidenceFile&quot;: &quot;compact-fare-picker.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;b9bbb8f25b689b78773e4159d84e9209122b6bec01942bb93b23a9d4552781a9&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 57962,
+  &quot;errors&quot;: [],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: {
+    &quot;sort&quot;: &quot;durationMinutes:asc&quot;,
+    &quot;options&quot;: [
+      {
+        &quot;value&quot;: &quot;fare_002764814&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 04:12 · 16h 31m · Direct · €68.22&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_002764815&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 08:11 · 15h 50m · Direct · €73.33&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_002764816&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 11:52 · 17h 23m · Direct · €47.50&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_002764817&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 13:48 · 15h 56m · Direct · €40.42&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_002764818&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 17:35 · 16h 9m · Direct · €56.85&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_002764819&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 20:41 · 16h 23m · Direct · €46.99&quot;
+      },
+      {
+        &quot;value&quot;: &quot;fare_002764820&quot;,
+        &quot;text&quot;: &quot;Bus · Alsa · 23:45 · 16h 28m · Direct · €72.76&quot;
+      }
+    ],
+    &quot;selectedOption&quot;: {
+      &quot;value&quot;: &quot;fare_002764814&quot;,
+      &quot;text&quot;: &quot;Bus · Alsa · 04:12 · 16h 31m · Direct · €68.22&quot;
+    },
+    &quot;selectedFareIds&quot;: [
+      &quot;fare_002764814&quot;
+    ],
+    &quot;sortState&quot;: {
+      &quot;field&quot;: &quot;durationMinutes&quot;,
+      &quot;direction&quot;: &quot;asc&quot;
+    },
+    &quot;trackerText&quot;: &quot;YOUR TRIP\nPlanning tracker\nClear all\nMadrid → Paris\n2026-11-02 · 04:12\nBus · Alsa\n€68.22\nCancel\nBuy&quot;,
+    &quot;chatRequestsBefore&quot;: 3,
+    &quot;chatRequestsAfter&quot;: 3,
+    &quot;chatRequestDelta&quot;: 0
+  }
+}</pre></details></article><article class="card case-card" data-family="calendar-browsing" data-search="flexible week fare browser i can leave london for paris any day from 31 october through 6 november 2026. give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards i can add to my trip. keep the selected day separate from the visible week. calendar-browsing"><div class="rank">#18</div><p class="family">calendar-browsing · 0 distinct successful runs · not default eligible</p><h3>Flexible week fare browser</h3><div class="scores"><span>Daily 4/5</span><span>Complete 1/5</span><span>Correct 1/5</span><strong>2.2/5</strong></div><div class="prompt">I can leave London for Paris any day from 31 October through 6 November 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.</div><button class="copy" data-prompt="I can leave London for Paris any day from 31 October through 6 November 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.">Copy prompt</button><p>The broad compound target was not accepted as one complete scene; its useful leaves were tested in narrower cases and the sort interaction has a known defect.</p><div class="components"></div></article><article class="card case-card" data-family="resilience" data-search="coverage and recovery states search the synthetic data for a london to paris trip far outside the loaded date range. if results are loading, incomplete, empty, stale, or fail locally, show the matching honest status in the travel view and give me a retry action. do not claim fares that were not returned. resilience"><div class="rank">#19</div><p class="family">resilience · 0 distinct successful runs · not default eligible</p><h3>Coverage and recovery states</h3><div class="scores"><span>Daily 2/5</span><span>Complete 0/5</span><span>Correct 0/5</span><strong>0.8/5</strong></div><div class="prompt">Search the synthetic data for a London to Paris trip far outside the loaded date range. If results are loading, incomplete, empty, stale, or fail locally, show the matching honest status in the travel view and give me a retry action. Do not claim fares that were not returned.</div><button class="copy" data-prompt="Search the synthetic data for a London to Paris trip far outside the loaded date range. If results are loading, incomplete, empty, stale, or fail locally, show the matching honest status in the travel view and give me a retry action. Do not claim fares that were not returned.">Copy prompt</button><p>The broad all-status prompt never produced an accepted terminal scene; narrower condition-specific cases provide the valid status evidence.</p><div class="components"></div><details class="attempt"><summary>Attempt 1 · no accepted scene · failed</summary><div class="shots"></div><pre>{
+  &quot;evidenceFile&quot;: &quot;coverage-recovery-broad-timeout.json&quot;,
+  &quot;sourceEvidenceSha256&quot;: &quot;15b094f95ebda3c4df00c0531b370b384228ca8e154c7fc3f4a8e558e2014b85&quot;,
+  &quot;statuses&quot;: [
+    200,
+    200,
+    200
+  ],
+  &quot;elapsedMs&quot;: 600511,
+  &quot;errors&quot;: [
+    &quot;Agent turn did not finish within 600000ms&quot;
+  ],
+  &quot;warnings&quot;: [],
+  &quot;interaction&quot;: null
+}</pre></details></article>
+</div></section>
+<section id="coverage"><h2>Registered component ledger</h2><p>A green row means the descriptor appeared in an accepted persisted model-authored scene. Internal-only rows are visible through a fixed composite but were not selected directly by the model. Component scores judge the component itself, separately from the usefulness of any one prompt.</p><div class="filters"><label>Filter components <input id="component-search" type="search" placeholder="Name, group, capability"></label><label>Status <select id="status-filter"><option value="">All statuses</option><option>model-generated</option><option>internal-only</option><option>attempted-not-observed</option><option>not-targeted</option></select></label></div><div class="coverage-wrap"><table class="coverage"><thead><tr><th>Component</th><th>Group</th><th>Status</th><th>Score</th><th>Evidence</th><th>Capability</th></tr></thead><tbody><tr data-status="model-generated" data-search="cheapestfastest view local cheapest and fastest individual fares with carrier, departure and arrival details plus direct add or remove actions for the shared planningtracker"><td><strong>CheapestFastest</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>5.00</td><td>budget-shortlist, budget-shortlist, compact-fare-picker, date-strip-price-calendar, departure-board, departure-board, departure-board, departure-board, departure-board, duration-picker, duration-picker, fare-cards-controls, fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, flexible-calendar, local-failure-retry, manual-leg-editor, mode-dashboard, mode-dashboard, mode-dashboard, multi-city-workspace, pending-refresh-loading, status-empty-partial, status-stale-saved-comparison, story-layouts, story-layouts, tradeoff-dashboard, tradeoff-dashboard, tradeoff-dashboard</td><td>Local cheapest and fastest individual fares with carrier, departure and arrival details plus direct add or remove actions for the shared PlanningTracker</td></tr><tr data-status="model-generated" data-search="comparisontable view locally resolved ranked individual fare comparison with direct planningtracker selection"><td><strong>ComparisonTable</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>5.00</td><td>budget-shortlist, budget-shortlist, fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, local-failure-retry, mode-dashboard, mode-dashboard, mode-dashboard, pending-refresh-loading, status-stale-saved-comparison, story-layouts, story-layouts, tradeoff-dashboard, tradeoff-dashboard, tradeoff-dashboard</td><td>Locally resolved ranked individual fare comparison with direct PlanningTracker selection</td></tr><tr data-status="model-generated" data-search="directtoggle control direct-only local filter"><td><strong>DirectToggle</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>5.00</td><td>budget-shortlist, budget-shortlist</td><td>Direct-only local filter</td></tr><tr data-status="model-generated" data-search="durationpriceplot view local duration and price comparison whose individual fare points toggle planningtracker selection"><td><strong>DurationPricePlot</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>5.00</td><td>tradeoff-dashboard, tradeoff-dashboard, tradeoff-dashboard</td><td>Local duration and price comparison whose individual fare points toggle PlanningTracker selection</td></tr><tr data-status="model-generated" data-search="inlineerror status sanitized local failure"><td><strong>InlineError</strong></td><td>status</td><td class="status model-generated">model-generated</td><td>5.00</td><td>local-failure-retry</td><td>Sanitized local failure</td></tr><tr data-status="model-generated" data-search="itinerarytimeline view individual fare chronology with direct planningtracker selection"><td><strong>ItineraryTimeline</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>5.00</td><td>departure-board, departure-board, departure-board, departure-board, departure-board, story-layouts</td><td>Individual fare chronology with direct PlanningTracker selection</td></tr><tr data-status="model-generated" data-search="modebreakdown view locally grouped option counts by transport mode"><td><strong>ModeBreakdown</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>5.00</td><td>mode-dashboard, mode-dashboard, mode-dashboard</td><td>Locally grouped option counts by transport mode</td></tr><tr data-status="model-generated" data-search="pricerange control direct local price limit"><td><strong>PriceRange</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>5.00</td><td>budget-shortlist, budget-shortlist</td><td>Direct local price limit</td></tr><tr data-status="model-generated" data-search="retryaction status retry local resource operation"><td><strong>RetryAction</strong></td><td>status</td><td class="status model-generated">model-generated</td><td>5.00</td><td>local-failure-retry</td><td>Retry local resource operation</td></tr><tr data-status="model-generated" data-search="selecteditinerary view selected fare route, date, mode and per-passenger facts; pair with synthetictotal for price summary"><td><strong>SelectedItinerary</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>5.00</td><td>fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, manual-leg-editor, story-layouts, story-layouts</td><td>Selected fare route, date, mode and per-passenger facts; pair with SyntheticTotal for price summary</td></tr><tr data-status="model-generated" data-search="travelsurface layout root travel artifact with subscribed local state"><td><strong>TravelSurface</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>5.00</td><td>budget-shortlist, budget-shortlist, compact-fare-picker, date-strip-price-calendar, departure-board, departure-board, departure-board, departure-board, departure-board, duration-picker, duration-picker, fare-cards-controls, fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, flexible-calendar, local-failure-retry, manual-leg-editor, mode-dashboard, mode-dashboard, mode-dashboard, multi-city-workspace, pending-refresh-loading, status-empty-partial, status-stale-saved-comparison, story-layouts, story-layouts, tradeoff-dashboard, tradeoff-dashboard, tradeoff-dashboard</td><td>Root travel artifact with subscribed local state</td></tr><tr data-status="model-generated" data-search="farepicker control compact direct fare selector for one leg"><td><strong>FarePicker</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.70</td><td>compact-fare-picker, duration-picker, duration-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker</td><td>Compact direct fare selector for one leg</td></tr><tr data-status="model-generated" data-search="carrierfilter control direct local carrier selection"><td><strong>CarrierFilter</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>budget-shortlist, budget-shortlist, fare-cards-controls</td><td>Direct local carrier selection</td></tr><tr data-status="model-generated" data-search="cityfield control editable origin and destination city fields backed by host location suggestions. legindex is the stable zero-based logical leg identity and datasetref is its initial load handle; changes write the artifact citysequence, where each destination connects to its stay and the next leg origin"><td><strong>CityField</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>manual-leg-editor</td><td>Editable origin and destination city fields backed by host location suggestions. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; changes write the artifact citySequence, where each destination connects to its stay and the next leg origin</td></tr><tr data-status="model-generated" data-search="comparisonmatrix view locally grouped mode comparison"><td><strong>ComparisonMatrix</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.60</td><td>mode-dashboard, mode-dashboard, mode-dashboard, story-layouts, story-layouts</td><td>Locally grouped mode comparison</td></tr><tr data-status="model-generated" data-search="coveragenotice status partial resource notice"><td><strong>CoverageNotice</strong></td><td>status</td><td class="status model-generated">model-generated</td><td>4.60</td><td>status-empty-partial</td><td>Partial resource notice</td></tr><tr data-status="model-generated" data-search="datestrip control direct local date selection"><td><strong>DateStrip</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>date-strip-price-calendar</td><td>Direct local date selection</td></tr><tr data-status="model-generated" data-search="datewindow control bounded local date window"><td><strong>DateWindow</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>budget-shortlist, budget-shortlist, local-failure-retry, pending-refresh-loading</td><td>Bounded local date window</td></tr><tr data-status="model-generated" data-search="emptystate status no matching fares"><td><strong>EmptyState</strong></td><td>status</td><td class="status model-generated">model-generated</td><td>4.60</td><td>status-empty-partial</td><td>No matching fares</td></tr><tr data-status="model-generated" data-search="farecards view expanded individual fare detail cards for one leg with direct planningtracker selection"><td><strong>FareCards</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.60</td><td>fare-cards-controls</td><td>Expanded individual fare detail cards for one leg with direct PlanningTracker selection</td></tr><tr data-status="model-generated" data-search="inline layout horizontal wrapping arrangement"><td><strong>Inline</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.60</td><td>budget-shortlist, budget-shortlist, fare-cards-controls, manual-leg-editor, multi-city-workspace</td><td>Horizontal wrapping arrangement</td></tr><tr data-status="model-generated" data-search="modechips control direct local transport mode filtering"><td><strong>ModeChips</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>budget-shortlist, budget-shortlist, fare-cards-controls</td><td>Direct local transport mode filtering</td></tr><tr data-status="model-generated" data-search="pricecalendar view locally grouped price-by-day view with separate date browsing and cheapest-fare planningtracker actions"><td><strong>PriceCalendar</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.60</td><td>date-strip-price-calendar</td><td>Locally grouped price-by-day view with separate date browsing and cheapest-fare PlanningTracker actions</td></tr><tr data-status="model-generated" data-search="responsivegrid layout responsive equal-column arrangement"><td><strong>ResponsiveGrid</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.60</td><td>manual-leg-editor, mode-dashboard, mode-dashboard, mode-dashboard, multi-city-workspace, tradeoff-dashboard</td><td>Responsive equal-column arrangement</td></tr><tr data-status="model-generated" data-search="section layout named story section"><td><strong>Section</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.60</td><td>budget-shortlist, budget-shortlist, departure-board, departure-board, departure-board, departure-board, duration-picker, duration-picker, manual-leg-editor, status-stale-saved-comparison, story-layouts, story-layouts</td><td>Named story section</td></tr><tr data-status="model-generated" data-search="splitpane layout responsive primary and supporting sections"><td><strong>SplitPane</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.60</td><td>fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, flexible-calendar, story-layouts, story-layouts, tradeoff-dashboard, tradeoff-dashboard</td><td>Responsive primary and supporting sections</td></tr><tr data-status="model-generated" data-search="stack layout vertical arrangement"><td><strong>Stack</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.60</td><td>fare-cards-controls, fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, story-layouts</td><td>Vertical arrangement</td></tr><tr data-status="model-generated" data-search="stickysummary layout persistent selected-trip summary"><td><strong>StickySummary</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.60</td><td>fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, flexible-calendar, manual-leg-editor, story-layouts, story-layouts</td><td>Persistent selected-trip summary</td></tr><tr data-status="model-generated" data-search="synthetictotal view selected synthetic eur total for all passengers"><td><strong>SyntheticTotal</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.60</td><td>fixed-date-picker, fixed-date-picker, fixed-date-picker, fixed-date-picker, manual-leg-editor, story-layouts, story-layouts</td><td>Selected synthetic EUR total for all passengers</td></tr><tr data-status="model-generated" data-search="transportselect control same-leg transport selector for modes with available fares. legindex is the stable zero-based logical leg identity and datasetref is its initial load handle. uses a compact multi-select dropdown with vector icons inside multicityplangrid and inline toggles when rendered alone; writes modesbyleg for the current route and filters its fadefares and farecalendar"><td><strong>TransportSelect</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>manual-leg-editor</td><td>Same-leg transport selector for modes with available fares. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle. Uses a compact multi-select dropdown with vector icons inside MultiCityPlanGrid and inline toggles when rendered alone; writes modesByLeg for the current route and filters its FadeFares and FareCalendar</td></tr><tr data-status="model-generated" data-search="traveldate control same-leg local departure date. legindex is the stable zero-based logical leg identity and datasetref is its initial load handle; the first leg changes the trip display window and later legs preserve route offsets while the host enforces any preceding arrival threshold"><td><strong>TravelDate</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.60</td><td>fare-cards-controls, manual-leg-editor</td><td>Same-leg local departure date. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; the first leg changes the trip display window and later legs preserve route offsets while the host enforces any preceding arrival threshold</td></tr><tr data-status="model-generated" data-search="selectedfarecount view current artifact selected fare count, without claiming legs or price"><td><strong>SelectedFareCount</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.30</td><td>budget-shortlist, budget-shortlist, multi-city-workspace</td><td>Current artifact selected fare count, without claiming legs or price</td></tr><tr data-status="model-generated" data-search="callout layout short heading and explanatory body text up to600 characters"><td><strong>Callout</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.20</td><td>status-stale-saved-comparison, story-layouts, story-layouts</td><td>Short heading and explanatory body text up to600 characters</td></tr><tr data-status="model-generated" data-search="citysequence view ordered stop strip with stay nights"><td><strong>CitySequence</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.20</td><td>multi-city-workspace</td><td>Ordered stop strip with stay nights</td></tr><tr data-status="model-generated" data-search="routemap view schematic connection chart"><td><strong>RouteMap</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.20</td><td>departure-board, departure-board, departure-board, departure-board, departure-board</td><td>Schematic connection chart</td></tr><tr data-status="model-generated" data-search="stayduration control destination stay slider from 0 to 30 days. legindex is the stable zero-based logical leg identity and datasetref is its initial arriving-leg handle; its destination becomes the next leg origin, and selected arrival plus this stay sets the next minimum departure"><td><strong>StayDuration</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.20</td><td>manual-leg-editor</td><td>Destination stay slider from 0 to 30 days. legIndex is the stable zero-based logical leg identity and datasetRef is its initial arriving-leg handle; its destination becomes the next leg origin, and selected arrival plus this stay sets the next minimum departure</td></tr><tr data-status="model-generated" data-search="tabs layout accessible tabbed sections"><td><strong>Tabs</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.20</td><td>story-layouts, story-layouts</td><td>Accessible tabbed sections</td></tr><tr data-status="model-generated" data-search="travelhero layout travel artifact headline and introduction"><td><strong>TravelHero</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>4.20</td><td>mode-dashboard, mode-dashboard, multi-city-workspace, status-empty-partial, story-layouts, story-layouts</td><td>Travel artifact headline and introduction</td></tr><tr data-status="model-generated" data-search="fadefares view same-leg bounded vertically scrollable synthetic fare-card grid. it progressively requests cursor pages near the bottom instead of preloading the dataset, retries failed appends, and resets loaded pages plus scroll position when the effective leg, date, mode, price or sort input changes. legindex is the stable zero-based logical leg identity and datasetref is its initial load handle; each loaded page keeps its exact display provenance, and selections flow to the shared planningtracker"><td><strong>FadeFares</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.00</td><td>manual-leg-editor</td><td>Same-leg bounded vertically scrollable synthetic fare-card grid. It progressively requests cursor pages near the bottom instead of preloading the dataset, retries failed appends, and resets loaded pages plus scroll position when the effective leg, date, mode, price or sort input changes. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; each loaded page keeps its exact display provenance, and selections flow to the shared PlanningTracker</td></tr><tr data-status="model-generated" data-search="farecalendar view bound-leg flexible-dates booking workflow within one exact display date window. use exactly one farecalendar for each requested leg when calendars are the trip booking interface. legindex is the stable zero-based logical leg identity and datasetref is its initial load handle. it uses that leg modes and minimum departure, defaults each day to its local cheapest synthetic fare, and opens that day fares without sending rows to the model"><td><strong>FareCalendar</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>4.00</td><td>flexible-calendar</td><td>Bound-leg flexible-dates booking workflow within one exact display date window. Use exactly one FareCalendar for each requested leg when calendars are the trip booking interface. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle. It uses that leg modes and minimum departure, defaults each day to its local cheapest synthetic fare, and opens that day fares without sending rows to the model</td></tr><tr data-status="model-generated" data-search="fareorder control same-leg fare ordering control. legindex is the stable zero-based logical leg identity and datasetref is its initial load handle; cheapest orders price, fastest orders duration, and departure orders service date then departure time. cheapest and fastest also set the matching farecalendar objective; departure leaves its default cheapest objective"><td><strong>FareOrder</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>4.00</td><td>manual-leg-editor</td><td>Same-leg fare ordering control. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; cheapest orders price, fastest orders duration, and departure orders service date then departure time. Cheapest and fastest also set the matching FareCalendar objective; departure leaves its default cheapest objective</td></tr><tr data-status="model-generated" data-search="coveragesummary view resource completeness and bounds"><td><strong>CoverageSummary</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>3.90</td><td>multi-city-workspace</td><td>Resource completeness and bounds</td></tr><tr data-status="model-generated" data-search="carousel layout accessible horizontal panels"><td><strong>Carousel</strong></td><td>layout</td><td class="status model-generated">model-generated</td><td>3.80</td><td>story-layouts, story-layouts</td><td>Accessible horizontal panels</td></tr><tr data-status="model-generated" data-search="multicityplangrid view all-leg booking workflow for distinct city stops with an optional final return to the origin. it owns every resolved leg in the artifact; composes cityfield, traveldate, transportselect, fareorder and fadefares per leg, inserts stayduration for each destination, and cascades selected arrival plus stay into the next leg minimum departure"><td><strong>MultiCityPlanGrid</strong></td><td>view</td><td class="status model-generated">model-generated</td><td>3.60</td><td>manual-leg-editor, multi-city-workspace</td><td>All-leg booking workflow for distinct city stops with an optional final return to the origin. It owns every resolved leg in the artifact; composes CityField, TravelDate, TransportSelect, FareOrder and FadeFares per leg, inserts StayDuration for each destination, and cascades selected arrival plus stay into the next leg minimum departure</td></tr><tr data-status="model-generated" data-search="stayallocation control multi-city stay nights allocation"><td><strong>StayAllocation</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>3.60</td><td>multi-city-workspace</td><td>Multi-city stay nights allocation</td></tr><tr data-status="model-generated" data-search="durationrange control direct local duration limit"><td><strong>DurationRange</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>3.40</td><td>duration-picker, duration-picker</td><td>Direct local duration limit</td></tr><tr data-status="model-generated" data-search="artifactskeleton status loading artifact placeholder"><td><strong>ArtifactSkeleton</strong></td><td>status</td><td class="status model-generated">model-generated</td><td>3.40</td><td>pending-refresh-loading</td><td>Loading artifact placeholder</td></tr><tr data-status="model-generated" data-search="stalebadge status revision mismatch notice"><td><strong>StaleBadge</strong></td><td>status</td><td class="status model-generated">model-generated</td><td>3.30</td><td>status-stale-saved-comparison</td><td>Revision mismatch notice</td></tr><tr data-status="model-generated" data-search="sortselect control price duration or departure sorting"><td><strong>SortSelect</strong></td><td>control</td><td class="status model-generated">model-generated</td><td>3.10</td><td>compact-fare-picker</td><td>Price duration or departure sorting</td></tr></tbody></table></div></section>
+<section id="host"><h2>Host-owned and internal UI</h2><p>These are part of the product but are intentionally absent from the agent catalog.</p><div class="host"><article><h3>PlanningTracker</h3><p>The host renders the responsive selected-fares tracker outside the model-authored component tree.</p></article><article><h3>Chat shell</h3><p>The host owns messages, composer, thread controls, and artifact placement.</p></article><article><h3>shadcn/ui primitives</h3><p>Catalog components use source-owned UI primitives internally; the agent cannot select those primitives directly.</p></article></div><h2>Audit incidents</h2><div class="host"><article><h3>premature-network-quiet</h3><p>audit-runner failure. Network quiet is no longer sufficient. The runner now waits for an explicit terminal stop response; a terminal text-only result is saved as a failed no-scene attempt instead of waiting for the full timeout.</p></article></div></section></main>
+<footer>Catalog 1.1.0 · 7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690</footer><script>
+const caseSearch=document.querySelector('#case-search'),familyFilter=document.querySelector('#family-filter');function filterCases(){const q=caseSearch.value.toLowerCase(),family=familyFilter.value;document.querySelectorAll('.case-card').forEach(card=>card.hidden=!(card.dataset.search.includes(q)&&(!family||card.dataset.family===family)))}caseSearch.addEventListener('input',filterCases);familyFilter.addEventListener('change',filterCases);
+const componentSearch=document.querySelector('#component-search'),statusFilter=document.querySelector('#status-filter');function filterComponents(){const q=componentSearch.value.toLowerCase(),status=statusFilter.value;document.querySelectorAll('.coverage tbody tr').forEach(row=>row.hidden=!(row.dataset.search.includes(q)&&(!status||row.dataset.status===status)))}componentSearch.addEventListener('input',filterComponents);statusFilter.addEventListener('change',filterComponents);
+document.querySelectorAll('.copy').forEach(button=>button.addEventListener('click',async()=>{await navigator.clipboard.writeText(button.dataset.prompt);button.textContent='Copied';setTimeout(()=>button.textContent='Copy prompt',1200)}));
+</script></body></html>

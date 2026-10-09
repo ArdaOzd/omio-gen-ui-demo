@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "id": "tradeoff-dashboard",
+  "title": "Price versus time dashboard",
+  "family": "tradeoff",
+  "prompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "CheapestFastest",
+    "ResponsiveGrid",
+    "ComparisonTable",
+    "DurationPricePlot"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "CheapestFastest",
+    "ResponsiveGrid",
+    "ComparisonTable",
+    "DurationPricePlot"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "TravelSurface",
+    "ResponsiveGrid",
+    "CheapestFastest",
+    "ComparisonTable",
+    "DurationPricePlot"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 58150,
+  "interactionEvidence": {
+    "action": "add-first-tradeoff-fare",
+    "success": true,
+    "selectedRow": "Bus\tNational Express\t2026-10-28\t04:53\t6h 0m\t€13.19\tAdd",
+    "selectedFareIds": [
+      "fare_002275272"
+    ],
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-10-28 · 04:53\nBus · National Express\n€13.19\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "tradeoff-dashboard-final-repeat.json",
+  "sourceEvidenceSha256": "655c7e7c8f2a439d448b11c59165bbf2db35268ffabc6e2ba251eafbdf52c0c5",
+  "screenshots": [
+    {
+      "path": "screenshots/tradeoff-dashboard-final-repeat-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "d39f854634ee3bf6d66e213b4facbfe5e5a6c2d66bab7eaf66adf5a1217ac30b",
+      "condition": "accepted model scene after named successful local interaction"
+    },
+    {
+      "path": "screenshots/tradeoff-dashboard-final-repeat-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "816dd6b31a14c259f6b94167c77f861c01ae53e85a628a74ef9bfbc62d9fda75",
+      "condition": "same accepted model scene and persisted local interaction at 390 CSS pixels"
+    }
+  ]
+}

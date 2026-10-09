@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "id": "date-strip-price-calendar",
+  "title": "Date strip and price-by-day calendar",
+  "family": "date-browsing",
+  "prompt": "Track Berlin to Amsterdam fares from 30 October to 5 November 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "DateStrip",
+    "PriceCalendar",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "DateStrip",
+    "PriceCalendar",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "DateStrip",
+    "PriceCalendar"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 61632,
+  "interactionEvidence": {
+    "initialLabels": [
+      "Fri 30 Oct\n€22.80\n8 options",
+      "Sat 31 Oct\n€22.80\n8 options",
+      "Sun 1 Nov\n€23.72\n8 options",
+      "Mon 2 Nov\n€21.28\n8 options",
+      "Tue 3 Nov\n€24.57\n7 options",
+      "Wed 4 Nov\n€25.71\n7 options",
+      "Thu 5 Nov\n€20.73\n7 options"
+    ],
+    "labelsAfterDay": [
+      "Fri 30 Oct\n€22.80\n8 options",
+      "Sat 31 Oct\n€22.80\n8 options",
+      "Sun 1 Nov\n€23.72\n8 options",
+      "Mon 2 Nov\n€21.28\n8 options",
+      "Tue 3 Nov\n€24.57\n7 options",
+      "Wed 4 Nov\n€25.71\n7 options",
+      "Thu 5 Nov\n€20.73\n7 options"
+    ],
+    "nextLabels": [
+      "Fri 6 Nov\n€24.02\n6 options",
+      "Sat 7 Nov\n€28.58\n9 options",
+      "Sun 8 Nov\n€23.72\n8 options",
+      "Mon 9 Nov\n€21.56\n7 options",
+      "Tue 10 Nov\n€29.03\n6 options",
+      "Wed 11 Nov\n€22.39\n7 options",
+      "Thu 12 Nov\n€21.56\n7 options"
+    ],
+    "restoredLabels": [
+      "Fri 30 Oct\n€22.80\n8 options",
+      "Sat 31 Oct\n€22.80\n8 options",
+      "Sun 1 Nov\n€23.72\n8 options",
+      "Mon 2 Nov\n€21.28\n8 options",
+      "Tue 3 Nov\n€24.57\n7 options",
+      "Wed 4 Nov\n€25.71\n7 options",
+      "Thu 5 Nov\n€20.73\n7 options"
+    ],
+    "labelsAfterAdd": [
+      "Fri 30 Oct\n€22.80\n8 options",
+      "Sat 31 Oct\n€22.80\n8 options",
+      "Sun 1 Nov\n€23.72\n8 options",
+      "Mon 2 Nov\n€21.28\n8 options",
+      "Tue 3 Nov\n€24.57\n7 options",
+      "Wed 4 Nov\n€25.71\n7 options",
+      "Thu 5 Nov\n€20.73\n7 options"
+    ],
+    "calendarDateByLeg": {
+      "berlin:amsterdam": "2026-11-02"
+    },
+    "displayWindowByLeg": {
+      "berlin:amsterdam": {
+        "from": "2026-11-03",
+        "to": "2026-11-03"
+      }
+    },
+    "dateStripValue": "2026-11-03",
+    "selectedFareIds": [
+      "fare_003080663"
+    ],
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nBerlin → Amsterdam\n2026-11-05 · 11:39\nBus · FlixBus\n€20.73\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "noHorizontalOverflow": true,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "date-strip-price-calendar.json",
+  "sourceEvidenceSha256": "91b27cac5f8f6e147bb840e2ebc1f81a308b04cc1ead902f1027bd1ca6ef42a3",
+  "screenshots": [
+    {
+      "path": "screenshots/date-strip-price-calendar-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "d1d58ac45ce03d5b1848ac336c6cfcfd854255972a95fa721c7a4b2df5b82618"
+    },
+    {
+      "path": "screenshots/date-strip-price-calendar-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "26145b37f03edb8f3f31510f214a63f4685c164512bf5766ddbd2f2455099b80"
+    },
+    {
+      "path": "screenshots/date-strip-price-calendar-interaction.png",
+      "role": "interaction",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "d1d58ac45ce03d5b1848ac336c6cfcfd854255972a95fa721c7a4b2df5b82618"
+    }
+  ]
+}

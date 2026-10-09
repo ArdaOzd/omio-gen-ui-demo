@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "status-empty-partial",
+  "title": "Honest out-of-coverage empty state",
+  "family": "coverage-status",
+  "prompt": "Search the synthetic data for London to Paris on 15 January 2030. If that date falls outside the loaded timetable, show an honest coverage explanation and empty-result status inside the travel view. Offer a retry only if a local operation truly failed, and do not imply that real-world travel is unavailable.",
+  "runAt": "2026-10-09T15:01:48.072Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "TravelHero",
+    "CoverageNotice",
+    "EmptyState",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "TravelHero",
+    "CoverageNotice",
+    "EmptyState",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "CoverageNotice",
+    "EmptyState"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 53980,
+  "interactionEvidence": null,
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": "Genuine production agent call in a fresh isolated browser context; no fixture or manually authored scene.",
+  "sourceEvidence": "status_empty_partial.json",
+  "sourceEvidenceSha256": "c4ebaa9438bbe813541246d71c92417e3960662f17ed236f1b8ea641080eee52",
+  "screenshots": [
+    {
+      "path": "screenshots/status-empty-partial-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1132
+      },
+      "sha256": "ff4216745ae5e80e8b24a92f09c898a0fe3121bfa680abaed0517287637d9fcd",
+      "condition": null
+    },
+    {
+      "path": "screenshots/status-empty-partial-desktop-2.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1132
+      },
+      "sha256": "acff9fea75351bbc7ac38dcfb39520e71a9299c693fafff533d7789b817a9dde",
+      "condition": null
+    },
+    {
+      "path": "screenshots/status-empty-partial-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1079
+      },
+      "sha256": "e1beb2270dd95838588fe60c5c6663feeeab59bc211b84313427c29f030ed323",
+      "condition": null
+    }
+  ]
+}

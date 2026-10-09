@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "id": "compact-fare-picker",
+  "title": "Compact fare picker with sort control",
+  "family": "compact-selection",
+  "prompt": "I need one compact choice from Madrid to Paris on 2 November 2026. Give me a small fare picker, a simple sort dropdown for price, duration, or departure, and the cheapest-versus-fastest comparison—no full trip planner.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "SortSelect",
+    "FarePicker",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "SortSelect",
+    "FarePicker",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "SortSelect",
+    "FarePicker"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 57962,
+  "interactionEvidence": {
+    "sort": "durationMinutes:asc",
+    "options": [
+      {
+        "value": "fare_002764814",
+        "text": "Bus · Alsa · 04:12 · 16h 31m · Direct · €68.22"
+      },
+      {
+        "value": "fare_002764815",
+        "text": "Bus · Alsa · 08:11 · 15h 50m · Direct · €73.33"
+      },
+      {
+        "value": "fare_002764816",
+        "text": "Bus · Alsa · 11:52 · 17h 23m · Direct · €47.50"
+      },
+      {
+        "value": "fare_002764817",
+        "text": "Bus · Alsa · 13:48 · 15h 56m · Direct · €40.42"
+      },
+      {
+        "value": "fare_002764818",
+        "text": "Bus · Alsa · 17:35 · 16h 9m · Direct · €56.85"
+      },
+      {
+        "value": "fare_002764819",
+        "text": "Bus · Alsa · 20:41 · 16h 23m · Direct · €46.99"
+      },
+      {
+        "value": "fare_002764820",
+        "text": "Bus · Alsa · 23:45 · 16h 28m · Direct · €72.76"
+      }
+    ],
+    "selectedOption": {
+      "value": "fare_002764814",
+      "text": "Bus · Alsa · 04:12 · 16h 31m · Direct · €68.22"
+    },
+    "selectedFareIds": [
+      "fare_002764814"
+    ],
+    "sortState": {
+      "field": "durationMinutes",
+      "direction": "asc"
+    },
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nMadrid → Paris\n2026-11-02 · 04:12\nBus · Alsa\n€68.22\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "compact-fare-picker.json",
+  "sourceEvidenceSha256": "b9bbb8f25b689b78773e4159d84e9209122b6bec01942bb93b23a9d4552781a9",
+  "screenshots": [
+    {
+      "path": "screenshots/compact-fare-picker-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1286
+      },
+      "sha256": "1c4275dd0c0db35c5b5f8faa734a8fc1c259f9361d3845af1f651e7d654c23eb"
+    },
+    {
+      "path": "screenshots/compact-fare-picker-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1502
+      },
+      "sha256": "60fcf199d1b1f87329b1f6000cddcf67ddce65045413d4cdfdcebb06b43d1fee"
+    },
+    {
+      "path": "screenshots/compact-fare-picker-interaction.png",
+      "role": "interaction",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1286
+      },
+      "sha256": "1c4275dd0c0db35c5b5f8faa734a8fc1c259f9361d3845af1f651e7d654c23eb"
+    }
+  ]
+}

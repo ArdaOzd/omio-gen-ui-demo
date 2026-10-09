@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "id": "fixed-date-picker",
+  "title": "Compact pick-one workspace",
+  "family": "single-choice",
+  "prompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "SplitPane",
+    "Stack",
+    "FarePicker",
+    "ComparisonTable",
+    "CheapestFastest",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "SplitPane",
+    "Stack",
+    "FarePicker",
+    "ComparisonTable",
+    "CheapestFastest",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "SplitPane",
+    "Stack",
+    "FarePicker",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 63127,
+  "interactionEvidence": {
+    "action": "select-fixed-date-fare",
+    "success": true,
+    "options": [
+      {
+        "value": "fare_003408527",
+        "text": "Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82"
+      },
+      {
+        "value": "fare_003408529",
+        "text": "Bus · Alsa · 08:33 · 17h 6m · Direct · €81.29"
+      },
+      {
+        "value": "fare_003408530",
+        "text": "Bus · Alsa · 10:35 · 15h 54m · Direct · €73.93"
+      },
+      {
+        "value": "fare_003408531",
+        "text": "Bus · Alsa · 12:53 · 16h 7m · Direct · €51.14"
+      },
+      {
+        "value": "fare_003408532",
+        "text": "Bus · Alsa · 16:09 · 16h 37m · Direct · €50.65"
+      },
+      {
+        "value": "fare_003408533",
+        "text": "Bus · Alsa · 17:51 · 16h 9m · Direct · €88.80"
+      },
+      {
+        "value": "fare_003408534",
+        "text": "Bus · Alsa · 20:54 · 15h 33m · Direct · €46.13"
+      },
+      {
+        "value": "fare_003408535",
+        "text": "Bus · Alsa · 23:39 · 17h 4m · Direct · €52.25"
+      }
+    ],
+    "selectedOption": {
+      "value": "fare_003408527",
+      "text": "Bus · Alsa · 06:07 · 15h 55m · Direct · €77.82"
+    },
+    "selectedFareIds": [
+      "fare_003408527"
+    ],
+    "selectedItineraryText": "Selected fares\nMadrid → Paris\n2026-11-08 · Bus · €77.82 per passenger",
+    "syntheticTotalText": "Synthetic total\n€77.82\n\n1 passenger\n\nSynthetic total, including demo fees. No booking is available.",
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nMadrid → Paris\n2026-11-08 · 06:07\nBus · Alsa\n€77.82\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "fixed-date-picker-responsive-post-fix.json",
+  "sourceEvidenceSha256": "8630d7d389b743483386b15b3e3f30849879917e22f6c76756cab9ad1b655aef",
+  "screenshots": [
+    {
+      "path": "screenshots/fixed-date-picker-post-fix-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "b64e9c0106aef780023fbc3435e6fe5c0c592bd701e64efd76efc6a5428f32a9",
+      "condition": "accepted model scene after named successful local interaction"
+    },
+    {
+      "path": "screenshots/fixed-date-picker-post-fix-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "f7ac3085da6b5ed07ea7f6fcc494754e2cfb42844567e6e7d9dd3bb3ca989c85",
+      "condition": "same accepted model scene and persisted local interaction at 390 CSS pixels"
+    }
+  ]
+}

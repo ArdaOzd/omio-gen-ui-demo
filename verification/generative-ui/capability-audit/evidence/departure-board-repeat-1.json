@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "departure-board",
+  "title": "Visual departure board",
+  "family": "schedule",
+  "prompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+  "runAt": "2026-10-09T14:31:41.145Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "RouteMap",
+    "Section",
+    "ItineraryTimeline",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "RouteMap",
+    "Section",
+    "ItineraryTimeline",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "RouteMap",
+    "ItineraryTimeline"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 61706,
+  "interactionEvidence": {
+    "summary": "clicked Add to trip",
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "case-3-first.json",
+  "sourceEvidenceSha256": "16d4d72cbad5ad4ccb16ddf5c976b53f125818c0467926fcd861c53bcf068b12",
+  "screenshots": [
+    {
+      "path": "screenshots/departure-board-repeat-1-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1186
+      },
+      "sha256": "cf1b9bf500cbd5c239fa9e69ef38da57e58dbbb41359c28425092483234a98d3"
+    },
+    {
+      "path": "screenshots/departure-board-repeat-1-detail.png",
+      "role": "detail",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1440,
+        "height": 1186
+      },
+      "sha256": "499a18f14a9709d8239d6cc7ee6a48d8437ecf1c4fb941763a8a605d1bcef5de"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "manual-leg-editor",
+  "title": "Direct leg editing controls",
+  "family": "trip-editing",
+  "prompt": "Build a manual editor for a London to Paris to Barcelona trip starting 8 November 2026, with two nights in Paris. For the first leg, show separate origin and destination fields, its local departure date, transport selector, Paris stay slider, fare order, and scrollable fares outside the combined planner so I can see each edit before I add a fare.",
+  "runAt": "2026-10-09T15:11:50.725Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "CityField",
+    "Inline",
+    "TravelDate",
+    "TransportSelect",
+    "StayDuration",
+    "FareOrder",
+    "FadeFares",
+    "ResponsiveGrid",
+    "CheapestFastest",
+    "MultiCityPlanGrid",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "Section",
+    "CityField",
+    "Inline",
+    "TravelDate",
+    "TransportSelect",
+    "StayDuration",
+    "FareOrder",
+    "FadeFares",
+    "ResponsiveGrid",
+    "CheapestFastest",
+    "MultiCityPlanGrid",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "CityField",
+    "TravelDate",
+    "TransportSelect",
+    "StayDuration"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 73680,
+  "interactionEvidence": {
+    "add": {
+      "label": "Add lowest fare Bus €14.33 to trip",
+      "trackerVisible": true
+    },
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "manual-leg-editor.json",
+  "sourceEvidenceSha256": "bc1bb8b6fee9e4f51e3bf008cc7116c96003cfbd724892b87265a5ea609e3594",
+  "screenshots": [
+    {
+      "path": "screenshots/manual-leg-editor-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "b46f1785ea743117a07383f822287a10b0fb0ef4c1b6dbf880c9c7aca1c280ae"
+    },
+    {
+      "path": "screenshots/manual-leg-editor-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "e22fc5b9e168f08c8d923a275268720041304df682af7a7ec69920fecadfcef4"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "story-layouts",
+  "title": "Tabbed journey story",
+  "family": "story-layout",
+  "prompt": "Turn my London to Paris options on 8 November 2026 into a compact journey story. Use a hero, a two-tab comparison, and a swipeable set of option panels. Keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic.",
+  "runAt": "2026-10-09T14:55:30.041Z",
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "TravelHero",
+    "SplitPane",
+    "Stack",
+    "Tabs",
+    "Section",
+    "CheapestFastest",
+    "ComparisonMatrix",
+    "Carousel",
+    "ComparisonTable",
+    "ItineraryTimeline",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal",
+    "Callout"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "TravelHero",
+    "SplitPane",
+    "Stack",
+    "Tabs",
+    "Section",
+    "CheapestFastest",
+    "ComparisonMatrix",
+    "Carousel",
+    "ComparisonTable",
+    "ItineraryTimeline",
+    "StickySummary",
+    "SelectedItinerary",
+    "SyntheticTotal",
+    "Callout"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "TravelHero",
+    "Tabs",
+    "Carousel",
+    "SplitPane",
+    "StickySummary",
+    "Callout"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 76008,
+  "interactionEvidence": null,
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": null,
+  "sourceEvidence": "story-layouts.json",
+  "sourceEvidenceSha256": "9524541d798e3501b8caa87517a627d86b2577afa793500d4c64af3f7784bfa6",
+  "screenshots": [
+    {
+      "path": "screenshots/story-layouts-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "25e4cfcd68e69c0c394227aa1b9b5bf107cef5d1b2e3468aa1f60059e6554855"
+    },
+    {
+      "path": "screenshots/story-layouts-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1079
+      },
+      "sha256": "d173de50c39334c43f6cd9590f6321bd84d4125925169febd9938a4b4b6965e7"
+    }
+  ]
+}

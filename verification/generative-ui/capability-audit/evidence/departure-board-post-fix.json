@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "id": "departure-board",
+  "title": "Visual departure board",
+  "family": "schedule",
+  "prompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "RouteMap",
+    "ItineraryTimeline",
+    "CheapestFastest"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "RouteMap",
+    "ItineraryTimeline",
+    "CheapestFastest"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "RouteMap",
+    "ItineraryTimeline"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 70257,
+  "interactionEvidence": {
+    "action": "add-first-timeline-fare",
+    "success": true,
+    "routeLabel": "Schematic route: London to Paris",
+    "timelineRows": [
+      "2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip",
+      "2026-11-08 · 06:42\nLondon → Paris\n\nTrain · 3h 16m · €46.68\n\nAdd to trip",
+      "2026-11-08 · 06:45\nLondon → Paris\n\nFlight · 5h 2m · €27.70\n\nAdd to trip",
+      "2026-11-08 · 06:49\nLondon → Paris\n\nBus · 5h 47m · €27.14\n\nAdd to trip",
+      "2026-11-08 · 07:31\nLondon → Paris\n\nTrain · 3h 5m · €26.44\n\nAdd to trip"
+    ],
+    "departureMinutes": [
+      266,
+      402,
+      405,
+      409,
+      451
+    ],
+    "chronological": true,
+    "selectedRow": "2026-11-08 · 04:26\nLondon → Paris\n\nBus · 5h 35m · €21.58\n\nAdd to trip",
+    "selectedFareIds": [
+      "fare_003484753"
+    ],
+    "trackerText": "YOUR TRIP\nPlanning tracker\nClear all\nLondon → Paris\n2026-11-08 · 04:26\nBus · National Express\n€21.58\nCancel\nBuy",
+    "chatRequestsBefore": 3,
+    "chatRequestsAfter": 3,
+    "chatRequestDelta": 0
+  },
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "departure-board-responsive-post-fix.json",
+  "sourceEvidenceSha256": "8c6bbab4b58749cee8dbd26a0380f3956278ce776e291b54021d47257792c26a",
+  "screenshots": [
+    {
+      "path": "screenshots/departure-board-post-fix-desktop.png",
+      "role": "desktop",
+      "cssViewport": {
+        "width": 1280,
+        "height": 1000
+      },
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "fc11258db993ad9ee06ed43d7705faa46ea388c71cb68a69c4707ddaed6fed0f",
+      "condition": "accepted model scene after named successful local interaction"
+    },
+    {
+      "path": "screenshots/departure-board-post-fix-mobile.png",
+      "role": "mobile",
+      "cssViewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1428
+      },
+      "sha256": "4f052a9bfa1b6c86e25fa5ca18ffb41581ab6c4c8a5c684742d1bdcd74390344",
+      "condition": "same accepted model scene and persisted local interaction at 390 CSS pixels"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "tradeoff-dashboard",
+  "title": "Price versus time dashboard",
+  "family": "tradeoff",
+  "prompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [
+    "TravelSurface",
+    "CheapestFastest",
+    "SplitPane",
+    "ComparisonTable",
+    "DurationPricePlot"
+  ],
+  "claimedModelGeneratedComponents": [
+    "TravelSurface",
+    "CheapestFastest",
+    "SplitPane",
+    "ComparisonTable",
+    "DurationPricePlot"
+  ],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [
+    "TravelSurface",
+    "ResponsiveGrid",
+    "CheapestFastest",
+    "ComparisonTable",
+    "DurationPricePlot"
+  ],
+  "acceptedSceneCount": 1,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [
+    200,
+    200,
+    200
+  ],
+  "elapsedMs": 60750,
+  "interactionEvidence": null,
+  "componentEvidence": {},
+  "errors": [],
+  "warnings": [],
+  "noHorizontalOverflowAt390": true,
+  "noHorizontalOverflowAtDesktop": true,
+  "notes": null,
+  "sourceEvidence": "tradeoff-dashboard.json",
+  "sourceEvidenceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
+  "screenshots": [
+    {
+      "path": "screenshots/tradeoff-dashboard-desktop.png",
+      "role": "desktop",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1032
+      },
+      "sha256": "2f2bcf4c338533cbe7de0477ade7618aefc764e63e5b4486d7dcce41a8a4330a"
+    },
+    {
+      "path": "screenshots/tradeoff-dashboard-mobile.png",
+      "role": "mobile",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 390,
+        "height": 1079
+      },
+      "sha256": "fc0283ba46718b6dc352dfcba1b51e56dc577274d74e57331fcf5b6a01544224"
+    }
+  ]
+}

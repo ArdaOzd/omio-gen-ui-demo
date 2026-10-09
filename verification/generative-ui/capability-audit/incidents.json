@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "premature-network-quiet",
+      "caseId": "story-layouts",
+      "observed": {
+        "chatStatuses": [200],
+        "acceptedSceneCount": 0,
+        "modelGeneratedComponents": [],
+        "elapsedMs": 7356
+      },
+      "classification": "audit-runner failure",
+      "resolution": "Network quiet is no longer sufficient. The runner now waits for an explicit terminal stop response; a terminal text-only result is saved as a failed no-scene attempt instead of waiting for the full timeout."
+    }
+  ]
+}
