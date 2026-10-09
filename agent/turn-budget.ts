@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
-import { LIMITS,type ArtifactId,type UIStateRevision } from '../src/generative/contracts';
+import { z } from 'zod';
+import { EditArtifactInputSchema,LIMITS,type ArtifactId,type UIStateRevision } from '../src/generative/contracts';
 import type { ChatRequest } from './request-schema';
-type SceneCompletion={artifactRef:ArtifactId;uiStateRevision:UIStateRevision;toolName:'present'};
+export type SceneCompletion={artifactRef:ArtifactId;uiStateRevision:UIStateRevision;toolName:'present'};
+export type RequiredScene={artifactRef:ArtifactId;uiStateRevision:UIStateRevision;reason:'scope-edit'};
+const AppliedEditOutputSchema=z.object({artifactId:z.string(),revision:z.number().int().nonnegative(),status:z.literal('applied')});
 const ledger=new Map<string,{calls:number;facts:number;expires:number;scenes:Map<string,SceneCompletion>}>();
 export function acceptTurn(request:ChatRequest):string {
  const user=[...request.messages].reverse().find(message=>message.role==='user');
@@ -48,4 +51,20 @@ export function getAcceptedScenes(key:string,request:ChatRequest):SceneCompletio
   result.set(artifact.artifactId,{artifactRef:artifact.artifactId,uiStateRevision:artifact.revision,toolName:name});
  }
  return [...result.values()];
+}
+
+export function getRequiredScene(request:ChatRequest,acceptedScenes:readonly SceneCompletion[]):RequiredScene|undefined{
+ const artifactId=request.currentContext.activeArtifactId;if(!artifactId)return;
+ const artifact=request.currentContext.artifacts.find(candidate=>candidate.artifactId===artifactId);if(!artifact||!artifact.componentBindings.length)return;
+ const activeRefs=new Set(request.currentContext.displayContext.activeViews);
+ const activeTypes=new Set(request.currentContext.displayContext.components.flatMap(component=>activeRefs.has(component.identity.componentRef.value)&&component.identity.scope.artifactId===artifactId?[component.identity.componentType]:[]));
+ if(!artifact.componentBindings.some(binding=>activeTypes.has(binding.type)))return;
+ if(acceptedScenes.some(scene=>scene.artifactRef===artifactId&&scene.uiStateRevision===artifact.revision))return;
+ let userIndex=request.messages.length-1;while(userIndex>=0&&request.messages[userIndex]?.role!=='user')userIndex--;
+ for(const message of request.messages.slice(userIndex+1))for(const part of message.parts){
+  const name=part.type==='dynamic-tool'?part.toolName:part.type.slice(5);if(name!=='edit_artifact'||part.state!=='output-available')continue;
+  const input=EditArtifactInputSchema.safeParse(part.input),output=AppliedEditOutputSchema.safeParse(part.output);if(!input.success||!output.success)continue;
+  if(input.data.artifactRef!==artifactId||output.data.artifactId!==artifactId||output.data.revision!==artifact.revision)continue;
+  if(input.data.commands.some(command=>command.kind==='route'||command.kind==='dates'))return{artifactRef:artifactId,uiStateRevision:artifact.revision,reason:'scope-edit'};
+ }
 }

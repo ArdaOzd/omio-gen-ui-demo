@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 import { afterEach,describe,expect,it,vi } from 'vitest'
 import { Chat } from '@ai-sdk/react'
 import { DefaultChatTransport,lastAssistantMessageIsCompleteWithToolCalls } from 'ai'
-import { ArtifactIdSchema } from '../src/generative/contracts'
+import { ArtifactIdSchema,UIStateRevisionSchema } from '../src/generative/contracts'
 import { createUIStateStore } from '../src/generative/state/ui-state-store'
 import { exportAgentContext } from '../src/generative/state/snapshot-exporter'
 import { createFareDataBridge } from '../src/generative/data/fare-data-bridge'
@@ -17,6 +17,22 @@ import { InvalidModelOutputError } from './repair'
 const servers:ReturnType<typeof createServer>[]=[]
 afterEach(async()=>{await Promise.all(servers.splice(0).map(server=>new Promise<void>(resolve=>server.close(()=>resolve()))));decision.mockReset();vi.restoreAllMocks()})
 describe('native frontend tool continuation messages',()=>{
+ it('repairs a silent completion after an applied route edit into a current presentation',async()=>{
+  const warnings:string[]=[];vi.spyOn(console,'warn').mockImplementation(value=>warnings.push(String(value)))
+  const id=ArtifactIdSchema.parse('scope-edit-artifact'),store=createUIStateStore();store.initializeMissing(id,{})
+  const displayStore=createDisplayContextStore();displayStore.register({componentRef:{value:'scope-edit-table',keySource:'authored-key'},componentType:'ComparisonTable',scope:{kind:'artifact',artifactId:id},authored:{}})
+  const context=exportAgentContext({turnId:'scope-edit-test',activeArtifactId:id,artifactIds:[id],store,bridge:createFareDataBridge(),displayStore,componentBindings:new Map([[id,[{key:'comparison',type:'ComparisonTable'}]]])})
+  context.artifacts[0]!.revision=UIStateRevisionSchema.parse(1)
+  const prompts:string[]=[]
+  decision.mockImplementation(async({onDelta,prompt})=>{prompts.push(prompt);if(prompts.length===1)return{intro:'',toolName:'none',toolInput:'{}',outro:''};const toolInput=JSON.stringify({$type:'TravelSurface',$key:'root',artifactRef:id,children:[]});onDelta('toolInput',toolInput,'present');return{intro:'',toolName:'present',toolInput,outro:''}})
+  const server=createServer(async(request,response)=>{try{let body='';for await(const chunk of request)body+=chunk.toString();await handleChat(parseChatRequest(JSON.parse(body)),response,new AbortController().signal)}catch(error){response.writeHead(500);response.end(String(error))}});servers.push(server)
+  await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw new Error('Expected local test server')
+  const response=await fetch(`http://127.0.0.1:${address.port}`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:'scope-edit-repair',currentContext:context,tools:{present:{parameters:{}}},messages:[{id:'user',role:'user',parts:[{type:'text',text:'Use a different comparison for Paris.'}]},{id:'assistant',role:'assistant',parts:[{type:'tool-edit_artifact',toolCallId:'route-edit',state:'output-available',input:{artifactRef:id,expectedRevision:0,commands:[{kind:'route',citySequence:['london','paris']}]},output:{artifactId:id,revision:1,status:'applied'}}]}]})})
+  const streamed=await response.text();expect(response.status).toBe(200);expect(decision).toHaveBeenCalledTimes(2)
+  expect(JSON.parse(prompts[0]??'{}').completion.requiredScene).toEqual({artifactRef:id,uiStateRevision:1,reason:'scope-edit'});expect(prompts[1]).toContain('PRESENTATION_REQUIRED_AFTER_SCOPE_EDIT')
+  expect(streamed).toContain('tool-input-available');expect(streamed).toContain('present');expect(JSON.parse(warnings[0]??'{}')).toMatchObject({attempt:0,tool:'unknown',reason:'Error: PRESENTATION_REQUIRED_AFTER_SCOPE_EDIT'})
+ })
+
  it('passes one effective request signal through a repaired native HTTP stream',async()=>{
   const warnings:string[]=[];vi.spyOn(console,'warn').mockImplementation(value=>warnings.push(String(value)))
   const id=ArtifactIdSchema.parse('deadline-chat-artifact'),store=createUIStateStore();store.initializeMissing(id,{})
