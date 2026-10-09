@@ -7,6 +7,12 @@ export function legKey(coverage: Pick<FareScope, 'originId' | 'destinationId'>):
   return `${coverage.originId}:${coverage.destinationId}`
 }
 
+export function earliestDepartureInWindow(window:FareScope['dateWindow'],threshold:FareScope['earliestDeparture']):FareScope['earliestDeparture']{
+  if(threshold.date<window.from)return{date:window.from,minutes:0}
+  if(threshold.date>window.to)return{date:window.to,minutes:1439}
+  return{date:threshold.date,minutes:threshold.minutes}
+}
+
 export type LegResource = { key: string; datasetId: DatasetId; resourceKey: ResourceKey; coverage: FareScope; manifest: FareScopeManifest }
 
 export function availableModes(manifest: Pick<FareScopeManifest, 'availableModes'>): TransportMode[] {
@@ -69,7 +75,8 @@ export function legRequest(state: ArtifactUIState, coverage: FareScope, selected
   const fallbackTo = visible?.to ?? (state.dates.end ? legDate(state, coverage.originId, state.dates.end) : threshold.date)
   const requestedFrom = visible?.from && visible.from > threshold.date ? visible.from : threshold.date
   const from = requestedFrom > fallbackTo ? fallbackTo : requestedFrom
-  return { ...coverage, dateWindow: { from, to: fallbackTo }, earliestDeparture: { date: threshold.date, minutes: threshold.minutes } }
+  const dateWindow={from,to:fallbackTo}
+  return { ...coverage, dateWindow, earliestDeparture:earliestDepartureInWindow(dateWindow,threshold) }
 }
 
 export function hasLoadedItineraryCoverage(state: ArtifactUIState, bridge: ServerFareDataBridge, selectedFacts: readonly BoundedFareFact[] = []): boolean {

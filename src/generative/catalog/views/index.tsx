@@ -7,10 +7,8 @@ import { Label } from '@/components/ui/label'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { FareIdSchema, FareRowSchema, type ArtifactId,type BoundedFareFact, type FareRow } from '../../contracts'
-import { legDate,tripDatesForLegDeparture } from '../../state/leg-bindings'
+import { DateSchema, FareIdSchema, FareRowSchema, type ArtifactId,type BoundedFareFact, type FareRow } from '../../contracts'
 import { hasLoadedItineraryCoverage } from '../../state/leg-bindings'
-import { withTripDates } from '../../state/ui-state-store'
 import { carrierLabel,cityLabel, departure, duration, money, useArtifact, useFareRows, useQueryFareSelection, useTravelAction, filterPredicate, type QueryFareSelectionSource } from '../context'
 import type { WidgetProps } from '../layout'
 import type { TravelServices } from '../context'
@@ -22,12 +20,25 @@ import {fareInspectionItems,useProjectionDisplay} from '../display-records'
 import {recordDisplayInteraction,useDisplayNode,usePublishDisplay} from '../display-context-provider'
 import {useCalendarDays,useFareHighlights,useModeStats,useOrderedFares,useItineraryPlan} from '../context'
 import { FareRouteDetails } from '../fare-route-details'
+import {fareMatchesScope} from '../../data/server-query-client'
 function fareDateTime(serviceDate:string,minutes:number){
  const day=Math.floor(minutes/1440),date=new Date(Date.parse(`${serviceDate}T00:00:00.000Z`)+day*86_400_000)
  return `${date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${departure(minutes%1440)}`
 }
-function currentResourceKey(state:QueryExecutionState):string|undefined{return state.status==='ready'||state.status==='refreshing'?state.current.resourceKey:state.status==='error'?state.previous?.resourceKey:undefined}
+function committedQueryResult(state:QueryExecutionState){return state.status==='ready'||state.status==='refreshing'?state.current:state.status==='error'?state.previous:undefined}
+function currentResourceKey(state:QueryExecutionState):string|undefined{return committedQueryResult(state)?.resourceKey}
 function queryStatus(data:unknown,state:QueryExecutionState):'loading'|'ready'|'error'{return data?'ready':state.status==='error'?'error':'loading'}
+const calendarDayMs=86_400_000
+function shiftCalendarDate(date:string,days:number){
+ const instant=Date.parse(`${date}T00:00:00.000Z`)+days*calendarDayMs
+ if(!Number.isFinite(instant))return undefined
+ const candidate=DateSchema.safeParse(new Date(instant).toISOString().slice(0,10))
+ return candidate.success?candidate.data:undefined
+}
+function adjacentCalendarWindow(window:{from:string;to:string},direction:'previous'|'next'){
+ const days=direction==='next'?7:-7,from=shiftCalendarDate(window.from,days),to=shiftCalendarDate(window.to,days)
+ return from&&to?{from,to}:undefined
+}
 function fareDisplay(items:readonly FareItem[],total:number,viewport?:{offset:number;limit:number;cursor?:string},rankOffset=0):DisplayRepresentation{const omitted=Math.max(0,total-items.length);return{payload:{kind:'fare-order',orderedFareRefs:items.map((item,index)=>({fareId:item.id,rank:rankOffset+index+1})),...(items.length?{renderedRange:{fromRank:rankOffset+1,toRank:rankOffset+items.length}}:{}),...(viewport?{viewport}:{})},totalDisplayed:total,includedCount:items.length,complete:omitted===0,omittedCount:omitted}}
 function useSelection(props:WidgetProps){const selection=useQueryFareSelection(props.artifactRef),display=useDisplayNode();return{state:selection.state,toggle(item:{id:FareItem['id']},source:QueryFareSelectionSource,fareIds:readonly FareItem['id'][]){const selected=selection.state.selectedFareIds.includes(item.id);recordDisplayInteraction(display.store,{artifactId:props.artifactRef,componentRef:display.componentRef,action:selected?'deselect':'select'});return selection.toggle(item,source,fareIds)}}}
 export function FareCards(props:WidgetProps) {
@@ -58,14 +69,37 @@ export function FarePicker(props:WidgetProps) {
  return <Card className="travel-panel"><h3>{props.title??'Choose a fare'}</h3>{status==='loading'?<p role="status">Finding your options…</p>:status==='error'?<Alert>These options could not load. Try refreshing the view.</Alert>:items.length?<Label className="travel-field">Choose a synthetic fare<NativeSelect aria-label="Choose a synthetic fare" value={selected} onChange={event=>{const item=items.find(candidate=>candidate.id===event.target.value);if(item)selection.toggle(item,result,fareIds);else if(selected)selection.toggle({id:selected},result,fareIds)}}><NativeSelectOption value="">No fare selected on this page</NativeSelectOption>{items.map(item=>{const transfers=item.legs.length-1;return <NativeSelectOption key={item.id} value={item.id}>{cityLabel(item.mode)} · {carrierLabel(item,services.bridge,resourceKey)} · {departure(item.departureMinutes)} · {duration(item.durationMinutes)} · {transfers===0?'Direct':`${transfers} transfer${transfers===1?'':'s'}`} · {money(item.priceCents)}</NativeSelectOption>})}</NativeSelect></Label>:<p role="status">No options match. Try another mode, date, or price limit.</p>}<div className="travel-pagination" aria-label="Fare picker pages"><Button type="button" variant="outline" disabled={!cursorHistory.length} onClick={()=>changePage(cursorHistory.at(-1)??null,'previous')}>Previous</Button><span>Page {pageIndex+1}</span><Button type="button" variant="outline" disabled={!result.data?.pageInfo.hasNextPage||!result.data.pageInfo.nextCursor} onClick={()=>{const next=result.data?.pageInfo.nextCursor;if(next)changePage(next,'next')}}>Next</Button></div><small>Synthetic fares per passenger</small></Card>
 }
 export function PriceCalendar(props:WidgetProps) {
- const node=useDisplayNode(),{state}=useArtifact(props.artifactRef),dispatch=useTravelAction(props.artifactRef),selection=useSelection(props)
+ const node=useDisplayNode(),{services,state}=useArtifact(props.artifactRef),dispatch=useTravelAction(props.artifactRef),selection=useSelection(props)
  const result=useCalendarDays(props.artifactRef,{componentRef:node.componentRef??`${props.artifactRef}:price-calendar`,purpose:'price-calendar',datasetRef:props.datasetRef,objective:'cheapest'}),days=(result.data?.days??[]).slice(0,62),omitted=Math.max(0,(result.data?.days.length??0)-days.length)
  const cells=days.map(day=>({key:day.date,label:day.date,value:day.representative?.priceCents,unit:(day.representative?'priceCents':'count') as 'priceCents'|'count',fareId:day.representative?.id,available:day.count>0}))
  useProjectionDisplay(result,{payload:{kind:'calendar',cells},totalDisplayed:result.data?.days.length??0,includedCount:days.length,complete:omitted===0,omittedCount:omitted},fareInspectionItems(days.flatMap(day=>day.representative?[day.representative]:[])))
- const status=queryStatus(result.data,result.queryState),origin=result.requirement.scope.originId
+ const status=queryStatus(result.data,result.queryState),legKey=result.requirement.group.legKey
  if(status!=='ready')return <RequestNotice status={status} label="Date comparisons"/>
  const fareIds=days.flatMap(day=>day.representative?[day.representative.id]:[])
- return <Card className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-calendar">{days.map(day=>{const item=day.representative,selected=item?selection.state.selectedFareIds.includes(item.id):false;return <div className={`travel-calendar-option${selected?' is-selected':''}`} key={day.date}><Button variant="outline" type="button" disabled={!item} onClick={()=>{if(item)dispatch({kind:'calendarDates',artifactId:state.artifactId,dates:tripDatesForLegDeparture(state,origin,day.date)})}}><span>{new Date(`${day.date}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{item?money(item.priceCents):'No fare'}</strong><small>{day.count} options</small></Button>{item&&<Button type="button" size="sm" variant={selected?'default':'outline'} aria-pressed={selected} aria-label={`${selected?'Remove':'Add'} cheapest fare on ${day.date} ${selected?'from':'to'} trip`} onClick={()=>selection.toggle(item,result,fareIds)}>{selected?'Added':'Add cheapest'}</Button>}</div>})}</div>{!days.length&&<p role="status">No options match. Try another mode, date, or price limit.</p>}</Card>
+ const renderedResult=committedQueryResult(result.queryState),binding=state.datasetRefs.flatMap(datasetId=>services.bridge.findBinding(datasetId)??[]).find(candidate=>`${candidate.manifest.coverage.originId}:${candidate.manifest.coverage.destinationId}`===legKey)
+ const window=state.displayWindowByLeg[legKey]??result.requirement.scope.dateWindow,queryReady=!!renderedResult&&result.currentResultKey()===renderedResult.resultKey
+ const previousWindow=adjacentCalendarWindow(window,'previous'),nextWindow=adjacentCalendarWindow(window,'next')
+ const previousDisabled=!queryReady||!previousWindow
+ const nextDisabled=!queryReady||!nextWindow
+ const chooseDate=(date:string)=>{
+  if(!renderedResult||!binding)return
+  const calendarDateByLeg={...state.calendarDateByLeg,[legKey]:date}
+  const command={kind:'calendarDateByLeg' as const,artifactId:state.artifactId,calendarDateByLeg,expectedRevision:state.revision}
+  const scope={legKey,date,availableDates:days.filter(day=>day.count>0).map(day=>day.date),resourceKey:binding.resourceKey,datasetId:binding.datasetId,datasetRevision:binding.datasetRevision,sourceVersion:binding.manifest.source.sourceVersion,resultKey:renderedResult.resultKey,currentResultKey:result.currentResultKey,selectionKey:JSON.stringify(state.selectedFareIds)}
+  return services.dispatch?.calendarDateFromQuery?.(command,scope)??services.state.dispatch(command)
+ }
+ const toggleFare=(item:FareItem)=>{
+  const selected=selection.state.selectedFareIds.includes(item.id)
+  recordDisplayInteraction(node.store,{artifactId:props.artifactRef,componentRef:node.componentRef,action:selected?'deselect':'select'})
+  const command={kind:'select' as const,artifactId:state.artifactId,fareId:item.id,selected:!selected}
+  if(selected||!services.dispatch?.selectFromQuery)return dispatch(command)
+  if(!renderedResult||!binding)return{status:'stale' as const,revision:services.state.get(state.artifactId).revision}
+  services.activate(props.artifactRef)
+  const scope={kind:'query-result' as const,fareIds,resultKey:renderedResult.resultKey,currentResultKey:result.currentResultKey,resourceKey:binding.resourceKey,datasetId:binding.datasetId,datasetRevision:binding.datasetRevision,sourceVersion:binding.manifest.source.sourceVersion}
+  return services.dispatch.selectFromQuery({...command,expectedRevision:services.state.get(state.artifactId).revision},scope)
+ }
+ const navigate=(target:{from:string;to:string}|undefined)=>{if(!target)return;dispatch({kind:'displayWindowByLeg',artifactId:state.artifactId,displayWindowByLeg:{...state.displayWindowByLeg,[legKey]:target}})}
+ return <Card className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-inline" role="group" aria-label="Calendar date pages"><Button variant="outline" type="button" aria-label="Previous dates" disabled={previousDisabled} onClick={()=>navigate(previousWindow)}><span aria-hidden="true">←</span></Button><Button variant="outline" type="button" aria-label="Next dates" disabled={nextDisabled} onClick={()=>navigate(nextWindow)}><span aria-hidden="true">→</span></Button></div><div className="travel-calendar">{days.map(day=>{const item=day.representative,fareSelected=item?selection.state.selectedFareIds.includes(item.id):false,dateSelected=state.calendarDateByLeg[legKey]===day.date,itemReady=!!item&&!!binding&&queryReady&&fareMatchesScope(item,binding.manifest.coverage);return <div className="travel-calendar-option" key={day.date}><Button variant="outline" type="button" disabled={!itemReady} aria-pressed={dateSelected} onClick={()=>{if(item)chooseDate(day.date)}}><span>{new Date(`${day.date}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{item?money(item.priceCents):'No fare'}</strong><small>{day.count} options</small></Button>{item&&<Button type="button" size="sm" variant={fareSelected?'default':'outline'} disabled={!itemReady} aria-pressed={fareSelected} aria-label={`${fareSelected?'Remove':'Add'} cheapest fare on ${day.date} ${fareSelected?'from':'to'} trip`} onClick={()=>toggleFare(item)}>{fareSelected?'Added':'Add cheapest'}</Button>}</div>})}</div>{!days.length&&<p role="status">No options match. Use the arrows to try another week.</p>}</Card>
 }
 export function Comparison(props:WidgetProps) {
  const node=useDisplayNode(),result=useModeStats(props.artifactRef,{componentRef:node.componentRef??`${props.artifactRef}:comparison`,purpose:'comparison-matrix',datasetRef:props.datasetRef,baseline:'active'}),modes=result.data?.modes??[]

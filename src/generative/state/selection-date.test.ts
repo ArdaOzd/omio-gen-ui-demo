@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { ArtifactIdSchema } from '../contracts'
 import { FareItemSchema, ResultKeySchema, type FareItem } from '../contracts/query-groups'
 import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
-import { createActionRouter, type QueryFareSelectionScope } from './action-router'
+import { createActionRouter, type CoverageLoadStatus, type QueryFareSelectionScope } from './action-router'
 import { createUIStateStore } from './ui-state-store'
 
 const id = ArtifactIdSchema.parse('trip')
@@ -29,7 +29,7 @@ function item(originId: string, destinationId: string, serviceDate: string): Far
   })
 }
 
-async function fixture(originId = 'london', destinationId = 'paris', dateWindow = { from: dates[0]!, to: dates.at(-1)! }) {
+async function fixture(originId = 'london', destinationId = 'paris', dateWindow = { from: dates[0]!, to: dates.at(-1)! }, onCoverageStatus?: (status:CoverageLoadStatus)=>void) {
   const fixed = createFixedProjectionFixture({ rows: dates.map(date => item(originId, destinationId, date)), sourceVersion: 'selection-source-v1' })
   const scope = fixed.scope({ originId, destinationId, dateWindow, passengers: 1, earliestDeparture: { date: dateWindow.from, minutes: 0 } })
   const manifest = await fixed.bridge.loadScope(scope, new AbortController().signal)
@@ -43,7 +43,7 @@ async function fixture(originId = 'london', destinationId = 'paris', dateWindow 
   if (!page || page.kind !== 'farePage') throw new Error('Selection fixture did not return a fare page')
   const state = createUIStateStore()
   state.initializeMissing(id, { datasetRefs: [binding.datasetId], dates: { start: dates[0]! } })
-  const router = createActionRouter(state, { bridge: fixed.bridge })
+  const router = createActionRouter(state, { bridge: fixed.bridge, onCoverageStatus })
   let currentResultKey = ResultKeySchema.parse('selection-result-v1')
   const fare = (date: string) => FareItemSchema.shape.id.parse(`${originId}-${destinationId}-${date}`)
   const selectionScope = (fareIds: QueryFareSelectionScope['fareIds']): QueryFareSelectionScope => ({
@@ -156,5 +156,31 @@ it('rechecks the committed result after asynchronous reconciliation before align
   await router.whenIdle(id)
   expect(state.get(id).dates).toEqual({ start: '2026-10-09' })
   expect(state.get(id).selectedFareIds).toEqual([])
+  router.dispose()
+})
+
+it('cancels an obsolete pin lookup before it can realign a newer selection state', async () => {
+  const statuses: CoverageLoadStatus[] = []
+  const { bridge, state, router, fare, selectionScope } = await fixture('london','paris',{from:dates[0]!,to:dates.at(-1)!},status=>statuses.push(status))
+  const originalLookup = bridge.lookupPins.bind(bridge)
+  let markStarted = () => {}
+  const started = new Promise<void>(resolve => { markStarted = resolve })
+  let lookupCount=0
+  bridge.lookupPins = async (input, signal) => {
+    lookupCount+=1
+    if(lookupCount>1)return originalLookup(input,signal)
+    markStarted()
+    await new Promise<void>((_resolve, reject) => {
+      signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true })
+    })
+    return originalLookup(input, signal)
+  }
+  const obsolete = fare('2026-10-10'),selected=fare('2026-10-11')
+  router.selectFromQuery({ kind: 'select', artifactId: id, fareId: obsolete, selected: true }, selectionScope([obsolete]))
+  await started
+  router.selectFromQuery({ kind: 'select', artifactId: id, fareId: selected, selected: true }, selectionScope([obsolete,selected]))
+  await router.whenIdle(id)
+  expect(state.get(id)).toMatchObject({ dates: { start: '2026-10-11' }, selectedFareIds: [selected] })
+  expect(statuses.filter(status=>status.status==='error')).toEqual([])
   router.dispose()
 })

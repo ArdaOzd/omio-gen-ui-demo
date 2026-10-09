@@ -25,6 +25,7 @@ import {
 import { stableFingerprint, type ProjectionRequirement } from '../data/projection-coordinator'
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
 import { fallbackLegDate } from '../state/itinerary-schedule'
+import { earliestDepartureInWindow } from '../state/leg-bindings'
 export { filterPredicate } from '../state/filter-predicate'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 
@@ -165,7 +166,7 @@ function scopeBinding(state: ArtifactUIState, bridge: ServerFareDataBridge, opti
     ? addMinutes(previous.serviceDate, previous.departureMinutes + previous.durationMinutes
       + (state.stays.find(stay => stay.cityId === originId)?.nights ?? 0) * 24 * 60)
     : binding?.manifest.coverage.earliestDeparture ?? { date: window.from, minutes: 0 }
-  const earliestDeparture = threshold.date < window.from ? { date: window.from, minutes: 0 } : threshold
+  const earliestDeparture = earliestDepartureInWindow(window,threshold)
   const scope = {
     kind: 'fareScope' as const,
     originId,

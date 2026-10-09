@@ -72,7 +72,7 @@ const scheduleCoverages = (scopes: readonly FareScope[]) => scopes.map(scope => 
 
 export function createActionRouter(store: UIStateStore, options: { bridge?: ServerFareDataBridge; activate?: (id: ArtifactId) => void; onCoverageStatus?: (status: CoverageLoadStatus) => void; onSourceChanged?: (artifactId: ArtifactId, resourceKey: ResourceKey) => void } = {}) {
   const requests = new Map<ArtifactId, { controller: AbortController; promise: Promise<void> }>()
-  const selections = new Map<ArtifactId, { token: symbol; promise: Promise<void> }>()
+  const selections = new Map<ArtifactId, { token: symbol; controller: AbortController; promise: Promise<void> }>()
   type SourceWatch = { sourceVersion: string; selectedLegByFare: ReadonlyMap<FareId, string>; stop: () => void }
   const sourceWatches = new Map<ArtifactId, Map<ResourceKey, SourceWatch>>()
 
@@ -219,9 +219,13 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
   const reconcileSelection = (artifactId: ArtifactId, command: Extract<UICommand, { kind: 'select' }> | undefined, scope: QueryFareSelectionScope | undefined): void => {
     const bridge = options.bridge
     if (!bridge) return
+    selections.get(artifactId)?.controller.abort()
     const token = Symbol()
+    const controller = new AbortController()
     const selectedKey = JSON.stringify(store.get(artifactId).selectedFareIds)
     const promise = Promise.resolve().then(async () => {
+      if (selections.get(artifactId)?.token !== token || JSON.stringify(store.get(artifactId).selectedFareIds) !== selectedKey) return
+      if (command?.selected && scope) await bridge.lookupPins({version:1,requestId:`selection-${crypto.randomUUID()}`,sourceVersion:scope.sourceVersion,pins:[{fareId:command.fareId,resourceKey:scope.resourceKey}]},controller.signal)
       if (selections.get(artifactId)?.token !== token || JSON.stringify(store.get(artifactId).selectedFareIds) !== selectedKey) return
       let state = store.get(artifactId)
       const facts = cachedSelectedFacts(state, bridge)
@@ -238,7 +242,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
         const offset = Date.parse(legDate(state, chosen.originId)) - Date.parse(state.dates.start)
         const start = new Date(Date.parse(chosen.serviceDate) - offset).toISOString().slice(0, 10)
         if (start !== state.dates.start) {
-          const aligned = store.dispatch({ kind: 'dates', artifactId, dates: { start }, expectedRevision: state.revision })
+          const aligned = store.dispatch({ kind: 'calendarDates', artifactId, dates: { start }, expectedRevision: state.revision })
           if (aligned.status === 'stale') throw new Error('Stale selected-date alignment')
           state = store.get(artifactId)
         }
@@ -260,6 +264,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
       }
       await retry(artifactId, cachedSelectedFacts(store.get(artifactId), bridge))
     }).catch(() => {
+      if(controller.signal.aborted||selections.get(artifactId)?.token!==token)return
       if (command?.selected && selections.get(artifactId)?.token === token) {
         const current = store.get(artifactId)
         if (current.selectedFareIds.includes(command.fareId)) store.dispatch({ kind: 'select', artifactId, fareId: command.fareId, selected: false, expectedRevision: current.revision })
@@ -268,7 +273,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     }).finally(() => {
       if (selections.get(artifactId)?.token === token) selections.delete(artifactId)
     })
-    selections.set(artifactId, { token, promise })
+    selections.set(artifactId, { token, controller, promise })
   }
 
   const route = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => {
@@ -290,6 +295,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
   const cancelPending = () => {
     for (const request of requests.values()) request.controller.abort()
     requests.clear()
+    selections.forEach(selection=>selection.controller.abort())
     selections.clear()
     for (const watches of sourceWatches.values()) for (const watch of watches.values()) watch.stop()
     sourceWatches.clear()

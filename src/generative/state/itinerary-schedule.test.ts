@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { ArtifactIdSchema, FareIdSchema, UIStateRevisionSchema, type ArtifactUIState, type BoundedFareFact, type Coverage } from '../contracts'
 import type { FareScope } from '../contracts/query-groups'
 import { fareMeetsThreshold, legThreshold, scheduleLegs, staleDownstreamFareIds } from './itinerary-schedule'
-import {legState} from './leg-bindings'
+import {legRequest,legState} from './leg-bindings'
 
 const state = (nights = 3): ArtifactUIState => ({
   artifactId: ArtifactIdSchema.parse('schedule'), revision: UIStateRevisionSchema.parse(0), runtimeVariables: {}, datasetRefs: [], datasetBindings:{},
@@ -50,6 +50,7 @@ it('returns an empty query state when a selected-arrival threshold exceeds the r
  const windowed={...state(),dates:{start:'2026-10-26',end:'2026-10-27'},displayWindowByLeg:{'paris:rome':{from:'2026-10-26',to:'2026-10-27'}}}
  expect(legState(windowed,scope('paris','rome'),[first]).dates).toEqual({start:'2026-10-27',end:'2026-10-27'})
  expect(legState(windowed,scope('paris','rome'),[first]).runtimeVariables.$outsideDisplayWindow).toBe(true)
+ expect(legRequest(windowed,scope('paris','rome'),[first])).toMatchObject({dateWindow:{from:'2026-10-27',to:'2026-10-27'},earliestDeparture:{date:'2026-10-27',minutes:1439}})
 })
 
 it('excludes coverage margins before the display window without carrying an earlier minute threshold',()=>{
@@ -58,4 +59,5 @@ it('excludes coverage margins before the display window without carrying an earl
  const scoped=legState(windowed,scope('paris','rome'),[first])
  expect(scoped.dates).toEqual({start:'2026-10-30',end:'2026-11-01'})
  expect(scoped.runtimeVariables.$earliestDepartureMinutes).toBe(0)
+ expect(legRequest(windowed,scope('paris','rome'),[first])).toMatchObject({dateWindow:{from:'2026-10-30',to:'2026-11-01'},earliestDeparture:{date:'2026-10-30',minutes:0}})
 })

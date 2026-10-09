@@ -53,5 +53,14 @@ describe('supported route shape', () => {
       'london:paris': { from: '2026-10-10', to: '2026-10-13' },
       'paris:rome': { from: '2026-10-11', to: '2026-10-13' },
     })
+
+    store.dispatch({ kind: 'calendarDates', artifactId: id, dates: { start: '2026-10-12', end: '2026-10-15' } })
+    expect(store.get(id)).toMatchObject({
+      dates: { start: '2026-10-12', end: '2026-10-15' },
+      displayWindowByLeg: {
+        'london:paris': { from: '2026-10-10', to: '2026-10-13' },
+        'paris:rome': { from: '2026-10-11', to: '2026-10-13' },
+      },
+    })
   })
 })

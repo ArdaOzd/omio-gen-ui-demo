@@ -31,10 +31,11 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
     let patch: Partial<ArtifactUIState>
     switch (command.kind) {
       case 'filters': patch={filters:command.filters};break
-      case 'dates': case 'calendarDates': {
+      case 'dates': {
         const shifted=withTripDates(current,command.dates)
         patch={dates:shifted.dates,displayWindowByLeg:shifted.displayWindowByLeg};break
       }
+      case 'calendarDates':patch={dates:command.dates};break
       case 'sort': patch={sort:command.sort};break
       case 'sortByLeg':patch={sortByLeg:command.sortByLeg};break
       case 'calendarDateByLeg':patch={calendarDateByLeg:command.calendarDateByLeg};break
