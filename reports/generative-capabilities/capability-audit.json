@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-09T16:06:36.052Z",
+  "generatedAt": "2026-10-09T16:08:54.943Z",
   "catalogVersion": "1.1.0",
   "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
   "rubric": {
@@ -21,7 +21,8 @@
     "registeredAgentVisibleComponents": 49,
     "modelGeneratedComponents": 49,
     "rankedCases": 19,
-    "evidenceAttempts": 33,
+    "evidenceRecords": 33,
+    "distinctAttempts": 30,
     "casesWithEvidence": 18,
     "acceptedCases": 17,
     "plannedWithoutRun": 1,

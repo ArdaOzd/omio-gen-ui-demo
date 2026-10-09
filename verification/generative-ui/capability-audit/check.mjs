@@ -69,6 +69,8 @@ for (const file of (await readdir(evidenceRoot).catch(() => [])).filter(name => 
 
 if (final) {
   assert.equal(report.scope.modelGeneratedComponents, 49, 'Final report must contain accepted direct evidence for all 49 descriptors')
+  assert.equal(report.scope.evidenceRecords, 33)
+  assert.equal(report.scope.distinctAttempts, 30)
   assert.equal(report.scope.rankedCases, 19)
   assert.equal(report.scope.casesWithEvidence, 18)
   assert.equal(report.scope.acceptedCases, 17)
