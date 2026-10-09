@@ -51,7 +51,14 @@ async function waitForTurn(page, network, startedAt) {
     await page.waitForTimeout(500)
     const stop = page.getByRole('button', { name: 'Stop response' })
     const stopped = await stop.count() === 0 || await stop.isDisabled().catch(() => true)
-    if (network.requests.length > 0 && network.inflight === 0 && Date.now() - network.lastActivity > 6_000 && stopped) return
+    const record = await readLatestThread(page).catch(() => undefined)
+    const assistantMessages = (record?.messages ?? []).filter(message => message.role === 'assistant')
+    const acceptedScene = assistantMessages.some(message => (message.parts ?? []).some(part => part.type === 'tool-present' && part.state === 'output-available'))
+    const lastParts = assistantMessages.at(-1)?.parts ?? []
+    const lastToolIndex = lastParts.findLastIndex(part => typeof part.type === 'string' && part.type.startsWith('tool-'))
+    const lastTextIndex = lastParts.findLastIndex(part => part.type === 'text' && typeof part.text === 'string' && part.text.trim())
+    const finalTextAfterTools = lastTextIndex > lastToolIndex
+    if (acceptedScene && finalTextAfterTools && network.inflight === 0 && Date.now() - network.lastActivity > 6_000 && stopped) return
   }
   throw new Error(`Agent turn did not finish within ${timeoutMs}ms`)
 }
@@ -119,6 +126,8 @@ try {
         noHorizontalOverflowAt390: !overflow,
         consoleErrors,
         pageErrors,
+        assistantText: (record?.messages ?? []).filter(message => message.role === 'assistant').flatMap(message => (message.parts ?? []).filter(part => part.type === 'text').map(part => part.text)).filter(Boolean),
+        visibleText: await page.locator('body').innerText(),
         latestScene
       }
       await writeFile(path.join(output, `${testCase.id}.json`), `${JSON.stringify(result, null, 2)}\n`)
