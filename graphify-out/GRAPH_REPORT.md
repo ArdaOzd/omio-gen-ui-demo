@@ -1,7 +1,7 @@
-# Graph Report - omio-gen-ui-demo  (2026-10-08)
+# Graph Report - omio-gen-ui-demo  (2026-10-09)
 
 ## Corpus Check
-- 249 files · ~283,650 words
+- 249 files · ~283,836 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c78348b1`
+- Built from commit: `3a93f497`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -39,7 +39,7 @@
 - ResultsPage.jsx
 - controls/index.tsx
 - useDisplayNode
-- query-engine.ts
+- assertNoBulkData
 - chat-route.ts
 - query-groups.ts
 - contracts/display-context.ts
@@ -48,7 +48,7 @@
 - DatasetId
 - App.jsx
 - components.json
-- assertNoBulkData
+- query-engine.ts
 - check-shadcn.mjs
 - display-context-provider.tsx
 - state/display-context.ts
@@ -77,7 +77,7 @@
 - Contributing Guide
 - Omio Generative UI Demo
 - Six Task-Shaped Composition Pattern Families
-- worker-client.ts
+- abortError
 - seeds.py
 - Progressive Fare Strip
 - run.mjs
@@ -297,9 +297,9 @@ Nodes (14): Checkbox(), Field(), FieldGroup(), FieldLegend(), FieldSet(), fieldV
 Cohesion: 0.25
 Nodes (30): carrierLabel(), cityLabel(), departure(), duration(), money(), useQueryFareSelection(), useDisplayNode(), fareInspectionItems() (+22 more)
 
-### Community 24 - "query-engine.ts"
+### Community 24 - "assertNoBulkData"
 Cohesion: 0.16
-Nodes (13): AllowedFareField, BoundedQueryResult, QueryIR, compare(), defaults, executeQuery(), matches(), QueryLimits (+5 more)
+Nodes (11): AgentContextEnvelopeSchema, CoverageSchema, QueryIRSchema, assertNoBulkData(), fareFields, forbidden, hasFareRowFields(), LEAKAGE_SENTINEL (+3 more)
 
 ### Community 25 - "chat-route.ts"
 Cohesion: 0.15
@@ -314,16 +314,16 @@ Cohesion: 0.08
 Nodes (25): boundedFact, ComponentRef, ComponentRefSchema, componentRefValue, date, DisplayCell, displayCells, DisplayCellSchema (+17 more)
 
 ### Community 28 - "browser.ts"
-Cohesion: 0.14
-Nodes (20): base, benchmarkRows(), csvRows(), expected(), id, longTasks, Metric, percentile() (+12 more)
+Cohesion: 0.16
+Nodes (19): base, benchmarkRows(), csvRows(), expected(), id, longTasks, Metric, percentile() (+11 more)
 
 ### Community 29 - "catalog.ts"
 Cohesion: 0.10
 Nodes (17): CatalogComponentName, ComponentFunctionDeclaration, componentFunctions, none, catalogDescriptors, catalogHash, catalogVersion, componentNames (+9 more)
 
 ### Community 30 - "DatasetId"
-Cohesion: 0.16
-Nodes (11): DatasetId, DatasetRevisionSchema, scalar, WorkerRequest, WorkerResponse, QueryResource, LocalQueryEngine, id (+3 more)
+Cohesion: 0.14
+Nodes (16): BoundedQueryResult, DatasetId, DatasetRevisionSchema, QueryIR, scalar, WorkerRequest, WorkerResponse, WorkerResponseSchema (+8 more)
 
 ### Community 31 - "App.jsx"
 Cohesion: 0.14
@@ -333,9 +333,9 @@ Nodes (19): buildSearchUrl(), getJson(), locationValue(), minutesFromDuration(),
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 33 - "assertNoBulkData"
-Cohesion: 0.16
-Nodes (11): AgentContextEnvelopeSchema, CoverageSchema, QueryIRSchema, assertNoBulkData(), fareFields, forbidden, hasFareRowFields(), LEAKAGE_SENTINEL (+3 more)
+### Community 33 - "query-engine.ts"
+Cohesion: 0.23
+Nodes (10): AllowedFareField, FareFieldSchema, compare(), defaults, executeQuery(), matches(), QueryLimits, QueryResources (+2 more)
 
 ### Community 34 - "check-shadcn.mjs"
 Cohesion: 0.15
@@ -402,8 +402,8 @@ Cohesion: 0.17
 Nodes (10): FareScopeManifestSchema, QueryGroupsRequestSchema, filters, item, scope, item, lookupResource, manifest (+2 more)
 
 ### Community 50 - "query-engine-fixture.ts"
-Cohesion: 0.13
-Nodes (12): CONTRACT_VERSION, DatasetManifest, DatasetManifestSchema, FareFieldSchema, FareRowSchema, rows, fixture(), rows (+4 more)
+Cohesion: 0.11
+Nodes (14): CONTRACT_VERSION, DatasetManifest, DatasetManifestSchema, FareRow, FareRowSchema, rows, fixture(), rows (+6 more)
 
 ### Community 51 - "fixed-projection-fixture.ts"
 Cohesion: 0.09
@@ -449,9 +449,9 @@ Nodes (12): Deterministic Synthetic Timetable, Source-Scoped Fare Lookup Endpoin
 Cohesion: 0.18
 Nodes (13): Fixed Projection Union, Combined Tradeoff Dashboard Pattern, Component Function Registry, 49-Component Catalog Vocabulary, Fare Scope Manifest, Fixed Projection Boundary, Focused Fare Discovery Pattern, Journey Review Pattern (+5 more)
 
-### Community 62 - "worker-client.ts"
-Cohesion: 0.28
-Nodes (8): abortError(), WorkerResponseSchema, createLocalQueryEngine(), createWorkerQueryEngine(), receive(), request(), cancel(), QueryWorker
+### Community 62 - "abortError"
+Cohesion: 0.36
+Nodes (5): abortError(), receive(), request(), cancel(), QueryWorker
 
 ### Community 63 - "seeds.py"
 Cohesion: 0.29
@@ -659,9 +659,9 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `FareDataBridge` connect `FareDataBridge` to `index.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `DatasetId` connect `DatasetId` to `ArtifactIdSchema`, `action-router.ts`, `projection-coordinator.ts`, `index.ts`, `snapshot-exporter.ts`, `context.tsx`, `persistence.ts`, `query-engine-fixture.ts`, `trip-planning-fixture.tsx`, `query-engine.ts`, `query-groups.ts`, `browser.ts`, `worker-client.ts`?**
+- **Why does `DatasetId` connect `DatasetId` to `query-engine.ts`, `ArtifactIdSchema`, `action-router.ts`, `projection-coordinator.ts`, `index.ts`, `snapshot-exporter.ts`, `context.tsx`, `persistence.ts`, `query-engine-fixture.ts`, `trip-planning-fixture.tsx`, `query-groups.ts`, `browser.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `ArtifactIdSchema` connect `ArtifactIdSchema` to `projection-coordinator.test.ts`, `createUIStateStore`, `action-router.ts`, `index.ts`, `views/index.tsx`, `routes.tsx`, `context.tsx`, `present-boundary.tsx`, `persistence.ts`, `main.tsx`, `trip-planning-fixture.tsx`, `chat-route.ts`, `query-groups.ts`, `query-engine-fixture.ts`, `fixed-projection-fixture.ts`, `runtime-provider.tsx`, `createDisplayContextStore`, `planning-tracker.tsx`, `chat-continuation.test.ts`?**
+- **Why does `ArtifactIdSchema` connect `ArtifactIdSchema` to `projection-coordinator.test.ts`, `createUIStateStore`, `action-router.ts`, `index.ts`, `views/index.tsx`, `routes.tsx`, `context.tsx`, `present-boundary.tsx`, `persistence.ts`, `main.tsx`, `trip-planning-fixture.tsx`, `chat-route.ts`, `query-groups.ts`, `query-engine.ts`, `fixed-projection-fixture.ts`, `runtime-provider.tsx`, `createDisplayContextStore`, `planning-tracker.tsx`, `chat-continuation.test.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `createUIStateStore()` (e.g. with `dispatch()` and `get()`) actually correct?**
   _`createUIStateStore()` has 3 INFERRED edges - model-reasoned connections that need verification._

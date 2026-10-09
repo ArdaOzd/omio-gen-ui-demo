@@ -1048,71 +1048,6 @@
       "source_location": "L21"
     },
     {
-      "id": "src_generative_contracts_index_allowedfarefield",
-      "label": "AllowedFareField",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "allowedfarefield",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L45"
-    },
-    {
-      "id": "src_generative_contracts_index_boundedqueryresult",
-      "label": "BoundedQueryResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "boundedqueryresult",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L193"
-    },
-    {
-      "id": "src_generative_contracts_index_queryir",
-      "label": "QueryIR",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "queryir",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L191"
-    },
-    {
-      "id": "src_generative_query_query_engine_querylimits",
-      "label": "QueryLimits",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "querylimits",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "src_generative_query_query_engine_queryresources",
-      "label": "QueryResources",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "queryresources",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L4"
-    },
-    {
       "id": "agent_codex_provider_decision",
       "label": "Decision",
       "_callable": true,
@@ -1568,19 +1503,6 @@
       "source_location": "L14"
     },
     {
-      "id": "src_generative_contracts_index_farerow",
-      "label": "FareRow",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 28,
-      "community_name": "browser.ts",
-      "file_type": "code",
-      "norm_label": "farerow",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L43"
-    },
-    {
       "id": "src_generative_contracts_index_jsonscalar",
       "label": "JsonScalar",
       "_callable": true,
@@ -1672,6 +1594,19 @@
       "source_location": "L25"
     },
     {
+      "id": "src_generative_contracts_index_boundedqueryresult",
+      "label": "BoundedQueryResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": "boundedqueryresult",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L193"
+    },
+    {
       "id": "src_generative_contracts_index_datasetid",
       "label": "DatasetId",
       "_callable": true,
@@ -1683,6 +1618,19 @@
       "norm_label": "datasetid",
       "source_file": "src/generative/contracts/index.ts",
       "source_location": "L15"
+    },
+    {
+      "id": "src_generative_contracts_index_queryir",
+      "label": "QueryIR",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": "queryir",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L191"
     },
     {
       "id": "src_generative_query_protocol_workerrequest",
@@ -1735,6 +1683,45 @@
       "norm_label": "localqueryengine",
       "source_file": "src/generative/query/worker-client.ts",
       "source_location": "L5"
+    },
+    {
+      "id": "src_generative_contracts_index_allowedfarefield",
+      "label": "AllowedFareField",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "query-engine.ts",
+      "file_type": "code",
+      "norm_label": "allowedfarefield",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_generative_query_query_engine_querylimits",
+      "label": "QueryLimits",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "query-engine.ts",
+      "file_type": "code",
+      "norm_label": "querylimits",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_generative_query_query_engine_queryresources",
+      "label": "QueryResources",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "query-engine.ts",
+      "file_type": "code",
+      "norm_label": "queryresources",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L4"
     },
     {
       "id": "src_generative_catalog_display_context_provider_publishdisplayinput",
@@ -2114,6 +2101,19 @@
       "source_location": "L62"
     },
     {
+      "id": "src_generative_contracts_index_farerow",
+      "label": "FareRow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "farerow",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L43"
+    },
+    {
       "id": "src_generative_contracts_query_groups_fareleg",
       "label": "FareLeg",
       "_callable": true,
@@ -2458,7 +2458,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": "queryworker",
       "source_file": "src/generative/query/worker-client.ts",
@@ -7315,88 +7315,52 @@
       "source_location": "L98"
     },
     {
-      "id": "src_generative_query_query_engine_compare",
-      "label": "compare()",
+      "id": "src_generative_contracts_privacy_assertnobulkdata",
+      "label": "assertNoBulkData()",
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "compare()",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L7"
+      "norm_label": "assertnobulkdata()",
+      "source_file": "src/generative/contracts/privacy.ts",
+      "source_location": "L6"
     },
     {
-      "id": "src_generative_query_query_engine_executequery",
-      "label": "executeQuery()",
+      "id": "src_generative_contracts_privacy_hasfarerowfields",
+      "label": "hasFareRowFields()",
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "executequery()",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L24"
+      "norm_label": "hasfarerowfields()",
+      "source_file": "src/generative/contracts/privacy.ts",
+      "source_location": "L3"
     },
     {
-      "id": "src_generative_query_query_engine_matches",
-      "label": "matches()",
+      "id": "src_generative_presentation_tree_test_leaf",
+      "label": "leaf()",
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "matches()",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L8"
+      "norm_label": "leaf()",
+      "source_file": "src/generative/presentation/tree.test.ts",
+      "source_location": "L4"
     },
     {
-      "id": "src_generative_query_query_engine_test_fare",
-      "label": "fare()",
+      "id": "src_generative_presentation_tree_test_tree",
+      "label": "tree()",
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "fare()",
-      "source_file": "src/generative/query/query-engine.test.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_generative_query_query_engine_test_query",
-      "label": "query()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "query()",
-      "source_file": "src/generative/query/query-engine.test.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_generative_query_query_engine_valueof",
-      "label": "valueOf()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": "valueof()",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "src_generative_query_worker_client_localqueryengine_execute",
-      "label": ".execute()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "query-engine.ts",
-      "file_type": "code",
-      "norm_label": ".execute()",
-      "source_file": "src/generative/query/worker-client.ts",
-      "source_location": "L8"
+      "norm_label": "tree()",
+      "source_file": "src/generative/presentation/tree.test.ts",
+      "source_location": "L5"
     },
     {
       "id": "agent_chat_route_handlechat",
@@ -8575,6 +8539,30 @@
       "source_location": "L367"
     },
     {
+      "id": "src_generative_query_worker_client_createlocalqueryengine",
+      "label": "createLocalQueryEngine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": "createlocalqueryengine()",
+      "source_file": "src/generative/query/worker-client.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "src_generative_query_worker_client_createworkerqueryengine",
+      "label": "createWorkerQueryEngine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": "createworkerqueryengine()",
+      "source_file": "src/generative/query/worker-client.ts",
+      "source_location": "L18"
+    },
+    {
       "id": "src_generative_query_worker_client_localqueryengine_append",
       "label": ".append()",
       "_callable": true,
@@ -8597,6 +8585,18 @@
       "norm_label": ".dispose()",
       "source_file": "src/generative/query/worker-client.ts",
       "source_location": "L10"
+    },
+    {
+      "id": "src_generative_query_worker_client_localqueryengine_execute",
+      "label": ".execute()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": ".execute()",
+      "source_file": "src/generative/query/worker-client.ts",
+      "source_location": "L8"
     },
     {
       "id": "src_generative_query_worker_client_localqueryengine_register",
@@ -8851,52 +8851,52 @@
       "source_location": "L9"
     },
     {
-      "id": "src_generative_contracts_privacy_assertnobulkdata",
-      "label": "assertNoBulkData()",
+      "id": "src_generative_query_query_engine_compare",
+      "label": "compare()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "assertnobulkdata()",
-      "source_file": "src/generative/contracts/privacy.ts",
-      "source_location": "L6"
+      "norm_label": "compare()",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L7"
     },
     {
-      "id": "src_generative_contracts_privacy_hasfarerowfields",
-      "label": "hasFareRowFields()",
+      "id": "src_generative_query_query_engine_executequery",
+      "label": "executeQuery()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "hasfarerowfields()",
-      "source_file": "src/generative/contracts/privacy.ts",
-      "source_location": "L3"
+      "norm_label": "executequery()",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L24"
     },
     {
-      "id": "src_generative_presentation_tree_test_leaf",
-      "label": "leaf()",
+      "id": "src_generative_query_query_engine_matches",
+      "label": "matches()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "leaf()",
-      "source_file": "src/generative/presentation/tree.test.ts",
-      "source_location": "L4"
+      "norm_label": "matches()",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L8"
     },
     {
-      "id": "src_generative_presentation_tree_test_tree",
-      "label": "tree()",
+      "id": "src_generative_query_query_engine_valueof",
+      "label": "valueOf()",
       "_callable": true,
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "tree()",
-      "source_file": "src/generative/presentation/tree.test.ts",
-      "source_location": "L5"
+      "norm_label": "valueof()",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L23"
     },
     {
       "id": "scripts_check_shadcn_attributesof",
@@ -10567,6 +10567,30 @@
       "source_location": "L7"
     },
     {
+      "id": "src_generative_query_query_engine_test_fare",
+      "label": "fare()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "fare()",
+      "source_file": "src/generative/query/query-engine.test.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_generative_query_query_engine_test_query",
+      "label": "query()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "query()",
+      "source_file": "src/generative/query/query-engine.test.ts",
+      "source_location": "L12"
+    },
+    {
       "id": "src_generative_testing_query_engine_fixture_createqueryenginefixture",
       "label": "createQueryEngineFixture()",
       "_callable": true,
@@ -11748,35 +11772,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": "aborterror()",
       "source_file": "src/generative/data/resource-loader.ts",
       "source_location": "L7"
-    },
-    {
-      "id": "src_generative_query_worker_client_createlocalqueryengine",
-      "label": "createLocalQueryEngine()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "worker-client.ts",
-      "file_type": "code",
-      "norm_label": "createlocalqueryengine()",
-      "source_file": "src/generative/query/worker-client.ts",
-      "source_location": "L45"
-    },
-    {
-      "id": "src_generative_query_worker_client_createworkerqueryengine",
-      "label": "createWorkerQueryEngine()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "worker-client.ts",
-      "file_type": "code",
-      "norm_label": "createworkerqueryengine()",
-      "source_file": "src/generative/query/worker-client.ts",
-      "source_location": "L18"
     },
     {
       "id": "src_generative_query_worker_client_createworkerqueryengine_receive",
@@ -11784,7 +11784,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": "receive()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -11796,7 +11796,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": "request()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -11808,7 +11808,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": "cancel()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -11820,7 +11820,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": ".addeventlistener()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -11832,7 +11832,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": ".postmessage()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -11844,7 +11844,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": ".removeeventlistener()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -11856,7 +11856,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 62,
-      "community_name": "worker-client.ts",
+      "community_name": "abortError",
       "file_type": "code",
       "norm_label": ".terminate()",
       "source_file": "src/generative/query/worker-client.ts",
@@ -17125,70 +17125,136 @@
       "source_location": "L1"
     },
     {
-      "id": "src_generative_query_query_engine",
-      "label": "query-engine.ts",
+      "id": "src_generative_contracts_index_agentcontextenvelopeschema",
+      "label": "AgentContextEnvelopeSchema",
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "query-engine.ts",
-      "source_file": "src/generative/query/query-engine.ts",
+      "norm_label": "agentcontextenvelopeschema",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L115"
+    },
+    {
+      "id": "src_generative_contracts_index_coverageschema",
+      "label": "CoverageSchema",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "assertNoBulkData",
+      "file_type": "code",
+      "norm_label": "coverageschema",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_generative_contracts_index_queryirschema",
+      "label": "QueryIRSchema",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "assertNoBulkData",
+      "file_type": "code",
+      "norm_label": "queryirschema",
+      "source_file": "src/generative/contracts/index.ts",
+      "source_location": "L182"
+    },
+    {
+      "id": "src_generative_contracts_privacy",
+      "label": "privacy.ts",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "assertNoBulkData",
+      "file_type": "code",
+      "norm_label": "privacy.ts",
+      "source_file": "src/generative/contracts/privacy.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_generative_query_query_engine_defaults",
-      "label": "defaults",
+      "id": "src_generative_contracts_privacy_farefields",
+      "label": "fareFields",
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "defaults",
-      "source_file": "src/generative/query/query-engine.ts",
-      "source_location": "L6"
+      "norm_label": "farefields",
+      "source_file": "src/generative/contracts/privacy.ts",
+      "source_location": "L2"
     },
     {
-      "id": "src_generative_query_query_engine_test",
-      "label": "query-engine.test.ts",
+      "id": "src_generative_contracts_privacy_forbidden",
+      "label": "forbidden",
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "query-engine.test.ts",
-      "source_file": "src/generative/query/query-engine.test.ts",
+      "norm_label": "forbidden",
+      "source_file": "src/generative/contracts/privacy.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_generative_contracts_privacy_leakage_sentinel",
+      "label": "LEAKAGE_SENTINEL",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "assertNoBulkData",
+      "file_type": "code",
+      "norm_label": "leakage_sentinel",
+      "source_file": "src/generative/contracts/privacy.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_generative_contracts_privacy_test",
+      "label": "privacy.test.ts",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "assertNoBulkData",
+      "file_type": "code",
+      "norm_label": "privacy.test.ts",
+      "source_file": "src/generative/contracts/privacy.test.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_generative_query_query_engine_test_datasetid",
-      "label": "datasetId",
+      "id": "src_generative_contracts_privacy_test_basecontext",
+      "label": "baseContext",
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "datasetid",
-      "source_file": "src/generative/query/query-engine.test.ts",
+      "norm_label": "basecontext",
+      "source_file": "src/generative/contracts/privacy.test.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_generative_contracts_privacy_test_displaycontext",
+      "label": "displayContext",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "assertNoBulkData",
+      "file_type": "code",
+      "norm_label": "displaycontext",
+      "source_file": "src/generative/contracts/privacy.test.ts",
       "source_location": "L6"
     },
     {
-      "id": "src_generative_query_query_engine_test_resources",
-      "label": "resources",
+      "id": "src_generative_presentation_tree_test",
+      "label": "tree.test.ts",
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "resources",
-      "source_file": "src/generative/query/query-engine.test.ts",
-      "source_location": "L13"
+      "norm_label": "tree.test.ts",
+      "source_file": "src/generative/presentation/tree.test.ts",
+      "source_location": "L1"
     },
     {
-      "id": "src_generative_query_query_engine_test_rows",
-      "label": "rows",
+      "id": "src_generative_presentation_tree_test_scope",
+      "label": "scope",
       "_origin": "ast",
       "community": 24,
-      "community_name": "query-engine.ts",
+      "community_name": "assertNoBulkData",
       "file_type": "code",
-      "norm_label": "rows",
-      "source_file": "src/generative/query/query-engine.test.ts",
-      "source_location": "L8"
+      "norm_label": "scope",
+      "source_file": "src/generative/presentation/tree.test.ts",
+      "source_location": "L6"
     },
     {
       "id": "agent_chat_route",
@@ -18511,17 +18577,6 @@
       "source_location": "L4"
     },
     {
-      "id": "src_generative_data_synthetic_source",
-      "label": "synthetic-source.ts",
-      "_origin": "ast",
-      "community": 28,
-      "community_name": "browser.ts",
-      "file_type": "code",
-      "norm_label": "synthetic-source.ts",
-      "source_file": "src/generative/data/synthetic-source.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_generative_query_nullable_oracle_test",
       "label": "nullable-oracle.test.ts",
       "_origin": "ast",
@@ -18885,6 +18940,17 @@
       "source_location": "L5"
     },
     {
+      "id": "src_generative_query_protocol_workerresponseschema",
+      "label": "WorkerResponseSchema",
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": "workerresponseschema",
+      "source_file": "src/generative/query/protocol.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "src_generative_query_worker",
       "label": "worker.ts",
       "_origin": "ast",
@@ -18893,6 +18959,17 @@
       "file_type": "code",
       "norm_label": "worker.ts",
       "source_file": "src/generative/query/worker.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_query_worker_client",
+      "label": "worker-client.ts",
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "DatasetId",
+      "file_type": "code",
+      "norm_label": "worker-client.ts",
+      "source_file": "src/generative/query/worker-client.ts",
       "source_location": "L1"
     },
     {
@@ -19281,136 +19358,59 @@
       "source_location": "L5"
     },
     {
-      "id": "src_generative_contracts_index_agentcontextenvelopeschema",
-      "label": "AgentContextEnvelopeSchema",
+      "id": "src_generative_contracts_index_farefieldschema",
+      "label": "FareFieldSchema",
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "agentcontextenvelopeschema",
+      "norm_label": "farefieldschema",
       "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L115"
+      "source_location": "L44"
     },
     {
-      "id": "src_generative_contracts_index_coverageschema",
-      "label": "CoverageSchema",
+      "id": "src_generative_query_query_engine",
+      "label": "query-engine.ts",
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "coverageschema",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L29"
-    },
-    {
-      "id": "src_generative_contracts_index_queryirschema",
-      "label": "QueryIRSchema",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "queryirschema",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L182"
-    },
-    {
-      "id": "src_generative_contracts_privacy",
-      "label": "privacy.ts",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "privacy.ts",
-      "source_file": "src/generative/contracts/privacy.ts",
+      "norm_label": "query-engine.ts",
+      "source_file": "src/generative/query/query-engine.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_generative_contracts_privacy_farefields",
-      "label": "fareFields",
+      "id": "src_generative_query_query_engine_defaults",
+      "label": "defaults",
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "farefields",
-      "source_file": "src/generative/contracts/privacy.ts",
-      "source_location": "L2"
+      "norm_label": "defaults",
+      "source_file": "src/generative/query/query-engine.ts",
+      "source_location": "L6"
     },
     {
-      "id": "src_generative_contracts_privacy_forbidden",
-      "label": "forbidden",
+      "id": "src_generative_tools_summarize_schema",
+      "label": "summarize-schema.ts",
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "forbidden",
-      "source_file": "src/generative/contracts/privacy.ts",
-      "source_location": "L5"
+      "norm_label": "summarize-schema.ts",
+      "source_file": "src/generative/tools/summarize-schema.ts",
+      "source_location": "L1"
     },
     {
-      "id": "src_generative_contracts_privacy_leakage_sentinel",
-      "label": "LEAKAGE_SENTINEL",
+      "id": "src_generative_tools_summarize_schema_summarizefaresinputschema",
+      "label": "SummarizeFaresInputSchema",
       "_origin": "ast",
       "community": 33,
-      "community_name": "assertNoBulkData",
+      "community_name": "query-engine.ts",
       "file_type": "code",
-      "norm_label": "leakage_sentinel",
-      "source_file": "src/generative/contracts/privacy.ts",
+      "norm_label": "summarizefaresinputschema",
+      "source_file": "src/generative/tools/summarize-schema.ts",
       "source_location": "L4"
-    },
-    {
-      "id": "src_generative_contracts_privacy_test",
-      "label": "privacy.test.ts",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "privacy.test.ts",
-      "source_file": "src/generative/contracts/privacy.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_contracts_privacy_test_basecontext",
-      "label": "baseContext",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "basecontext",
-      "source_file": "src/generative/contracts/privacy.test.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_generative_contracts_privacy_test_displaycontext",
-      "label": "displayContext",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "displaycontext",
-      "source_file": "src/generative/contracts/privacy.test.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_generative_presentation_tree_test",
-      "label": "tree.test.ts",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "tree.test.ts",
-      "source_file": "src/generative/presentation/tree.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_presentation_tree_test_scope",
-      "label": "scope",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "assertNoBulkData",
-      "file_type": "code",
-      "norm_label": "scope",
-      "source_file": "src/generative/presentation/tree.test.ts",
-      "source_location": "L6"
     },
     {
       "id": "scripts_check_shadcn",
@@ -20764,17 +20764,6 @@
       "source_location": "L56"
     },
     {
-      "id": "src_generative_contracts_index_farefieldschema",
-      "label": "FareFieldSchema",
-      "_origin": "ast",
-      "community": 50,
-      "community_name": "query-engine-fixture.ts",
-      "file_type": "code",
-      "norm_label": "farefieldschema",
-      "source_file": "src/generative/contracts/index.ts",
-      "source_location": "L44"
-    },
-    {
       "id": "src_generative_contracts_index_farerowschema",
       "label": "FareRowSchema",
       "_origin": "ast",
@@ -20784,6 +20773,17 @@
       "norm_label": "farerowschema",
       "source_file": "src/generative/contracts/index.ts",
       "source_location": "L39"
+    },
+    {
+      "id": "src_generative_data_synthetic_source",
+      "label": "synthetic-source.ts",
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "synthetic-source.ts",
+      "source_file": "src/generative/data/synthetic-source.ts",
+      "source_location": "L1"
     },
     {
       "id": "src_generative_query_default_ordering_test",
@@ -20830,6 +20830,50 @@
       "source_location": "L6"
     },
     {
+      "id": "src_generative_query_query_engine_test",
+      "label": "query-engine.test.ts",
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "query-engine.test.ts",
+      "source_file": "src/generative/query/query-engine.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_query_query_engine_test_datasetid",
+      "label": "datasetId",
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "datasetid",
+      "source_file": "src/generative/query/query-engine.test.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_generative_query_query_engine_test_resources",
+      "label": "resources",
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "resources",
+      "source_file": "src/generative/query/query-engine.test.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "src_generative_query_query_engine_test_rows",
+      "label": "rows",
+      "_origin": "ast",
+      "community": 50,
+      "community_name": "query-engine-fixture.ts",
+      "file_type": "code",
+      "norm_label": "rows",
+      "source_file": "src/generative/query/query-engine.test.ts",
+      "source_location": "L8"
+    },
+    {
       "id": "src_generative_testing_query_engine_fixture",
       "label": "query-engine-fixture.ts",
       "_origin": "ast",
@@ -20861,28 +20905,6 @@
       "norm_label": "numeric",
       "source_file": "src/generative/testing/query-engine-fixture.ts",
       "source_location": "L15"
-    },
-    {
-      "id": "src_generative_tools_summarize_schema",
-      "label": "summarize-schema.ts",
-      "_origin": "ast",
-      "community": 50,
-      "community_name": "query-engine-fixture.ts",
-      "file_type": "code",
-      "norm_label": "summarize-schema.ts",
-      "source_file": "src/generative/tools/summarize-schema.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_tools_summarize_schema_summarizefaresinputschema",
-      "label": "SummarizeFaresInputSchema",
-      "_origin": "ast",
-      "community": 50,
-      "community_name": "query-engine-fixture.ts",
-      "file_type": "code",
-      "norm_label": "summarizefaresinputschema",
-      "source_file": "src/generative/tools/summarize-schema.ts",
-      "source_location": "L4"
     },
     {
       "id": "src_generative_contracts_query_groups_resultkeyschema",
@@ -21135,28 +21157,6 @@
       "file_type": "code",
       "norm_label": "projection-coordinator.ts",
       "source_file": "src/generative/data/projection-coordinator.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_query_protocol_workerresponseschema",
-      "label": "WorkerResponseSchema",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "worker-client.ts",
-      "file_type": "code",
-      "norm_label": "workerresponseschema",
-      "source_file": "src/generative/query/protocol.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_generative_query_worker_client",
-      "label": "worker-client.ts",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "worker-client.ts",
-      "file_type": "code",
-      "norm_label": "worker-client.ts",
-      "source_file": "src/generative/query/worker-client.ts",
       "source_location": "L1"
     },
     {
@@ -86010,5 +86010,5 @@
       "source_file": "docs/decisions/query-null-semantics.md"
     }
   ],
-  "built_at_commit": "c78348b1eda0d1b60f1684e1afab449537d3a59e"
+  "built_at_commit": "3a93f4975943dfb6967fff19a139b3c9d41b3fca"
 }

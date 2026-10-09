@@ -702,10 +702,10 @@
     "semantic_hash": "4bf58fe46d39f657a90779cc5be706c8"
   },
   "agent/chat-continuation.test.ts": {
-    "mtime": 1791474412.8479862,
-    "seen": 1791474417.633712,
-    "ast_hash": "697a328b2951950cb4671e6bbcdec259",
-    "semantic_hash": "697a328b2951950cb4671e6bbcdec259"
+    "mtime": 1791534895.9664211,
+    "seen": 1791534952.91635,
+    "ast_hash": "16b440b23f43597cf1c02eaebd12674c",
+    "semantic_hash": ""
   },
   "agent/scene-completion.test.ts": {
     "mtime": 1791474412.8513064,
@@ -1464,9 +1464,9 @@
     "semantic_hash": ""
   },
   "src/generative/presentation/prompt.ts": {
-    "mtime": 1791474412.88608,
-    "seen": 1791474417.6338189,
-    "ast_hash": "f73a1833a2de3fa9ec4d91f1fd394741",
+    "mtime": 1791534925.225516,
+    "seen": 1791534952.916474,
+    "ast_hash": "95ee64899038cd1ebdbdea09fcc9da7e",
     "semantic_hash": ""
   },
   "src/generative/presentation/toolkit-client.tsx": {
