@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { access, readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
+import { JSDOM } from 'jsdom'
 import { catalogDescriptors, catalogHash, catalogVersion } from '../../../src/generative/catalog/generated/catalog.ts'
 import { defaultSuggestions } from '../../../src/generative/chat/thread-shell.tsx'
 
@@ -37,6 +38,108 @@ assert.ok(html.includes(`${catalogDescriptors.length} registered`))
 assert.ok(html.includes('id="case-search"'))
 assert.ok(html.includes('id="component-search"'))
 assert.ok(html.includes('class="copy"'))
+assert.ok(html.includes('id="vote-filter"'))
+assert.ok(html.includes('id="order-by-votes"'))
+
+const voteStorageKey = 'omio-generative-capability-audit-votes-v1'
+const orderStorageKey = 'omio-generative-capability-audit-order-v1'
+function createReportDom(storage = {}, storageThrows = false) {
+  return new JSDOM(html, {
+    runScripts: 'dangerously',
+    url: 'https://capability-report.test/',
+    beforeParse(window) {
+      if (storageThrows) {
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem() { throw new Error('storage unavailable') },
+            setItem() { throw new Error('storage unavailable') }
+          }
+        })
+        return
+      }
+      for (const [key, value] of Object.entries(storage)) window.localStorage.setItem(key, value)
+    }
+  })
+}
+const cardIds = document => [...document.querySelectorAll('.case-card')].map(card => card.dataset.caseId)
+const visibleCards = document => [...document.querySelectorAll('.case-card')].filter(card => !card.hidden)
+const clickVote = (card, vote) => card.querySelector(`[data-vote-action="${vote}"]`).click()
+const analyticalOrder = report.ranking.map(testCase => testCase.id)
+
+const interactionDom = createReportDom()
+const interactionDocument = interactionDom.window.document
+const interactionCards = [...interactionDocument.querySelectorAll('.case-card')]
+assert.equal(interactionCards.length, report.ranking.length)
+assert.deepEqual(cardIds(interactionDocument), analyticalOrder, 'Votes must start in analytical score order')
+clickVote(interactionCards[0], 'up')
+assert.equal(interactionCards[0].dataset.vote, 'up')
+assert.equal(interactionCards[0].querySelector('[data-vote-action="up"]').getAttribute('aria-pressed'), 'true')
+clickVote(interactionCards[0], 'up')
+assert.equal(interactionCards[0].dataset.vote, '', 'Pressing an active vote must clear it')
+clickVote(interactionCards[0], 'up')
+clickVote(interactionCards[1], 'down')
+clickVote(interactionCards[2], 'up')
+assert.deepEqual(cardIds(interactionDocument), analyticalOrder, 'Voting must not reorder cards before the Order button is pressed')
+assert.deepEqual(JSON.parse(interactionDom.window.localStorage.getItem(voteStorageKey)), {
+  [analyticalOrder[0]]: 'up',
+  [analyticalOrder[1]]: 'down',
+  [analyticalOrder[2]]: 'up'
+})
+
+const voteFilter = interactionDocument.querySelector('#vote-filter')
+voteFilter.value = 'up'
+voteFilter.dispatchEvent(new interactionDom.window.Event('change', { bubbles: true }))
+assert.deepEqual(visibleCards(interactionDocument).map(card => card.dataset.caseId), [analyticalOrder[0], analyticalOrder[2]])
+assert.deepEqual(visibleCards(interactionDocument).map(card => card.querySelector('.rank').textContent), ['#1', '#2'], 'Filters must number only visible cards')
+voteFilter.value = ''
+voteFilter.dispatchEvent(new interactionDom.window.Event('change', { bubbles: true }))
+assert.deepEqual([...interactionDocument.querySelectorAll('.case-card .rank')].map(rank => rank.textContent), analyticalOrder.map((_, index) => `#${index + 1}`), 'Clearing filters must restore full-list numbering')
+interactionDocument.querySelector('#order-by-votes').click()
+const expectedVoteOrder = [
+  analyticalOrder[0],
+  analyticalOrder[2],
+  ...analyticalOrder.slice(3),
+  analyticalOrder[1]
+]
+assert.deepEqual(cardIds(interactionDocument), expectedVoteOrder, 'Manual ordering must group upvotes, neutral cards, then downvotes')
+assert.deepEqual(
+  [...interactionDocument.querySelectorAll('.case-card .rank')].map(rank => rank.textContent),
+  analyticalOrder.map((_, index) => `#${index + 1}`),
+  'Manual ordering must renumber the full prompt list'
+)
+const storedOrder = interactionDom.window.localStorage.getItem(orderStorageKey)
+assert.deepEqual(JSON.parse(storedOrder), expectedVoteOrder)
+voteFilter.value = 'down'
+voteFilter.dispatchEvent(new interactionDom.window.Event('change', { bubbles: true }))
+assert.deepEqual(visibleCards(interactionDocument).map(card => [card.dataset.caseId, card.querySelector('.rank').textContent]), [[analyticalOrder[1], '#1']], 'Filtering must renumber only visible cards')
+assert.deepEqual(cardIds(interactionDocument), expectedVoteOrder, 'Filtering must not reorder the list')
+voteFilter.value = ''
+voteFilter.dispatchEvent(new interactionDom.window.Event('change', { bubbles: true }))
+assert.deepEqual([...interactionDocument.querySelectorAll('.case-card .rank')].map(rank => rank.textContent), analyticalOrder.map((_, index) => `#${index + 1}`), 'Clearing filters after manual ordering must restore full-list numbering')
+
+const persistedDom = createReportDom({
+  [voteStorageKey]: interactionDom.window.localStorage.getItem(voteStorageKey),
+  [orderStorageKey]: storedOrder
+})
+const persistedDocument = persistedDom.window.document
+assert.deepEqual(cardIds(persistedDocument), expectedVoteOrder, 'The last manually applied order must survive reloads')
+const persistedFirstCard = persistedDocument.querySelector(`[data-case-id="${analyticalOrder[0]}"]`)
+assert.equal(persistedFirstCard.querySelector('[data-vote-action="up"]').getAttribute('aria-pressed'), 'true')
+const orderBeforeVoteChange = persistedDom.window.localStorage.getItem(orderStorageKey)
+clickVote(persistedFirstCard, 'down')
+assert.deepEqual(cardIds(persistedDocument), expectedVoteOrder, 'Changing a vote after reload must not silently reorder cards')
+assert.equal(persistedDom.window.localStorage.getItem(orderStorageKey), orderBeforeVoteChange, 'Voting must not overwrite the last manually applied order')
+
+const resilientDom = createReportDom({}, true)
+const resilientDocument = resilientDom.window.document
+const resilientFirstCard = resilientDocument.querySelector('.case-card')
+clickVote(resilientFirstCard, 'up')
+resilientDocument.querySelector('#order-by-votes').click()
+assert.equal(resilientFirstCard.dataset.vote, 'up', 'Voting must still work when browser storage is unavailable')
+assert.equal(resilientFirstCard.querySelector('[data-vote-action="up"]').getAttribute('aria-pressed'), 'true')
+interactionDom.window.close()
+persistedDom.window.close()
+resilientDom.window.close()
 
 const evidenceRoot = path.join(auditRoot, 'evidence')
 for (const file of (await readdir(evidenceRoot).catch(() => [])).filter(name => name.endsWith('.json'))) {
