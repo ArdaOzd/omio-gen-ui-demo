@@ -1,13 +1,15 @@
 import { createContext, useContext, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
-import { ArtifactIdSchema, ArtifactUIStateSchema, LIMITS, UIStateRevisionSchema, type ArtifactId, type ArtifactUIState, type FareId, type FareScopeBinding, type UIStateStore } from '../contracts'
+import { ArtifactIdSchema, ArtifactUIStateSchema, LIMITS, UIStateRevisionSchema, type ArtifactId, type ArtifactUIState, type DatasetId, type FareId, type FareScopeBinding, type UIStateStore } from '../contracts'
+import type { ResourceKey } from '../contracts/query-groups'
 import { TravelProvider, type TravelServices } from '../catalog/context'
 import { createUIStateStore } from '../state/ui-state-store'
 import { createRuntimePresentValidationScopeForTree } from './present-scope'
 import { validatePresentTree, type PresentNode } from './tree'
 import { DisplayContextProvider } from '../catalog/display-context-provider'
 import { createDisplayContextStore, type DisplayContextStore } from '../state/display-context'
+import { releaseDatasetWhenUnowned } from '../state/dataset-ownership'
 
 export const SceneSnapshotSchema=z.strictObject({
   toolCallId:z.string().min(1).max(160),
@@ -16,6 +18,8 @@ export const SceneSnapshotSchema=z.strictObject({
 export type PersistedSceneSnapshot=z.infer<typeof SceneSnapshotSchema>
 type SceneView={kind:'active'}|{kind:'frozen';services:TravelServices}|{kind:'hidden'}
 type PendingTurn={previousToolCallId:string;states:ArtifactUIState[];activeArtifactId?:string}
+type SnapshotPin={datasetId:DatasetId;resourceKey:ResourceKey}
+type StoredSceneSnapshot={value:PersistedSceneSnapshot;services:TravelServices;pins:SnapshotPin[]}
 const fallbackActiveView:SceneView={kind:'active'}
 const fallbackSubscribe=()=>()=>{}
 
@@ -59,6 +63,7 @@ function frozenServices(snapshot:PersistedSceneSnapshot,live:TravelServices):Tra
     exportSnapshot:mutable.exportSnapshot,
     getIds:mutable.getIds,
     setDatasetBindings:()=>{},
+    replace:()=>{},
   }
   return{
     bridge:live.bridge,
@@ -72,7 +77,7 @@ function frozenServices(snapshot:PersistedSceneSnapshot,live:TravelServices):Tra
 export type SceneLifecycle={
   prepareTurn:(messages:UIMessage[])=>Promise<void>
   finishTurn:(messages:UIMessage[],result:{failed:boolean;willContinue:boolean})=>void
-  exportSnapshots:()=>PersistedSceneSnapshot[]
+  exportSnapshots:(messages?:UIMessage[])=>PersistedSceneSnapshot[]
   activeArtifactIds:(messages:UIMessage[])=>ArtifactId[]
   bindings:()=>FareScopeBinding[]
   view:(toolCallId:string)=>SceneView
@@ -80,10 +85,10 @@ export type SceneLifecycle={
 }
 
 export function createSceneLifecycle(services:TravelServices,options:{initialMessages?:UIMessage[];initialSnapshots?:PersistedSceneSnapshot[];restoreSelectedFareIds?:(artifactId:ArtifactId,capturedIds:FareId[])=>FareId[]}={}):SceneLifecycle{
-  const snapshots=new Map<string,{value:PersistedSceneSnapshot;services:TravelServices}>()
+  const snapshots=new Map<string,StoredSceneSnapshot>()
   for(const input of options.initialSnapshots??[]){
     const value=SceneSnapshotSchema.parse(input)
-    snapshots.set(value.toolCallId,{value,services:frozenServices(value,services)})
+    snapshots.set(value.toolCallId,{value,services:frozenServices(value,services),pins:[]})
   }
   let activeToolCallId=acceptedScenes(options.initialMessages??[],services).at(-1)?.toolCallId
   let latestCompletedToolCallId=latestCompletedPresentId(options.initialMessages??[])
@@ -93,53 +98,111 @@ export function createSceneLifecycle(services:TravelServices,options:{initialMes
   const frozenViews=new Map<string,Extract<SceneView,{kind:'frozen'}>>()
   for(const [toolCallId,snapshot] of snapshots)frozenViews.set(toolCallId,{kind:'frozen',services:snapshot.services})
   const notify=()=>listeners.forEach(listener=>listener())
-  const restore=()=>{
-    if(!pending)return
-    if(!services.state.replace)throw new Error('Scene rollback requires a replaceable UI state store')
-    for(const state of pending.states){
-      const stillLive=new Set(services.state.get(state.artifactId).datasetRefs)
-      services.state.replace({...state,revision:UIStateRevisionSchema.parse(Math.max(state.revision,services.state.get(state.artifactId).revision)+1),selectedFareIds:options.restoreSelectedFareIds?.(state.artifactId,state.selectedFareIds)??state.selectedFareIds})
-      for(const datasetId of state.datasetRefs)if(stillLive.has(datasetId)){
-        const binding=services.bridge.findBinding(datasetId)
-        if(binding)services.bridge.release(binding.resourceKey)
+  const releaseSnapshot=(toolCallId:string):boolean=>{
+    const snapshot=snapshots.get(toolCallId)
+    if(!snapshot)return false
+    for(const pin of snapshot.pins)services.bridge.release(pin.resourceKey)
+    snapshots.delete(toolCallId)
+    frozenViews.delete(toolCallId)
+    return true
+  }
+  const restoreSnapshot=(toolCallId:string,states:ArtifactUIState[],activeArtifactId?:string):void=>{
+    const record=snapshots.get(toolCallId)
+    const remainingPins=[...(record?.pins??[])]
+    for(const state of states){
+      const current=services.state.get(state.artifactId)
+      const currentRefs=new Set(current.datasetRefs),snapshotRefs=new Set(state.datasetRefs)
+      services.state.replace({...state,revision:UIStateRevisionSchema.parse(Math.max(state.revision,current.revision)+1),selectedFareIds:options.restoreSelectedFareIds?.(state.artifactId,state.selectedFareIds)??state.selectedFareIds})
+      for(const datasetId of currentRefs)if(!snapshotRefs.has(datasetId))releaseDatasetWhenUnowned(services.state,services.bridge,state.artifactId,datasetId)
+      for(const datasetId of snapshotRefs){
+        const pinIndex=remainingPins.findIndex(pin=>pin.datasetId===datasetId)
+        if(pinIndex<0)continue
+        const [pin]=remainingPins.splice(pinIndex,1)
+        if(currentRefs.has(datasetId)&&pin)services.bridge.release(pin.resourceKey)
       }
     }
-    if(pending.activeArtifactId)services.activate(pending.activeArtifactId)
-    activeToolCallId=pending.previousToolCallId
-    snapshots.delete(pending.previousToolCallId)
-    frozenViews.delete(pending.previousToolCallId)
+    for(const pin of remainingPins)services.bridge.release(pin.resourceKey)
+    snapshots.delete(toolCallId)
+    frozenViews.delete(toolCallId)
+    const nextActiveId=activeArtifactId??states[0]?.artifactId
+    if(nextActiveId)services.activate(nextActiveId)
+    activeToolCallId=toolCallId
+  }
+  const reconcile=(messages:UIMessage[]):Array<{toolCallId:string;tree:PresentNode}>=>{
+    const scenes=acceptedScenes(messages,services),retainedIds=new Set(scenes.map(scene=>scene.toolCallId))
+    for(const toolCallId of snapshots.keys())if(!retainedIds.has(toolCallId))releaseSnapshot(toolCallId)
+    const active=activeToolCallId?scenes.find(scene=>scene.toolCallId===activeToolCallId):undefined
+    if(active){
+      const snapshot=snapshots.get(active.toolCallId)
+      if(snapshot)restoreSnapshot(active.toolCallId,snapshot.value.artifactStates,artifactIds(active.tree)[0])
+      return scenes
+    }
+    const fallback=scenes.at(-1)
+    if(!fallback){activeToolCallId=undefined;return scenes}
+    const snapshot=snapshots.get(fallback.toolCallId)
+    if(snapshot)restoreSnapshot(fallback.toolCallId,snapshot.value.artifactStates,artifactIds(fallback.tree)[0])
+    else{
+      activeToolCallId=fallback.toolCallId
+      const artifactId=artifactIds(fallback.tree)[0]
+      if(artifactId)services.activate(artifactId)
+    }
+    return scenes
+  }
+  const restore=()=>{
+    if(!pending)return
+    const previous=pending
+    restoreSnapshot(previous.previousToolCallId,previous.states,previous.activeArtifactId)
     pending=undefined
-    notify()
   }
   return{
     async prepareTurn(messages){
-      const latest=acceptedScenes(messages,services).at(-1)
+      const scenes=reconcile(messages),latest=scenes.at(-1)
       if(latest&&!activeToolCallId)activeToolCallId=latest.toolCallId
       if(!activeToolCallId||pending)return
-      const active=acceptedScenes(messages,services).find(scene=>scene.toolCallId===activeToolCallId)
+      const active=scenes.find(scene=>scene.toolCallId===activeToolCallId)
       if(!active)return
-      const states=artifactIds(active.tree).map(id=>services.state.get(id))
-      for(const state of states)for(const datasetId of state.datasetRefs){
-        const binding=services.bridge.findBinding(datasetId)
-        if(binding)await services.bridge.loadScope(binding.manifest.coverage,new AbortController().signal)
-      }
+      const states=structuredClone(artifactIds(active.tree).map(id=>services.state.get(id)))
       const value=SceneSnapshotSchema.parse({toolCallId:activeToolCallId,artifactStates:states})
-      snapshots.set(activeToolCallId,{value,services:frozenServices(value,services)})
-      frozenViews.set(activeToolCallId,{kind:'frozen',services:snapshots.get(activeToolCallId)!.services})
-      pending={previousToolCallId:activeToolCallId,states:structuredClone(states),activeArtifactId:services.activeId()}
+      const snapshot:StoredSceneSnapshot={value,services:frozenServices(value,services),pins:[]}
+      snapshots.set(activeToolCallId,snapshot)
+      frozenViews.set(activeToolCallId,{kind:'frozen',services:snapshot.services})
+      pending={previousToolCallId:activeToolCallId,states,activeArtifactId:services.activeId()}
       notify()
+      try{
+        for(const state of states)for(const datasetId of state.datasetRefs){
+          const binding=services.bridge.findBinding(datasetId)
+          if(!binding)continue
+          const manifest=await services.bridge.loadScope(binding.manifest.coverage,new AbortController().signal)
+          snapshot.pins.push({datasetId,resourceKey:manifest.resourceKey})
+        }
+      }catch(error){
+        if(pending?.previousToolCallId===active.toolCallId&&snapshots.get(active.toolCallId)===snapshot){
+          releaseSnapshot(active.toolCallId)
+          pending=undefined
+          activeToolCallId=active.toolCallId
+          notify()
+        }
+        throw error
+      }
     },
     finishTurn(messages,result){
       if(result.willContinue)return
       latestCompletedToolCallId=latestCompletedPresentId(messages)
-      if(!pending)return
+      if(!pending){reconcile(messages);notify();return}
       const latest=acceptedScenes(messages,services).at(-1)
-      if(result.failed||!latest||latest.toolCallId===pending.previousToolCallId){restore();return}
+      if(result.failed||!latest||latest.toolCallId===pending.previousToolCallId){restore();reconcile(messages);notify();return}
       activeToolCallId=latest.toolCallId
       pending=undefined
+      reconcile(messages)
       notify()
     },
-    exportSnapshots:()=>[...snapshots.values()].map(snapshot=>structuredClone(snapshot.value)),
+    exportSnapshots(messages){
+      if(messages){
+        const retainedIds=new Set(acceptedScenes(messages,services).map(scene=>scene.toolCallId))
+        for(const toolCallId of snapshots.keys())if(!retainedIds.has(toolCallId))releaseSnapshot(toolCallId)
+      }
+      return [...snapshots.values()].map(snapshot=>structuredClone(snapshot.value))
+    },
     activeArtifactIds(messages){
       const latest=acceptedScenes(messages,services).find(scene=>scene.toolCallId===activeToolCallId)??acceptedScenes(messages,services).at(-1)
       return latest?artifactIds(latest.tree):[]

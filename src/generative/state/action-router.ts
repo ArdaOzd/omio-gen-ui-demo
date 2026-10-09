@@ -223,6 +223,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     selections.get(artifactId)?.controller.abort()
     const token = Symbol()
     const controller = new AbortController()
+    const selectedBinding = command?.selected && scope ? bridge.findBinding(scope.datasetId) : undefined
     const selectedKey = JSON.stringify(store.get(artifactId).selectedFareIds)
     const promise = Promise.resolve().then(async () => {
       if (selections.get(artifactId)?.token !== token || JSON.stringify(store.get(artifactId).selectedFareIds) !== selectedKey) return
@@ -266,7 +267,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
       await retry(artifactId, cachedSelectedFacts(store.get(artifactId), bridge))
       if (command?.selected && store.get(artifactId).selectedFareIds.includes(command.fareId)) {
         const fact = facts.find(candidate => candidate.id === command.fareId)
-        if (fact) options.planning?.select(artifactId, fact)
+        if (fact) options.planning?.select(artifactId, fact, selectedBinding)
       }
     }).catch(() => {
       if(controller.signal.aborted||selections.get(artifactId)?.token!==token)return

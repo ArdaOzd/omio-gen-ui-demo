@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import type { UIMessage } from 'ai'
 import { getSceneMetadata } from './scene-metadata'
-import { ArtifactIdSchema, CATALOG_VERSION, CONTRACT_VERSION, type AgentContextEnvelope } from './contracts'
+import { ArtifactIdSchema, CATALOG_VERSION, CONTRACT_VERSION, type AgentContextEnvelope, type ArtifactId, type FareId } from './contracts'
 import { createFareDataBridge } from './data/fare-data-bridge'
 import { createUIStateStore } from './state/ui-state-store'
 import { createArtifactStore } from './state/artifact-store'
@@ -121,7 +121,7 @@ function SessionConversation(props: SessionConversationProps) {
     assertNoBulkData(next)
     const { sources } = getSceneMetadata(next,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
     const states = runtime.artifacts.getIds().map(id => runtime.services.state.get(id))
-    const sceneSnapshots = sceneLifecycleRef.current?.exportSnapshots() ?? []
+    const sceneSnapshots = sceneLifecycleRef.current?.exportSnapshots(next) ?? []
     const refs = [...new Set([...states, ...sceneSnapshots.flatMap(snapshot => snapshot.artifactStates)].flatMap(state => state.datasetRefs))]
     const frozenBindings = new Map((sceneLifecycleRef.current?.bindings() ?? []).map(binding => [binding.datasetId, binding]))
     return {
@@ -202,15 +202,21 @@ function SessionConversation(props: SessionConversationProps) {
       if (controller.signal.aborted) return
       let valid: UIMessage[] = []
       let sourceRefreshed = false
+      let sourceChangedFareIdsByArtifact: ReadonlyMap<ArtifactId, ReadonlySet<FareId>> = new Map()
       if (record) {
         valid = record.messages.filter(isUIMessage)
-        await props.persistence.restore(record, runtime.services.bridge, runtime.services.state, controller.signal, cleared => {
+        await props.persistence.restore(record, runtime.services.bridge, runtime.services.state, controller.signal, sourceChange => {
           sourceRefreshed = true
-          setNotice(cleared
-            ? 'Synthetic fare data changed. Coverage was refreshed and previous fare selections were cleared; your conversation and travel preferences are preserved.'
+          sourceChangedFareIdsByArtifact = sourceChange.sourceChangedFareIdsByArtifact
+          setNotice(sourceChange.clearedSelections
+            ? 'Synthetic fare data changed. Coverage was refreshed and affected saved fare selections were cleared; your conversation and travel preferences are preserved.'
             : 'Synthetic fare data changed. Coverage was refreshed; your conversation and travel preferences are preserved.')
         })
-        runtime.planning.restore(record.plannedFares)
+        runtime.planning.restore(record.plannedFares.flatMap(entry => {
+          const owners = entry.owners.filter(owner => !sourceChangedFareIdsByArtifact.get(owner)?.has(entry.fact.id))
+          const sources = entry.sources?.filter(source => owners.includes(source.owner))
+          return owners.length ? [{ ...entry, owners, ...(sources ? { sources } : {}) }] : []
+        }))
         if (!record.plannedFares.length) {
           for (const artifact of record.artifacts) {
             for (const fareId of artifact.state.selectedFareIds) {

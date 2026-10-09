@@ -2,6 +2,7 @@ import { expect, it } from 'vitest'
 import { ArtifactIdSchema } from '../contracts'
 import { FareItemSchema, ResultKeySchema, type FareItem } from '../contracts/query-groups'
 import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
+import { createPlanningStore } from '../tracker/planning-store'
 import { createActionRouter, type CoverageLoadStatus, type QueryFareSelectionScope } from './action-router'
 import { createUIStateStore } from './ui-state-store'
 
@@ -43,7 +44,8 @@ async function fixture(originId = 'london', destinationId = 'paris', dateWindow 
   if (!page || page.kind !== 'farePage') throw new Error('Selection fixture did not return a fare page')
   const state = createUIStateStore()
   state.initializeMissing(id, { datasetRefs: [binding.datasetId], dates: { start: dates[0]! } })
-  const router = createActionRouter(state, { bridge: fixed.bridge, onCoverageStatus })
+  const planning = createPlanningStore()
+  const router = createActionRouter(state, { bridge: fixed.bridge, planning, onCoverageStatus })
   let currentResultKey = ResultKeySchema.parse('selection-result-v1')
   const fare = (date: string) => FareItemSchema.shape.id.parse(`${originId}-${destinationId}-${date}`)
   const selectionScope = (fareIds: QueryFareSelectionScope['fareIds']): QueryFareSelectionScope => ({
@@ -59,6 +61,8 @@ async function fixture(originId = 'london', destinationId = 'paris', dateWindow 
   return {
     bridge: fixed.bridge,
     state,
+    binding,
+    planning,
     router,
     fare,
     selectionScope,
@@ -66,12 +70,17 @@ async function fixture(originId = 'london', destinationId = 'paris', dateWindow 
   }
 }
 
-it('retains an explicit authored multi-date choice and exports the aligned date and selected ID', async () => {
-  const { state, router, fare, selectionScope } = await fixture()
+it('retains an explicit authored multi-date choice with its source and exports the aligned date and selected ID', async () => {
+  const { state, binding, planning, router, fare, selectionScope } = await fixture()
   const selected = fare('2026-10-10')
   router.selectFromQuery({ kind: 'select', artifactId: id, fareId: selected, selected: true }, selectionScope([selected]))
   await router.whenIdle(id)
   expect(state.exportSnapshot(id)).toMatchObject({ dates: { start: '2026-10-10' }, selectedFareIds: [selected] })
+  expect(planning.get()).toMatchObject([{
+    fact: { id: selected },
+    owners: [id],
+    sources: [{ owner: id, source: binding.manifest.source, scope: binding.manifest.coverage }],
+  }])
   router.dispose()
 })
 

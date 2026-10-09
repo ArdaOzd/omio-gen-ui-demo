@@ -3,15 +3,16 @@ import {
   ArtifactIdSchema,
   CATALOG_VERSION,
   CONTRACT_VERSION,
+  DatasetIdSchema,
   FareIdSchema,
   type DatasetId,
 } from '../contracts'
-import { FareItemSchema, type FareScope, type QueryGroupsResponse, type ResourceKey } from '../contracts/query-groups'
+import { FareItemSchema, ResourceKeySchema, type FareScope, type QueryGroupsResponse, type ResourceKey } from '../contracts/query-groups'
 import { createFareDataBridge } from '../data/fare-data-bridge'
 import { createFixedProjectionFixture } from '../testing/fixed-projection-fixture'
 import { createArtifactStore } from './artifact-store'
 import { createDisplayContextStore } from './display-context'
-import { createThreadPersistence, type PersistedThread, type ThreadStorage } from './persistence'
+import { createThreadPersistence, PersistedThreadSchema, type PersistedThread, type ThreadStorage } from './persistence'
 import { exportAgentContext } from './snapshot-exporter'
 import { createUIStateStore } from './ui-state-store'
 
@@ -298,7 +299,11 @@ describe('descriptor-only thread persistence', () => {
     const fresh = bridgeWithStableResource('sqlite-demo-v2-new-generation', item.binding.resourceKey)
     const store = createUIStateStore()
     let cleared = false
-    await persistence.restore(loaded, fresh, store, new AbortController().signal, value => { cleared = value })
+    let sourceChangedFareIdsByArtifact = new Map()
+    await persistence.restore(loaded, fresh, store, new AbortController().signal, sourceChange => {
+      cleared = sourceChange.clearedSelections
+      sourceChangedFareIdsByArtifact = new Map(sourceChange.sourceChangedFareIdsByArtifact)
+    })
 
     expect(store.get(item.id).revision).toBe(item.store.get(item.id).revision + 1)
     expect(store.get(item.id).selectedFareIds).toEqual([])
@@ -310,6 +315,168 @@ describe('descriptor-only thread persistence', () => {
     expect(loaded.activeArtifactId).toBe(item.id)
     expect(fresh.getManifest(item.binding.resourceKey).source.sourceVersion).toBe('sqlite-demo-v2-new-generation')
     expect(cleared).toBe(true)
+    expect(sourceChangedFareIdsByArtifact).toEqual(new Map())
+  })
+
+  it('identifies only the stale frozen fare when the same owner has a valid live scope', async () => {
+    const currentLondonRow = FareItemSchema.parse({ ...row, id: FareIdSchema.parse('fare-current-london-paris') })
+    const madridRow = FareItemSchema.parse({
+      ...row,
+      id: FareIdSchema.parse('fare-madrid-barcelona'),
+      originId: 'madrid',
+      destinationId: 'barcelona',
+      legs: [{
+        ...row.legs[0]!,
+        originId: 'madrid',
+        destinationId: 'barcelona',
+        originLabel: 'Madrid',
+        destinationLabel: 'Barcelona',
+      }],
+    })
+    const oldSource = createFixedProjectionFixture({
+      sourceVersion: 'mixed-source-v1',
+      sourceDateWindow: { from: '2026-10-02', to: '2026-10-02' },
+      rows: [row, currentLondonRow, madridRow],
+    })
+    const currentSource = createFixedProjectionFixture({
+      sourceVersion: 'mixed-source-v2',
+      sourceDateWindow: { from: '2026-10-02', to: '2026-10-02' },
+      rows: [row, currentLondonRow, madridRow],
+    })
+    const londonManifest = await oldSource.bridge.loadScope(scope(), new AbortController().signal)
+    const londonBinding = oldSource.bridge.getBinding(londonManifest.resourceKey)
+    const currentLondonManifest = await currentSource.bridge.loadScope(scope(), new AbortController().signal)
+    const currentLondonBinding = currentSource.bridge.getBinding(currentLondonManifest.resourceKey)
+    const madridScope: FareScope = {
+      ...scope(),
+      originId: 'madrid',
+      destinationId: 'barcelona',
+    }
+    const madridManifest = await currentSource.bridge.loadScope(madridScope, new AbortController().signal)
+    const madridBinding = currentSource.bridge.getBinding(madridManifest.resourceKey)
+    const restoredQueries = vi.spyOn(currentSource.client, 'queryGroups')
+    const restoringBridge = createFareDataBridge({
+      client: {
+        async queryGroups(request, signal) {
+          const response = await currentSource.client.queryGroups(request, signal)
+          return {
+            ...response,
+            groups: response.groups.map(group => group.manifest.coverage.originId === 'london' ? {
+              ...group,
+              manifest: {
+                ...group.manifest,
+                resourceKey: londonBinding.resourceKey,
+                source: { ...group.manifest.source, descriptorId: londonBinding.resourceKey },
+              },
+            } : group),
+          }
+        },
+        lookupPins: currentSource.client.lookupPins,
+      },
+    })
+    const owner = ArtifactIdSchema.parse('mixed-scope-owner')
+    const frozenState = createUIStateStore()
+    frozenState.initializeMissing(owner, { datasetRefs: [londonBinding.datasetId], selectedFareIds: [row.id] })
+    const liveState = createUIStateStore()
+    liveState.initializeMissing(owner, { selectedFareIds: [] })
+    const withoutAvailability = <T extends typeof row>(fare: T) => {
+      const { availableSeats: _availableSeats, ...fact } = fare
+      return fact
+    }
+    const record: PersistedThread = {
+      schemaVersion: CONTRACT_VERSION,
+      catalogVersion: CATALOG_VERSION,
+      parserVersion: 'native-present-1',
+      queryVersion: '1',
+      messages: [{
+        id: 'frozen-message',
+        role: 'assistant',
+        parts: [{ type: 'tool-present', toolCallId: 'frozen-scene', state: 'output-available', input: {}, output: {} }],
+      }],
+      artifacts: [{ source: 'Current Madrid scene', state: liveState.get(owner) }],
+      descriptors: [londonBinding].map(binding => ({
+        datasetId: binding.datasetId,
+        resourceKey: binding.resourceKey,
+        scope: binding.manifest.coverage,
+        sourceVersion: binding.manifest.source.sourceVersion,
+        complete: binding.manifest.complete,
+      })),
+      plannedFares: [
+        {
+          fact: withoutAvailability(row),
+          owners: [owner],
+          sources: [{ owner, source: londonBinding.manifest.source, scope: londonBinding.manifest.coverage }],
+        },
+        {
+          fact: withoutAvailability(currentLondonRow),
+          owners: [owner],
+          sources: [{
+            owner,
+            source: { ...currentLondonBinding.manifest.source, descriptorId: londonBinding.resourceKey },
+            scope: currentLondonBinding.manifest.coverage,
+          }],
+        },
+        {
+          fact: withoutAvailability(madridRow),
+          owners: [owner],
+          sources: [{ owner, source: madridBinding.manifest.source, scope: madridBinding.manifest.coverage }],
+        },
+      ],
+      sceneSnapshots: [{ toolCallId: 'frozen-scene', artifactStates: [frozenState.get(owner)] }],
+    }
+    let sourceChange
+    const restored = createUIStateStore()
+
+    await createThreadPersistence(memory().storage).restore(
+      record,
+      restoringBridge,
+      restored,
+      new AbortController().signal,
+      change => { sourceChange = change },
+    )
+
+    expect(restored.get(owner).selectedFareIds).toEqual([])
+    expect(sourceChange).toEqual({
+      clearedSelections: true,
+      sourceChangedFareIdsByArtifact: new Map([[owner, new Set([row.id])]]),
+    })
+    expect(restoringBridge.getBinding(londonBinding.resourceKey).resourceKey).toBe(londonBinding.resourceKey)
+    expect(() => restoringBridge.getBinding(madridBinding.resourceKey)).toThrow('Expired fare scope reference')
+    expect(restoredQueries.mock.calls.flatMap(([request]) => request.groups.map(group => group.scope.originId))).toContain('madrid')
+  })
+
+  it('reports and releases a stale basket source after its scope leaves retained state', async () => {
+    const item = await fixture()
+    const owner = item.id
+    const state = createUIStateStore()
+    state.initializeMissing(owner, {})
+    const { availableSeats: _availableSeats, ...fact } = row
+    const record: PersistedThread = {
+      ...item.record,
+      artifacts: [{ source: item.record.artifacts[0]!.source, state: state.get(owner) }],
+      descriptors: [],
+      plannedFares: [{
+        fact,
+        owners: [owner],
+        sources: [{ owner, source: item.binding.manifest.source, scope: item.binding.manifest.coverage }],
+      }],
+    }
+    const fresh = bridgeWithStableResource('persistence-v2', item.binding.resourceKey)
+    let sourceChange
+
+    await createThreadPersistence(memory().storage).restore(
+      record,
+      fresh,
+      createUIStateStore(),
+      new AbortController().signal,
+      change => { sourceChange = change },
+    )
+
+    expect(sourceChange).toEqual({
+      clearedSelections: true,
+      sourceChangedFareIdsByArtifact: new Map([[owner, new Set([row.id])]]),
+    })
+    expect(() => fresh.getBinding(item.binding.resourceKey)).toThrow('Expired fare scope reference')
   })
 
   it('refuses a stale tab save without overwriting a newer conversation', async () => {
@@ -356,6 +523,61 @@ describe('descriptor-only thread persistence', () => {
     const messages = Array.from({ length: 250 }, (_, index) => ({ id: `message-${index}`, role: index % 2 ? 'assistant' : 'user', parts: [{ type: 'text', text: `Message ${index}` }] }))
     await persistence.save('long-history', { ...item.record, messages })
     expect((await persistence.load('long-history'))?.messages).toEqual(messages)
+  })
+
+  it('round-trips every retained frozen scene beyond the stored-artifact count', async () => {
+    const item = await fixture()
+    const io = memory()
+    const persistence = createThreadPersistence(io.storage)
+    const descriptors: PersistedThread['descriptors'] = []
+    const sceneSnapshots = Array.from({ length: 21 }, (_, sceneIndex) => {
+      const state = createUIStateStore()
+      const datasetRefs = Array.from({ length: 8 }, (_, datasetIndex) => {
+        const suffix = `${sceneIndex}-${datasetIndex}`
+        const datasetId = DatasetIdSchema.parse(`dataset-${suffix}`)
+        descriptors.push({
+          datasetId,
+          resourceKey: ResourceKeySchema.parse(`resource-${suffix}`),
+          scope: {
+            ...scope(),
+            originId: `origin-${suffix}`,
+            destinationId: `destination-${suffix}`,
+          },
+          sourceVersion: 'retained-scenes-v1',
+          complete: true,
+        })
+        return datasetId
+      })
+      state.initializeMissing(item.id, { datasetRefs })
+      return { toolCallId: `scene-${sceneIndex}`, artifactStates: [state.get(item.id)] }
+    })
+    const messages = sceneSnapshots.map(snapshot => ({
+      id: `message-${snapshot.toolCallId}`,
+      role: 'assistant',
+      parts: [{
+        type: 'tool-present',
+        toolCallId: snapshot.toolCallId,
+        state: 'output-available',
+        input: { $type: 'TravelSurface', artifactRef: item.id },
+        output: {},
+      }],
+    }))
+    const record = { ...item.record, artifacts: [], descriptors, messages, sceneSnapshots }
+
+    await persistence.save('retained-scenes', record)
+
+    expect(await persistence.load('retained-scenes')).toMatchObject({ descriptors, sceneSnapshots })
+    expect(() => PersistedThreadSchema.parse({
+      ...record,
+      messages: [],
+      sceneSnapshots: sceneSnapshots.slice(0, 1),
+    })).toThrow('Scene snapshot is not retained in message history')
+    expect(() => PersistedThreadSchema.parse({
+      ...record,
+      descriptors: [...descriptors, { ...descriptors[0]!, datasetId: DatasetIdSchema.parse('orphan-dataset') }],
+    })).toThrow('Descriptor is not referenced by retained state')
+    expect(() => PersistedThreadSchema.parse({ ...record, descriptors: descriptors.slice(0, -1) })).toThrow('Missing descriptor for retained dataset')
+    expect(() => PersistedThreadSchema.parse({ ...record, descriptors: [...descriptors, descriptors[0]!] })).toThrow('Duplicate dataset descriptor')
   })
 
   it('exports one coherent current revision and allowlisted scope manifests without fare items', async () => {

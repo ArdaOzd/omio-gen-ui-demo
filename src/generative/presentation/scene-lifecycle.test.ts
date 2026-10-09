@@ -26,6 +26,26 @@ function fixture(){
 }
 
 describe('scene lifecycle',()=>{
+  it('freezes synchronously while pinning the current scene and rolls back a failed pin',async()=>{
+    const value=fixture(),fixed=createFixedProjectionFixture({rows:[],sourceVersion:'scene-pin-v1'})
+    const binding=await fixed.bridge.loadScope(fixed.scope({originId:'london',destinationId:'paris',dateWindow:{from:'2026-11-08',to:'2026-11-08'},passengers:1,earliestDeparture:{date:'2026-11-08',minutes:0}}),new AbortController().signal).then(manifest=>fixed.bridge.getBinding(manifest.resourceKey))
+    value.state.replace({...value.state.get(value.first),datasetRefs:[binding.datasetId]})
+    const services:TravelServices={...value.services,bridge:fixed.bridge}
+    const firstMessage=present('first-scene',value.first,'London to Paris')
+    const lifecycle=createSceneLifecycle(services,{initialMessages:[firstMessage]})
+    let rejectPin:(reason?:unknown)=>void=()=>{}
+    vi.spyOn(fixed.bridge,'loadScope').mockImplementationOnce(()=>new Promise((_,reject)=>{rejectPin=reject}))
+
+    const preparation=lifecycle.prepareTurn([firstMessage])
+    expect(lifecycle.view('first-scene').kind).toBe('frozen')
+    rejectPin(new Error('pin failed'))
+    await expect(preparation).rejects.toThrow('pin failed')
+
+    expect(lifecycle.view('first-scene')).toEqual({kind:'active'})
+    expect(lifecycle.exportSnapshots()).toEqual([])
+    expect(fixed.bridge.getBinding(binding.resourceKey).datasetId).toBe(binding.datasetId)
+  })
+
   it('freezes the previous scene before live artifact edits and activates the accepted replacement',async()=>{
     const value=fixture(),firstMessage=present('first-scene',value.first,'London to Paris')
     const lifecycle=createSceneLifecycle(value.services,{initialMessages:[firstMessage]})
@@ -58,6 +78,85 @@ describe('scene lifecycle',()=>{
     expect(lifecycle.view('first-scene')).toEqual({kind:'active'})
     expect(value.activate).toHaveBeenLastCalledWith(value.first)
     expect(lifecycle.exportSnapshots()).toEqual([])
+  })
+
+  it('releases replacement-only resources while preserving the restored scene scope',async()=>{
+    const value=fixture(),fixed=createFixedProjectionFixture({rows:[],sourceVersion:'scene-rollback-v1'})
+    const load=async(originId:string)=>{
+      const manifest=await fixed.bridge.loadScope(fixed.scope({originId,destinationId:'paris',dateWindow:{from:'2026-11-08',to:'2026-11-08'},passengers:1,earliestDeparture:{date:'2026-11-08',minutes:0}}),new AbortController().signal)
+      return fixed.bridge.getBinding(manifest.resourceKey)
+    }
+    const firstBinding=await load('london')
+    value.state.replace({...value.state.get(value.first),datasetRefs:[firstBinding.datasetId]})
+    const services:TravelServices={...value.services,bridge:fixed.bridge},firstMessage=present('first-scene',value.first,'London to Paris')
+    const lifecycle=createSceneLifecycle(services,{initialMessages:[firstMessage]})
+    await lifecycle.prepareTurn([firstMessage])
+    const replacementBinding=await load('madrid')
+    value.state.replace({...value.state.get(value.first),datasetRefs:[replacementBinding.datasetId]})
+    fixed.bridge.release(firstBinding.resourceKey)
+
+    lifecycle.finishTurn([firstMessage],{failed:true,willContinue:false})
+
+    expect(value.state.get(value.first).datasetRefs).toEqual([firstBinding.datasetId])
+    expect(fixed.bridge.getBinding(firstBinding.resourceKey).datasetId).toBe(firstBinding.datasetId)
+    expect(()=>fixed.bridge.getBinding(replacementBinding.resourceKey)).toThrow(/expired/i)
+  })
+
+  it('releases the snapshot pin when the restored scene still owns the same scope',async()=>{
+    const value=fixture(),fixed=createFixedProjectionFixture({rows:[],sourceVersion:'scene-shared-v1'})
+    const manifest=await fixed.bridge.loadScope(fixed.scope({originId:'london',destinationId:'paris',dateWindow:{from:'2026-11-08',to:'2026-11-08'},passengers:1,earliestDeparture:{date:'2026-11-08',minutes:0}}),new AbortController().signal)
+    const binding=fixed.bridge.getBinding(manifest.resourceKey)
+    value.state.replace({...value.state.get(value.first),datasetRefs:[binding.datasetId]})
+    const services:TravelServices={...value.services,bridge:fixed.bridge},firstMessage=present('first-scene',value.first,'London to Paris')
+    const lifecycle=createSceneLifecycle(services,{initialMessages:[firstMessage]})
+    await lifecycle.prepareTurn([firstMessage])
+
+    lifecycle.finishTurn([firstMessage],{failed:true,willContinue:false})
+    fixed.bridge.release(binding.resourceKey)
+
+    expect(()=>fixed.bridge.getBinding(binding.resourceKey)).toThrow(/expired/i)
+  })
+
+  it('reconciles a removed active scene before a retry and restores the surviving scene on failure',async()=>{
+    const value=fixture(),firstMessage=present('first-scene',value.first,'London to Paris'),secondMessage=present('second-scene',value.second,'Madrid to Paris')
+    const lifecycle=createSceneLifecycle(value.services,{initialMessages:[firstMessage]})
+    await lifecycle.prepareTurn([firstMessage])
+    lifecycle.finishTurn([firstMessage,secondMessage],{failed:false,willContinue:false})
+
+    await lifecycle.prepareTurn([firstMessage])
+    lifecycle.finishTurn([firstMessage],{failed:true,willContinue:false})
+
+    expect(lifecycle.view('first-scene')).toEqual({kind:'active'})
+    expect(lifecycle.view('second-scene')).toEqual({kind:'hidden'})
+    expect(lifecycle.activeArtifactIds([firstMessage])).toEqual([value.first])
+  })
+
+  it('prunes removed frozen snapshots and activates a successful retry replacement',async()=>{
+    const value=fixture(),fixed=createFixedProjectionFixture({rows:[],sourceVersion:'scene-prune-v1'})
+    const manifest=await fixed.bridge.loadScope(fixed.scope({originId:'madrid',destinationId:'paris',dateWindow:{from:'2026-11-08',to:'2026-11-08'},passengers:1,earliestDeparture:{date:'2026-11-08',minutes:0}}),new AbortController().signal)
+    const binding=fixed.bridge.getBinding(manifest.resourceKey)
+    value.state.replace({...value.state.get(value.second),datasetRefs:[binding.datasetId]})
+    const services:TravelServices={...value.services,bridge:fixed.bridge}
+    const firstMessage=present('first-scene',value.first,'London to Paris'),secondMessage=present('second-scene',value.second,'Madrid to Paris')
+    const lifecycle=createSceneLifecycle(services,{initialMessages:[firstMessage]})
+    await lifecycle.prepareTurn([firstMessage])
+    lifecycle.finishTurn([firstMessage,secondMessage],{failed:false,willContinue:false})
+    await lifecycle.prepareTurn([firstMessage,secondMessage])
+    lifecycle.finishTurn([firstMessage,secondMessage,present('third-scene',value.first,'London again')],{failed:false,willContinue:false})
+    const release=vi.spyOn(fixed.bridge,'release')
+
+    expect(lifecycle.exportSnapshots([firstMessage]).map(snapshot=>snapshot.toolCallId)).toEqual(['first-scene'])
+    expect(release).toHaveBeenCalledWith(binding.resourceKey)
+
+    await lifecycle.prepareTurn([firstMessage])
+    const replacement=present('retry-scene',value.second,'Retry Madrid')
+    lifecycle.finishTurn([firstMessage,replacement],{failed:false,willContinue:false})
+
+    expect(lifecycle.exportSnapshots().map(snapshot=>snapshot.toolCallId)).toEqual(['first-scene'])
+    expect(lifecycle.view('first-scene').kind).toBe('frozen')
+    expect(lifecycle.view('second-scene')).toEqual({kind:'hidden'})
+    expect(lifecycle.view('third-scene')).toEqual({kind:'hidden'})
+    expect(lifecycle.view('retry-scene')).toEqual({kind:'active'})
   })
 
   it('keeps host tracker removals authoritative when rolling back a failed replacement',async()=>{
