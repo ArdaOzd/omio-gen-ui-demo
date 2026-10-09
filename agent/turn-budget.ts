@@ -56,9 +56,6 @@ export function getAcceptedScenes(key:string,request:ChatRequest):SceneCompletio
 export function getRequiredScene(request:ChatRequest,acceptedScenes:readonly SceneCompletion[]):RequiredScene|undefined{
  const artifactId=request.currentContext.activeArtifactId;if(!artifactId)return;
  const artifact=request.currentContext.artifacts.find(candidate=>candidate.artifactId===artifactId);if(!artifact||!artifact.componentBindings.length)return;
- const activeRefs=new Set(request.currentContext.displayContext.activeViews);
- const activeTypes=new Set(request.currentContext.displayContext.components.flatMap(component=>activeRefs.has(component.identity.componentRef.value)&&component.identity.scope.artifactId===artifactId?[component.identity.componentType]:[]));
- if(!artifact.componentBindings.some(binding=>activeTypes.has(binding.type)))return;
  if(acceptedScenes.some(scene=>scene.artifactRef===artifactId&&scene.uiStateRevision===artifact.revision))return;
  let userIndex=request.messages.length-1;while(userIndex>=0&&request.messages[userIndex]?.role!=='user')userIndex--;
  for(const message of request.messages.slice(userIndex+1))for(const part of message.parts){

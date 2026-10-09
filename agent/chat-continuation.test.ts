@@ -20,7 +20,7 @@ describe('native frontend tool continuation messages',()=>{
  it('repairs a silent completion after an applied route edit into a current presentation',async()=>{
   const warnings:string[]=[];vi.spyOn(console,'warn').mockImplementation(value=>warnings.push(String(value)))
   const id=ArtifactIdSchema.parse('scope-edit-artifact'),store=createUIStateStore();store.initializeMissing(id,{})
-  const displayStore=createDisplayContextStore();displayStore.register({componentRef:{value:'scope-edit-table',keySource:'authored-key'},componentType:'ComparisonTable',scope:{kind:'artifact',artifactId:id},authored:{}})
+  const displayStore=createDisplayContextStore()
   const context=exportAgentContext({turnId:'scope-edit-test',activeArtifactId:id,artifactIds:[id],store,bridge:createFareDataBridge(),displayStore,componentBindings:new Map([[id,[{key:'comparison',type:'ComparisonTable'}]]])})
   context.artifacts[0]!.revision=UIStateRevisionSchema.parse(1)
   const prompts:string[]=[]
