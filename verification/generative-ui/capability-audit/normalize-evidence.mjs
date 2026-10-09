@@ -106,11 +106,12 @@ for (const input of inputs) {
   const inputPath = path.resolve(input)
   const rawBytes = await readFile(inputPath)
   const raw = JSON.parse(rawBytes.toString('utf8'))
+  const rawSourceSha256 = createHash('sha256').update(rawBytes).digest('hex')
   const prompt = promptOf(raw)
   const id = idOf(raw, prompt, inputPath)
   const testCase = byId.get(id)
   assert.equal(prompt, testCase.prompt, `${id} prompt must match the verified case exactly`)
-  const scene = raw.latestScene ?? raw.tree ?? raw.finalTree
+  const scene = raw.latestScene ?? raw.finalTree ?? raw.tree
   const sceneComponents = walkTypes(scene)
   const claimedGenerated = raw.modelGeneratedComponents ?? raw.componentTypes ?? raw.components ?? []
   const generated = sceneComponents.length ? sceneComponents : claimedGenerated
@@ -144,7 +145,29 @@ for (const input of inputs) {
     noHorizontalOverflowAtDesktop: raw.desktopNoHorizontalOverflow ?? null,
     notes: raw.notes ?? null,
     sourceEvidence: path.basename(inputPath),
-    sourceEvidenceSha256: createHash('sha256').update(rawBytes).digest('hex')
+    sourceEvidenceSha256: rawSourceSha256,
+    archiveProvenance: {
+      rawSourceFile: path.basename(inputPath),
+      originalCaptureSha256: rawSourceSha256,
+      archivedRawSourceSha256: rawSourceSha256,
+      sourceFileChangedAfterNormalization: false,
+      sanitization: 'Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded.'
+    },
+    acceptedScene: scene ?? null,
+    toolFacts: (raw.tools ?? []).map(tool => ({
+      name: tool.name,
+      state: tool.state,
+      input: tool.input,
+      output: tool.output
+    })),
+    stateFacts: raw.artifactStates ?? raw.stateFacts ?? null,
+    networkFacts: {
+      queryTraffic: raw.queryTraffic ?? null,
+      lookupTraffic: raw.lookupTraffic ?? null,
+      coverageSettlements: raw.coverageSettlements ?? null
+    },
+    conditionFacts: raw.condition ?? null,
+    resolvedFinding: raw.resolvedFinding ?? null
   }
   assert.equal(normalized.catalogVersion, manifest.catalogVersion, `${id} catalog version drift`)
   assert.equal(normalized.catalogHash, manifest.catalogHash, `${id} catalog hash drift`)

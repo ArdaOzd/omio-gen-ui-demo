@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "archiveProvenance": {
+    "rawSourceFile": "stale-browser-revision-concurrent-timeout.json",
+    "rawSourceSha256": "173ec6f1352ca154ba8b6faf765f077bbdce9aba63fce166bd0a50f46f9b29c0",
+    "sanitization": "Bounded diagnostic facts only; provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "id": "stale-browser-revision-concurrent-timeout",
+  "prompt": "Extend this London to Paris comparison through 9 November 2026. I may make a newer browser edit while you work; if your edit is rejected as stale, preserve my newer version and show a concise stale-edit notice inside the travel view before making any further change. Keep the fare table and cheapest-versus-fastest choice.",
+  "runAt": null,
+  "acceptedSceneCount": 1,
+  "acceptedScene": null,
+  "errors": [],
+  "warnings": [],
+  "condition": {
+    "newerBrowserEdit": "Window ends = 2026-11-10",
+    "injectedAfterPromptSubmission": true
+  },
+  "elapsedMs": null,
+  "chatStatuses": []
+}

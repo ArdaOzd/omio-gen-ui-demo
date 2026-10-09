@@ -4,7 +4,10 @@
     {
       "id": "sort-select-fare-picker-ordering",
       "caseId": "compact-fare-picker",
-      "components": ["SortSelect", "FarePicker"],
+      "components": [
+        "SortSelect",
+        "FarePicker"
+      ],
       "severity": "error",
       "status": "open",
       "expected": "Selecting duration ascending reorders the dataset-bound fare picker by duration.",
@@ -14,69 +17,105 @@
         "src/generative/catalog/context.tsx:229-232 reads state.sortByLeg[leg] or the default sort for dataset-bound queries",
         "src/generative/catalog/views/index.tsx:62 gives FarePicker a datasetRef"
       ],
-      "screenshot": "/private/tmp/agent-prompt-evidence/compact-fare-picker-failed.png"
+      "screenshot": "diagnostics/compact-fare-picker-sort-failure.png"
     },
     {
       "id": "duration-picker-scoped-sort",
       "caseId": "duration-picker",
-      "components": ["DurationRange", "FarePicker", "FareOrder"],
+      "components": [
+        "DurationRange",
+        "FarePicker",
+        "FareOrder"
+      ],
       "severity": "error",
       "status": "open",
       "expected": "The shortest-first request ends with a populated duration-ordered picker.",
       "observed": "A repeat ended with an empty refreshing picker after the assistant tried to correct departure ordering.",
-      "sourceTrace": ["Same global-versus-leg sort boundary as sort-select-fare-picker-ordering"]
+      "sourceTrace": [
+        "Same global-versus-leg sort boundary as sort-select-fare-picker-ordering"
+      ]
     },
     {
       "id": "budget-repeat-empty",
       "caseId": "budget-shortlist",
-      "components": ["PriceRange", "ModeChips", "FarePicker"],
+      "components": [
+        "PriceRange",
+        "ModeChips",
+        "FarePicker"
+      ],
       "severity": "error",
       "status": "open",
       "expected": "The exact budget prompt remains usable across repeat runs.",
       "observed": "One exact repeat produced zero rows and a coverage alert after valid local €25 and Train inputs; later repeats passed, but the failed attempt lacked query-body capture.",
-      "sourceTrace": ["/private/tmp/agent-prompt-evidence/budget-shortlist-failed.png"]
+      "sourceTrace": [
+        "evidence/budget-shortlist-failed-repeat.json",
+        "diagnostics/budget-shortlist-empty-repeat.png"
+      ]
     },
     {
       "id": "covered-selection-false-coverage",
       "caseId": "departure-board",
-      "components": ["ItineraryTimeline", "CheapestFastest"],
+      "components": [
+        "ItineraryTimeline",
+        "CheapestFastest"
+      ],
       "severity": "error",
       "status": "resolved",
       "expected": "Adding a fare already covered by the active scope leaves coverage ready.",
       "observed": "Before the fix, a successful Add showed a persistent false coverage error even though query and pin lookup responses were 200.",
-      "sourceTrace": ["src/generative/state/action-router.ts deferred retry body in commit 6529ed1", "/private/tmp/agent-prompt-evidence/departure-board-responsive-failure-traffic.json"],
+      "sourceTrace": [
+        "src/generative/state/action-router.ts deferred retry body in commit 6529ed1",
+        "diagnostics/departure-board-pre-fix-failure.json"
+      ],
       "resolution": "Commit 6529ed1 registers the request before the supersession check; fresh desktop and 390 px runs stayed error-free before and after Add."
     },
     {
       "id": "covered-selection-false-coverage-fixed-picker",
       "caseId": "fixed-date-picker",
-      "components": ["FarePicker", "SelectedItinerary", "SyntheticTotal"],
+      "components": [
+        "FarePicker",
+        "SelectedItinerary",
+        "SyntheticTotal"
+      ],
       "severity": "error",
       "status": "resolved",
       "expected": "Selecting an already-covered fare updates summary UI without a coverage error.",
       "observed": "Before the fix, selection succeeded and lookup returned the exact fare, then a persistent false coverage error appeared.",
-      "sourceTrace": ["Superseded coverage was thrown before request registration", "/private/tmp/agent-prompt-evidence/fixed-date-picker-responsive-debug.json"],
+      "sourceTrace": [
+        "Superseded coverage was thrown before request registration",
+        "diagnostics/fixed-picker-pre-fix-debug.json"
+      ],
       "resolution": "Commit 6529ed1 fixed the ordering race; fresh selection remained error-free at both viewports."
     },
     {
       "id": "static-loading-status",
       "caseId": "pending-refresh-loading",
-      "components": ["ArtifactSkeleton"],
+      "components": [
+        "ArtifactSkeleton"
+      ],
       "severity": "error",
       "status": "open",
       "expected": "A loading indicator clears when the held local refresh becomes ready.",
       "observed": "The model-authored ArtifactSkeleton remained visible after all held requests completed.",
-      "sourceTrace": ["ArtifactSkeleton is a static authored descriptor and does not observe readiness"]
+      "sourceTrace": [
+        "ArtifactSkeleton is a static authored descriptor and does not observe readiness"
+      ]
     },
     {
       "id": "adaptive-stale-status-unverified",
       "caseId": "status-stale-saved-comparison",
-      "components": ["StaleBadge"],
+      "components": [
+        "StaleBadge"
+      ],
       "severity": "warning",
       "status": "open",
       "expected": "A stale badge can distinguish old saved material from current bound results.",
       "observed": "The user-described old-saved preview was correct, but two automatic browser-revision attempts timed out without a terminal accepted scene.",
-      "sourceTrace": ["/private/tmp/omio-prompt-status-cases/status-component-ledger.json"]
+      "sourceTrace": [
+        "diagnostics/status-component-ledger.json",
+        "diagnostics/stale-browser-revision-prior-edit-timeout.json",
+        "diagnostics/stale-browser-revision-concurrent-timeout.json"
+      ]
     }
   ]
 }

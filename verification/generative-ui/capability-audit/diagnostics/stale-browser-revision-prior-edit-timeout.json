@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "archiveProvenance": {
+    "rawSourceFile": "stale-browser-revision-prior-edit-timeout.json",
+    "rawSourceSha256": "9d1231b6b8b80f08cbc68be07c1d203290a6b20d2eff6cab615584654b4f7a40",
+    "sanitization": "Bounded diagnostic facts only; provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "id": "stale-browser-revision-prior-edit-timeout",
+  "prompt": "I changed the date window locally after your last response, so the earlier generated plan is now stale. Keep my newer browser dates, add a concise stale-edit notice inside the travel view, and keep the fare table and cheapest-versus-fastest choice.",
+  "runAt": null,
+  "acceptedSceneCount": 1,
+  "acceptedScene": null,
+  "errors": [],
+  "warnings": [],
+  "condition": {
+    "newerBrowserEdit": "Window ends = 2026-11-10",
+    "injectedBeforePromptSubmission": true
+  },
+  "elapsedMs": null,
+  "chatStatuses": []
+}

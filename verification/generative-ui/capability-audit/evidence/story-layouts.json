@@ -89,5 +89,153 @@
       },
       "sha256": "d173de50c39334c43f6cd9590f6321bd84d4125925169febd9938a4b4b6965e7"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+    "$type": "TravelSurface",
+    "$key": "journey-story",
+    "children": [
+      {
+        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+        "title": "London to Paris",
+        "body": "8 November 2026 · Compare your options, explore departure times, and build your journey.",
+        "$type": "TravelHero",
+        "$key": "story-hero"
+      },
+      {
+        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+        "$type": "SplitPane",
+        "$key": "decision-and-summary",
+        "children": [
+          {
+            "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+            "$type": "Stack",
+            "$key": "main-decision",
+            "children": [
+              {
+                "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                "$type": "Tabs",
+                "$key": "comparison-tabs",
+                "children": [
+                  {
+                    "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                    "title": "Price vs time",
+                    "$type": "Section",
+                    "$key": "price-time-tab",
+                    "children": [
+                      {
+                        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                        "variant": "compact",
+                        "legIndex": 0,
+                        "$type": "CheapestFastest",
+                        "$key": "leg-0-cheapest-fastest"
+                      }
+                    ]
+                  },
+                  {
+                    "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                    "title": "Compare transport",
+                    "$type": "Section",
+                    "$key": "transport-tab",
+                    "children": [
+                      {
+                        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                        "variant": "compact",
+                        "legIndex": 0,
+                        "$type": "ComparisonMatrix",
+                        "$key": "leg-0-mode-comparison"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                "title": "Explore your options",
+                "$type": "Carousel",
+                "$key": "swipe-option-panels",
+                "children": [
+                  {
+                    "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                    "title": "Compare the details",
+                    "$type": "Section",
+                    "$key": "ranked-options-panel",
+                    "children": [
+                      {
+                        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                        "variant": "compact",
+                        "legIndex": 0,
+                        "$type": "ComparisonTable",
+                        "$key": "leg-0-ranked-options"
+                      }
+                    ]
+                  },
+                  {
+                    "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                    "title": "Find a convenient departure",
+                    "$type": "Section",
+                    "$key": "departure-options-panel",
+                    "children": [
+                      {
+                        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                        "variant": "compact",
+                        "legIndex": 0,
+                        "$type": "ItineraryTimeline",
+                        "$key": "leg-0-departure-timeline"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+            "title": "Your journey",
+            "$type": "StickySummary",
+            "$key": "persistent-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                "variant": "compact",
+                "$type": "SelectedItinerary",
+                "$key": "selected-journey"
+              },
+              {
+                "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+                "title": "Synthetic total",
+                "variant": "compact",
+                "$type": "SyntheticTotal",
+                "$key": "selected-synthetic-total"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-a7794050-ce54-4e9a-bf10-73a926bb8a65",
+        "title": "Demo prices",
+        "variant": "compact",
+        "body": "All fares, schedules and totals are synthetic demo data—not live quotes or bookable offers.",
+        "$type": "Callout",
+        "$key": "synthetic-price-note"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "story-layouts.json",
+    "originalCaptureSha256": "9524541d798e3501b8caa87517a627d86b2577afa793500d4c64af3f7784bfa6",
+    "archivedRawSourceSha256": "9524541d798e3501b8caa87517a627d86b2577afa793500d4c64af3f7784bfa6",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

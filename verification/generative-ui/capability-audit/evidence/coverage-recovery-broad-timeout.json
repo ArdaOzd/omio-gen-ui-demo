@@ -38,5 +38,18 @@
   "notes": null,
   "sourceEvidence": "coverage-recovery.json",
   "sourceEvidenceSha256": "15b094f95ebda3c4df00c0531b370b384228ca8e154c7fc3f4a8e558e2014b85",
-  "screenshots": []
+  "screenshots": [],
+  "acceptedScene": null,
+  "archiveProvenance": {
+    "rawSourceFile": "coverage-recovery.json",
+    "originalCaptureSha256": "15b094f95ebda3c4df00c0531b370b384228ca8e154c7fc3f4a8e558e2014b85",
+    "archivedRawSourceSha256": "15b094f95ebda3c4df00c0531b370b384228ca8e154c7fc3f4a8e558e2014b85",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

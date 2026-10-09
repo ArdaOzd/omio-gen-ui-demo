@@ -66,5 +66,106 @@
       },
       "sha256": "cae1c5ee54abb4145473eb41f08598e1b010946d58e9f9270da51b96f475e5b8"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-e6b34187-8c18-401a-be55-3ea02fd755a0",
+    "title": "London–Paris · 31 October–6 November 2026",
+    "$type": "TravelSurface",
+    "$key": "london-paris-flex-workspace",
+    "children": [
+      {
+        "artifactRef": "artifact-e6b34187-8c18-401a-be55-3ea02fd755a0",
+        "$type": "SplitPane",
+        "$key": "calendar-and-comparison",
+        "children": [
+          {
+            "artifactRef": "artifact-e6b34187-8c18-401a-be55-3ea02fd755a0",
+            "datasetRef": "scope-3ca1a029d409342e3e0d002b24e39bb9",
+            "title": "Cheapest synthetic fare for each date",
+            "legIndex": 0,
+            "$type": "FareCalendar",
+            "$key": "london-paris-calendar-0"
+          },
+          {
+            "artifactRef": "artifact-e6b34187-8c18-401a-be55-3ea02fd755a0",
+            "$type": "StickySummary",
+            "$key": "persistent-comparison",
+            "children": [
+              {
+                "artifactRef": "artifact-e6b34187-8c18-401a-be55-3ea02fd755a0",
+                "datasetRef": "scope-3ca1a029d409342e3e0d002b24e39bb9",
+                "title": "Cheapest versus fastest",
+                "legIndex": 0,
+                "$type": "CheapestFastest",
+                "$key": "london-paris-cheapest-fastest-0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "flexible-calendar.json",
+    "originalCaptureSha256": "9bd924d73db62024aecc2ab0670bdd12344381091b4ef50d3f8b55c69f4406e4",
+    "archivedRawSourceSha256": "9bd924d73db62024aecc2ab0670bdd12344381091b4ef50d3f8b55c69f4406e4",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-e6b34187-8c18-401a-be55-3ea02fd755a0",
+      "revision": 7,
+      "runtimeVariables": {},
+      "datasetRefs": [
+        "scope-3ca1a029d409342e3e0d002b24e39bb9"
+      ],
+      "datasetBindings": {},
+      "filters": {
+        "modes": [],
+        "carrierIds": [],
+        "directOnly": false
+      },
+      "dates": {
+        "start": "2026-10-31",
+        "end": "2026-11-06"
+      },
+      "citySequence": [
+        "london",
+        "paris"
+      ],
+      "stays": [],
+      "modesByLeg": {},
+      "availableModesByLeg": {
+        "london:paris": [
+          "train",
+          "bus",
+          "flight"
+        ]
+      },
+      "requestedModesByLeg": {
+        "london:paris": [
+          "train",
+          "bus",
+          "flight"
+        ]
+      },
+      "displayWindowByLeg": {},
+      "sortByLeg": {},
+      "calendarDateByLeg": {
+        "london:paris": "2026-10-31"
+      },
+      "sort": {
+        "field": "priceCents",
+        "direction": "asc"
+      },
+      "selectedFareIds": [],
+      "pending": [],
+      "lastInteractionAt": "2026-10-09T15:12:28.991Z"
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

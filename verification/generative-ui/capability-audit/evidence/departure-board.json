@@ -68,5 +68,72 @@
       },
       "sha256": "3e5c5fe35a89c2b27a0ef581a7e0e382cdf38f3195c7b15bb698ac13a207549b"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+    "title": "London → Paris · 8 November 2026",
+    "$type": "TravelSurface",
+    "$key": "london-paris-departure-board",
+    "children": [
+      {
+        "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+        "title": "Your route",
+        "$type": "Section",
+        "$key": "route-orientation",
+        "children": [
+          {
+            "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "$type": "RouteMap",
+            "$key": "route-map"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+        "title": "The day in departure order",
+        "$type": "Section",
+        "$key": "day-board",
+        "children": [
+          {
+            "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Synthetic journeys · departure and arrival times",
+            "legIndex": 0,
+            "$type": "ItineraryTimeline",
+            "$key": "departure-arrival-timeline-leg-0"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+        "title": "Your shortlist: save money or save time",
+        "$type": "Section",
+        "$key": "actionable-shortlist",
+        "children": [
+          {
+            "artifactRef": "artifact-43a47594-36fb-46e1-838a-d005ff2d789e",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Lowest fare versus shortest journey",
+            "variant": "compact",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "cheapest-fastest-leg-0"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "case-3.json",
+    "originalCaptureSha256": "785166d6bfee520b0ccd7f39602f2595a0b1a7ed289ff57454350ee03dafa5db",
+    "archivedRawSourceSha256": "785166d6bfee520b0ccd7f39602f2595a0b1a7ed289ff57454350ee03dafa5db",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

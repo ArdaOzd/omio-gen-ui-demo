@@ -116,5 +116,68 @@
       "sha256": "c72f0ddaab8c5a8fccb9849827bf54142b82f3fb98026472710cf7abb5d63c2a",
       "condition": null
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+    "$type": "TravelSurface",
+    "$key": "london-paris-surface",
+    "children": [
+      {
+        "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+        "title": "Current synthetic fares · 8 November 2026",
+        "$type": "Section",
+        "$key": "current-fares-panel",
+        "children": [
+          {
+            "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Cheapest versus fastest",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "current-leg-0-tradeoffs"
+          },
+          {
+            "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "London–Paris fare options",
+            "legIndex": 0,
+            "$type": "ComparisonTable",
+            "$key": "current-leg-0-options"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+        "title": "Old saved comparison",
+        "$type": "Section",
+        "$key": "old-saved-comparison-panel",
+        "children": [
+          {
+            "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+            "$type": "StaleBadge",
+            "$key": "old-saved-comparison-stale"
+          },
+          {
+            "artifactRef": "artifact-6f75f6f2-b798-48d4-acd0-fbc22e38220e",
+            "title": "Not current fare evidence",
+            "body": "The saved comparison predates your local date change. Its old fare details are not supplied in this turn; use the separate current-results panel for 8 November.",
+            "$type": "Callout",
+            "$key": "old-saved-comparison-note"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "status_stale_saved_comparison.json",
+    "originalCaptureSha256": "7bb7988ff26629a53b2d5215f6f2aac0c22dd480e051afbc771eb8c2da6a9bba",
+    "archivedRawSourceSha256": "7bb7988ff26629a53b2d5215f6f2aac0c22dd480e051afbc771eb8c2da6a9bba",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

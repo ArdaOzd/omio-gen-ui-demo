@@ -68,5 +68,163 @@
       },
       "sha256": "fc0283ba46718b6dc352dfcba1b51e56dc577274d74e57331fcf5b6a01544224"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+    "title": "London → Paris · 28 October 2026",
+    "$type": "TravelSurface",
+    "$key": "london-paris-tradeoff",
+    "children": [
+      {
+        "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+        "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+        "title": "Saving money versus saving time",
+        "legIndex": 0,
+        "$type": "CheapestFastest",
+        "$key": "leg-0-cheapest-fastest"
+      },
+      {
+        "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+        "$type": "SplitPane",
+        "$key": "exact-options-and-tradeoff",
+        "children": [
+          {
+            "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+            "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+            "title": "Exact synthetic options",
+            "legIndex": 0,
+            "$type": "ComparisonTable",
+            "$key": "leg-0-exact-options"
+          },
+          {
+            "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+            "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+            "title": "What does a shorter journey cost?",
+            "legIndex": 0,
+            "$type": "DurationPricePlot",
+            "$key": "leg-0-price-duration"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "tradeoff-dashboard-historical.json",
+    "originalCaptureSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
+    "archivedRawSourceSha256": "199082ec4138efae6170fbbac60f46b2972fe0ae2e1552707506e12480e61a75",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "london",
+              "paris"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-10-28",
+              "end": "2026-10-28"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+        "status": "applied",
+        "revision": 6,
+        "scopes": [
+          {
+            "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+            "resourceKey": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+            "legIndex": 0,
+            "originId": "london",
+            "destinationId": "paris",
+            "dateWindow": {
+              "from": "2026-10-28",
+              "to": "2026-10-28"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 20,
+            "complete": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+        "title": "London → Paris · 28 October 2026",
+        "$type": "TravelSurface",
+        "$key": "london-paris-tradeoff",
+        "children": [
+          {
+            "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+            "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+            "title": "Saving money versus saving time",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "leg-0-cheapest-fastest"
+          },
+          {
+            "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+            "$type": "SplitPane",
+            "$key": "exact-options-and-tradeoff",
+            "children": [
+              {
+                "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+                "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+                "title": "Exact synthetic options",
+                "legIndex": 0,
+                "$type": "ComparisonTable",
+                "$key": "leg-0-exact-options"
+              },
+              {
+                "artifactRef": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+                "datasetRef": "scope-785c48abfad3e3ff2181dfae7699b8e8",
+                "title": "What does a shorter journey cost?",
+                "legIndex": 0,
+                "$type": "DurationPricePlot",
+                "$key": "leg-0-price-duration"
+              }
+            ]
+          }
+        ]
+      },
+      "output": {}
+    }
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-f8a0ac02-45ad-4af8-9066-5a2fd0ca2d85",
+      "revision": 6,
+      "citySequence": [
+        "london",
+        "paris"
+      ],
+      "dates": {
+        "start": "2026-10-28",
+        "end": "2026-10-28"
+      },
+      "datasetRefs": [
+        "scope-785c48abfad3e3ff2181dfae7699b8e8"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

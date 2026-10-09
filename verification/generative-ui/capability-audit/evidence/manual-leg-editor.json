@@ -93,5 +93,193 @@
       },
       "sha256": "e22fc5b9e168f08c8d923a275268720041304df682af7a7ec69920fecadfcef4"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+    "title": "London → Paris → Barcelona",
+    "$type": "TravelSurface",
+    "$key": "manual-trip-editor",
+    "children": [
+      {
+        "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+        "title": "Edit London → Paris before choosing a fare",
+        "$type": "Section",
+        "$key": "first-leg-manual",
+        "children": [
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Origin and destination",
+            "legIndex": 0,
+            "$type": "CityField",
+            "$key": "first-leg-cities"
+          },
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "$type": "Inline",
+            "$key": "first-leg-controls",
+            "children": [
+              {
+                "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+                "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                "title": "Departure date",
+                "legIndex": 0,
+                "$type": "TravelDate",
+                "$key": "first-leg-date"
+              },
+              {
+                "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+                "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                "legIndex": 0,
+                "$type": "TransportSelect",
+                "$key": "first-leg-transport"
+              },
+              {
+                "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+                "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                "title": "Stay in Paris",
+                "legIndex": 0,
+                "$type": "StayDuration",
+                "$key": "paris-stay"
+              },
+              {
+                "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+                "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                "legIndex": 0,
+                "$type": "FareOrder",
+                "$key": "first-leg-order"
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Browse synthetic fares",
+            "legIndex": 0,
+            "$type": "FadeFares",
+            "$key": "first-leg-scrollable-fares"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+        "$type": "ResponsiveGrid",
+        "$key": "leg-tradeoffs",
+        "children": [
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "London → Paris: cheapest vs fastest",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "london-paris-comparison"
+          },
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "datasetRef": "scope-fa88fa20961255473af03e769d8225a0",
+            "title": "Paris → Barcelona: cheapest vs fastest",
+            "legIndex": 1,
+            "$type": "CheapestFastest",
+            "$key": "paris-barcelona-comparison"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+        "title": "Combined planner · both legs",
+        "$type": "MultiCityPlanGrid",
+        "$key": "complete-trip-planner"
+      },
+      {
+        "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+        "$type": "StickySummary",
+        "$key": "trip-summary",
+        "children": [
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "$type": "SelectedItinerary",
+            "$key": "selected-trip"
+          },
+          {
+            "artifactRef": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+            "$type": "SyntheticTotal",
+            "$key": "synthetic-trip-total"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "manual-leg-editor.json",
+    "originalCaptureSha256": "bc1bb8b6fee9e4f51e3bf008cc7116c96003cfbd724892b87265a5ea609e3594",
+    "archivedRawSourceSha256": "bc1bb8b6fee9e4f51e3bf008cc7116c96003cfbd724892b87265a5ea609e3594",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-37ed222b-1753-418c-86d3-5a9d9b53a234",
+      "revision": 7,
+      "runtimeVariables": {},
+      "datasetRefs": [
+        "scope-137a4e0b2465af233a372cbb5313865b",
+        "scope-fa88fa20961255473af03e769d8225a0"
+      ],
+      "datasetBindings": {},
+      "filters": {
+        "modes": [],
+        "carrierIds": [],
+        "directOnly": false
+      },
+      "dates": {
+        "start": "2026-11-08"
+      },
+      "citySequence": [
+        "london",
+        "paris",
+        "barcelona"
+      ],
+      "stays": [
+        {
+          "cityId": "paris",
+          "nights": 2
+        }
+      ],
+      "modesByLeg": {},
+      "availableModesByLeg": {
+        "london:paris": [
+          "train",
+          "bus",
+          "flight"
+        ],
+        "paris:barcelona": [
+          "bus"
+        ]
+      },
+      "requestedModesByLeg": {
+        "london:paris": [
+          "train",
+          "bus",
+          "flight"
+        ],
+        "paris:barcelona": [
+          "bus"
+        ]
+      },
+      "displayWindowByLeg": {},
+      "sortByLeg": {},
+      "calendarDateByLeg": {},
+      "sort": {
+        "field": "priceCents",
+        "direction": "asc"
+      },
+      "selectedFareIds": [],
+      "pending": [],
+      "lastInteractionAt": "2026-10-09T15:10:57.525Z"
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

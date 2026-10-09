@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "archiveProvenance": {
+    "rawSourceFile": "stale-badge-explicit-preview-interrupted.json",
+    "rawSourceSha256": "f02f1d73306c5d8d674739677c67cd7d2eb623a1fbc00d18483671c27cc211b9",
+    "sanitization": "Bounded diagnostic facts only; provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "id": "stale-badge-explicit-preview-interrupted",
+  "prompt": "I'm reviewing the interface's standard stale-status badge before launch. Beside the current London-to-Paris options for 8 November 2026, show a clearly titled Preview panel containing the standard stale-status badge. Keep the preview visually separate from the live fares, label it as a demonstration, and state that the current results are live rather than stale.",
+  "runAt": null,
+  "acceptedSceneCount": null,
+  "acceptedScene": null,
+  "errors": [],
+  "warnings": [],
+  "condition": null,
+  "elapsedMs": null,
+  "chatStatuses": []
+}

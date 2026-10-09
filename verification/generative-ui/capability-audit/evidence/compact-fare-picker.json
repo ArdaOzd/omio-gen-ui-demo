@@ -109,16 +109,156 @@
         "height": 1502
       },
       "sha256": "60fcf199d1b1f87329b1f6000cddcf67ddce65045413d4cdfdcebb06b43d1fee"
+    }
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+    "title": "Madrid → Paris · 2 November 2026",
+    "variant": "compact",
+    "$type": "TravelSurface",
+    "$key": "compact-madrid-paris",
+    "children": [
+      {
+        "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+        "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+        "title": "Price, duration or departure",
+        "variant": "compact",
+        "$type": "SortSelect",
+        "$key": "compact-sort"
+      },
+      {
+        "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+        "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+        "title": "Choose a synthetic fare",
+        "variant": "compact",
+        "legIndex": 0,
+        "$type": "FarePicker",
+        "$key": "compact-picker-leg-0"
+      },
+      {
+        "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+        "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+        "title": "Cheapest versus fastest",
+        "variant": "compact",
+        "legIndex": 0,
+        "$type": "CheapestFastest",
+        "$key": "compact-comparison-leg-0"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "compact-fare-picker.json",
+    "originalCaptureSha256": "b9bbb8f25b689b78773e4159d84e9209122b6bec01942bb93b23a9d4552781a9",
+    "archivedRawSourceSha256": "b9bbb8f25b689b78773e4159d84e9209122b6bec01942bb93b23a9d4552781a9",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "madrid",
+              "paris"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-11-02",
+              "end": "2026-11-02"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+        "status": "applied",
+        "revision": 6,
+        "scopes": [
+          {
+            "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+            "resourceKey": "scope-2b3ec1a794cbcac18238aefac219c51a",
+            "legIndex": 0,
+            "originId": "madrid",
+            "destinationId": "paris",
+            "dateWindow": {
+              "from": "2026-11-02",
+              "to": "2026-11-02"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 7,
+            "complete": true
+          }
+        ]
+      }
     },
     {
-      "path": "screenshots/compact-fare-picker-interaction.png",
-      "role": "interaction",
-      "cssViewport": null,
-      "pixelDimensions": {
-        "width": 1440,
-        "height": 1286
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+        "title": "Madrid → Paris · 2 November 2026",
+        "variant": "compact",
+        "$type": "TravelSurface",
+        "$key": "compact-madrid-paris",
+        "children": [
+          {
+            "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+            "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+            "title": "Price, duration or departure",
+            "variant": "compact",
+            "$type": "SortSelect",
+            "$key": "compact-sort"
+          },
+          {
+            "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+            "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+            "title": "Choose a synthetic fare",
+            "variant": "compact",
+            "legIndex": 0,
+            "$type": "FarePicker",
+            "$key": "compact-picker-leg-0"
+          },
+          {
+            "artifactRef": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+            "datasetRef": "scope-2b3ec1a794cbcac18238aefac219c51a",
+            "title": "Cheapest versus fastest",
+            "variant": "compact",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "compact-comparison-leg-0"
+          }
+        ]
       },
-      "sha256": "1c4275dd0c0db35c5b5f8faa734a8fc1c259f9361d3845af1f651e7d654c23eb"
+      "output": {}
     }
-  ]
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-2fc52509-f5f6-4b77-aa23-aa8e9afbb76e",
+      "revision": 6,
+      "citySequence": [
+        "madrid",
+        "paris"
+      ],
+      "dates": {
+        "start": "2026-11-02",
+        "end": "2026-11-02"
+      },
+      "datasetRefs": [
+        "scope-2b3ec1a794cbcac18238aefac219c51a"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

@@ -126,16 +126,148 @@
         "height": 1428
       },
       "sha256": "26145b37f03edb8f3f31510f214a63f4685c164512bf5766ddbd2f2455099b80"
+    }
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+    "title": "Berlin → Amsterdam · 30 October–5 November 2026",
+    "$type": "TravelSurface",
+    "$key": "berlin-amsterdam-tracker",
+    "children": [
+      {
+        "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+        "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+        "title": "Browse departure dates",
+        "$type": "DateStrip",
+        "$key": "departure-date-strip"
+      },
+      {
+        "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+        "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+        "title": "Synthetic prices by day",
+        "legIndex": 0,
+        "$type": "PriceCalendar",
+        "$key": "price-by-day-calendar"
+      },
+      {
+        "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+        "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+        "title": "Cheapest versus fastest",
+        "legIndex": 0,
+        "$type": "CheapestFastest",
+        "$key": "cheapest-versus-fastest-leg-0"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "date-strip-price-calendar.json",
+    "originalCaptureSha256": "91b27cac5f8f6e147bb840e2ebc1f81a308b04cc1ead902f1027bd1ca6ef42a3",
+    "archivedRawSourceSha256": "91b27cac5f8f6e147bb840e2ebc1f81a308b04cc1ead902f1027bd1ca6ef42a3",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "berlin",
+              "amsterdam"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-10-30",
+              "end": "2026-11-05"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+        "status": "applied",
+        "revision": 6,
+        "scopes": [
+          {
+            "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+            "resourceKey": "scope-2e44b85af0047fe15c92c264b38426d8",
+            "legIndex": 0,
+            "originId": "berlin",
+            "destinationId": "amsterdam",
+            "dateWindow": {
+              "from": "2026-10-30",
+              "to": "2026-11-05"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 53,
+            "complete": true
+          }
+        ]
+      }
     },
     {
-      "path": "screenshots/date-strip-price-calendar-interaction.png",
-      "role": "interaction",
-      "cssViewport": null,
-      "pixelDimensions": {
-        "width": 1280,
-        "height": 1032
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+        "title": "Berlin → Amsterdam · 30 October–5 November 2026",
+        "$type": "TravelSurface",
+        "$key": "berlin-amsterdam-tracker",
+        "children": [
+          {
+            "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+            "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+            "title": "Browse departure dates",
+            "$type": "DateStrip",
+            "$key": "departure-date-strip"
+          },
+          {
+            "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+            "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+            "title": "Synthetic prices by day",
+            "legIndex": 0,
+            "$type": "PriceCalendar",
+            "$key": "price-by-day-calendar"
+          },
+          {
+            "artifactRef": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+            "datasetRef": "scope-2e44b85af0047fe15c92c264b38426d8",
+            "title": "Cheapest versus fastest",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "cheapest-versus-fastest-leg-0"
+          }
+        ]
       },
-      "sha256": "d1d58ac45ce03d5b1848ac336c6cfcfd854255972a95fa721c7a4b2df5b82618"
+      "output": {}
     }
-  ]
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-5770e983-359c-4ab8-82af-46798cbe675f",
+      "revision": 6,
+      "citySequence": [
+        "berlin",
+        "amsterdam"
+      ],
+      "dates": {
+        "start": "2026-10-30",
+        "end": "2026-11-05"
+      },
+      "datasetRefs": [
+        "scope-2e44b85af0047fe15c92c264b38426d8"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

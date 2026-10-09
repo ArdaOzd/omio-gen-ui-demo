@@ -102,5 +102,121 @@
       },
       "sha256": "5c72992ad1ea688c1d1d78bc7674be0b35a048e810a278f8fe6f83c94c78a5dd"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+    "$type": "TravelSurface",
+    "$key": "journey-story",
+    "children": [
+      {
+        "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+        "title": "London to Paris",
+        "body": "8 November 2026 · Compare your journey, then collect your preferred option.",
+        "$type": "TravelHero",
+        "$key": "story-hero"
+      },
+      {
+        "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+        "$type": "SplitPane",
+        "$key": "decision-and-summary",
+        "children": [
+          {
+            "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+            "$type": "Tabs",
+            "$key": "comparison-tabs",
+            "children": [
+              {
+                "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                "title": "Journey highlights",
+                "$type": "Section",
+                "$key": "highlights-tab",
+                "children": [
+                  {
+                    "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                    "$type": "Carousel",
+                    "$key": "option-panels",
+                    "children": [
+                      {
+                        "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                        "title": "Save money or save time",
+                        "variant": "compact",
+                        "legIndex": 0,
+                        "$type": "CheapestFastest",
+                        "$key": "leg-0-cheapest-fastest"
+                      },
+                      {
+                        "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                        "title": "Compare transport modes",
+                        "variant": "compact",
+                        "legIndex": 0,
+                        "$type": "ComparisonMatrix",
+                        "$key": "leg-0-mode-comparison"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                "title": "Option details",
+                "$type": "Section",
+                "$key": "details-tab",
+                "children": [
+                  {
+                    "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                    "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                    "title": "Compare individual journeys",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "ComparisonTable",
+                    "$key": "leg-0-option-table"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+            "title": "Your chosen journey",
+            "$type": "StickySummary",
+            "$key": "persistent-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                "variant": "compact",
+                "$type": "SelectedItinerary",
+                "$key": "selected-journey"
+              },
+              {
+                "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+                "$type": "SyntheticTotal",
+                "$key": "selected-synthetic-total"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-6e01310f-5a61-4c56-8093-42b557216377",
+        "title": "Demo prices, not live offers",
+        "body": "All fares, schedules and totals are synthetic demo data. Selecting an option does not reserve, book or purchase travel.",
+        "$type": "Callout",
+        "$key": "synthetic-price-note"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "story-layouts.json",
+    "originalCaptureSha256": "489cab987548a3d9a71a36ad0d7fb47c05b2226875b317b8d31ede492a7a3a15",
+    "archivedRawSourceSha256": "489cab987548a3d9a71a36ad0d7fb47c05b2226875b317b8d31ede492a7a3a15",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

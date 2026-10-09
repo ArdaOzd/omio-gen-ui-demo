@@ -68,5 +68,64 @@
       },
       "sha256": "499a18f14a9709d8239d6cc7ee6a48d8437ecf1c4fb941763a8a605d1bcef5de"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-1f47ea87-c223-4ec2-a911-e157ae8a027b",
+    "title": "London–Paris · 8 November 2026 · Synthetic journeys",
+    "$type": "TravelSurface",
+    "$key": "london-paris-departure-board",
+    "children": [
+      {
+        "artifactRef": "artifact-1f47ea87-c223-4ec2-a911-e157ae8a027b",
+        "title": "Your route: London → Paris",
+        "$type": "RouteMap",
+        "$key": "route-orientation"
+      },
+      {
+        "artifactRef": "artifact-1f47ea87-c223-4ec2-a911-e157ae8a027b",
+        "title": "The day at a glance",
+        "$type": "Section",
+        "$key": "departure-board-section",
+        "children": [
+          {
+            "artifactRef": "artifact-1f47ea87-c223-4ec2-a911-e157ae8a027b",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Departures in time order, with arrival details",
+            "legIndex": 0,
+            "$type": "ItineraryTimeline",
+            "$key": "departure-board-leg-0"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-1f47ea87-c223-4ec2-a911-e157ae8a027b",
+        "title": "Your actionable shortlist: save money or save time",
+        "$type": "Section",
+        "$key": "shortlist-section",
+        "children": [
+          {
+            "artifactRef": "artifact-1f47ea87-c223-4ec2-a911-e157ae8a027b",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Cheapest versus fastest synthetic journey",
+            "variant": "emphasis",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "shortlist-leg-0"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "case-3-first.json",
+    "originalCaptureSha256": "16d4d72cbad5ad4ccb16ddf5c976b53f125818c0467926fcd861c53bcf068b12",
+    "archivedRawSourceSha256": "16d4d72cbad5ad4ccb16ddf5c976b53f125818c0467926fcd861c53bcf068b12",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

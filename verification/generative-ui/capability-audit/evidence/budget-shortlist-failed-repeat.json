@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "budget-shortlist",
+  "title": "Budget shortlist with local filters",
+  "family": "bounded-filter-workspace",
+  "prompt": "Find me a direct London to Paris trip between 26 October and 1 November 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.",
+  "runAt": null,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "modelGeneratedComponents": [],
+  "claimedModelGeneratedComponents": [],
+  "componentClaimMismatch": false,
+  "internallyRenderedComponents": [],
+  "targetComponents": [],
+  "acceptedSceneCount": 0,
+  "rejectedSceneCount": 0,
+  "chatStatuses": [],
+  "elapsedMs": null,
+  "interactionEvidence": null,
+  "componentEvidence": {},
+  "errors": [
+    "Exact repeat produced an empty FarePicker after local €25 plus Train input; no query-body capture was available."
+  ],
+  "warnings": [
+    "Preserved from the runtime-controls v2 attempt ledger."
+  ],
+  "noHorizontalOverflowAt390": null,
+  "noHorizontalOverflowAtDesktop": null,
+  "notes": "Current run recovered from an empty initial load and then passed every filter/add assertion; retain a separate unresolved failed repeat, so family repeatability is below the clean-pass cases.",
+  "sourceEvidence": "runtime-controls-cases-v2.json",
+  "sourceEvidenceSha256": "a3c8ae015fcd75ad1a19af3ae7606d07ad12c3238cd5a6d0b26cb5591291c6fe",
+  "acceptedScene": null,
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null,
+  "archiveProvenance": {
+    "rawSourceFile": "runtime-controls-cases-v2.json",
+    "originalCaptureSha256": "a3c8ae015fcd75ad1a19af3ae7606d07ad12c3238cd5a6d0b26cb5591291c6fe",
+    "archivedRawSourceSha256": "a3c8ae015fcd75ad1a19af3ae7606d07ad12c3238cd5a6d0b26cb5591291c6fe",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "The failed-attempt ledger entry and screenshot are preserved; no accepted model tree or request body existed for this attempt."
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/budget-shortlist-failed-repeat-failure.png",
+      "role": "failure",
+      "cssViewport": null,
+      "pixelDimensions": {
+        "width": 1280,
+        "height": 1086
+      },
+      "sha256": "d027d01c2ea660382685c962da02d101b72d42f6d7857e01de76a97119906f08",
+      "condition": "Unresolved empty FarePicker after €25 plus Train input."
+    }
+  ],
+  "outcome": {
+    "status": "failure",
+    "label": "unresolved failed repeat",
+    "findingId": "budget-repeat-empty"
+  }
+}

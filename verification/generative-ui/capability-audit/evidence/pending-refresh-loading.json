@@ -96,19 +96,6 @@
       "sha256": "708bb943493de82c60a6f65a5e310753e789ba5ed9d5b36168f302daece406fa"
     },
     {
-      "path": "screenshots/pending-refresh-loading-mobile-2.png",
-      "role": "mobile",
-      "cssViewport": {
-        "width": 390,
-        "height": 844
-      },
-      "pixelDimensions": {
-        "width": 390,
-        "height": 1133
-      },
-      "sha256": "708bb943493de82c60a6f65a5e310753e789ba5ed9d5b36168f302daece406fa"
-    },
-    {
       "path": "screenshots/pending-refresh-loading-desktop-3.png",
       "role": "desktop",
       "cssViewport": {
@@ -121,5 +108,164 @@
       },
       "sha256": "05b04be7494f2958ee8d49e8c1282732cc99012bdecf598b99349b39aa4564c9"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-5692289a-3952-4bf3-8498-f83c38db5fa0",
+    "title": "London → Paris · committed 8 November results",
+    "$type": "TravelSurface",
+    "$key": "london-paris-comparison",
+    "children": [
+      {
+        "artifactRef": "artifact-5692289a-3952-4bf3-8498-f83c38db5fa0",
+        "title": "Start and end dates",
+        "variant": "compact",
+        "$type": "DateWindow",
+        "$key": "editable-date-window"
+      },
+      {
+        "artifactRef": "artifact-5692289a-3952-4bf3-8498-f83c38db5fa0",
+        "title": "Refreshing through 9 November…",
+        "body": "Previous committed 8 November results remain visible while the extended window loads.",
+        "$type": "ArtifactSkeleton",
+        "$key": "date-window-refresh-loading"
+      },
+      {
+        "artifactRef": "artifact-5692289a-3952-4bf3-8498-f83c38db5fa0",
+        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+        "title": "Cheapest versus fastest",
+        "variant": "compact",
+        "legIndex": 0,
+        "$type": "CheapestFastest",
+        "$key": "leg-0-cheapest-fastest"
+      },
+      {
+        "artifactRef": "artifact-5692289a-3952-4bf3-8498-f83c38db5fa0",
+        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+        "title": "Committed synthetic fares · 8 November",
+        "variant": "compact",
+        "legIndex": 0,
+        "$type": "ComparisonTable",
+        "$key": "leg-0-comparison-table"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "pending-refresh-loading.json",
+    "originalCaptureSha256": "7cc1a275f25dfa9e16c3e41eb117a86851315ebd571acdc96e493aa5d31b0629",
+    "archivedRawSourceSha256": "7cc1a275f25dfa9e16c3e41eb117a86851315ebd571acdc96e493aa5d31b0629",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": {
+    "heldCount": 4,
+    "queryEvents": [
+      {
+        "at": 1791559451533,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559451538,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559470532,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559470543,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559472206,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559472218,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559472641,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559472655,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559496776,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559496776,
+        "phase": "held"
+      },
+      {
+        "at": 1791559519810,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559519810,
+        "phase": "held"
+      },
+      {
+        "at": 1791559521468,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559521468,
+        "phase": "held"
+      },
+      {
+        "at": 1791559521942,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559521942,
+        "phase": "held"
+      },
+      {
+        "at": 1791559545814,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559545823,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559545824,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559545824,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559545832,
+        "phase": "response",
+        "status": 200
+      }
+    ],
+    "changedControl": "Window ends",
+    "statusText": "Loading the requested travel dates…"
+  },
+  "resolvedFinding": null
 }

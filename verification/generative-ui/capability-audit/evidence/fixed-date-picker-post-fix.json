@@ -135,5 +135,326 @@
       "sha256": "f7ac3085da6b5ed07ea7f6fcc494754e2cfb42844567e6e7d9dd3bb3ca989c85",
       "condition": "same accepted model scene and persisted local interaction at 390 CSS pixels"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+    "title": "Madrid → Paris · 8 November 2026",
+    "$type": "TravelSurface",
+    "$key": "fixed-date-choice",
+    "children": [
+      {
+        "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+        "$type": "SplitPane",
+        "$key": "choice-and-summary",
+        "children": [
+          {
+            "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+            "$type": "Stack",
+            "$key": "compact-options",
+            "children": [
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                "title": "Pick one synthetic fare",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "FarePicker",
+                "$key": "leg-0-picker"
+              },
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                "title": "Alternatives at a glance",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "ComparisonTable",
+                "$key": "leg-0-alternatives"
+              },
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                "title": "Budget versus journey time",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "CheapestFastest",
+                "$key": "leg-0-cheapest-fastest"
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+            "title": "Your selection",
+            "$type": "StickySummary",
+            "$key": "selected-trip-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "variant": "compact",
+                "$type": "SelectedItinerary",
+                "$key": "selected-itinerary"
+              },
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "title": "Synthetic total",
+                "variant": "emphasis",
+                "$type": "SyntheticTotal",
+                "$key": "selected-synthetic-total"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "fixed-date-picker-responsive-post-fix.json",
+    "originalCaptureSha256": "8630d7d389b743483386b15b3e3f30849879917e22f6c76756cab9ad1b655aef",
+    "archivedRawSourceSha256": "8630d7d389b743483386b15b3e3f30849879917e22f6c76756cab9ad1b655aef",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "madrid",
+              "paris"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-11-08",
+              "end": "2026-11-08"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+        "status": "applied",
+        "revision": 6,
+        "scopes": [
+          {
+            "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+            "resourceKey": "scope-98e28db02850e081338badd6f2a8e611",
+            "legIndex": 0,
+            "originId": "madrid",
+            "destinationId": "paris",
+            "dateWindow": {
+              "from": "2026-11-08",
+              "to": "2026-11-08"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 8,
+            "complete": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+        "title": "Madrid → Paris · 8 November 2026",
+        "$type": "TravelSurface",
+        "$key": "fixed-date-choice",
+        "children": [
+          {
+            "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+            "$type": "SplitPane",
+            "$key": "choice-and-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "$type": "Stack",
+                "$key": "compact-options",
+                "children": [
+                  {
+                    "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                    "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                    "title": "Pick one synthetic fare",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "FarePicker",
+                    "$key": "leg-0-picker"
+                  },
+                  {
+                    "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                    "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                    "title": "Alternatives at a glance",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "ComparisonTable",
+                    "$key": "leg-0-alternatives"
+                  },
+                  {
+                    "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                    "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                    "title": "Budget versus journey time",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "CheapestFastest",
+                    "$key": "leg-0-cheapest-fastest"
+                  }
+                ]
+              },
+              {
+                "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                "title": "Your selection",
+                "$type": "StickySummary",
+                "$key": "selected-trip-summary",
+                "children": [
+                  {
+                    "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                    "variant": "compact",
+                    "$type": "SelectedItinerary",
+                    "$key": "selected-itinerary"
+                  },
+                  {
+                    "artifactRef": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+                    "title": "Synthetic total",
+                    "variant": "emphasis",
+                    "$type": "SyntheticTotal",
+                    "$key": "selected-synthetic-total"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "output": {}
+    }
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-a4a06e2d-8986-4aa4-bb63-76b277a2710f",
+      "revision": 6,
+      "citySequence": [
+        "madrid",
+        "paris"
+      ],
+      "dates": {
+        "start": "2026-11-08",
+        "end": "2026-11-08"
+      },
+      "datasetRefs": [
+        "scope-98e28db02850e081338badd6f2a8e611"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {
+    "queryTraffic": [
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"scope-4e8666e1-a9ee-413e-b880-981416b2bee1\",\"expectedSourceVersion\":null,\"groups\":[{\"groupId\":\"group-1jimmnx\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[]}]}",
+        "response": "{\"version\":1,\"requestId\":\"scope-4e8666e1-a9ee-413e-b880-981416b2bee1\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jimmnx\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-98e28db02850e081338badd6f2a8e611\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":8,\"availableModes\":[\"bus\"],\"complete\":true},\"projections\":[]}]}",
+        "at": "2026-10-09T15:48:48.872Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-3fb79ced-7955-465c-93b5-7ad624be4918\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-1y6bs32\",\"kind\":\"farePage\",\"filters\":{\"modes\":[\"bus\"],\"carrierIds\":[],\"directOnly\":false},\"serviceDate\":null,\"sort\":{\"field\":\"priceCents\",\"direction\":\"asc\"},\"after\":null,\"limit\":12}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-3fb79ced-7955-465c-93b5-7ad624be4918\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-98e28db02850e081338badd6f2a8e611\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":8,\"availableModes\":[\"bus\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-1y6bs32\",\"kind\":\"farePage\",\"inputHash\":\"input-1tip5my\",\"items\":[{\"id\":\"fare_003408534\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":4613,\"durationMinutes\":933,\"departureMinutes\":1254,\"availableSeats\":16,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408532\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5065,\"durationMinutes\":997,\"departureMinutes\":969,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408531\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5114,\"durationMinutes\":967,\"departureMinutes\":773,\"availableSeats\":50,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408535\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5225,\"durationMinutes\":1024,\"departureMinutes\":1419,\"availableSeats\":33,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408530\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7393,\"durationMinutes\":954,\"departureMinutes\":635,\"availableSeats\":7,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408527\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7782,\"durationMinutes\":955,\"departureMinutes\":367,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408529\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8129,\"durationMinutes\":1026,\"departureMinutes\":513,\"availableSeats\":9,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408533\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8880,\"durationMinutes\":969,\"departureMinutes\":1071,\"availableSeats\":40,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]}],\"pageInfo\":{\"total\":8,\"returned\":8,\"hasNextPage\":false,\"nextCursor\":null},\"resultFingerprint\":\"result-399242f1a4cda3a3ca3f4b2b8b0df882\"}]}]}",
+        "at": "2026-10-09T15:49:06.337Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-f36ae703-c594-4bc6-b0f7-44784ac28c94\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-1y6bs32\",\"kind\":\"farePage\",\"filters\":{\"modes\":[\"bus\"],\"carrierIds\":[],\"directOnly\":false},\"serviceDate\":null,\"sort\":{\"field\":\"departureMinutes\",\"direction\":\"asc\"},\"after\":null,\"limit\":12}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-f36ae703-c594-4bc6-b0f7-44784ac28c94\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-98e28db02850e081338badd6f2a8e611\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":8,\"availableModes\":[\"bus\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-1y6bs32\",\"kind\":\"farePage\",\"inputHash\":\"input-u1wvjl\",\"items\":[{\"id\":\"fare_003408527\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7782,\"durationMinutes\":955,\"departureMinutes\":367,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408529\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8129,\"durationMinutes\":1026,\"departureMinutes\":513,\"availableSeats\":9,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408530\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7393,\"durationMinutes\":954,\"departureMinutes\":635,\"availableSeats\":7,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408531\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5114,\"durationMinutes\":967,\"departureMinutes\":773,\"availableSeats\":50,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408532\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5065,\"durationMinutes\":997,\"departureMinutes\":969,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408533\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8880,\"durationMinutes\":969,\"departureMinutes\":1071,\"availableSeats\":40,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408534\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":4613,\"durationMinutes\":933,\"departureMinutes\":1254,\"availableSeats\":16,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408535\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5225,\"durationMinutes\":1024,\"departureMinutes\":1419,\"availableSeats\":33,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]}],\"pageInfo\":{\"total\":8,\"returned\":8,\"hasNextPage\":false,\"nextCursor\":null},\"resultFingerprint\":\"result-978e90562d359ee972151d5024db98ea\"}]}]}",
+        "at": "2026-10-09T15:49:06.777Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-bbc04734-38c6-462b-af07-c75c2169edf6\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-5uw1h\",\"kind\":\"farePage\",\"filters\":{\"modes\":[\"bus\"],\"carrierIds\":[],\"directOnly\":false},\"serviceDate\":null,\"sort\":{\"field\":\"priceCents\",\"direction\":\"asc\"},\"after\":null,\"limit\":10}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-bbc04734-38c6-462b-af07-c75c2169edf6\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-98e28db02850e081338badd6f2a8e611\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":8,\"availableModes\":[\"bus\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-5uw1h\",\"kind\":\"farePage\",\"inputHash\":\"input-122lhr0\",\"items\":[{\"id\":\"fare_003408534\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":4613,\"durationMinutes\":933,\"departureMinutes\":1254,\"availableSeats\":16,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408532\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5065,\"durationMinutes\":997,\"departureMinutes\":969,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408531\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5114,\"durationMinutes\":967,\"departureMinutes\":773,\"availableSeats\":50,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408535\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5225,\"durationMinutes\":1024,\"departureMinutes\":1419,\"availableSeats\":33,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408530\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7393,\"durationMinutes\":954,\"departureMinutes\":635,\"availableSeats\":7,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408527\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7782,\"durationMinutes\":955,\"departureMinutes\":367,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408529\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8129,\"durationMinutes\":1026,\"departureMinutes\":513,\"availableSeats\":9,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408533\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8880,\"durationMinutes\":969,\"departureMinutes\":1071,\"availableSeats\":40,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]}],\"pageInfo\":{\"total\":8,\"returned\":8,\"hasNextPage\":false,\"nextCursor\":null},\"resultFingerprint\":\"result-9111f0b89b4ca7ca3a4af783f11976b1\"}]}]}",
+        "at": "2026-10-09T15:49:08.345Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-659ffa64-1ee9-4e4a-9f54-bcb036d72aa6\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-5uw1h\",\"kind\":\"farePage\",\"filters\":{\"modes\":[\"bus\"],\"carrierIds\":[],\"directOnly\":false},\"serviceDate\":null,\"sort\":{\"field\":\"departureMinutes\",\"direction\":\"asc\"},\"after\":null,\"limit\":10}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-659ffa64-1ee9-4e4a-9f54-bcb036d72aa6\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-98e28db02850e081338badd6f2a8e611\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":8,\"availableModes\":[\"bus\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-5uw1h\",\"kind\":\"farePage\",\"inputHash\":\"input-13tm2of\",\"items\":[{\"id\":\"fare_003408527\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7782,\"durationMinutes\":955,\"departureMinutes\":367,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408529\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8129,\"durationMinutes\":1026,\"departureMinutes\":513,\"availableSeats\":9,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408530\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7393,\"durationMinutes\":954,\"departureMinutes\":635,\"availableSeats\":7,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408531\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5114,\"durationMinutes\":967,\"departureMinutes\":773,\"availableSeats\":50,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408532\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5065,\"durationMinutes\":997,\"departureMinutes\":969,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408533\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":8880,\"durationMinutes\":969,\"departureMinutes\":1071,\"availableSeats\":40,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408534\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":4613,\"durationMinutes\":933,\"departureMinutes\":1254,\"availableSeats\":16,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408535\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":5225,\"durationMinutes\":1024,\"departureMinutes\":1419,\"availableSeats\":33,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]}],\"pageInfo\":{\"total\":8,\"returned\":8,\"hasNextPage\":false,\"nextCursor\":null},\"resultFingerprint\":\"result-fcc2596bdc467c169b32e7b95f87f821\"}]}]}",
+        "at": "2026-10-09T15:49:08.955Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-af294ff7-4fef-41e8-8c9d-ffc52036934e\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-9sld9c\",\"kind\":\"fareHighlights\",\"filters\":{\"modes\":[\"bus\"],\"carrierIds\":[],\"directOnly\":false}}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-af294ff7-4fef-41e8-8c9d-ffc52036934e\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1jpgygc\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-98e28db02850e081338badd6f2a8e611\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":8,\"availableModes\":[\"bus\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-9sld9c\",\"kind\":\"fareHighlights\",\"inputHash\":\"input-1kcpipp\",\"cheapest\":{\"id\":\"fare_003408534\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":4613,\"durationMinutes\":933,\"departureMinutes\":1254,\"availableSeats\":16,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},\"fastest\":{\"id\":\"fare_003408534\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":4613,\"durationMinutes\":933,\"departureMinutes\":1254,\"availableSeats\":16,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]},\"resultFingerprint\":\"result-9685d1a6c58ea07d00c3faf82f26e1ec\"}]}]}",
+        "at": "2026-10-09T15:49:10.478Z"
+      }
+    ],
+    "lookupTraffic": [
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"selection-5e92b31a-c1a3-4ea6-b6af-fb8526dd0285\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"pins\":[{\"fareId\":\"fare_003408527\",\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\"}],\"resources\":[{\"resourceKey\":\"scope-98e28db02850e081338badd6f2a8e611\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}}}]}",
+        "response": "{\"version\":1,\"requestId\":\"selection-5e92b31a-c1a3-4ea6-b6af-fb8526dd0285\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"items\":[{\"id\":\"fare_003408527\",\"originId\":\"madrid\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-mgluoo\",\"carrierName\":\"Alsa\",\"priceCents\":7782,\"durationMinutes\":955,\"departureMinutes\":367,\"availableSeats\":11,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"Alsa\",\"durationMinutes\":932,\"originId\":\"madrid\",\"destinationId\":\"paris\",\"originLabel\":\"Madrid\",\"destinationLabel\":\"Paris\"}]}],\"missingPins\":[]}",
+        "at": "2026-10-09T15:49:41.499Z"
+      }
+    ],
+    "coverageSettlements": [
+      {
+        "label": "accepted-desktop-before-interaction",
+        "beganAt": "2026-10-09T15:49:36.557Z",
+        "firstVisibleAt": null,
+        "endedAt": "2026-10-09T15:49:38.067Z",
+        "visibleAtEnd": false,
+        "elapsedMs": 1511
+      },
+      {
+        "label": "accepted-mobile-before-interaction",
+        "beganAt": "2026-10-09T15:49:38.162Z",
+        "firstVisibleAt": null,
+        "endedAt": "2026-10-09T15:49:39.756Z",
+        "visibleAtEnd": false,
+        "elapsedMs": 1594
+      },
+      {
+        "label": "desktop-before-local-interaction",
+        "beganAt": "2026-10-09T15:49:39.870Z",
+        "firstVisibleAt": null,
+        "endedAt": "2026-10-09T15:49:41.451Z",
+        "visibleAtEnd": false,
+        "elapsedMs": 1581
+      },
+      {
+        "label": "desktop-after-local-interaction",
+        "beganAt": "2026-10-09T15:49:41.885Z",
+        "firstVisibleAt": null,
+        "endedAt": "2026-10-09T15:49:43.477Z",
+        "visibleAtEnd": false,
+        "elapsedMs": 1592
+      },
+      {
+        "label": "mobile-after-local-interaction",
+        "beganAt": "2026-10-09T15:49:43.565Z",
+        "firstVisibleAt": null,
+        "endedAt": "2026-10-09T15:49:45.170Z",
+        "visibleAtEnd": false,
+        "elapsedMs": 1605
+      }
+    ],
+    "queryStatuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ]
+  },
+  "conditionFacts": null,
+  "resolvedFinding": {
+    "commit": "6529ed1",
+    "finding": "covered-scope retry self-reported Superseded coverage before request registration",
+    "currentResult": "no coverage alert before or after local selection at desktop or mobile"
+  }
 }

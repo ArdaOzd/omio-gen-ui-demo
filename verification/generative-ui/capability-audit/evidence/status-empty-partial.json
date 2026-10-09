@@ -89,5 +89,53 @@
       "sha256": "e1beb2270dd95838588fe60c5c6663feeeab59bc211b84313427c29f030ed323",
       "condition": null
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-caf7d40f-f06d-4a0d-9b0c-36f392ed2ff0",
+    "$type": "TravelSurface",
+    "$key": "london-paris-coverage",
+    "children": [
+      {
+        "artifactRef": "artifact-caf7d40f-f06d-4a0d-9b0c-36f392ed2ff0",
+        "title": "London → Paris · 15 January 2030",
+        "$type": "TravelHero",
+        "$key": "coverage-heading"
+      },
+      {
+        "artifactRef": "artifact-caf7d40f-f06d-4a0d-9b0c-36f392ed2ff0",
+        "datasetRef": "scope-5f85a8ab09b1423fe39a6692a528f833",
+        "title": "Missing synthetic coverage",
+        "body": "This date's synthetic scope returned no fares and is marked incomplete. The timetable bounds are not supplied, so I cannot confirm whether the date is outside them. This does not imply real-world travel is unavailable.",
+        "$type": "CoverageNotice",
+        "$key": "coverage-notice"
+      },
+      {
+        "artifactRef": "artifact-caf7d40f-f06d-4a0d-9b0c-36f392ed2ff0",
+        "datasetRef": "scope-5f85a8ab09b1423fe39a6692a528f833",
+        "title": "No synthetic fares returned",
+        "$type": "EmptyState",
+        "$key": "empty-results"
+      },
+      {
+        "artifactRef": "artifact-caf7d40f-f06d-4a0d-9b0c-36f392ed2ff0",
+        "datasetRef": "scope-5f85a8ab09b1423fe39a6692a528f833",
+        "title": "No synthetic options to compare",
+        "legIndex": 0,
+        "$type": "CheapestFastest",
+        "$key": "leg-0-cheapest-fastest"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "status_empty_partial.json",
+    "originalCaptureSha256": "c4ebaa9438bbe813541246d71c92417e3960662f17ed236f1b8ea641080eee52",
+    "archivedRawSourceSha256": "c4ebaa9438bbe813541246d71c92417e3960662f17ed236f1b8ea641080eee52",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

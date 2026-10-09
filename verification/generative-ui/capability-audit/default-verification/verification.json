@@ -1,0 +1,600 @@
+{
+  "runAt": "2026-10-09T15:58:17.007Z",
+  "sourceHead": "a908997abe4e7deb5fd204f2633eec1220bcea50",
+  "reportPath": "reports/generative-capabilities/capability-audit.json",
+  "reportGeneratedAt": "2026-10-09T15:56:36.139Z",
+  "topDefaultIds": [
+    "departure-board",
+    "fixed-date-picker",
+    "mode-dashboard",
+    "tradeoff-dashboard"
+  ],
+  "interceptedModelRequests": 8,
+  "forwardedModelRequests": 0,
+  "results": [
+    {
+      "id": "departure-board",
+      "label": "View a departure board",
+      "reportPrompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 1000
+      },
+      "requestCount": 1,
+      "payloadPrompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 396,
+            "top": 478.609375,
+            "right": 767.5,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Pick one journey",
+            "left": 776.5,
+            "top": 478.609375,
+            "right": 1148,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 396,
+            "top": 551.609375,
+            "right": 767.5,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 776.5,
+            "top": 551.609375,
+            "right": 1148,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 1280,
+          "height": 1000
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 1280,
+        "height": 1000
+      },
+      "screenshotPath": "screenshots/desktop-departure-board-existing.png"
+    },
+    {
+      "id": "fixed-date-picker",
+      "label": "Pick one journey",
+      "reportPrompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 1000
+      },
+      "requestCount": 1,
+      "payloadPrompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 396,
+            "top": 478.609375,
+            "right": 767.5,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Pick one journey",
+            "left": 776.5,
+            "top": 478.609375,
+            "right": 1148,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 396,
+            "top": 551.609375,
+            "right": 767.5,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 776.5,
+            "top": 551.609375,
+            "right": 1148,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 1280,
+          "height": 1000
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 1280,
+        "height": 1000
+      },
+      "screenshotPath": "screenshots/desktop-fixed-date-picker-existing.png"
+    },
+    {
+      "id": "mode-dashboard",
+      "label": "Compare travel modes",
+      "reportPrompt": "Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.",
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 1000
+      },
+      "requestCount": 1,
+      "payloadPrompt": "Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 396,
+            "top": 478.609375,
+            "right": 767.5,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Pick one journey",
+            "left": 776.5,
+            "top": 478.609375,
+            "right": 1148,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 396,
+            "top": 551.609375,
+            "right": 767.5,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 776.5,
+            "top": 551.609375,
+            "right": 1148,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 1280,
+          "height": 1000
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 1280,
+        "height": 1000
+      },
+      "screenshotPath": "screenshots/desktop-mode-dashboard-existing.png"
+    },
+    {
+      "id": "tradeoff-dashboard",
+      "label": "Compare price vs time",
+      "reportPrompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 1000
+      },
+      "requestCount": 1,
+      "payloadPrompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 396,
+            "top": 478.609375,
+            "right": 767.5,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Pick one journey",
+            "left": 776.5,
+            "top": 478.609375,
+            "right": 1148,
+            "bottom": 542.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 396,
+            "top": 551.609375,
+            "right": 767.5,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 776.5,
+            "top": 551.609375,
+            "right": 1148,
+            "bottom": 615.609375,
+            "width": 371.5,
+            "height": 64
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 1280,
+          "height": 1000
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 1280,
+        "height": 1000
+      },
+      "screenshotPath": "screenshots/desktop-tradeoff-dashboard-existing.png"
+    },
+    {
+      "id": "departure-board",
+      "label": "View a departure board",
+      "reportPrompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "requestCount": 1,
+      "payloadPrompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 26,
+            "top": 516.28125,
+            "right": 364,
+            "bottom": 570.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Pick one journey",
+            "left": 26,
+            "top": 579.28125,
+            "right": 364,
+            "bottom": 633.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 26,
+            "top": 642.28125,
+            "right": 364,
+            "bottom": 696.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 26,
+            "top": 705.28125,
+            "right": 364,
+            "bottom": 759.28125,
+            "width": 338,
+            "height": 54
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 390,
+        "height": 844
+      },
+      "screenshotPath": "screenshots/mobile-departure-board-existing.png"
+    },
+    {
+      "id": "fixed-date-picker",
+      "label": "Pick one journey",
+      "reportPrompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "requestCount": 1,
+      "payloadPrompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 26,
+            "top": 516.28125,
+            "right": 364,
+            "bottom": 570.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Pick one journey",
+            "left": 26,
+            "top": 579.28125,
+            "right": 364,
+            "bottom": 633.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 26,
+            "top": 642.28125,
+            "right": 364,
+            "bottom": 696.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 26,
+            "top": 705.28125,
+            "right": 364,
+            "bottom": 759.28125,
+            "width": 338,
+            "height": 54
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 390,
+        "height": 844
+      },
+      "screenshotPath": "screenshots/mobile-fixed-date-picker-existing.png"
+    },
+    {
+      "id": "mode-dashboard",
+      "label": "Compare travel modes",
+      "reportPrompt": "Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "requestCount": 1,
+      "payloadPrompt": "Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 26,
+            "top": 516.28125,
+            "right": 364,
+            "bottom": 570.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Pick one journey",
+            "left": 26,
+            "top": 579.28125,
+            "right": 364,
+            "bottom": 633.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 26,
+            "top": 642.28125,
+            "right": 364,
+            "bottom": 696.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 26,
+            "top": 705.28125,
+            "right": 364,
+            "bottom": 759.28125,
+            "width": 338,
+            "height": 54
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 390,
+        "height": 844
+      },
+      "screenshotPath": "screenshots/mobile-mode-dashboard-existing.png"
+    },
+    {
+      "id": "tradeoff-dashboard",
+      "label": "Compare price vs time",
+      "reportPrompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "requestCount": 1,
+      "payloadPrompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+      "exactPayloadParity": true,
+      "initialLayout": {
+        "labels": [
+          "View a departure board",
+          "Pick one journey",
+          "Compare travel modes",
+          "Compare price vs time"
+        ],
+        "controls": [
+          {
+            "label": "View a departure board",
+            "left": 26,
+            "top": 516.28125,
+            "right": 364,
+            "bottom": 570.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Pick one journey",
+            "left": 26,
+            "top": 579.28125,
+            "right": 364,
+            "bottom": 633.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare travel modes",
+            "left": 26,
+            "top": 642.28125,
+            "right": 364,
+            "bottom": 696.28125,
+            "width": 338,
+            "height": 54
+          },
+          {
+            "label": "Compare price vs time",
+            "left": 26,
+            "top": 705.28125,
+            "right": 364,
+            "bottom": 759.28125,
+            "width": 338,
+            "height": 54
+          }
+        ],
+        "documentOverflow": false,
+        "suggestionOverflow": false,
+        "viewport": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "suggestionsAfterSend": 0,
+      "exactUserTextVisible": 2,
+      "after": {
+        "documentOverflow": false,
+        "width": 390,
+        "height": 844
+      },
+      "screenshotPath": "screenshots/mobile-tradeoff-dashboard-existing.png"
+    }
+  ]
+}

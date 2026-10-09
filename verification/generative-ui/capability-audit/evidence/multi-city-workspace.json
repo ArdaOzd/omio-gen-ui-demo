@@ -89,5 +89,88 @@
       "sha256": "3d3b3494efa034bcef4853d533b61d804987e0a5d4600d7345c94f16bfc249c0",
       "condition": null
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+    "$type": "TravelSurface",
+    "$key": "trip-workspace",
+    "children": [
+      {
+        "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+        "title": "London → Paris → Barcelona",
+        "$type": "TravelHero",
+        "$key": "route-headline",
+        "children": [
+          {
+            "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+            "$type": "CitySequence",
+            "$key": "ordered-stops"
+          },
+          {
+            "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+            "$type": "StayAllocation",
+            "$key": "stay-allocation"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+        "title": "Edit your trip",
+        "$type": "MultiCityPlanGrid",
+        "$key": "editable-all-legs"
+      },
+      {
+        "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+        "$type": "ResponsiveGrid",
+        "$key": "leg-comparisons",
+        "children": [
+          {
+            "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "London → Paris: cheapest versus fastest",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "london-paris-comparison"
+          },
+          {
+            "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+            "datasetRef": "scope-fa88fa20961255473af03e769d8225a0",
+            "title": "Paris → Barcelona: cheapest versus fastest",
+            "legIndex": 1,
+            "$type": "CheapestFastest",
+            "$key": "paris-barcelona-comparison"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+        "$type": "Inline",
+        "$key": "trip-status",
+        "children": [
+          {
+            "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+            "$type": "SelectedFareCount",
+            "$key": "selected-fare-count"
+          },
+          {
+            "artifactRef": "artifact-5c76586b-2d85-41dd-abdc-c8efdd6d3d86",
+            "$type": "CoverageSummary",
+            "$key": "coverage-details"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "multi-city-workspace.json",
+    "originalCaptureSha256": "f40bec65ba5efcdf9468451859feaaa54af64fc81e15307e24a5379699d8b907",
+    "archivedRawSourceSha256": "f40bec65ba5efcdf9468451859feaaa54af64fc81e15307e24a5379699d8b907",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

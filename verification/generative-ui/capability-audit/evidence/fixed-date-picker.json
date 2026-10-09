@@ -67,5 +67,221 @@
       },
       "sha256": "5c55690e1d21702f6129cd3f636b511011b243098ad127087f789c4220afb3b8"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+    "$type": "TravelSurface",
+    "$key": "fixed-date-surface",
+    "children": [
+      {
+        "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+        "$type": "SplitPane",
+        "$key": "choice-and-summary",
+        "children": [
+          {
+            "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+            "$type": "Stack",
+            "$key": "compact-choices",
+            "children": [
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                "title": "Madrid → Paris · 8 November 2026",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "FarePicker",
+                "$key": "madrid-paris-picker"
+              },
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                "title": "Cheapest versus fastest",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "CheapestFastest",
+                "$key": "madrid-paris-tradeoff"
+              },
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                "title": "Alternatives at a glance",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "ComparisonTable",
+                "$key": "madrid-paris-alternatives"
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+            "title": "Your selection",
+            "$type": "StickySummary",
+            "$key": "selected-trip-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "variant": "compact",
+                "$type": "SelectedItinerary",
+                "$key": "selected-trip-details"
+              },
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "title": "Synthetic total",
+                "$type": "SyntheticTotal",
+                "$key": "selected-synthetic-total"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "fixed-date-picker-madrid-paris.json",
+    "originalCaptureSha256": "118cd8829d4cf37a42e50d17ee4841241646d1e803ae515d02b229dc108dcce7",
+    "archivedRawSourceSha256": "118cd8829d4cf37a42e50d17ee4841241646d1e803ae515d02b229dc108dcce7",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "madrid",
+              "paris"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-11-08",
+              "end": "2026-11-08"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+        "status": "applied",
+        "revision": 6,
+        "scopes": [
+          {
+            "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+            "resourceKey": "scope-98e28db02850e081338badd6f2a8e611",
+            "legIndex": 0,
+            "originId": "madrid",
+            "destinationId": "paris",
+            "dateWindow": {
+              "from": "2026-11-08",
+              "to": "2026-11-08"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 8,
+            "complete": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+        "$type": "TravelSurface",
+        "$key": "fixed-date-surface",
+        "children": [
+          {
+            "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+            "$type": "SplitPane",
+            "$key": "choice-and-summary",
+            "children": [
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "$type": "Stack",
+                "$key": "compact-choices",
+                "children": [
+                  {
+                    "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                    "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                    "title": "Madrid → Paris · 8 November 2026",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "FarePicker",
+                    "$key": "madrid-paris-picker"
+                  },
+                  {
+                    "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                    "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                    "title": "Cheapest versus fastest",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "CheapestFastest",
+                    "$key": "madrid-paris-tradeoff"
+                  },
+                  {
+                    "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                    "datasetRef": "scope-98e28db02850e081338badd6f2a8e611",
+                    "title": "Alternatives at a glance",
+                    "variant": "compact",
+                    "legIndex": 0,
+                    "$type": "ComparisonTable",
+                    "$key": "madrid-paris-alternatives"
+                  }
+                ]
+              },
+              {
+                "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                "title": "Your selection",
+                "$type": "StickySummary",
+                "$key": "selected-trip-summary",
+                "children": [
+                  {
+                    "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                    "variant": "compact",
+                    "$type": "SelectedItinerary",
+                    "$key": "selected-trip-details"
+                  },
+                  {
+                    "artifactRef": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+                    "title": "Synthetic total",
+                    "$type": "SyntheticTotal",
+                    "$key": "selected-synthetic-total"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "output": {}
+    }
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-a9b5f122-a202-457d-a92b-d3592a918e0c",
+      "revision": 6,
+      "citySequence": [
+        "madrid",
+        "paris"
+      ],
+      "dates": {
+        "start": "2026-11-08",
+        "end": "2026-11-08"
+      },
+      "datasetRefs": [
+        "scope-98e28db02850e081338badd6f2a8e611"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

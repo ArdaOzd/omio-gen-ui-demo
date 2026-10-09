@@ -104,16 +104,210 @@
         "height": 1502
       },
       "sha256": "a360fd960ee56cd867679ca2956e6aa71baf190f41d5da32609ee21dd595859d"
+    }
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+    "title": "Berlin → Amsterdam · 30 October 2026",
+    "$type": "TravelSurface",
+    "$key": "berlin-amsterdam-surface",
+    "children": [
+      {
+        "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+        "$type": "Stack",
+        "$key": "fare-discovery",
+        "children": [
+          {
+            "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+            "$type": "Inline",
+            "$key": "fare-controls",
+            "children": [
+              {
+                "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                "title": "Departure day",
+                "legIndex": 0,
+                "$type": "TravelDate",
+                "$key": "departure-day-0"
+              },
+              {
+                "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                "title": "Transport",
+                "legIndex": 0,
+                "$type": "ModeChips",
+                "$key": "mode-filter-0"
+              },
+              {
+                "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                "title": "Operator",
+                "legIndex": 0,
+                "$type": "CarrierFilter",
+                "$key": "carrier-filter-0"
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+            "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+            "title": "Expanded synthetic fares",
+            "legIndex": 0,
+            "$type": "FareCards",
+            "$key": "expanded-fares-0"
+          },
+          {
+            "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+            "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+            "title": "Lowest price or shortest journey?",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "cheapest-fastest-0"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "fare-cards-controls.json",
+    "originalCaptureSha256": "0b0a0776d40f473f2e811d334366f3ac8e15833313b0f0489c4d36fdb61fe02c",
+    "archivedRawSourceSha256": "0b0a0776d40f473f2e811d334366f3ac8e15833313b0f0489c4d36fdb61fe02c",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "berlin",
+              "amsterdam"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-10-30",
+              "end": "2026-10-30"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+        "status": "applied",
+        "revision": 6,
+        "scopes": [
+          {
+            "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+            "resourceKey": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+            "legIndex": 0,
+            "originId": "berlin",
+            "destinationId": "amsterdam",
+            "dateWindow": {
+              "from": "2026-10-30",
+              "to": "2026-10-30"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 8,
+            "complete": true
+          }
+        ]
+      }
     },
     {
-      "path": "screenshots/fare-cards-controls-interaction.png",
-      "role": "interaction",
-      "cssViewport": null,
-      "pixelDimensions": {
-        "width": 1440,
-        "height": 1286
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+        "title": "Berlin → Amsterdam · 30 October 2026",
+        "$type": "TravelSurface",
+        "$key": "berlin-amsterdam-surface",
+        "children": [
+          {
+            "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+            "$type": "Stack",
+            "$key": "fare-discovery",
+            "children": [
+              {
+                "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                "$type": "Inline",
+                "$key": "fare-controls",
+                "children": [
+                  {
+                    "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                    "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                    "title": "Departure day",
+                    "legIndex": 0,
+                    "$type": "TravelDate",
+                    "$key": "departure-day-0"
+                  },
+                  {
+                    "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                    "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                    "title": "Transport",
+                    "legIndex": 0,
+                    "$type": "ModeChips",
+                    "$key": "mode-filter-0"
+                  },
+                  {
+                    "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                    "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                    "title": "Operator",
+                    "legIndex": 0,
+                    "$type": "CarrierFilter",
+                    "$key": "carrier-filter-0"
+                  }
+                ]
+              },
+              {
+                "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                "title": "Expanded synthetic fares",
+                "legIndex": 0,
+                "$type": "FareCards",
+                "$key": "expanded-fares-0"
+              },
+              {
+                "artifactRef": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+                "datasetRef": "scope-fb5cf47c029a4f553dae4e1b0c73e91c",
+                "title": "Lowest price or shortest journey?",
+                "legIndex": 0,
+                "$type": "CheapestFastest",
+                "$key": "cheapest-fastest-0"
+              }
+            ]
+          }
+        ]
       },
-      "sha256": "d98f667c5e509b569322ef17923d5825a6c3328d5697bc2c9420f5cdf1bf490f"
+      "output": {}
     }
-  ]
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-ca1b5443-eb97-4a90-9a26-801001a4fd1c",
+      "revision": 6,
+      "citySequence": [
+        "berlin",
+        "amsterdam"
+      ],
+      "dates": {
+        "start": "2026-10-30",
+        "end": "2026-10-30"
+      },
+      "datasetRefs": [
+        "scope-fb5cf47c029a4f553dae4e1b0c73e91c"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }

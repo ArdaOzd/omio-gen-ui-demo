@@ -99,19 +99,166 @@
         "height": 1079
       },
       "sha256": "4495eaef54b35c6a6944bd81b715834fa9a4c2b988bd720dbb5c55484615ca61"
-    },
-    {
-      "path": "screenshots/local-failure-retry-failure-4.png",
-      "role": "failure",
-      "cssViewport": {
-        "width": 1280,
-        "height": 1000
-      },
-      "pixelDimensions": {
-        "width": 390,
-        "height": 1079
-      },
-      "sha256": "4495eaef54b35c6a6944bd81b715834fa9a4c2b988bd720dbb5c55484615ca61"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-865e9d9e-3f98-4dd3-aeaf-8e1ba08c9732",
+    "title": "London → Paris · synthetic fare comparison",
+    "$type": "TravelSurface",
+    "$key": "london-paris-comparison",
+    "children": [
+      {
+        "artifactRef": "artifact-865e9d9e-3f98-4dd3-aeaf-8e1ba08c9732",
+        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+        "title": "Edit start and end dates",
+        "$type": "DateWindow",
+        "$key": "comparison-date-window"
+      },
+      {
+        "artifactRef": "artifact-865e9d9e-3f98-4dd3-aeaf-8e1ba08c9732",
+        "title": "Latest refresh failed · previous results remain visible",
+        "$type": "InlineError",
+        "$key": "comparison-refresh-error"
+      },
+      {
+        "artifactRef": "artifact-865e9d9e-3f98-4dd3-aeaf-8e1ba08c9732",
+        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+        "title": "Retry fare refresh",
+        "$type": "RetryAction",
+        "$key": "comparison-refresh-retry"
+      },
+      {
+        "artifactRef": "artifact-865e9d9e-3f98-4dd3-aeaf-8e1ba08c9732",
+        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+        "title": "Save money or save time",
+        "variant": "compact",
+        "legIndex": 0,
+        "$type": "CheapestFastest",
+        "$key": "london-paris-cheapest-fastest"
+      },
+      {
+        "artifactRef": "artifact-865e9d9e-3f98-4dd3-aeaf-8e1ba08c9732",
+        "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+        "title": "Synthetic fare comparison",
+        "variant": "compact",
+        "legIndex": 0,
+        "$type": "ComparisonTable",
+        "$key": "london-paris-options-table"
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "local-failure-retry.json",
+    "originalCaptureSha256": "5725357cfb42d280cebe556790cf0de7c96b8c33add7ea73c75809e4dfe666a8",
+    "archivedRawSourceSha256": "5725357cfb42d280cebe556790cf0de7c96b8c33add7ea73c75809e4dfe666a8",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [],
+  "stateFacts": null,
+  "networkFacts": {},
+  "conditionFacts": {
+    "failedQueries": 4,
+    "queryEvents": [
+      {
+        "at": 1791559264128,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559264135,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559283679,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559283694,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559285697,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559285710,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559286177,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559286186,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559307742,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559307743,
+        "phase": "injected-failure"
+      },
+      {
+        "at": 1791559330574,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559330574,
+        "phase": "injected-failure"
+      },
+      {
+        "at": 1791559331751,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559331751,
+        "phase": "injected-failure"
+      },
+      {
+        "at": 1791559332197,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559332197,
+        "phase": "injected-failure"
+      },
+      {
+        "at": 1791559355856,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559355869,
+        "phase": "response",
+        "status": 200
+      },
+      {
+        "at": 1791559355880,
+        "phase": "request",
+        "method": "POST"
+      },
+      {
+        "at": 1791559355904,
+        "phase": "response",
+        "status": 200
+      }
+    ],
+    "changedControl": "Window ends",
+    "sortValue": null
+  },
+  "resolvedFinding": null
 }

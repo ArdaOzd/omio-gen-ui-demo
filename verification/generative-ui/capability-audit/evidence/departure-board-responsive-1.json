@@ -111,5 +111,218 @@
       },
       "sha256": "6ee7275314ba52900555ffe814b3db6f2a70f7e6b67e3d5078a3a66749f79464"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+    "title": "London → Paris · 8 November 2026",
+    "$type": "TravelSurface",
+    "$key": "london-paris-departure-board",
+    "children": [
+      {
+        "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+        "title": "Your route",
+        "$type": "RouteMap",
+        "$key": "route-orientation"
+      },
+      {
+        "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+        "title": "The day at a glance",
+        "$type": "Section",
+        "$key": "day-board-section",
+        "children": [
+          {
+            "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Synthetic journeys · departure and arrival times",
+            "legIndex": 0,
+            "$type": "ItineraryTimeline",
+            "$key": "chronological-journeys-leg-0"
+          }
+        ]
+      },
+      {
+        "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+        "title": "Your shortlist: save money or save time",
+        "$type": "Section",
+        "$key": "shortlist-section",
+        "children": [
+          {
+            "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "title": "Compare and add your preferred synthetic journey",
+            "variant": "compact",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "cheapest-fastest-leg-0"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "departure-board-responsive-attempt-1.json",
+    "originalCaptureSha256": "1bc6d0d171f081c6dfbb3ccdec1157b4834c104fe91b2e06773858122c288ef9",
+    "archivedRawSourceSha256": "1bc6d0d171f081c6dfbb3ccdec1157b4834c104fe91b2e06773858122c288ef9",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "london",
+              "paris"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-11-08",
+              "end": "2026-11-08"
+            }
+          },
+          {
+            "kind": "sort",
+            "sort": {
+              "field": "departureMinutes",
+              "direction": "asc"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+        "status": "applied",
+        "revision": 7,
+        "scopes": [
+          {
+            "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+            "resourceKey": "scope-137a4e0b2465af233a372cbb5313865b",
+            "legIndex": 0,
+            "originId": "london",
+            "destinationId": "paris",
+            "dateWindow": {
+              "from": "2026-11-08",
+              "to": "2026-11-08"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 22,
+            "complete": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+        "title": "London → Paris · 8 November 2026",
+        "$type": "TravelSurface",
+        "$key": "london-paris-departure-board",
+        "children": [
+          {
+            "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+            "title": "Your route",
+            "$type": "RouteMap",
+            "$key": "route-orientation"
+          },
+          {
+            "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+            "title": "The day at a glance",
+            "$type": "Section",
+            "$key": "day-board-section",
+            "children": [
+              {
+                "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+                "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                "title": "Synthetic journeys · departure and arrival times",
+                "legIndex": 0,
+                "$type": "ItineraryTimeline",
+                "$key": "chronological-journeys-leg-0"
+              }
+            ]
+          },
+          {
+            "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+            "title": "Your shortlist: save money or save time",
+            "$type": "Section",
+            "$key": "shortlist-section",
+            "children": [
+              {
+                "artifactRef": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+                "datasetRef": "scope-137a4e0b2465af233a372cbb5313865b",
+                "title": "Compare and add your preferred synthetic journey",
+                "variant": "compact",
+                "legIndex": 0,
+                "$type": "CheapestFastest",
+                "$key": "cheapest-fastest-leg-0"
+              }
+            ]
+          }
+        ]
+      },
+      "output": {}
+    }
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-59a531cc-7e44-4797-9bd2-d4f8e540eef3",
+      "revision": 7,
+      "citySequence": [
+        "london",
+        "paris"
+      ],
+      "dates": {
+        "start": "2026-11-08",
+        "end": "2026-11-08"
+      },
+      "datasetRefs": [
+        "scope-137a4e0b2465af233a372cbb5313865b"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {
+    "queryTraffic": [
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"scope-0c51f106-236a-40f1-a0b7-1cc9a9a7c6ae\",\"expectedSourceVersion\":null,\"groups\":[{\"groupId\":\"group-126qfvq\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"london\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[]}]}",
+        "response": "{\"version\":1,\"requestId\":\"scope-0c51f106-236a-40f1-a0b7-1cc9a9a7c6ae\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-126qfvq\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-137a4e0b2465af233a372cbb5313865b\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-137a4e0b2465af233a372cbb5313865b\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"london\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":22,\"availableModes\":[\"train\",\"bus\",\"flight\"],\"complete\":true},\"projections\":[]}]}",
+        "at": "2026-10-09T15:31:24.289Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-5544e296-c71c-4d43-8f61-a3991891fe50\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1pkuvyr\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"london\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-1a9sz5w\",\"kind\":\"farePage\",\"filters\":{\"modes\":[\"train\",\"bus\",\"flight\"],\"carrierIds\":[],\"directOnly\":false},\"serviceDate\":null,\"sort\":{\"field\":\"departureMinutes\",\"direction\":\"asc\"},\"after\":null,\"limit\":5}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-5544e296-c71c-4d43-8f61-a3991891fe50\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1pkuvyr\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-137a4e0b2465af233a372cbb5313865b\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-137a4e0b2465af233a372cbb5313865b\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"london\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":22,\"availableModes\":[\"train\",\"bus\",\"flight\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-1a9sz5w\",\"kind\":\"farePage\",\"inputHash\":\"input-isjhi\",\"items\":[{\"id\":\"fare_003484753\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-1kmj2pr\",\"carrierName\":\"National Express\",\"priceCents\":2158,\"durationMinutes\":335,\"departureMinutes\":266,\"availableSeats\":42,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"National Express\",\"durationMinutes\":324,\"originId\":\"london\",\"destinationId\":\"paris\",\"originLabel\":\"London\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003484119\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"train\",\"carrierId\":\"carrier-oc85vc\",\"carrierName\":\"Eurostar\",\"priceCents\":4668,\"durationMinutes\":196,\"departureMinutes\":402,\"availableSeats\":79,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"train\",\"carrierName\":\"Eurostar\",\"durationMinutes\":184,\"originId\":\"london\",\"destinationId\":\"paris\",\"originLabel\":\"London\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003408820\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"flight\",\"carrierId\":\"carrier-1lk3ua7\",\"carrierName\":\"Lufthansa\",\"priceCents\":2770,\"durationMinutes\":302,\"departureMinutes\":405,\"availableSeats\":174,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":false,\"legs\":[{\"legIndex\":0,\"mode\":\"flight\",\"carrierName\":\"Lufthansa\",\"durationMinutes\":128,\"originId\":\"london\",\"destinationId\":\"frankfurt\",\"originLabel\":\"London\",\"destinationLabel\":\"Frankfurt am Main\"},{\"legIndex\":1,\"mode\":\"flight\",\"carrierName\":\"Lufthansa\",\"durationMinutes\":115,\"originId\":\"frankfurt\",\"destinationId\":\"paris\",\"originLabel\":\"Frankfurt am Main\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003484754\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-1kmj2pr\",\"carrierName\":\"National Express\",\"priceCents\":2714,\"durationMinutes\":347,\"departureMinutes\":409,\"availableSeats\":14,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"National Express\",\"durationMinutes\":324,\"originId\":\"london\",\"destinationId\":\"paris\",\"originLabel\":\"London\",\"destinationLabel\":\"Paris\"}]},{\"id\":\"fare_003484120\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"train\",\"carrierId\":\"carrier-oc85vc\",\"carrierName\":\"Eurostar\",\"priceCents\":2644,\"durationMinutes\":185,\"departureMinutes\":451,\"availableSeats\":36,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"train\",\"carrierName\":\"Eurostar\",\"durationMinutes\":184,\"originId\":\"london\",\"destinationId\":\"paris\",\"originLabel\":\"London\",\"destinationLabel\":\"Paris\"}]}],\"pageInfo\":{\"total\":22,\"returned\":5,\"hasNextPage\":true,\"nextCursor\":\"eyJjaGVja3N1bSI6IjhlMDM3Y2U0YTAwZDRiZWIwYWFmMjA5YyIsImlucHV0SGFzaCI6ImN1cnNvci1pbnB1dC0xZmQ4ODNhZjZlOTk2NDY0MTM3YTAxNGIwNmU0NzJmNiIsInNvdXJjZVZlcnNpb24iOiJzcWxpdGUtZGVtby12NC1hY2I0ZTI5LTFlZDM1MTAwMC0xOGRjODJmNGU4Y2M2MzBiIiwidmFsdWVzIjpbIjIwMjYtMTEtMDgiLDQ1MSwzNDg0MTIwXSwidmVyc2lvbiI6MX0\"},\"resultFingerprint\":\"result-be611b7529b1015c4e72b3eb5bc1b3a3\"}]}]}",
+        "at": "2026-10-09T15:31:48.085Z"
+      },
+      {
+        "status": 200,
+        "request": "{\"version\":1,\"requestId\":\"request-84e0d650-1f82-434b-9371-152ef5b5d855\",\"expectedSourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1pkuvyr\",\"scope\":{\"kind\":\"fareScope\",\"originId\":\"london\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"projections\":[{\"projectionId\":\"wire-hrvx03\",\"kind\":\"fareHighlights\",\"filters\":{\"modes\":[\"train\",\"bus\",\"flight\"],\"carrierIds\":[],\"directOnly\":false}}]}]}",
+        "response": "{\"version\":1,\"requestId\":\"request-84e0d650-1f82-434b-9371-152ef5b5d855\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\",\"groups\":[{\"groupId\":\"group-1pkuvyr\",\"manifest\":{\"kind\":\"fareScopeManifest\",\"resourceKey\":\"scope-137a4e0b2465af233a372cbb5313865b\",\"source\":{\"kind\":\"search\",\"descriptorId\":\"scope-137a4e0b2465af233a372cbb5313865b\",\"sourceVersion\":\"sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b\"},\"coverage\":{\"kind\":\"fareScope\",\"originId\":\"london\",\"destinationId\":\"paris\",\"dateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"passengers\":1,\"earliestDeparture\":{\"date\":\"2026-11-08\",\"minutes\":0}},\"availableDateWindow\":{\"from\":\"2026-11-08\",\"to\":\"2026-11-08\"},\"totalAvailable\":22,\"availableModes\":[\"train\",\"bus\",\"flight\"],\"complete\":true},\"projections\":[{\"projectionId\":\"wire-hrvx03\",\"kind\":\"fareHighlights\",\"inputHash\":\"input-hv203c\",\"cheapest\":{\"id\":\"fare_003484760\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"bus\",\"carrierId\":\"carrier-1kmj2pr\",\"carrierName\":\"National Express\",\"priceCents\":1433,\"durationMinutes\":337,\"departureMinutes\":1282,\"availableSeats\":13,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"bus\",\"carrierName\":\"National Express\",\"durationMinutes\":324,\"originId\":\"london\",\"destinationId\":\"paris\",\"originLabel\":\"London\",\"destinationLabel\":\"Paris\"}]},\"fastest\":{\"id\":\"fare_003484120\",\"originId\":\"london\",\"destinationId\":\"paris\",\"serviceDate\":\"2026-11-08\",\"mode\":\"train\",\"carrierId\":\"carrier-oc85vc\",\"carrierName\":\"Eurostar\",\"priceCents\":2644,\"durationMinutes\":185,\"departureMinutes\":451,\"availableSeats\":36,\"currency\":\"EUR\",\"synthetic\":true,\"priceBasis\":\"per-passenger-including-demo-fees\",\"direct\":true,\"legs\":[{\"legIndex\":0,\"mode\":\"train\",\"carrierName\":\"Eurostar\",\"durationMinutes\":184,\"originId\":\"london\",\"destinationId\":\"paris\",\"originLabel\":\"London\",\"destinationLabel\":\"Paris\"}]},\"resultFingerprint\":\"result-41418fa99dda9c2ed431cc4c462ee3ff\"}]}]}",
+        "at": "2026-10-09T15:31:52.278Z"
+      }
+    ],
+    "queryStatuses": [
+      200,
+      200,
+      200
+    ]
+  },
+  "conditionFacts": null,
+  "resolvedFinding": null,
+  "outcome": {
+    "status": "resolved-failure",
+    "label": "Historical accepted scene; local Add triggered a persistent false coverage alert before fix 6529ed1.",
+    "findingId": "covered-scope-retry-race",
+    "resolvedBy": "6529ed1"
+  }
 }

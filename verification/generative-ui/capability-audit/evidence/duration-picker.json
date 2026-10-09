@@ -66,5 +66,210 @@
       },
       "sha256": "3a02170fcc3b8b3ddd19fcbd75e72bdb1a2e05e83abc8468261b64c5b40a336e"
     }
-  ]
+  ],
+  "acceptedScene": {
+    "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+    "$type": "TravelSurface",
+    "$key": "prague-vienna-easiest",
+    "children": [
+      {
+        "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+        "title": "Prague → Vienna · 8 November 2026",
+        "$type": "Section",
+        "$key": "shortest-trip-choice",
+        "children": [
+          {
+            "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+            "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "title": "Your fastest option versus the cheapest",
+            "variant": "emphasis",
+            "legIndex": 0,
+            "$type": "CheapestFastest",
+            "$key": "leg-0-cheapest-fastest"
+          },
+          {
+            "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+            "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "title": "Adjust maximum journey time",
+            "$type": "DurationRange",
+            "$key": "journey-duration-limit"
+          },
+          {
+            "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+            "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "title": "Alternatives · shortest trips first",
+            "legIndex": 0,
+            "$type": "FarePicker",
+            "$key": "leg-0-shortest-first-picker"
+          }
+        ]
+      }
+    ]
+  },
+  "archiveProvenance": {
+    "rawSourceFile": "pick-one-shortest.json",
+    "originalCaptureSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
+    "archivedRawSourceSha256": "80026ec5043ec71063a5d335a610ff310c57baf98f1f2c289b6feffe4b214688",
+    "sourceFileChangedAfterNormalization": false,
+    "sanitization": "Exact accepted scene plus bounded tool, state, interaction, network-status and condition facts. Provider instructions, headers, cookies, browser storage, and raw message streams are excluded."
+  },
+  "toolFacts": [
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+        "expectedRevision": 0,
+        "commands": [
+          {
+            "kind": "route",
+            "citySequence": [
+              "prague",
+              "vienna"
+            ]
+          },
+          {
+            "kind": "dates",
+            "dates": {
+              "start": "2026-11-08",
+              "end": "2026-11-08"
+            }
+          },
+          {
+            "kind": "sort",
+            "sort": {
+              "field": "durationMinutes",
+              "direction": "asc"
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+        "status": "applied",
+        "revision": 7,
+        "scopes": [
+          {
+            "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "resourceKey": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "legIndex": 0,
+            "originId": "prague",
+            "destinationId": "vienna",
+            "dateWindow": {
+              "from": "2026-11-08",
+              "to": "2026-11-08"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 16,
+            "complete": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "present",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+        "$type": "TravelSurface",
+        "$key": "prague-vienna-easiest",
+        "children": [
+          {
+            "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+            "title": "Prague → Vienna · 8 November 2026",
+            "$type": "Section",
+            "$key": "shortest-trip-choice",
+            "children": [
+              {
+                "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+                "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+                "title": "Your fastest option versus the cheapest",
+                "variant": "emphasis",
+                "legIndex": 0,
+                "$type": "CheapestFastest",
+                "$key": "leg-0-cheapest-fastest"
+              },
+              {
+                "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+                "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+                "title": "Adjust maximum journey time",
+                "$type": "DurationRange",
+                "$key": "journey-duration-limit"
+              },
+              {
+                "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+                "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+                "title": "Alternatives · shortest trips first",
+                "legIndex": 0,
+                "$type": "FarePicker",
+                "$key": "leg-0-shortest-first-picker"
+              }
+            ]
+          }
+        ]
+      },
+      "output": {}
+    },
+    {
+      "name": "edit_artifact",
+      "state": "output-available",
+      "input": {
+        "artifactRef": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+        "expectedRevision": 7,
+        "commands": [
+          {
+            "kind": "sortByLeg",
+            "sortByLeg": {
+              "prague:vienna": {
+                "field": "durationMinutes",
+                "direction": "asc"
+              }
+            }
+          }
+        ]
+      },
+      "output": {
+        "artifactId": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+        "status": "applied",
+        "revision": 8,
+        "scopes": [
+          {
+            "datasetRef": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "resourceKey": "scope-6ded5a77940b9a368fea65ad1ea1d352",
+            "legIndex": 0,
+            "originId": "prague",
+            "destinationId": "vienna",
+            "dateWindow": {
+              "from": "2026-11-08",
+              "to": "2026-11-08"
+            },
+            "sourceVersion": "sqlite-demo-v4-acb4e29-1ed351000-18dc82f4e8cc630b",
+            "totalAvailable": 16,
+            "complete": true
+          }
+        ]
+      }
+    }
+  ],
+  "stateFacts": [
+    {
+      "artifactId": "artifact-a297565d-de4d-4d73-93c2-9e165e197b9e",
+      "revision": 8,
+      "citySequence": [
+        "prague",
+        "vienna"
+      ],
+      "dates": {
+        "start": "2026-11-08",
+        "end": "2026-11-08"
+      },
+      "datasetRefs": [
+        "scope-6ded5a77940b9a368fea65ad1ea1d352"
+      ],
+      "selectedFareIds": []
+    }
+  ],
+  "networkFacts": {},
+  "conditionFacts": null,
+  "resolvedFinding": null
 }
