@@ -1,7 +1,7 @@
 # Graph Report - omio-gen-ui-demo  (2026-10-09)
 
 ## Corpus Check
-- 249 files · ~283,836 words
+- 249 files · ~283,908 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3a93f497`
+- Built from commit: `8510069a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -122,9 +122,9 @@
 - spike/toolkit.tsx
 - chat-continuation.test.ts
 - run-live.mjs
-- classic-search.test.tsx
+- action-router.test.ts
 - tw-animate-css
-- InspectDisplayInput
+- classic-search.test.tsx
 - Selected Bus Fare
 - live/README.md
 - backend/__init__.py
@@ -146,15 +146,15 @@
 - selectedFareIds Length Derivation
 - Unresolved Artifact Fallback
 - shadcn/ui MIT License
-- @assistant-ui/ai-sdk
+- InspectDisplayInput
 - thread-shell.tsx
 - present-boundary.tsx
 - smart-planner-handoff.ts
 - resource-loader.ts
 - chat-sessions.spec.ts
 - main.tsx
+- @assistant-ui/ai-sdk
 - @vitejs/plugin-react
-- trip-planning-fixture.tsx
 - QueryExecutionState
 - ArtifactIdSchema
 
@@ -211,7 +211,7 @@ Nodes (19): _batched(), _cell_weight(), _dates(), _direction(), directional_rout
 
 ### Community 2 - "createUIStateStore"
 Cohesion: 0.05
-Nodes (46): artifactId, setup(), CatalogNode(), TravelProvider(), renderFareCards(), artifactId, fixture(), rows (+38 more)
+Nodes (53): artifactId, setup(), CatalogNode(), TravelProvider(), TravelServices, items, renderSelector(), scope (+45 more)
 
 ### Community 3 - "query_groups.py"
 Cohesion: 0.10
@@ -307,7 +307,7 @@ Nodes (23): handleChat(), CODEX_DEVELOPER_INSTRUCTIONS, CODEX_MODEL, CODEX_REASO
 
 ### Community 26 - "query-groups.ts"
 Cohesion: 0.03
-Nodes (90): artifactId, scope, items, renderSelector(), scope, selectorItems, DatasetIdSchema, DatasetRevision (+82 more)
+Nodes (82): artifactId, scope, DatasetIdSchema, DatasetRevision, artifactId, datasetId, fare, resourceKey (+74 more)
 
 ### Community 27 - "contracts/display-context.ts"
 Cohesion: 0.08
@@ -406,8 +406,8 @@ Cohesion: 0.11
 Nodes (14): CONTRACT_VERSION, DatasetManifest, DatasetManifestSchema, FareRow, FareRowSchema, rows, fixture(), rows (+6 more)
 
 ### Community 51 - "fixed-projection-fixture.ts"
-Cohesion: 0.09
-Nodes (22): FareLeg, ResultKeySchema, dates(), fare(), fixture(), dates, fixture(), id (+14 more)
+Cohesion: 0.08
+Nodes (23): artifactId, scopedFixture(), signal(), binding(), id, scope(), FareLeg, FareScope (+15 more)
 
 ### Community 52 - "BackendTestCase"
 Cohesion: 0.15
@@ -609,7 +609,11 @@ Nodes (3): SpikeCard(), SpikeSurface(), generative
 Cohesion: 0.16
 Nodes (10): {decision}, servers, mocks, ModelProcess, valid, InvalidModelOutputError, ModelAttemptObservation, withOneRepair() (+2 more)
 
-### Community 108 - "classic-search.test.tsx"
+### Community 108 - "action-router.test.ts"
+Cohesion: 0.18
+Nodes (9): ResultKeySchema, dates(), fare(), fixture(), dates, fixture(), id, item() (+1 more)
+
+### Community 110 - "classic-search.test.tsx"
 Cohesion: 0.40
 Nodes (3): response(), summaries, trip()
 
@@ -641,13 +645,9 @@ Nodes (17): alpha, beta, dataStream(), fareRows(), fixtureForScope(), label(), m
 Cohesion: 0.17
 Nodes (11): App(), artifactId, bridge, input, requests, resume(), root, scenes (+3 more)
 
-### Community 151 - "trip-planning-fixture.tsx"
-Cohesion: 0.27
-Nodes (6): TravelServices, PresentNode, artifactId, createTripPlanningFixtureTree(), TripPlanningFixture(), TripPlanningFixtureWorkflow
-
 ### Community 162 - "ArtifactIdSchema"
-Cohesion: 0.09
-Nodes (19): artifactId, fare(), fixedRows(), scopeDates(), binding(), id, scope(), ArtifactIdSchema (+11 more)
+Cohesion: 0.11
+Nodes (16): artifactId, fare(), fixedRows(), scopeDates(), ArtifactIdSchema, FareIdSchema, filters, first (+8 more)
 
 ## Knowledge Gaps
 - **625 isolated node(s):** `{decision}`, `servers`, `mocks`, `valid`, `DecisionSchema` (+620 more)
@@ -659,9 +659,9 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `FareDataBridge` connect `FareDataBridge` to `index.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `DatasetId` connect `DatasetId` to `query-engine.ts`, `ArtifactIdSchema`, `action-router.ts`, `projection-coordinator.ts`, `index.ts`, `snapshot-exporter.ts`, `context.tsx`, `persistence.ts`, `query-engine-fixture.ts`, `trip-planning-fixture.tsx`, `query-groups.ts`, `browser.ts`?**
+- **Why does `DatasetId` connect `DatasetId` to `query-engine.ts`, `ArtifactIdSchema`, `createUIStateStore`, `action-router.ts`, `projection-coordinator.ts`, `index.ts`, `snapshot-exporter.ts`, `context.tsx`, `persistence.ts`, `query-engine-fixture.ts`, `query-groups.ts`, `browser.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `ArtifactIdSchema` connect `ArtifactIdSchema` to `projection-coordinator.test.ts`, `createUIStateStore`, `action-router.ts`, `index.ts`, `views/index.tsx`, `routes.tsx`, `context.tsx`, `present-boundary.tsx`, `persistence.ts`, `main.tsx`, `trip-planning-fixture.tsx`, `chat-route.ts`, `query-groups.ts`, `query-engine.ts`, `fixed-projection-fixture.ts`, `runtime-provider.tsx`, `createDisplayContextStore`, `planning-tracker.tsx`, `chat-continuation.test.ts`?**
+- **Why does `ArtifactIdSchema` connect `ArtifactIdSchema` to `projection-coordinator.test.ts`, `createUIStateStore`, `action-router.ts`, `index.ts`, `views/index.tsx`, `routes.tsx`, `context.tsx`, `present-boundary.tsx`, `persistence.ts`, `main.tsx`, `chat-route.ts`, `query-groups.ts`, `query-engine.ts`, `fixed-projection-fixture.ts`, `runtime-provider.tsx`, `createDisplayContextStore`, `planning-tracker.tsx`, `chat-continuation.test.ts`, `action-router.test.ts`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `createUIStateStore()` (e.g. with `dispatch()` and `get()`) actually correct?**
   _`createUIStateStore()` has 3 INFERRED edges - model-reasoned connections that need verification._

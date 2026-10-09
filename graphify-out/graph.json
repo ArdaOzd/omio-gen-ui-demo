@@ -307,6 +307,19 @@
       "source_location": "L7"
     },
     {
+      "id": "src_generative_testing_fixed_projection_fixture_fixedprojectionfixture",
+      "label": "FixedProjectionFixture",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "fixedprojectionfixture",
+      "source_file": "src/generative/testing/fixed-projection-fixture.ts",
+      "source_location": "L28"
+    },
+    {
       "id": "src_generative_contracts_index_agentcontextenvelope",
       "label": "AgentContextEnvelope",
       "_callable": true,
@@ -383,32 +396,6 @@
       "norm_label": "snapshotrecord",
       "source_file": "src/generative/state/snapshot-exporter.ts",
       "source_location": "L8"
-    },
-    {
-      "id": "src_generative_contracts_display_context_inspectdisplayinput",
-      "label": "InspectDisplayInput",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 110,
-      "community_name": "InspectDisplayInput",
-      "file_type": "code",
-      "norm_label": "inspectdisplayinput",
-      "source_file": "src/generative/contracts/display-context.ts",
-      "source_location": "L246"
-    },
-    {
-      "id": "src_generative_contracts_display_context_inspectdisplayoutput",
-      "label": "InspectDisplayOutput",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 110,
-      "community_name": "InspectDisplayInput",
-      "file_type": "code",
-      "norm_label": "inspectdisplayoutput",
-      "source_file": "src/generative/contracts/display-context.ts",
-      "source_location": "L269"
     },
     {
       "id": "src_generative_chat_session_history_sessionhistory",
@@ -710,6 +697,32 @@
       "source_location": "L19"
     },
     {
+      "id": "src_generative_contracts_display_context_inspectdisplayinput",
+      "label": "InspectDisplayInput",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 140,
+      "community_name": "InspectDisplayInput",
+      "file_type": "code",
+      "norm_label": "inspectdisplayinput",
+      "source_file": "src/generative/contracts/display-context.ts",
+      "source_location": "L246"
+    },
+    {
+      "id": "src_generative_contracts_display_context_inspectdisplayoutput",
+      "label": "InspectDisplayOutput",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 140,
+      "community_name": "InspectDisplayInput",
+      "file_type": "code",
+      "norm_label": "inspectdisplayoutput",
+      "source_file": "src/generative/contracts/display-context.ts",
+      "source_location": "L269"
+    },
+    {
       "id": "src_generative_chat_tool_supersession_scenepart",
       "label": "ScenePart",
       "_callable": true,
@@ -866,45 +879,6 @@
       "source_location": "L15"
     },
     {
-      "id": "src_generative_catalog_context_travelservices",
-      "label": "TravelServices",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "travelservices",
-      "source_file": "src/generative/catalog/context.tsx",
-      "source_location": "L31"
-    },
-    {
-      "id": "src_generative_presentation_tree_presentnode",
-      "label": "PresentNode",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "presentnode",
-      "source_file": "src/generative/presentation/tree.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "src_generative_testing_trip_planning_fixture_tripplanningfixtureworkflow",
-      "label": "TripPlanningFixtureWorkflow",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "tripplanningfixtureworkflow",
-      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
-      "source_location": "L17"
-    },
-    {
       "id": "src_generative_contracts_query_groups_queryexecutionstate",
       "label": "QueryExecutionState",
       "_callable": true,
@@ -1022,6 +996,45 @@
       "source_location": "L10"
     },
     {
+      "id": "src_generative_catalog_context_travelservices",
+      "label": "TravelServices",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "travelservices",
+      "source_file": "src/generative/catalog/context.tsx",
+      "source_location": "L31"
+    },
+    {
+      "id": "src_generative_presentation_tree_presentnode",
+      "label": "PresentNode",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "presentnode",
+      "source_file": "src/generative/presentation/tree.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture_tripplanningfixtureworkflow",
+      "label": "TripPlanningFixtureWorkflow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "tripplanningfixtureworkflow",
+      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
+      "source_location": "L17"
+    },
+    {
       "id": "src_components_ui_native_select_nativeselectprops",
       "label": "NativeSelectProps",
       "_callable": true,
@@ -1111,19 +1124,6 @@
       "norm_label": "datasetrevision",
       "source_file": "src/generative/contracts/index.ts",
       "source_location": "L16"
-    },
-    {
-      "id": "src_generative_contracts_query_groups_farescope",
-      "label": "FareScope",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "farescope",
-      "source_file": "src/generative/contracts/query-groups.ts",
-      "source_location": "L105"
     },
     {
       "id": "src_generative_contracts_query_groups_farescopemanifest",
@@ -2127,6 +2127,19 @@
       "source_location": "L42"
     },
     {
+      "id": "src_generative_contracts_query_groups_farescope",
+      "label": "FareScope",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "farescope",
+      "source_file": "src/generative/contracts/query-groups.ts",
+      "source_location": "L105"
+    },
+    {
       "id": "src_generative_testing_fixed_projection_fixture_datewindow",
       "label": "DateWindow",
       "_callable": true,
@@ -2151,19 +2164,6 @@
       "norm_label": "fareinput",
       "source_file": "src/generative/testing/fixed-projection-fixture.ts",
       "source_location": "L19"
-    },
-    {
-      "id": "src_generative_testing_fixed_projection_fixture_fixedprojectionfixture",
-      "label": "FixedProjectionFixture",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 51,
-      "community_name": "fixed-projection-fixture.ts",
-      "file_type": "code",
-      "norm_label": "fixedprojectionfixture",
-      "source_file": "src/generative/testing/fixed-projection-fixture.ts",
-      "source_location": "L28"
     },
     {
       "id": "src_generative_testing_fixed_projection_fixture_fixedprojectionfixtureoptions",
@@ -3715,52 +3715,100 @@
       "source_location": "L18"
     },
     {
-      "id": "src_classic_search_test_mocksearch",
-      "label": "mockSearch()",
+      "id": "src_generative_state_action_router_test_bindingfor",
+      "label": "bindingFor()",
       "_callable": true,
       "_origin": "ast",
       "community": 108,
-      "community_name": "classic-search.test.tsx",
+      "community_name": "action-router.test.ts",
       "file_type": "code",
-      "norm_label": "mocksearch()",
-      "source_file": "src/classic-search.test.tsx",
+      "norm_label": "bindingfor()",
+      "source_file": "src/generative/state/action-router.test.ts",
+      "source_location": "L105"
+    },
+    {
+      "id": "src_generative_state_action_router_test_dates",
+      "label": "dates()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "dates()",
+      "source_file": "src/generative/state/action-router.test.ts",
+      "source_location": "L31"
+    },
+    {
+      "id": "src_generative_state_action_router_test_fare",
+      "label": "fare()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "fare()",
+      "source_file": "src/generative/state/action-router.test.ts",
+      "source_location": "L39"
+    },
+    {
+      "id": "src_generative_state_action_router_test_fixture",
+      "label": "fixture()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "fixture()",
+      "source_file": "src/generative/state/action-router.test.ts",
+      "source_location": "L71"
+    },
+    {
+      "id": "src_generative_state_action_router_test_loadandcache",
+      "label": "loadAndCache()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "loadandcache()",
+      "source_file": "src/generative/state/action-router.test.ts",
+      "source_location": "L86"
+    },
+    {
+      "id": "src_generative_state_action_router_test_scope",
+      "label": "scope()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "scope()",
+      "source_file": "src/generative/state/action-router.test.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_generative_state_selection_date_test_fixture",
+      "label": "fixture()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "fixture()",
+      "source_file": "src/generative/state/selection-date.test.ts",
+      "source_location": "L32"
+    },
+    {
+      "id": "src_generative_state_selection_date_test_item",
+      "label": "item()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "item()",
+      "source_file": "src/generative/state/selection-date.test.ts",
       "source_location": "L11"
-    },
-    {
-      "id": "src_classic_search_test_response",
-      "label": "response()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 108,
-      "community_name": "classic-search.test.tsx",
-      "file_type": "code",
-      "norm_label": "response()",
-      "source_file": "src/classic-search.test.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_classic_search_test_start",
-      "label": "start()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 108,
-      "community_name": "classic-search.test.tsx",
-      "file_type": "code",
-      "norm_label": "start()",
-      "source_file": "src/classic-search.test.tsx",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_classic_search_test_trip",
-      "label": "trip()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 108,
-      "community_name": "classic-search.test.tsx",
-      "file_type": "code",
-      "norm_label": "trip()",
-      "source_file": "src/classic-search.test.tsx",
-      "source_location": "L8"
     },
     {
       "id": "src_generative_state_snapshot_exporter_addminutes",
@@ -3967,16 +4015,52 @@
       "source_location": "L20"
     },
     {
-      "id": "src_generative_state_display_context_displaycontextstore_inspect",
-      "label": ".inspect()",
+      "id": "src_classic_search_test_mocksearch",
+      "label": "mockSearch()",
       "_callable": true,
       "_origin": "ast",
       "community": 110,
-      "community_name": "InspectDisplayInput",
+      "community_name": "classic-search.test.tsx",
       "file_type": "code",
-      "norm_label": ".inspect()",
-      "source_file": "src/generative/state/display-context.ts",
-      "source_location": "L77"
+      "norm_label": "mocksearch()",
+      "source_file": "src/classic-search.test.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_classic_search_test_response",
+      "label": "response()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 110,
+      "community_name": "classic-search.test.tsx",
+      "file_type": "code",
+      "norm_label": "response()",
+      "source_file": "src/classic-search.test.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_classic_search_test_start",
+      "label": "start()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 110,
+      "community_name": "classic-search.test.tsx",
+      "file_type": "code",
+      "norm_label": "start()",
+      "source_file": "src/classic-search.test.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_classic_search_test_trip",
+      "label": "trip()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 110,
+      "community_name": "classic-search.test.tsx",
+      "file_type": "code",
+      "norm_label": "trip()",
+      "source_file": "src/classic-search.test.tsx",
+      "source_location": "L8"
     },
     {
       "id": "src_generative_chat_session_history_createsessionsummary",
@@ -4661,6 +4745,18 @@
       "norm_label": "filterpredicate()",
       "source_file": "src/generative/state/filter-predicate.ts",
       "source_location": "L3"
+    },
+    {
+      "id": "src_generative_state_display_context_displaycontextstore_inspect",
+      "label": ".inspect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 140,
+      "community_name": "InspectDisplayInput",
+      "file_type": "code",
+      "norm_label": ".inspect()",
+      "source_file": "src/generative/state/display-context.ts",
+      "source_location": "L77"
     },
     {
       "id": "src_components_ui_textarea_textarea",
@@ -5395,42 +5491,6 @@
       "source_location": "L121"
     },
     {
-      "id": "src_generative_testing_trip_planning_fixture_createtripplanningfixturetree",
-      "label": "createTripPlanningFixtureTree()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "createtripplanningfixturetree()",
-      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "src_generative_testing_trip_planning_fixture_fixturescene",
-      "label": "FixtureScene()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "fixturescene()",
-      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
-      "source_location": "L27"
-    },
-    {
-      "id": "src_generative_testing_trip_planning_fixture_tripplanningfixture",
-      "label": "TripPlanningFixture()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "tripplanningfixture()",
-      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
-      "source_location": "L32"
-    },
-    {
       "id": "src_generative_data_projection_coordinator_projectioncoordinator_dispose",
       "label": ".dispose()",
       "_callable": true,
@@ -5573,54 +5633,6 @@
       "norm_label": "scopedates()",
       "source_file": "src/generative/catalog/trip-planning/review-controls.test.tsx",
       "source_location": "L44"
-    },
-    {
-      "id": "src_generative_catalog_window_retry_test_binding",
-      "label": "binding()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 162,
-      "community_name": "ArtifactIdSchema",
-      "file_type": "code",
-      "norm_label": "binding()",
-      "source_file": "src/generative/catalog/window-retry.test.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_generative_catalog_window_retry_test_dates",
-      "label": "dates()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 162,
-      "community_name": "ArtifactIdSchema",
-      "file_type": "code",
-      "norm_label": "dates()",
-      "source_file": "src/generative/catalog/window-retry.test.tsx",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_generative_catalog_window_retry_test_row",
-      "label": "row()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 162,
-      "community_name": "ArtifactIdSchema",
-      "file_type": "code",
-      "norm_label": "row()",
-      "source_file": "src/generative/catalog/window-retry.test.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "src_generative_catalog_window_retry_test_scope",
-      "label": "scope()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 162,
-      "community_name": "ArtifactIdSchema",
-      "file_type": "code",
-      "norm_label": "scope()",
-      "source_file": "src/generative/catalog/window-retry.test.tsx",
-      "source_location": "L15"
     },
     {
       "id": "src_generative_data_data_state_test_fare",
@@ -6067,6 +6079,30 @@
       "source_location": "L50"
     },
     {
+      "id": "src_generative_catalog_fare_pagination_test_renderselector",
+      "label": "renderSelector()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "renderselector()",
+      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_generative_catalog_fare_pagination_test_scrollfareresultstoend",
+      "label": "scrollFareResultsToEnd()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "scrollfareresultstoend()",
+      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
+      "source_location": "L50"
+    },
+    {
       "id": "src_generative_catalog_fare_selection_scope_test_renderfarecards",
       "label": "renderFareCards()",
       "_callable": true,
@@ -6233,54 +6269,6 @@
       "norm_label": "signal()",
       "source_file": "src/generative/catalog/trip-planning/binding.test.ts",
       "source_location": "L7"
-    },
-    {
-      "id": "src_generative_catalog_trip_planning_components_test_datesin",
-      "label": "datesIn()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "createUIStateStore",
-      "file_type": "code",
-      "norm_label": "datesin()",
-      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
-      "source_location": "L37"
-    },
-    {
-      "id": "src_generative_catalog_trip_planning_components_test_fare",
-      "label": "fare()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "createUIStateStore",
-      "file_type": "code",
-      "norm_label": "fare()",
-      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "src_generative_catalog_trip_planning_components_test_scopedfixture",
-      "label": "scopedFixture()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "createUIStateStore",
-      "file_type": "code",
-      "norm_label": "scopedfixture()",
-      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
-      "source_location": "L48"
-    },
-    {
-      "id": "src_generative_catalog_trip_planning_components_test_signal",
-      "label": "signal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "createUIStateStore",
-      "file_type": "code",
-      "norm_label": "signal()",
-      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
-      "source_location": "L36"
     },
     {
       "id": "src_generative_presentation_present_supersession_test_accepted",
@@ -6497,6 +6485,42 @@
       "norm_label": "createfixedprojectionfixture()",
       "source_file": "src/generative/testing/fixed-projection-fixture.ts",
       "source_location": "L163"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture_createtripplanningfixturetree",
+      "label": "createTripPlanningFixtureTree()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "createtripplanningfixturetree()",
+      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture_fixturescene",
+      "label": "FixtureScene()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "fixturescene()",
+      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
+      "source_location": "L27"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture_tripplanningfixture",
+      "label": "TripPlanningFixture()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "tripplanningfixture()",
+      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
+      "source_location": "L32"
     },
     {
       "id": "src_generative_tracker_planning_tracker_test_fixture",
@@ -7493,30 +7517,6 @@
       "norm_label": "response()",
       "source_file": "src/generative/catalog/context.server-query.test.tsx",
       "source_location": "L27"
-    },
-    {
-      "id": "src_generative_catalog_fare_pagination_test_renderselector",
-      "label": "renderSelector()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "renderselector()",
-      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_generative_catalog_fare_pagination_test_scrollfareresultstoend",
-      "label": "scrollFareResultsToEnd()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "scrollfareresultstoend()",
-      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
-      "source_location": "L50"
     },
     {
       "id": "src_generative_contracts_query_groups_validatelookuppins",
@@ -10627,31 +10627,19 @@
       "source_location": "L85"
     },
     {
-      "id": "src_generative_state_action_router_test_bindingfor",
-      "label": "bindingFor()",
+      "id": "src_generative_catalog_trip_planning_components_test_datesin",
+      "label": "datesIn()",
       "_callable": true,
       "_origin": "ast",
       "community": 51,
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
-      "norm_label": "bindingfor()",
-      "source_file": "src/generative/state/action-router.test.ts",
-      "source_location": "L105"
+      "norm_label": "datesin()",
+      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
+      "source_location": "L37"
     },
     {
-      "id": "src_generative_state_action_router_test_dates",
-      "label": "dates()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 51,
-      "community_name": "fixed-projection-fixture.ts",
-      "file_type": "code",
-      "norm_label": "dates()",
-      "source_file": "src/generative/state/action-router.test.ts",
-      "source_location": "L31"
-    },
-    {
-      "id": "src_generative_state_action_router_test_fare",
+      "id": "src_generative_catalog_trip_planning_components_test_fare",
       "label": "fare()",
       "_callable": true,
       "_origin": "ast",
@@ -10659,35 +10647,71 @@
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
       "norm_label": "fare()",
-      "source_file": "src/generative/state/action-router.test.ts",
-      "source_location": "L39"
+      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
+      "source_location": "L14"
     },
     {
-      "id": "src_generative_state_action_router_test_fixture",
-      "label": "fixture()",
+      "id": "src_generative_catalog_trip_planning_components_test_scopedfixture",
+      "label": "scopedFixture()",
       "_callable": true,
       "_origin": "ast",
       "community": 51,
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
-      "norm_label": "fixture()",
-      "source_file": "src/generative/state/action-router.test.ts",
-      "source_location": "L71"
+      "norm_label": "scopedfixture()",
+      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
+      "source_location": "L48"
     },
     {
-      "id": "src_generative_state_action_router_test_loadandcache",
-      "label": "loadAndCache()",
+      "id": "src_generative_catalog_trip_planning_components_test_signal",
+      "label": "signal()",
       "_callable": true,
       "_origin": "ast",
       "community": 51,
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
-      "norm_label": "loadandcache()",
-      "source_file": "src/generative/state/action-router.test.ts",
-      "source_location": "L86"
+      "norm_label": "signal()",
+      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
+      "source_location": "L36"
     },
     {
-      "id": "src_generative_state_action_router_test_scope",
+      "id": "src_generative_catalog_window_retry_test_binding",
+      "label": "binding()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "binding()",
+      "source_file": "src/generative/catalog/window-retry.test.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_generative_catalog_window_retry_test_dates",
+      "label": "dates()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "dates()",
+      "source_file": "src/generative/catalog/window-retry.test.tsx",
+      "source_location": "L13"
+    },
+    {
+      "id": "src_generative_catalog_window_retry_test_row",
+      "label": "row()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "row()",
+      "source_file": "src/generative/catalog/window-retry.test.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_generative_catalog_window_retry_test_scope",
       "label": "scope()",
       "_callable": true,
       "_origin": "ast",
@@ -10695,32 +10719,8 @@
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
       "norm_label": "scope()",
-      "source_file": "src/generative/state/action-router.test.ts",
-      "source_location": "L14"
-    },
-    {
-      "id": "src_generative_state_selection_date_test_fixture",
-      "label": "fixture()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 51,
-      "community_name": "fixed-projection-fixture.ts",
-      "file_type": "code",
-      "norm_label": "fixture()",
-      "source_file": "src/generative/state/selection-date.test.ts",
-      "source_location": "L32"
-    },
-    {
-      "id": "src_generative_state_selection_date_test_item",
-      "label": "item()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 51,
-      "community_name": "fixed-projection-fixture.ts",
-      "file_type": "code",
-      "norm_label": "item()",
-      "source_file": "src/generative/state/selection-date.test.ts",
-      "source_location": "L11"
+      "source_file": "src/generative/catalog/window-retry.test.tsx",
+      "source_location": "L15"
     },
     {
       "id": "src_generative_testing_fixed_projection_fixture_activerows",
@@ -13937,26 +13937,59 @@
       "source_location": "L9"
     },
     {
-      "id": "src_classic_search_test",
-      "label": "classic-search.test.tsx",
+      "id": "src_generative_contracts_query_groups_resultkeyschema",
+      "label": "ResultKeySchema",
       "_origin": "ast",
       "community": 108,
-      "community_name": "classic-search.test.tsx",
+      "community_name": "action-router.test.ts",
       "file_type": "code",
-      "norm_label": "classic-search.test.tsx",
-      "source_file": "src/classic-search.test.tsx",
+      "norm_label": "resultkeyschema",
+      "source_file": "src/generative/contracts/query-groups.ts",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_generative_state_action_router_test",
+      "label": "action-router.test.ts",
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "action-router.test.ts",
+      "source_file": "src/generative/state/action-router.test.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_classic_search_test_summaries",
-      "label": "summaries",
+      "id": "src_generative_state_selection_date_test",
+      "label": "selection-date.test.ts",
       "_origin": "ast",
       "community": 108,
-      "community_name": "classic-search.test.tsx",
+      "community_name": "action-router.test.ts",
       "file_type": "code",
-      "norm_label": "summaries",
-      "source_file": "src/classic-search.test.tsx",
-      "source_location": "L7"
+      "norm_label": "selection-date.test.ts",
+      "source_file": "src/generative/state/selection-date.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_state_selection_date_test_dates",
+      "label": "dates",
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "dates",
+      "source_file": "src/generative/state/selection-date.test.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_generative_state_selection_date_test_id",
+      "label": "id",
+      "_origin": "ast",
+      "community": 108,
+      "community_name": "action-router.test.ts",
+      "file_type": "code",
+      "norm_label": "id",
+      "source_file": "src/generative/state/selection-date.test.ts",
+      "source_location": "L8"
     },
     {
       "id": "package_dependencies_tw_animate_css",
@@ -13990,6 +14023,28 @@
       "norm_label": "snapshot-exporter.ts",
       "source_file": "src/generative/state/snapshot-exporter.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "src_classic_search_test",
+      "label": "classic-search.test.tsx",
+      "_origin": "ast",
+      "community": 110,
+      "community_name": "classic-search.test.tsx",
+      "file_type": "code",
+      "norm_label": "classic-search.test.tsx",
+      "source_file": "src/classic-search.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_classic_search_test_summaries",
+      "label": "summaries",
+      "_origin": "ast",
+      "community": 110,
+      "community_name": "classic-search.test.tsx",
+      "file_type": "code",
+      "norm_label": "summaries",
+      "source_file": "src/classic-search.test.tsx",
+      "source_location": "L7"
     },
     {
       "id": "verification_generative_ui_presentation_live_readme",
@@ -14540,28 +14595,6 @@
       "source_location": "L1"
     },
     {
-      "id": "package_dependencies_assistant_ui_ai_sdk",
-      "label": "@assistant-ui/ai-sdk",
-      "_origin": "ast",
-      "community": 140,
-      "community_name": "@assistant-ui/ai-sdk",
-      "file_type": "code",
-      "norm_label": "@assistant-ui/ai-sdk",
-      "source_file": "package.json",
-      "source_location": "L26"
-    },
-    {
-      "id": "assistant_ui_ai_sdk",
-      "label": "@assistant-ui/ai-sdk",
-      "_origin": "ast",
-      "community": 140,
-      "community_name": "@assistant-ui/ai-sdk",
-      "file_type": "concept",
-      "norm_label": "@assistant-ui/ai-sdk",
-      "source_file": "package.json",
-      "source_location": "L26"
-    },
-    {
       "id": "vitest_config",
       "label": "vitest.config.ts",
       "_origin": "ast",
@@ -15024,10 +15057,32 @@
       "source_location": "L26"
     },
     {
+      "id": "package_dependencies_assistant_ui_ai_sdk",
+      "label": "@assistant-ui/ai-sdk",
+      "_origin": "ast",
+      "community": 148,
+      "community_name": "@assistant-ui/ai-sdk",
+      "file_type": "code",
+      "norm_label": "@assistant-ui/ai-sdk",
+      "source_file": "package.json",
+      "source_location": "L26"
+    },
+    {
+      "id": "assistant_ui_ai_sdk",
+      "label": "@assistant-ui/ai-sdk",
+      "_origin": "ast",
+      "community": 148,
+      "community_name": "@assistant-ui/ai-sdk",
+      "file_type": "concept",
+      "norm_label": "@assistant-ui/ai-sdk",
+      "source_file": "package.json",
+      "source_location": "L26"
+    },
+    {
       "id": "package_devdependencies_vitejs_plugin_react",
       "label": "@vitejs/plugin-react",
       "_origin": "ast",
-      "community": 148,
+      "community": 149,
       "community_name": "@vitejs/plugin-react",
       "file_type": "code",
       "norm_label": "@vitejs/plugin-react",
@@ -15038,23 +15093,12 @@
       "id": "vitejs_plugin_react",
       "label": "@vitejs/plugin-react",
       "_origin": "ast",
-      "community": 148,
+      "community": 149,
       "community_name": "@vitejs/plugin-react",
       "file_type": "concept",
       "norm_label": "@vitejs/plugin-react",
       "source_file": "package.json",
       "source_location": "L53"
-    },
-    {
-      "id": "zod_zod",
-      "label": "zod",
-      "_origin": "ast",
-      "community": 149,
-      "community_name": "zod",
-      "confidence": "EXTRACTED",
-      "file_type": "code",
-      "norm_label": "zod",
-      "source_file": "zod"
     },
     {
       "id": "src_generative_chat_history_projection_test",
@@ -15101,48 +15145,15 @@
       "source_location": "L7"
     },
     {
-      "id": "src_generative_presentation_present_scope",
-      "label": "presentation/present-scope.ts",
+      "id": "zod_zod",
+      "label": "zod",
       "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
+      "community": 150,
+      "community_name": "zod",
+      "confidence": "EXTRACTED",
       "file_type": "code",
-      "norm_label": "presentation/present-scope.ts",
-      "source_file": "src/generative/presentation/present-scope.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_testing_trip_planning_fixture",
-      "label": "trip-planning-fixture.tsx",
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "trip-planning-fixture.tsx",
-      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_testing_trip_planning_fixture_artifactid",
-      "label": "artifactId",
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "artifactid",
-      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_generative_testing_trip_planning_fixture_test",
-      "label": "trip-planning-fixture.test.ts",
-      "_origin": "ast",
-      "community": 151,
-      "community_name": "trip-planning-fixture.tsx",
-      "file_type": "code",
-      "norm_label": "trip-planning-fixture.test.ts",
-      "source_file": "src/generative/testing/trip-planning-fixture.test.ts",
-      "source_location": "L1"
+      "norm_label": "zod",
+      "source_file": "zod"
     },
     {
       "id": "tsconfig",
@@ -15506,28 +15517,6 @@
       "norm_label": "artifactid",
       "source_file": "src/generative/catalog/trip-planning/review-controls.test.tsx",
       "source_location": "L14"
-    },
-    {
-      "id": "src_generative_catalog_window_retry_test",
-      "label": "window-retry.test.tsx",
-      "_origin": "ast",
-      "community": 162,
-      "community_name": "ArtifactIdSchema",
-      "file_type": "code",
-      "norm_label": "window-retry.test.tsx",
-      "source_file": "src/generative/catalog/window-retry.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_catalog_window_retry_test_id",
-      "label": "id",
-      "_origin": "ast",
-      "community": 162,
-      "community_name": "ArtifactIdSchema",
-      "file_type": "code",
-      "norm_label": "id",
-      "source_file": "src/generative/catalog/window-retry.test.tsx",
-      "source_location": "L12"
     },
     {
       "id": "src_generative_contracts_index_artifactidschema",
@@ -16355,6 +16344,50 @@
       "source_location": "L9"
     },
     {
+      "id": "src_generative_catalog_fare_pagination_test",
+      "label": "fare-pagination.test.tsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "fare-pagination.test.tsx",
+      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_catalog_fare_pagination_test_items",
+      "label": "items",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "items",
+      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "src_generative_catalog_fare_pagination_test_scope",
+      "label": "scope",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "scope",
+      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "src_generative_catalog_fare_pagination_test_selectoritems",
+      "label": "selectorItems",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "selectoritems",
+      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
+      "source_location": "L24"
+    },
+    {
       "id": "src_generative_catalog_fare_selection_test",
       "label": "fare-selection.test.tsx",
       "_origin": "ast",
@@ -16542,28 +16575,6 @@
       "source_location": "L8"
     },
     {
-      "id": "src_generative_catalog_trip_planning_components_test",
-      "label": "components.test.tsx",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "createUIStateStore",
-      "file_type": "code",
-      "norm_label": "components.test.tsx",
-      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_catalog_trip_planning_components_test_artifactid",
-      "label": "artifactId",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "createUIStateStore",
-      "file_type": "code",
-      "norm_label": "artifactid",
-      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
-      "source_location": "L12"
-    },
-    {
       "id": "src_generative_contracts_index_compactartifactsnapshotschema",
       "label": "CompactArtifactSnapshotSchema",
       "_origin": "ast",
@@ -16586,6 +16597,17 @@
       "source_location": "L22"
     },
     {
+      "id": "src_generative_presentation_present_scope",
+      "label": "presentation/present-scope.ts",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "presentation/present-scope.ts",
+      "source_file": "src/generative/presentation/present-scope.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_generative_presentation_present_supersession_test",
       "label": "present-supersession.test.tsx",
       "_origin": "ast",
@@ -16605,6 +16627,39 @@
       "file_type": "code",
       "norm_label": "ui-state-store.ts",
       "source_file": "src/generative/state/ui-state-store.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture",
+      "label": "trip-planning-fixture.tsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "trip-planning-fixture.tsx",
+      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture_artifactid",
+      "label": "artifactId",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "artifactid",
+      "source_file": "src/generative/testing/trip-planning-fixture.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_generative_testing_trip_planning_fixture_test",
+      "label": "trip-planning-fixture.test.ts",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "createUIStateStore",
+      "file_type": "code",
+      "norm_label": "trip-planning-fixture.test.ts",
+      "source_file": "src/generative/testing/trip-planning-fixture.test.ts",
       "source_location": "L1"
     },
     {
@@ -17455,50 +17510,6 @@
       "source_location": "L1"
     },
     {
-      "id": "src_generative_catalog_fare_pagination_test",
-      "label": "fare-pagination.test.tsx",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "fare-pagination.test.tsx",
-      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_catalog_fare_pagination_test_items",
-      "label": "items",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "items",
-      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
-      "source_location": "L17"
-    },
-    {
-      "id": "src_generative_catalog_fare_pagination_test_scope",
-      "label": "scope",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "scope",
-      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_generative_catalog_fare_pagination_test_selectoritems",
-      "label": "selectorItems",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "selectoritems",
-      "source_file": "src/generative/catalog/fare-pagination.test.tsx",
-      "source_location": "L24"
-    },
-    {
       "id": "src_generative_contracts_index_datasetidschema",
       "label": "DatasetIdSchema",
       "_origin": "ast",
@@ -18069,50 +18080,6 @@
       "norm_label": "uistaterevision",
       "source_file": "src/generative/contracts/query-groups.ts",
       "source_location": "L10"
-    },
-    {
-      "id": "src_generative_data_carrier_labels_test",
-      "label": "carrier-labels.test.tsx",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "carrier-labels.test.tsx",
-      "source_file": "src/generative/data/carrier-labels.test.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_generative_data_carrier_labels_test_filters",
-      "label": "filters",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "filters",
-      "source_file": "src/generative/data/carrier-labels.test.tsx",
-      "source_location": "L18"
-    },
-    {
-      "id": "src_generative_data_carrier_labels_test_named",
-      "label": "named",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "named",
-      "source_file": "src/generative/data/carrier-labels.test.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_generative_data_carrier_labels_test_scope",
-      "label": "scope",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "query-groups.ts",
-      "file_type": "code",
-      "norm_label": "scope",
-      "source_file": "src/generative/data/carrier-labels.test.tsx",
-      "source_location": "L6"
     },
     {
       "id": "src_generative_data_fare_data_bridge",
@@ -20907,59 +20874,92 @@
       "source_location": "L15"
     },
     {
-      "id": "src_generative_contracts_query_groups_resultkeyschema",
-      "label": "ResultKeySchema",
+      "id": "src_generative_catalog_trip_planning_components_test",
+      "label": "components.test.tsx",
       "_origin": "ast",
       "community": 51,
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
-      "norm_label": "resultkeyschema",
-      "source_file": "src/generative/contracts/query-groups.ts",
-      "source_location": "L29"
-    },
-    {
-      "id": "src_generative_state_action_router_test",
-      "label": "action-router.test.ts",
-      "_origin": "ast",
-      "community": 51,
-      "community_name": "fixed-projection-fixture.ts",
-      "file_type": "code",
-      "norm_label": "action-router.test.ts",
-      "source_file": "src/generative/state/action-router.test.ts",
+      "norm_label": "components.test.tsx",
+      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_generative_state_selection_date_test",
-      "label": "selection-date.test.ts",
+      "id": "src_generative_catalog_trip_planning_components_test_artifactid",
+      "label": "artifactId",
       "_origin": "ast",
       "community": 51,
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
-      "norm_label": "selection-date.test.ts",
-      "source_file": "src/generative/state/selection-date.test.ts",
+      "norm_label": "artifactid",
+      "source_file": "src/generative/catalog/trip-planning/components.test.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_generative_catalog_window_retry_test",
+      "label": "window-retry.test.tsx",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "window-retry.test.tsx",
+      "source_file": "src/generative/catalog/window-retry.test.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_generative_state_selection_date_test_dates",
-      "label": "dates",
-      "_origin": "ast",
-      "community": 51,
-      "community_name": "fixed-projection-fixture.ts",
-      "file_type": "code",
-      "norm_label": "dates",
-      "source_file": "src/generative/state/selection-date.test.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_generative_state_selection_date_test_id",
+      "id": "src_generative_catalog_window_retry_test_id",
       "label": "id",
       "_origin": "ast",
       "community": 51,
       "community_name": "fixed-projection-fixture.ts",
       "file_type": "code",
       "norm_label": "id",
-      "source_file": "src/generative/state/selection-date.test.ts",
-      "source_location": "L8"
+      "source_file": "src/generative/catalog/window-retry.test.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_generative_data_carrier_labels_test",
+      "label": "carrier-labels.test.tsx",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "carrier-labels.test.tsx",
+      "source_file": "src/generative/data/carrier-labels.test.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_generative_data_carrier_labels_test_filters",
+      "label": "filters",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "filters",
+      "source_file": "src/generative/data/carrier-labels.test.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_generative_data_carrier_labels_test_named",
+      "label": "named",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "named",
+      "source_file": "src/generative/data/carrier-labels.test.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_generative_data_carrier_labels_test_scope",
+      "label": "scope",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "fixed-projection-fixture.ts",
+      "file_type": "code",
+      "norm_label": "scope",
+      "source_file": "src/generative/data/carrier-labels.test.tsx",
+      "source_location": "L6"
     },
     {
       "id": "src_generative_testing_fixed_projection_fixture",
@@ -86010,5 +86010,5 @@
       "source_file": "docs/decisions/query-null-semantics.md"
     }
   ],
-  "built_at_commit": "3a93f4975943dfb6967fff19a139b3c9d41b3fca"
+  "built_at_commit": "8510069ad5381828bcf4d8cd7dc68378be5eb4ba"
 }
