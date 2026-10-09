@@ -354,9 +354,9 @@
     "semantic_hash": "4975e98e48b036e4475ab9077e98e641"
   },
   "src/generative/catalog/context.tsx": {
-    "mtime": 1791474412.8705735,
-    "seen": 1791474417.63377,
-    "ast_hash": "06ee07d7729ae5492e5d5073ad22a0f0",
+    "mtime": 1791542805.282397,
+    "seen": 1791542931.9321442,
+    "ast_hash": "c4a9a8beff6d6908e4135262e15bf978",
     "semantic_hash": ""
   },
   "src/generative/catalog/controls/index.tsx": {
@@ -396,9 +396,9 @@
     "semantic_hash": "68177ae0f44bbef57f488f460d896cb7"
   },
   "src/generative/catalog/views/index.tsx": {
-    "mtime": 1791474412.878705,
-    "seen": 1791474417.6337888,
-    "ast_hash": "9227b1bc965e018279d9a08faca1ee65",
+    "mtime": 1791542653.6016247,
+    "seen": 1791542931.9321668,
+    "ast_hash": "cce5103d52713886c1bbbd0ced5e157b",
     "semantic_hash": ""
   },
   "src/generative/chat/runtime-provider.tsx": {
@@ -516,10 +516,10 @@
     "semantic_hash": "97a3aa68533bbd89305642ab89c6cbaa"
   },
   "src/generative/state/action-router.ts": {
-    "mtime": 1791474412.889673,
-    "seen": 1791474417.633833,
-    "ast_hash": "284c818814523c47fa8eb0f3bbe8b566",
-    "semantic_hash": "284c818814523c47fa8eb0f3bbe8b566"
+    "mtime": 1791542618.7252524,
+    "seen": 1791542931.932223,
+    "ast_hash": "89014fa626bc6ba08ef0ecdd8f1c9fe2",
+    "semantic_hash": ""
   },
   "src/generative/state/artifact-store.test.ts": {
     "mtime": 1791194840.274628,
@@ -534,10 +534,10 @@
     "semantic_hash": "6cf5a1dfeebb93e7d067056f41797271"
   },
   "src/generative/state/leg-bindings.ts": {
-    "mtime": 1791474412.8908846,
-    "seen": 1791474417.6338391,
-    "ast_hash": "54649fbecfa5127f9094f782c02d8261",
-    "semantic_hash": "54649fbecfa5127f9094f782c02d8261"
+    "mtime": 1791542819.638941,
+    "seen": 1791542931.932231,
+    "ast_hash": "a34d38e46103c6d6c7576f69413f7a24",
+    "semantic_hash": ""
   },
   "src/generative/state/persistence.test.ts": {
     "mtime": 1791475044.5803926,
@@ -558,10 +558,10 @@
     "semantic_hash": ""
   },
   "src/generative/state/ui-state-store.ts": {
-    "mtime": 1791446174.263445,
-    "seen": 1791474417.633844,
-    "ast_hash": "f7a5e9890f5d09b1d6f4432fe52ed8d6",
-    "semantic_hash": "f7a5e9890f5d09b1d6f4432fe52ed8d6"
+    "mtime": 1791542131.3433554,
+    "seen": 1791542931.932236,
+    "ast_hash": "710b5aa2af93129f66199b944c200ade",
+    "semantic_hash": ""
   },
   "src/generative/testing/fake-stream.test.tsx": {
     "mtime": 1791194840.2779765,
@@ -780,10 +780,10 @@
     "semantic_hash": "b86a4ca74ffd7f85ca73c7e09540f2de"
   },
   "src/generative/state/selection-date.test.ts": {
-    "mtime": 1791474412.8917017,
-    "seen": 1791474417.6338408,
-    "ast_hash": "b71ce0757386f0e509a9ddd3937e7790",
-    "semantic_hash": "b71ce0757386f0e509a9ddd3937e7790"
+    "mtime": 1791542618.7475047,
+    "seen": 1791542931.9322329,
+    "ast_hash": "43a2359a3074ceb6171faf4a5b42b9e8",
+    "semantic_hash": ""
   },
   "verification/generative-ui/root-saved-chat-proof-2026-10-03.json": {
     "mtime": 1791194840.3178506,
@@ -804,10 +804,10 @@
     "semantic_hash": "47c23909da84e310e6ed59382ee701e6"
   },
   "src/generative/catalog/route-calendar.test.tsx": {
-    "mtime": 1791474412.874775,
-    "seen": 1791474417.633782,
-    "ast_hash": "fbd8ea4df97ede613a78681df6182eed",
-    "semantic_hash": "fbd8ea4df97ede613a78681df6182eed"
+    "mtime": 1791542531.7075586,
+    "seen": 1791542931.932158,
+    "ast_hash": "8bd7f2db79ccaf19e2c2e2c591e3ca8d",
+    "semantic_hash": ""
   },
   "src/generative/data/carrier-labels.test.tsx": {
     "mtime": 1791474412.8831449,
@@ -1110,16 +1110,16 @@
     "semantic_hash": ""
   },
   "src/generative/contracts/route-shape.test.ts": {
-    "mtime": 1791293566.5474358,
-    "seen": 1791474417.6338072,
-    "ast_hash": "68405babc4735d1da92401372d0aa52b",
-    "semantic_hash": "68405babc4735d1da92401372d0aa52b"
+    "mtime": 1791542131.3861682,
+    "seen": 1791542931.932189,
+    "ast_hash": "7bbfbc46caaf3fad591e357b3fb339b4",
+    "semantic_hash": ""
   },
   "src/generative/state/itinerary-schedule.test.ts": {
-    "mtime": 1791474412.8906963,
-    "seen": 1791474417.633837,
-    "ast_hash": "bd23a541e7aed1f7afef61e18c553315",
-    "semantic_hash": "bd23a541e7aed1f7afef61e18c553315"
+    "mtime": 1791542675.6018574,
+    "seen": 1791542931.932229,
+    "ast_hash": "859462fc5b7ac40c0c4e9f445afde7a3",
+    "semantic_hash": ""
   },
   "src/generative/state/itinerary-schedule.ts": {
     "mtime": 1791291675.7500625,
