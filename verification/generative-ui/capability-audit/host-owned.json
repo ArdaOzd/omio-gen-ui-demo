@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "name": "PlanningTracker",
+      "owner": "host",
+      "reason": "The host renders the responsive selected-fares tracker outside the model-authored component tree."
+    },
+    {
+      "name": "Chat shell",
+      "owner": "host",
+      "reason": "The host owns messages, composer, thread controls, and artifact placement."
+    },
+    {
+      "name": "shadcn/ui primitives",
+      "owner": "internal",
+      "reason": "Catalog components use source-owned UI primitives internally; the agent cannot select those primitives directly."
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "1.1.0",
+  "catalogHash": "7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690",
+  "rubric": {
+    "dailyUsefulness": { "weight": 0.4, "description": "Would a traveler use this repeatedly to make a real choice?" },
+    "completeness": { "weight": 0.3, "description": "Does the result cover the request and expose the actions needed to finish it?" },
+    "correctness": { "weight": 0.3, "description": "Are the UI, facts, bindings, and interactions grounded in the returned synthetic data?" }
+  },
+  "cases": [
+    {
+      "id": "tradeoff-dashboard",
+      "title": "Price versus time dashboard",
+      "family": "tradeoff",
+      "prompt": "I’m going from London to Paris on 28 October 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.",
+      "targets": ["TravelSurface", "ResponsiveGrid", "CheapestFastest", "ComparisonTable", "DurationPricePlot"]
+    },
+    {
+      "id": "budget-shortlist",
+      "title": "Direct budget shortlist",
+      "family": "filtering",
+      "prompt": "Find me a direct London to Paris trip between 26 October and 1 November 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.",
+      "targets": ["Section", "Inline", "DateWindow", "ModeChips", "CarrierFilter", "PriceRange", "DirectToggle", "FareOrder"]
+    },
+    {
+      "id": "departure-board",
+      "title": "Visual departure board",
+      "family": "schedule",
+      "prompt": "Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.",
+      "targets": ["RouteMap", "ItineraryTimeline"]
+    },
+    {
+      "id": "fixed-date-picker",
+      "title": "Compact pick-one workspace",
+      "family": "single-choice",
+      "prompt": "My travel date is fixed: Madrid to Paris on 8 November 2026. I don't need a calendar or a trip planner, and I don't want a long list. Give me a compact pick-one selector with a small alternatives table, plus a clear selected-trip summary and synthetic total as I choose.",
+      "targets": ["SplitPane", "Stack", "FarePicker", "StickySummary", "SelectedItinerary", "SyntheticTotal"]
+    },
+    {
+      "id": "mode-dashboard",
+      "title": "Transport mode comparison",
+      "family": "mode-comparison",
+      "prompt": "Help me choose how to travel from London to Paris on 8 November 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.",
+      "targets": ["ModeBreakdown", "ComparisonMatrix"]
+    },
+    {
+      "id": "weekly-fare-browser",
+      "title": "Flexible week fare browser",
+      "family": "calendar-browsing",
+      "prompt": "I can leave London for Paris any day from 31 October through 6 November 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.",
+      "targets": ["PriceCalendar", "DateStrip", "CarrierFilter", "SortSelect", "FareCards"]
+    },
+    {
+      "id": "duration-picker",
+      "title": "Shortest-trip picker",
+      "family": "duration-filtering",
+      "prompt": "Find the easiest Prague to Vienna option on 8 November 2026. I want one clear pick, with the shortest trips first and a duration control so I can widen the choices if needed.",
+      "targets": ["DurationRange", "FadeFares"]
+    },
+    {
+      "id": "flexible-calendar",
+      "title": "Flexible-date booking calendar",
+      "family": "flexible-dates",
+      "prompt": "I want a flexible-date booking workspace for London to Paris from 31 October through 6 November 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.",
+      "targets": ["FareCalendar"]
+    },
+    {
+      "id": "multi-city-workspace",
+      "title": "Editable multi-city workspace",
+      "family": "multi-city",
+      "prompt": "Plan London to Paris to Barcelona starting 8 November 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.",
+      "targets": ["TravelHero", "MultiCityPlanGrid", "CitySequence", "StayAllocation", "SelectedFareCount", "CoverageSummary", "Callout"]
+    },
+    {
+      "id": "manual-leg-editor",
+      "title": "Direct leg editing controls",
+      "family": "trip-editing",
+      "prompt": "Help me adjust the London to Paris leg of a longer trip. Keep the city fields, departure date, transport choices, stay length, fare ordering, and a scrollable fare list together so I can see how each edit changes the leg before I add a fare.",
+      "targets": ["CityField", "TravelDate", "TransportSelect", "StayDuration"]
+    },
+    {
+      "id": "story-layouts",
+      "title": "Tabbed journey story",
+      "family": "story-layout",
+      "prompt": "Turn my London to Paris options on 8 November 2026 into a compact journey story. Use a hero, a two-tab comparison, and a swipeable set of option panels. Keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic.",
+      "targets": ["TravelHero", "Tabs", "Carousel", "SplitPane", "StickySummary", "Callout"]
+    },
+    {
+      "id": "coverage-recovery",
+      "title": "Coverage and recovery states",
+      "family": "resilience",
+      "prompt": "Search the synthetic data for a London to Paris trip far outside the loaded date range. If results are loading, incomplete, empty, stale, or fail locally, show the matching honest status in the travel view and give me a retry action. Do not claim fares that were not returned.",
+      "targets": ["ArtifactSkeleton", "CoverageNotice", "EmptyState", "InlineError", "StaleBadge", "RetryAction"]
+    }
+  ]
+}

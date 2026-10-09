@@ -18,6 +18,9 @@
     "check:catalog": "tsx src/generative/catalog/generate.ts --check",
     "check:shadcn": "node scripts/check-shadcn.mjs",
     "generate:catalog": "tsx src/generative/catalog/generate.ts",
+    "audit:capabilities": "node --import tsx verification/generative-ui/capability-audit/run.mjs",
+    "report:capabilities": "node --import tsx verification/generative-ui/capability-audit/build-report.mjs",
+    "check:capability-report": "node --import tsx verification/generative-ui/capability-audit/check.mjs",
     "agent:dev": "tsx agent/server.ts",
     "benchmark:query": "node scripts/run-query-benchmark.mjs"
   },
