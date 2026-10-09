@@ -60,9 +60,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1791449655.5410821,
-    "seen": 1791474417.633743,
-    "ast_hash": "1360281271132c4f0b37959cfb305d46",
+    "mtime": 1791557563.8446178,
+    "seen": 1791557592.000231,
+    "ast_hash": "bcd702d96af7b1726b9a2d292f062fed",
     "semantic_hash": ""
   },
   "scripts/run.mjs": {
@@ -408,9 +408,9 @@
     "semantic_hash": ""
   },
   "src/generative/chat/thread-shell.tsx": {
-    "mtime": 1791556584.871617,
-    "seen": 1791556875.8242261,
-    "ast_hash": "3458d8b4d0529b9741793b070470b536",
+    "mtime": 1791561344.123802,
+    "seen": 1791561378.934585,
+    "ast_hash": "ded2d8432dd287d411cc6b186b08aa83",
     "semantic_hash": ""
   },
   "src/generative/chat/transport.test.ts": {
@@ -516,9 +516,9 @@
     "semantic_hash": "97a3aa68533bbd89305642ab89c6cbaa"
   },
   "src/generative/state/action-router.ts": {
-    "mtime": 1791542618.7252524,
-    "seen": 1791542931.932223,
-    "ast_hash": "89014fa626bc6ba08ef0ecdd8f1c9fe2",
+    "mtime": 1791560814.1158147,
+    "seen": 1791560834.353384,
+    "ast_hash": "1b87a104d87da8971e03f654ddd82eb5",
     "semantic_hash": ""
   },
   "src/generative/state/artifact-store.test.ts": {
@@ -780,9 +780,9 @@
     "semantic_hash": "b86a4ca74ffd7f85ca73c7e09540f2de"
   },
   "src/generative/state/selection-date.test.ts": {
-    "mtime": 1791542618.7475047,
-    "seen": 1791542931.9322329,
-    "ast_hash": "43a2359a3074ceb6171faf4a5b42b9e8",
+    "mtime": 1791560814.1389992,
+    "seen": 1791560834.3533928,
+    "ast_hash": "81da4ff5b107f384b8d5f3b018a77564",
     "semantic_hash": ""
   },
   "verification/generative-ui/root-saved-chat-proof-2026-10-03.json": {
@@ -936,9 +936,9 @@
     "semantic_hash": "e219c42617641cd0618749d938bdd042"
   },
   "src/generative/chat/thread-shell.test.tsx": {
-    "mtime": 1791556633.2460496,
-    "seen": 1791556875.8242261,
-    "ast_hash": "3d0fb871ce33af2b3fb6eb2bc97dd821",
+    "mtime": 1791561350.7071886,
+    "seen": 1791561378.9345841,
+    "ast_hash": "47162d8b1bc92f11821cddf6caf9c3bb",
     "semantic_hash": ""
   },
   "src/generative/smart-planner-handoff.ts": {
@@ -1695,6 +1695,1344 @@
     "mtime": 1791474412.925189,
     "seen": 1791474417.6339068,
     "ast_hash": "12d15e00b46216105b3b14aacc304edf",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/capability-audit.json": {
+    "mtime": 1791561396.1414754,
+    "seen": 1791561447.980844,
+    "ast_hash": "",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/build-report.mjs": {
+    "mtime": 1791562209.0971773,
+    "seen": 1791562226.3847601,
+    "ast_hash": "09e2d46a15171ace426eb14e56c80410",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/cases.json": {
+    "mtime": 1791561391.095838,
+    "seen": 1791561447.980973,
+    "ast_hash": "f24b27d20181c3569f666d281cca4e03",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/check.mjs": {
+    "mtime": 1791562215.3177176,
+    "seen": 1791562226.38479,
+    "ast_hash": "104161191c360bca83b6236a23647b4b",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/component-scores.json": {
+    "mtime": 1791562212.2241797,
+    "seen": 1791562226.38479,
+    "ast_hash": "f7b459f56df6d0aa7263b57a6e4ff08f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/budget-shortlist.json": {
+    "mtime": 1791561936.604166,
+    "seen": 1791562016.544457,
+    "ast_hash": "d9f24d1343ab77f565c1e49556693ec2",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/departure-board.json": {
+    "mtime": 1791561936.6062057,
+    "seen": 1791562016.5444632,
+    "ast_hash": "6eefcc4da9c2625e9ba371475cb5b6da",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/duration-picker.json": {
+    "mtime": 1791561936.6017532,
+    "seen": 1791562016.5444648,
+    "ast_hash": "f44b4e72e1451f4b1c7d2335c464b4e1",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/fixed-date-picker.json": {
+    "mtime": 1791561936.607403,
+    "seen": 1791562016.544468,
+    "ast_hash": "a29b6a3b50f1cd610223cc8f815b697a",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/mode-dashboard.json": {
+    "mtime": 1791561936.5976481,
+    "seen": 1791562016.5444732,
+    "ast_hash": "6e8a95e782b7f822ca70071b611904fa",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/multi-city-workspace.json": {
+    "mtime": 1791561936.6070478,
+    "seen": 1791562016.5444741,
+    "ast_hash": "e6db62f6e68c88fdced8b496da1dd9d9",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/tradeoff-dashboard.json": {
+    "mtime": 1791561936.6065023,
+    "seen": 1791562016.54448,
+    "ast_hash": "66370a9061a784c385330f4583e2b766",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/host-owned.json": {
+    "mtime": 1791557438.9842079,
+    "seen": 1791557592.000368,
+    "ast_hash": "94fb69e0e39eca204c082944ed2a2306",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/normalize-evidence.mjs": {
+    "mtime": 1791561953.5406222,
+    "seen": 1791562016.544534,
+    "ast_hash": "e90857ebb305eb3d8b859784482c0166",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/run.mjs": {
+    "mtime": 1791560389.0165172,
+    "seen": 1791560834.353439,
+    "ast_hash": "cea0a09aa4a55d404660d3ddf646fe36",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/scores.json": {
+    "mtime": 1791561800.8914998,
+    "seen": 1791562016.544561,
+    "ast_hash": "8756240accf5088b15e34ff66bc6df1c",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/index.html": {
+    "mtime": 1791562218.5358698,
+    "seen": 1791562226.387625,
+    "ast_hash": "e49b610ad43eb3e2072c3a8fcdbca815",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/budget-shortlist-desktop.png": {
+    "mtime": 1791562218.5011475,
+    "seen": 1791562226.388254,
+    "ast_hash": "9ecbc9d9e61a8a90e48a0529265b649f",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-desktop.png": {
+    "mtime": 1791562218.5050466,
+    "seen": 1791562226.388269,
+    "ast_hash": "a9fe0383a62b25540f26e259daf5e377",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/duration-picker-desktop.png": {
+    "mtime": 1791562218.505974,
+    "seen": 1791562226.388278,
+    "ast_hash": "9810c7fa2a0e69d65ad284dfe990436d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fixed-date-picker-desktop.png": {
+    "mtime": 1791562218.5081625,
+    "seen": 1791562226.388282,
+    "ast_hash": "95f18073d810d1af0569fe24c6686923",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-desktop.png": {
+    "mtime": 1791562218.5110319,
+    "seen": 1791562226.388292,
+    "ast_hash": "544a17411ea4afb6b290c8a9cc11e12b",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-mobile.png": {
+    "mtime": 1791562218.511234,
+    "seen": 1791562226.388293,
+    "ast_hash": "b93f85df194879e9e972cedd996bc995",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/multi-city-workspace-desktop.png": {
+    "mtime": 1791562218.5116706,
+    "seen": 1791562226.388298,
+    "ast_hash": "63e6af3d5100d6c5ec73b91551541e9a",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/multi-city-workspace-mobile.png": {
+    "mtime": 1791562218.511854,
+    "seen": 1791562226.388298,
+    "ast_hash": "8afcc51c51f36259a80e59fe769084d0",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/tradeoff-dashboard-desktop.png": {
+    "mtime": 1791562218.5162554,
+    "seen": 1791562226.38831,
+    "ast_hash": "6bfb72643b0376f9b47dedf8aa13d079",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/budget-shortlist-desktop.png": {
+    "mtime": 1791560421.0275447,
+    "seen": 1791560834.353499,
+    "ast_hash": "9ecbc9d9e61a8a90e48a0529265b649f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-desktop.png": {
+    "mtime": 1791560611.4428613,
+    "seen": 1791560834.353508,
+    "ast_hash": "a9fe0383a62b25540f26e259daf5e377",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/duration-picker-desktop.png": {
+    "mtime": 1791560421.2206748,
+    "seen": 1791560834.353515,
+    "ast_hash": "9810c7fa2a0e69d65ad284dfe990436d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fixed-date-picker-desktop.png": {
+    "mtime": 1791560611.5109177,
+    "seen": 1791560834.3535192,
+    "ast_hash": "95f18073d810d1af0569fe24c6686923",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-desktop.png": {
+    "mtime": 1791560421.1563003,
+    "seen": 1791560834.353526,
+    "ast_hash": "544a17411ea4afb6b290c8a9cc11e12b",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-mobile.png": {
+    "mtime": 1791560421.1584778,
+    "seen": 1791560834.353528,
+    "ast_hash": "b93f85df194879e9e972cedd996bc995",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/multi-city-workspace-desktop.png": {
+    "mtime": 1791561395.8981085,
+    "seen": 1791561447.981163,
+    "ast_hash": "63e6af3d5100d6c5ec73b91551541e9a",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/multi-city-workspace-mobile.png": {
+    "mtime": 1791561395.8988085,
+    "seen": 1791561447.9811661,
+    "ast_hash": "8afcc51c51f36259a80e59fe769084d0",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/tradeoff-dashboard-desktop.png": {
+    "mtime": 1791560420.9649749,
+    "seen": 1791560834.3535411,
+    "ast_hash": "6bfb72643b0376f9b47dedf8aa13d079",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/budget-shortlist-repeat-3.json": {
+    "mtime": 1791561936.6098545,
+    "seen": 1791562016.544456,
+    "ast_hash": "94be39f59a9ed361356047a8eb66eddf",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/compact-fare-picker.json": {
+    "mtime": 1791561936.6044703,
+    "seen": 1791562016.544458,
+    "ast_hash": "1b24f14cef8aa77f83eedb6e946f672d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/coverage-recovery-broad-timeout.json": {
+    "mtime": 1791561936.6034372,
+    "seen": 1791562016.544459,
+    "ast_hash": "67ff2381bce9858fb8606fbe0db26691",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/date-strip-price-calendar.json": {
+    "mtime": 1791561936.5994291,
+    "seen": 1791562016.544459,
+    "ast_hash": "b731e57bbed38a94e80cdc719b49f613",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/departure-board-repeat-1.json": {
+    "mtime": 1791561936.6027687,
+    "seen": 1791562016.544461,
+    "ast_hash": "c02b9aad900527fad73c3ce7daccb586",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/departure-board-responsive-1.json": {
+    "mtime": 1791561936.6032188,
+    "seen": 1791562016.544462,
+    "ast_hash": "cf34b26aa5827a46a65fd0e024ae1c42",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/departure-board-responsive-2.json": {
+    "mtime": 1791561936.6052217,
+    "seen": 1791562016.5444632,
+    "ast_hash": "cda40cf2dd9e1350b17a4dac4bdb75bf",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/duration-picker-repeat-2.json": {
+    "mtime": 1791561936.6068437,
+    "seen": 1791562016.5444639,
+    "ast_hash": "6d19043a6e5065c48f1e581866f3d884",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/fare-cards-controls.json": {
+    "mtime": 1791561936.6048045,
+    "seen": 1791562016.544466,
+    "ast_hash": "091de81ff8ffe0c585ecb88003f48975",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/fixed-date-picker-repeat-1.json": {
+    "mtime": 1791561936.6078362,
+    "seen": 1791562016.544467,
+    "ast_hash": "13fe37da40bf0cd9c02388f4e20ae852",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/fixed-date-picker-responsive-2.json": {
+    "mtime": 1791561936.6000893,
+    "seen": 1791562016.544468,
+    "ast_hash": "8dc98ce6506941463346fd7415cc3fd7",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/flexible-calendar.json": {
+    "mtime": 1791561936.6012414,
+    "seen": 1791562016.5444689,
+    "ast_hash": "32aa751e7597bdb7468c927f35b85807",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/local-failure-retry.json": {
+    "mtime": 1791561936.610143,
+    "seen": 1791562016.54447,
+    "ast_hash": "781c4670f76f64dd7625b1a5f927516f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/manual-leg-editor.json": {
+    "mtime": 1791561936.6104934,
+    "seen": 1791562016.544471,
+    "ast_hash": "a83894e84bf621dbd0dacd99d7c39bed",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/mode-dashboard-repeat-1.json": {
+    "mtime": 1791561936.605735,
+    "seen": 1791562016.544472,
+    "ast_hash": "064a74f370c5c6fd89297589eb0fd202",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/mode-dashboard-repeat-2.json": {
+    "mtime": 1791561936.602568,
+    "seen": 1791562016.544472,
+    "ast_hash": "7d6399143ae45e7d1fd5a7a6f9a89444",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/pending-refresh-loading.json": {
+    "mtime": 1791561936.6003854,
+    "seen": 1791562016.5444748,
+    "ast_hash": "5666540d83797fdb1e13d720ac545316",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/status-empty-partial.json": {
+    "mtime": 1791561936.600634,
+    "seen": 1791562016.5444758,
+    "ast_hash": "2e5bda20e0dcf707d82b267be9422af0",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/story-layouts-repeat-2.json": {
+    "mtime": 1791561936.6081312,
+    "seen": 1791562016.544477,
+    "ast_hash": "a3ff8da64ba344059a4ae3126d55bb81",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/story-layouts.json": {
+    "mtime": 1791561936.6020575,
+    "seen": 1791562016.544478,
+    "ast_hash": "27351cdbf4a21655780858dd2f44f90c",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/tradeoff-dashboard-repeat-2.json": {
+    "mtime": 1791561936.6009371,
+    "seen": 1791562016.544479,
+    "ast_hash": "ab13820d7a4053602bbce4fd37b47b7c",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/findings.json": {
+    "mtime": 1791561880.119292,
+    "seen": 1791562016.54448,
+    "ast_hash": "7e5dd65dea381105d2fa85ef3a4c61a6",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/incidents.json": {
+    "mtime": 1791561391.1317945,
+    "seen": 1791561447.981003,
+    "ast_hash": "bb83da7016ebe0da9daecd80a0f045d2",
+    "semantic_hash": ""
+  },
+  "docs/demo-video-recording-and-delivery.md": {
+    "mtime": 1791558562.5351098,
+    "seen": 1791560834.353466,
+    "ast_hash": "0428fc4b466da03933e0d2eae2da0a7f",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/compact-fare-picker-desktop.png": {
+    "mtime": 1791562218.5016181,
+    "seen": 1791562226.3882592,
+    "ast_hash": "c73174d6cf391e1f73c9f7caae3ae849",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/compact-fare-picker-mobile.png": {
+    "mtime": 1791562218.501846,
+    "seen": 1791562226.3882601,
+    "ast_hash": "473c98de349790bba2bf09f29cf0f9f9",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/date-strip-price-calendar-desktop.png": {
+    "mtime": 1791562218.5020926,
+    "seen": 1791562226.388261,
+    "ast_hash": "db0b05eead43dc53c2d987771b68f19a",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/date-strip-price-calendar-mobile.png": {
+    "mtime": 1791562218.5023105,
+    "seen": 1791562226.388261,
+    "ast_hash": "c3c82b24121879d2a99c69c298db6a06",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-repeat-1-desktop.png": {
+    "mtime": 1791562218.5030594,
+    "seen": 1791562226.388272,
+    "ast_hash": "02853d6140cba33dcb9af017c07bc362",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fare-cards-controls-desktop.png": {
+    "mtime": 1791562218.5065153,
+    "seen": 1791562226.388281,
+    "ast_hash": "7b8889ea9e19ebfa00e0c5f1838b4e92",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fixed-date-picker-repeat-1-desktop.png": {
+    "mtime": 1791562218.5074651,
+    "seen": 1791562226.388285,
+    "ast_hash": "5f6798b7da00641ffcd93d3fbd1b5196",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/story-layouts-desktop.png": {
+    "mtime": 1791562218.5149956,
+    "seen": 1791562226.3883069,
+    "ast_hash": "3ea1bbf500b67e43ad34b64300fb7096",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/story-layouts-mobile.png": {
+    "mtime": 1791562218.5151792,
+    "seen": 1791562226.388308,
+    "ast_hash": "4e085ea27d03a0d42e8a14e3d10e3857",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/story-layouts-repeat-2-desktop.png": {
+    "mtime": 1791562218.514592,
+    "seen": 1791562226.388309,
+    "ast_hash": "8442b0895f3b46131e01ebb4997f1fff",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/story-layouts-repeat-2-mobile.png": {
+    "mtime": 1791562218.5147898,
+    "seen": 1791562226.388309,
+    "ast_hash": "ed58d523bc75aca6972178998612556f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/budget-shortlist-mobile.png": {
+    "mtime": 1791560421.028218,
+    "seen": 1791560834.3535,
+    "ast_hash": "c29e4bfcaba2f89c09ee08d253d9716d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/budget-shortlist-repeat-3-desktop.png": {
+    "mtime": 1791560421.059667,
+    "seen": 1791560834.3535008,
+    "ast_hash": "9ecbc9d9e61a8a90e48a0529265b649f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/budget-shortlist-repeat-3-mobile.png": {
+    "mtime": 1791560421.0601406,
+    "seen": 1791560834.353502,
+    "ast_hash": "c29e4bfcaba2f89c09ee08d253d9716d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/compact-fare-picker-desktop.png": {
+    "mtime": 1791560611.5776222,
+    "seen": 1791560834.353503,
+    "ast_hash": "c73174d6cf391e1f73c9f7caae3ae849",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/compact-fare-picker-mobile.png": {
+    "mtime": 1791560611.5786188,
+    "seen": 1791560834.3535051,
+    "ast_hash": "473c98de349790bba2bf09f29cf0f9f9",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/date-strip-price-calendar-desktop.png": {
+    "mtime": 1791560421.1243052,
+    "seen": 1791560834.3535051,
+    "ast_hash": "db0b05eead43dc53c2d987771b68f19a",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/date-strip-price-calendar-mobile.png": {
+    "mtime": 1791560421.1253817,
+    "seen": 1791560834.353507,
+    "ast_hash": "c3c82b24121879d2a99c69c298db6a06",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-detail.png": {
+    "mtime": 1791560611.4444199,
+    "seen": 1791560834.353508,
+    "ast_hash": "047628a70269553c5c2742b33bf59016",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-repeat-1-desktop.png": {
+    "mtime": 1791560611.4775302,
+    "seen": 1791560834.35351,
+    "ast_hash": "02853d6140cba33dcb9af017c07bc362",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-repeat-1-detail.png": {
+    "mtime": 1791560611.4784932,
+    "seen": 1791560834.35351,
+    "ast_hash": "7b574584a8d901cda0ef91d6cfd45e49",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-responsive-1-desktop.png": {
+    "mtime": 1791560549.3937206,
+    "seen": 1791560834.3535109,
+    "ast_hash": "01df3c814933c78d34f985cdd91dcb91",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-responsive-1-interaction.png": {
+    "mtime": 1791560549.3949885,
+    "seen": 1791560834.353512,
+    "ast_hash": "d119ef04fc302914a8267e59e16159e3",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-responsive-1-mobile.png": {
+    "mtime": 1791560549.394425,
+    "seen": 1791560834.353512,
+    "ast_hash": "4f276a3dc24d30f57d39b4d516d5470d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-responsive-2-desktop.png": {
+    "mtime": 1791560549.4253907,
+    "seen": 1791560834.353513,
+    "ast_hash": "a26be4c220bd3ec9cc9f875e98e04e01",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-responsive-2-interaction.png": {
+    "mtime": 1791560549.4269514,
+    "seen": 1791560834.353514,
+    "ast_hash": "b0ea8cf21a769a78ed7ac05f57ff81f6",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-responsive-2-mobile.png": {
+    "mtime": 1791560549.426143,
+    "seen": 1791560834.353514,
+    "ast_hash": "0f6f3b76609b1cbc186ac280a6808ecd",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/duration-picker-mobile.png": {
+    "mtime": 1791560421.221429,
+    "seen": 1791560834.353515,
+    "ast_hash": "508775de1d237c2ee765734d24f2a1ab",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/duration-picker-repeat-2-desktop.png": {
+    "mtime": 1791560421.2500236,
+    "seen": 1791560834.353516,
+    "ast_hash": "9810c7fa2a0e69d65ad284dfe990436d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/duration-picker-repeat-2-mobile.png": {
+    "mtime": 1791560421.2504957,
+    "seen": 1791560834.353517,
+    "ast_hash": "508775de1d237c2ee765734d24f2a1ab",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fare-cards-controls-desktop.png": {
+    "mtime": 1791560421.0919456,
+    "seen": 1791560834.353517,
+    "ast_hash": "7b8889ea9e19ebfa00e0c5f1838b4e92",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fare-cards-controls-mobile.png": {
+    "mtime": 1791560421.0926528,
+    "seen": 1791560834.353518,
+    "ast_hash": "366f6d51fd8e75c44c0489fdbcfa1681",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fixed-date-picker-repeat-1-desktop.png": {
+    "mtime": 1791560611.5435255,
+    "seen": 1791560834.3535202,
+    "ast_hash": "5f6798b7da00641ffcd93d3fbd1b5196",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fixed-date-picker-responsive-2-desktop.png": {
+    "mtime": 1791560549.457897,
+    "seen": 1791560834.3535202,
+    "ast_hash": "44e6b2c5c354c031a684215755721b97",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fixed-date-picker-responsive-2-mobile.png": {
+    "mtime": 1791560549.4588559,
+    "seen": 1791560834.3535209,
+    "ast_hash": "9f3d65892addec32a3b6c17bc0c21cfa",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/flexible-calendar-desktop.png": {
+    "mtime": 1791560611.6116621,
+    "seen": 1791560834.3535218,
+    "ast_hash": "41b4b4aa4c4f87b83ea50b727f84ba55",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/flexible-calendar-mobile.png": {
+    "mtime": 1791560611.612339,
+    "seen": 1791560834.3535218,
+    "ast_hash": "3a2c2b7b3aa57eecbd63bc6bef24804d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/local-failure-retry-failure-2.png": {
+    "mtime": 1791560406.3594236,
+    "seen": 1791560834.353523,
+    "ast_hash": "f66aa27bc5a501a656182c65a9228213",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/local-failure-retry-failure-3.png": {
+    "mtime": 1791560406.360238,
+    "seen": 1791560834.353524,
+    "ast_hash": "4a7c353e8cfcc4224b82d380ac7f606d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/local-failure-retry-failure.png": {
+    "mtime": 1791560406.3586867,
+    "seen": 1791560834.353525,
+    "ast_hash": "627bec707f9c1ee391233e5a70a1058d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/manual-leg-editor-desktop.png": {
+    "mtime": 1791560611.6444817,
+    "seen": 1791560834.353525,
+    "ast_hash": "e1f9a2d963e11be5f74e3efd79a0a3a4",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/manual-leg-editor-mobile.png": {
+    "mtime": 1791560611.645743,
+    "seen": 1791560834.353526,
+    "ast_hash": "cf408c3df60218c801e492e5f71cfa3d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-interaction.png": {
+    "mtime": 1791560421.160078,
+    "seen": 1791560834.353527,
+    "ast_hash": "be82db591775ad881e276c8333c15faf",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-repeat-1-desktop.png": {
+    "mtime": 1791561311.4396074,
+    "seen": 1791561378.934825,
+    "ast_hash": "544a17411ea4afb6b290c8a9cc11e12b",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-repeat-1-mobile.png": {
+    "mtime": 1791561311.4402905,
+    "seen": 1791561378.934827,
+    "ast_hash": "b93f85df194879e9e972cedd996bc995",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-repeat-2-desktop.png": {
+    "mtime": 1791561311.4747498,
+    "seen": 1791561378.934827,
+    "ast_hash": "649f3e49d69a71ac7c2abdc5a0e56f50",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-repeat-2-mobile.png": {
+    "mtime": 1791561311.475476,
+    "seen": 1791561378.9348302,
+    "ast_hash": "e13f98193d678010c4f24c185e59aced",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/pending-refresh-loading-desktop-2.png": {
+    "mtime": 1791560406.3656347,
+    "seen": 1791560834.353534,
+    "ast_hash": "202f89b1abb38c968d8d3071a5665a98",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/pending-refresh-loading-desktop-3.png": {
+    "mtime": 1791560406.3673909,
+    "seen": 1791560834.353534,
+    "ast_hash": "225d4254c3c7a36ab2d23e713c5fbae4",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/pending-refresh-loading-desktop.png": {
+    "mtime": 1791560406.3649633,
+    "seen": 1791560834.353535,
+    "ast_hash": "c1138e75bc8673d89d4665d88361f8c1",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/pending-refresh-loading-mobile.png": {
+    "mtime": 1791560406.366211,
+    "seen": 1791560834.353536,
+    "ast_hash": "f61ac70229e844a14779af8a5411c78f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-empty-partial-desktop.png": {
+    "mtime": 1791561109.565503,
+    "seen": 1791561378.934836,
+    "ast_hash": "d4144abc2d46bb6fef8dbcfc8ed4d0ea",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-empty-partial-mobile.png": {
+    "mtime": 1791561109.5671544,
+    "seen": 1791561378.934839,
+    "ast_hash": "3006972ff8b3a7b957f2098c68c74399",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/story-layouts-desktop.png": {
+    "mtime": 1791560611.7110217,
+    "seen": 1791560834.353539,
+    "ast_hash": "3ea1bbf500b67e43ad34b64300fb7096",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/story-layouts-mobile.png": {
+    "mtime": 1791560611.7117,
+    "seen": 1791560834.353539,
+    "ast_hash": "4e085ea27d03a0d42e8a14e3d10e3857",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/story-layouts-repeat-2-desktop.png": {
+    "mtime": 1791560611.7453308,
+    "seen": 1791560834.3535402,
+    "ast_hash": "8442b0895f3b46131e01ebb4997f1fff",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/story-layouts-repeat-2-mobile.png": {
+    "mtime": 1791560611.74623,
+    "seen": 1791560834.3535402,
+    "ast_hash": "ed58d523bc75aca6972178998612556f",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/tradeoff-dashboard-mobile.png": {
+    "mtime": 1791560420.9657588,
+    "seen": 1791560834.3535419,
+    "ast_hash": "bc8500ebcc6356c2add5f96ffd1e1cfc",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/tradeoff-dashboard-repeat-2-desktop.png": {
+    "mtime": 1791560420.9957767,
+    "seen": 1791560834.3535419,
+    "ast_hash": "6bfb72643b0376f9b47dedf8aa13d079",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/tradeoff-dashboard-repeat-2-mobile.png": {
+    "mtime": 1791560420.9968858,
+    "seen": 1791560834.3535428,
+    "ast_hash": "bc8500ebcc6356c2add5f96ffd1e1cfc",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/departure-board-post-fix.json": {
+    "mtime": 1791561936.6091259,
+    "seen": 1791562016.54446,
+    "ast_hash": "c45836a30aa8b7fdfa5fe443f429450d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/fixed-date-picker-post-fix.json": {
+    "mtime": 1791561936.5991087,
+    "seen": 1791562016.544466,
+    "ast_hash": "a381aec376770717a26c9ed12f926c2b",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/status-stale-saved-comparison.json": {
+    "mtime": 1791561936.6059632,
+    "seen": 1791562016.5444758,
+    "ast_hash": "9283e75da27f3af26881ecd5bb8545c7",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/tradeoff-dashboard-final-repeat.json": {
+    "mtime": 1791561936.598423,
+    "seen": 1791562016.544478,
+    "ast_hash": "a5f20aab27fba9214c35f4794202d46c",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/budget-shortlist-mobile.png": {
+    "mtime": 1791562218.5013676,
+    "seen": 1791562226.388256,
+    "ast_hash": "c29e4bfcaba2f89c09ee08d253d9716d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/budget-shortlist-repeat-3-desktop.png": {
+    "mtime": 1791562218.5006645,
+    "seen": 1791562226.388257,
+    "ast_hash": "9ecbc9d9e61a8a90e48a0529265b649f",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/budget-shortlist-repeat-3-mobile.png": {
+    "mtime": 1791562218.5008998,
+    "seen": 1791562226.388258,
+    "ast_hash": "c29e4bfcaba2f89c09ee08d253d9716d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-detail.png": {
+    "mtime": 1791562218.5053189,
+    "seen": 1791562226.388269,
+    "ast_hash": "047628a70269553c5c2742b33bf59016",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-post-fix-desktop.png": {
+    "mtime": 1791562218.5025382,
+    "seen": 1791562226.3882701,
+    "ast_hash": "a21749f3f04d107d52049238ddf32cbb",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-post-fix-mobile.png": {
+    "mtime": 1791562218.5027714,
+    "seen": 1791562226.388271,
+    "ast_hash": "09a35cb25ebd0460b234a76d96be1a08",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-repeat-1-detail.png": {
+    "mtime": 1791562218.5033414,
+    "seen": 1791562226.388273,
+    "ast_hash": "7b574584a8d901cda0ef91d6cfd45e49",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-responsive-1-desktop.png": {
+    "mtime": 1791562218.5036001,
+    "seen": 1791562226.388274,
+    "ast_hash": "01df3c814933c78d34f985cdd91dcb91",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-responsive-1-interaction.png": {
+    "mtime": 1791562218.5040712,
+    "seen": 1791562226.388274,
+    "ast_hash": "d119ef04fc302914a8267e59e16159e3",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-responsive-1-mobile.png": {
+    "mtime": 1791562218.5038342,
+    "seen": 1791562226.388275,
+    "ast_hash": "4f276a3dc24d30f57d39b4d516d5470d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-responsive-2-desktop.png": {
+    "mtime": 1791562218.504312,
+    "seen": 1791562226.3882759,
+    "ast_hash": "a26be4c220bd3ec9cc9f875e98e04e01",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-responsive-2-interaction.png": {
+    "mtime": 1791562218.5047894,
+    "seen": 1791562226.388277,
+    "ast_hash": "b0ea8cf21a769a78ed7ac05f57ff81f6",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/departure-board-responsive-2-mobile.png": {
+    "mtime": 1791562218.5045347,
+    "seen": 1791562226.388278,
+    "ast_hash": "0f6f3b76609b1cbc186ac280a6808ecd",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/duration-picker-mobile.png": {
+    "mtime": 1791562218.5062625,
+    "seen": 1791562226.388279,
+    "ast_hash": "508775de1d237c2ee765734d24f2a1ab",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/duration-picker-repeat-2-desktop.png": {
+    "mtime": 1791562218.5055594,
+    "seen": 1791562226.3882802,
+    "ast_hash": "9810c7fa2a0e69d65ad284dfe990436d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/duration-picker-repeat-2-mobile.png": {
+    "mtime": 1791562218.5057678,
+    "seen": 1791562226.3882802,
+    "ast_hash": "508775de1d237c2ee765734d24f2a1ab",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fare-cards-controls-mobile.png": {
+    "mtime": 1791562218.5067382,
+    "seen": 1791562226.388282,
+    "ast_hash": "366f6d51fd8e75c44c0489fdbcfa1681",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fixed-date-picker-post-fix-desktop.png": {
+    "mtime": 1791562218.506987,
+    "seen": 1791562226.3882828,
+    "ast_hash": "599c5d94d76d72382a4236f0d37181b7",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fixed-date-picker-post-fix-mobile.png": {
+    "mtime": 1791562218.5071905,
+    "seen": 1791562226.388284,
+    "ast_hash": "c73301fe9e92ffefa49fea766864e816",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fixed-date-picker-responsive-2-desktop.png": {
+    "mtime": 1791562218.5077074,
+    "seen": 1791562226.388285,
+    "ast_hash": "44e6b2c5c354c031a684215755721b97",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/fixed-date-picker-responsive-2-mobile.png": {
+    "mtime": 1791562218.50792,
+    "seen": 1791562226.3882859,
+    "ast_hash": "9f3d65892addec32a3b6c17bc0c21cfa",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/flexible-calendar-desktop.png": {
+    "mtime": 1791562218.5084262,
+    "seen": 1791562226.388287,
+    "ast_hash": "41b4b4aa4c4f87b83ea50b727f84ba55",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/flexible-calendar-mobile.png": {
+    "mtime": 1791562218.5086458,
+    "seen": 1791562226.388288,
+    "ast_hash": "3a2c2b7b3aa57eecbd63bc6bef24804d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/local-failure-retry-failure-2.png": {
+    "mtime": 1791562218.509101,
+    "seen": 1791562226.388289,
+    "ast_hash": "f66aa27bc5a501a656182c65a9228213",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/local-failure-retry-failure-3.png": {
+    "mtime": 1791562218.5093093,
+    "seen": 1791562226.388289,
+    "ast_hash": "4a7c353e8cfcc4224b82d380ac7f606d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/local-failure-retry-failure.png": {
+    "mtime": 1791562218.5088828,
+    "seen": 1791562226.3882902,
+    "ast_hash": "627bec707f9c1ee391233e5a70a1058d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/manual-leg-editor-desktop.png": {
+    "mtime": 1791562218.5095584,
+    "seen": 1791562226.3882911,
+    "ast_hash": "e1f9a2d963e11be5f74e3efd79a0a3a4",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/manual-leg-editor-mobile.png": {
+    "mtime": 1791562218.5097594,
+    "seen": 1791562226.3882911,
+    "ast_hash": "cf408c3df60218c801e492e5f71cfa3d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-interaction.png": {
+    "mtime": 1791562218.5114522,
+    "seen": 1791562226.388293,
+    "ast_hash": "be82db591775ad881e276c8333c15faf",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-repeat-1-desktop.png": {
+    "mtime": 1791562218.5099754,
+    "seen": 1791562226.388294,
+    "ast_hash": "544a17411ea4afb6b290c8a9cc11e12b",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-repeat-1-interaction.png": {
+    "mtime": 1791562218.5103967,
+    "seen": 1791562226.388295,
+    "ast_hash": "be82db591775ad881e276c8333c15faf",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-repeat-1-mobile.png": {
+    "mtime": 1791562218.5101817,
+    "seen": 1791562226.388296,
+    "ast_hash": "b93f85df194879e9e972cedd996bc995",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-repeat-2-desktop.png": {
+    "mtime": 1791562218.5106072,
+    "seen": 1791562226.388296,
+    "ast_hash": "649f3e49d69a71ac7c2abdc5a0e56f50",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/mode-dashboard-repeat-2-mobile.png": {
+    "mtime": 1791562218.5108213,
+    "seen": 1791562226.3882968,
+    "ast_hash": "e13f98193d678010c4f24c185e59aced",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/pending-refresh-loading-desktop-2.png": {
+    "mtime": 1791562218.5122952,
+    "seen": 1791562226.388299,
+    "ast_hash": "202f89b1abb38c968d8d3071a5665a98",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/pending-refresh-loading-desktop-3.png": {
+    "mtime": 1791562218.5127246,
+    "seen": 1791562226.3883,
+    "ast_hash": "225d4254c3c7a36ab2d23e713c5fbae4",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/pending-refresh-loading-desktop.png": {
+    "mtime": 1791562218.5120955,
+    "seen": 1791562226.3883,
+    "ast_hash": "c1138e75bc8673d89d4665d88361f8c1",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/pending-refresh-loading-mobile.png": {
+    "mtime": 1791562218.5124762,
+    "seen": 1791562226.3883011,
+    "ast_hash": "f61ac70229e844a14779af8a5411c78f",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-empty-partial-desktop-2.png": {
+    "mtime": 1791562218.5132082,
+    "seen": 1791562226.388302,
+    "ast_hash": "9389a5d9087c2327e1959962d9cf910b",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-empty-partial-desktop.png": {
+    "mtime": 1791562218.5129695,
+    "seen": 1791562226.388303,
+    "ast_hash": "d4144abc2d46bb6fef8dbcfc8ed4d0ea",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-empty-partial-mobile.png": {
+    "mtime": 1791562218.5133903,
+    "seen": 1791562226.3883038,
+    "ast_hash": "3006972ff8b3a7b957f2098c68c74399",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-stale-saved-comparison-desktop-2.png": {
+    "mtime": 1791562218.5138354,
+    "seen": 1791562226.3883038,
+    "ast_hash": "783201f9ac6a2708bf1384a6ffb35c38",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-stale-saved-comparison-desktop.png": {
+    "mtime": 1791562218.513615,
+    "seen": 1791562226.388305,
+    "ast_hash": "2ac850fa6fb2c730715fb13b7a96e33d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-stale-saved-comparison-mobile-2.png": {
+    "mtime": 1791562218.5143034,
+    "seen": 1791562226.388306,
+    "ast_hash": "8187628ce8563ad116f82cbb82a7f5a5",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/status-stale-saved-comparison-mobile.png": {
+    "mtime": 1791562218.5140314,
+    "seen": 1791562226.388306,
+    "ast_hash": "18fbd0423e0b81552e12d17f3053cd18",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/tradeoff-dashboard-final-repeat-desktop.png": {
+    "mtime": 1791562218.5154164,
+    "seen": 1791562226.3883111,
+    "ast_hash": "a0a9fd49ede7ff881a8705ce0bd60200",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/tradeoff-dashboard-final-repeat-mobile.png": {
+    "mtime": 1791562218.515622,
+    "seen": 1791562226.3883111,
+    "ast_hash": "119922ee2efe4aff86e391f09d460334",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/tradeoff-dashboard-mobile.png": {
+    "mtime": 1791562218.5164409,
+    "seen": 1791562226.388312,
+    "ast_hash": "bc8500ebcc6356c2add5f96ffd1e1cfc",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/tradeoff-dashboard-repeat-2-desktop.png": {
+    "mtime": 1791562218.5158358,
+    "seen": 1791562226.388313,
+    "ast_hash": "6bfb72643b0376f9b47dedf8aa13d079",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/tradeoff-dashboard-repeat-2-mobile.png": {
+    "mtime": 1791562218.5160325,
+    "seen": 1791562226.388313,
+    "ast_hash": "bc8500ebcc6356c2add5f96ffd1e1cfc",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-post-fix-desktop.png": {
+    "mtime": 1791561083.5682755,
+    "seen": 1791561378.934794,
+    "ast_hash": "a21749f3f04d107d52049238ddf32cbb",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/departure-board-post-fix-mobile.png": {
+    "mtime": 1791561083.568758,
+    "seen": 1791561378.934796,
+    "ast_hash": "09a35cb25ebd0460b234a76d96be1a08",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fixed-date-picker-post-fix-desktop.png": {
+    "mtime": 1791561083.6001363,
+    "seen": 1791561378.9348102,
+    "ast_hash": "599c5d94d76d72382a4236f0d37181b7",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/fixed-date-picker-post-fix-mobile.png": {
+    "mtime": 1791561083.6006796,
+    "seen": 1791561378.934813,
+    "ast_hash": "c73301fe9e92ffefa49fea766864e816",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/mode-dashboard-repeat-1-interaction.png": {
+    "mtime": 1791561311.440984,
+    "seen": 1791561378.934826,
+    "ast_hash": "be82db591775ad881e276c8333c15faf",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-empty-partial-desktop-2.png": {
+    "mtime": 1791561109.5663462,
+    "seen": 1791561378.934836,
+    "ast_hash": "9389a5d9087c2327e1959962d9cf910b",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-stale-saved-comparison-desktop-2.png": {
+    "mtime": 1791561071.238791,
+    "seen": 1791561378.934839,
+    "ast_hash": "783201f9ac6a2708bf1384a6ffb35c38",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-stale-saved-comparison-desktop.png": {
+    "mtime": 1791561071.238236,
+    "seen": 1791561378.93484,
+    "ast_hash": "2ac850fa6fb2c730715fb13b7a96e33d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-stale-saved-comparison-mobile-2.png": {
+    "mtime": 1791561071.2396595,
+    "seen": 1791561378.93484,
+    "ast_hash": "8187628ce8563ad116f82cbb82a7f5a5",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/status-stale-saved-comparison-mobile.png": {
+    "mtime": 1791561071.2392292,
+    "seen": 1791561378.9348412,
+    "ast_hash": "18fbd0423e0b81552e12d17f3053cd18",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/tradeoff-dashboard-final-repeat-desktop.png": {
+    "mtime": 1791561109.5971715,
+    "seen": 1791561378.934845,
+    "ast_hash": "a0a9fd49ede7ff881a8705ce0bd60200",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/tradeoff-dashboard-final-repeat-mobile.png": {
+    "mtime": 1791561109.5980852,
+    "seen": 1791561378.934846,
+    "ast_hash": "119922ee2efe4aff86e391f09d460334",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/departure-board-pre-fix-failure.json": {
+    "mtime": 1791562218.5212011,
+    "seen": 1791562226.379581,
+    "ast_hash": "61bb60c3b38ab7ed73c2c28bc77b77dd",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/fixed-picker-pre-fix-debug.json": {
+    "mtime": 1791562218.52139,
+    "seen": 1791562226.379582,
+    "ast_hash": "6ef82d9ddd1096f9172edc75751cc5e8",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/stale-badge-explicit-preview-interrupted.json": {
+    "mtime": 1791562218.5215738,
+    "seen": 1791562226.379583,
+    "ast_hash": "e41b48e8dd6f4c78e593f9e223e79e9e",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/stale-browser-revision-concurrent-timeout.json": {
+    "mtime": 1791562218.521742,
+    "seen": 1791562226.379584,
+    "ast_hash": "e3ad971f3667c7a3b9c5fa42e317dd0d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/stale-browser-revision-prior-edit-timeout.json": {
+    "mtime": 1791562218.5218935,
+    "seen": 1791562226.379585,
+    "ast_hash": "3643c8d463c26b1326958b7c653eb57a",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/status-component-ledger.json": {
+    "mtime": 1791562218.5220773,
+    "seen": 1791562226.379585,
+    "ast_hash": "630923e841d26eb753664310ce4c19e1",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/verification.json": {
+    "mtime": 1791561806.8126276,
+    "seen": 1791562016.54445,
+    "ast_hash": "8f1c6116b7af126338af871f7eb0be1a",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/departure-board-pre-fix-failure.json": {
+    "mtime": 1791561948.8234298,
+    "seen": 1791562016.544451,
+    "ast_hash": "61bb60c3b38ab7ed73c2c28bc77b77dd",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/fixed-picker-pre-fix-debug.json": {
+    "mtime": 1791561880.0943725,
+    "seen": 1791562016.5444522,
+    "ast_hash": "6ef82d9ddd1096f9172edc75751cc5e8",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/stale-badge-explicit-preview-interrupted.json": {
+    "mtime": 1791561880.0951393,
+    "seen": 1791562016.5444522,
+    "ast_hash": "e41b48e8dd6f4c78e593f9e223e79e9e",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/stale-browser-revision-concurrent-timeout.json": {
+    "mtime": 1791561880.0950015,
+    "seen": 1791562016.5444531,
+    "ast_hash": "e3ad971f3667c7a3b9c5fa42e317dd0d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/stale-browser-revision-prior-edit-timeout.json": {
+    "mtime": 1791561880.0948598,
+    "seen": 1791562016.5444539,
+    "ast_hash": "3643c8d463c26b1326958b7c653eb57a",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/status-component-ledger.json": {
+    "mtime": 1791561880.094699,
+    "seen": 1791562016.5444539,
+    "ast_hash": "630923e841d26eb753664310ce4c19e1",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/budget-shortlist-failed-repeat.json": {
+    "mtime": 1791561936.601448,
+    "seen": 1791562016.5444548,
+    "ast_hash": "87f9151107043a8329f3ac70753539ee",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/budget-shortlist-empty-repeat.png": {
+    "mtime": 1791562218.5207877,
+    "seen": 1791562226.388252,
+    "ast_hash": "66de0b5bcd21f36bc57355a8adc57ed4",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/diagnostics/compact-fare-picker-sort-failure.png": {
+    "mtime": 1791562218.521035,
+    "seen": 1791562226.388253,
+    "ast_hash": "75fe6127589cbfae45a07d0dbf34876d",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/budget-shortlist-failed-repeat-failure.png": {
+    "mtime": 1791562218.500327,
+    "seen": 1791562226.388255,
+    "ast_hash": "66de0b5bcd21f36bc57355a8adc57ed4",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/desktop-departure-board-existing.png": {
+    "mtime": 1791562218.5167336,
+    "seen": 1791562226.3882618,
+    "ast_hash": "8a1b425450d8adc7ffe9c3bca27827b3",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/desktop-fixed-date-picker-existing.png": {
+    "mtime": 1791562218.5169322,
+    "seen": 1791562226.388263,
+    "ast_hash": "5d3bb2e7e65471da63a470bdac845f94",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/desktop-mode-dashboard-existing.png": {
+    "mtime": 1791562218.51713,
+    "seen": 1791562226.388264,
+    "ast_hash": "95c363a00e55e28211cb06ebeca59491",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/desktop-tradeoff-dashboard-existing.png": {
+    "mtime": 1791562218.518767,
+    "seen": 1791562226.388265,
+    "ast_hash": "d00a9efa02cbe59f72fe320b688f38bd",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/mobile-departure-board-existing.png": {
+    "mtime": 1791562218.518952,
+    "seen": 1791562226.388266,
+    "ast_hash": "4e05ae266dc03ee0f74c1ec636ef7615",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/mobile-fixed-date-picker-existing.png": {
+    "mtime": 1791562218.5191622,
+    "seen": 1791562226.388267,
+    "ast_hash": "76ef96a6daedd0eb0197ec713202927b",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/mobile-mode-dashboard-existing.png": {
+    "mtime": 1791562218.5193489,
+    "seen": 1791562226.388267,
+    "ast_hash": "8767e7dc41f2ac8fba0f9c67e9108492",
+    "semantic_hash": ""
+  },
+  "reports/generative-capabilities/screenshots/defaults/mobile-tradeoff-dashboard-existing.png": {
+    "mtime": 1791562218.5195174,
+    "seen": 1791562226.388268,
+    "ast_hash": "7bc35929d8373eb3ff9f02d5fe82c944",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/desktop-departure-board-existing.png": {
+    "mtime": 1791561806.786684,
+    "seen": 1791562016.546287,
+    "ast_hash": "8a1b425450d8adc7ffe9c3bca27827b3",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/desktop-fixed-date-picker-existing.png": {
+    "mtime": 1791561806.7873204,
+    "seen": 1791562016.546288,
+    "ast_hash": "5d3bb2e7e65471da63a470bdac845f94",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/desktop-initial.png": {
+    "mtime": 1791561806.788043,
+    "seen": 1791562016.546288,
+    "ast_hash": "10f132fb2aed287fe3e3573f04e0d19c",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/desktop-mode-dashboard-existing.png": {
+    "mtime": 1791561806.7885594,
+    "seen": 1791562016.546289,
+    "ast_hash": "95c363a00e55e28211cb06ebeca59491",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/desktop-tradeoff-dashboard-existing.png": {
+    "mtime": 1791561806.789087,
+    "seen": 1791562016.54629,
+    "ast_hash": "d00a9efa02cbe59f72fe320b688f38bd",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/mobile-departure-board-existing.png": {
+    "mtime": 1791561806.7895393,
+    "seen": 1791562016.54629,
+    "ast_hash": "4e05ae266dc03ee0f74c1ec636ef7615",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/mobile-fixed-date-picker-existing.png": {
+    "mtime": 1791561806.790031,
+    "seen": 1791562016.5462909,
+    "ast_hash": "76ef96a6daedd0eb0197ec713202927b",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/mobile-initial.png": {
+    "mtime": 1791561806.7906418,
+    "seen": 1791562016.546292,
+    "ast_hash": "08596990c1f3f4b918da87d1a46ed57c",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/mobile-mode-dashboard-existing.png": {
+    "mtime": 1791561806.7911246,
+    "seen": 1791562016.546292,
+    "ast_hash": "8767e7dc41f2ac8fba0f9c67e9108492",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/default-verification/screenshots/mobile-tradeoff-dashboard-existing.png": {
+    "mtime": 1791561806.7916417,
+    "seen": 1791562016.546293,
+    "ast_hash": "7bc35929d8373eb3ff9f02d5fe82c944",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/budget-shortlist-empty-repeat.png": {
+    "mtime": 1791561880.0960402,
+    "seen": 1791562016.546294,
+    "ast_hash": "66de0b5bcd21f36bc57355a8adc57ed4",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/diagnostics/compact-fare-picker-sort-failure.png": {
+    "mtime": 1791561880.0958018,
+    "seen": 1791562016.546295,
+    "ast_hash": "75fe6127589cbfae45a07d0dbf34876d",
+    "semantic_hash": ""
+  },
+  "verification/generative-ui/capability-audit/evidence/screenshots/budget-shortlist-failed-repeat-failure.png": {
+    "mtime": 1791561856.8982265,
+    "seen": 1791562016.546334,
+    "ast_hash": "66de0b5bcd21f36bc57355a8adc57ed4",
     "semantic_hash": ""
   }
 }
