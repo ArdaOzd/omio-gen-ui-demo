@@ -15,6 +15,7 @@
 .travel-fare{flex-direction:row;box-shadow:none}.travel-fare.is-selected{box-shadow:inset 3px 0 var(--travel-blue)}
 .travel-fieldset{display:block;gap:0}.travel-field{align-items:stretch;line-height:1.5;user-select:auto}.travel-check{font-weight:inherit;line-height:1.5;user-select:auto}
 .travel-field [data-slot=native-select-wrapper]{width:100%}
+.travel-app [data-slot=native-select-icon]{width:1rem;height:1rem}
 .travel-app [data-slot=checkbox]{width:18px;height:18px;min-height:18px;flex:0 0 18px;padding:0;border-color:var(--travel-line);border-radius:2px;background:var(--travel-paper);color:#fff}
 .travel-app [data-slot=checkbox]:hover{background:var(--travel-paper)}
 .travel-app [data-slot=checkbox][data-state=checked],.travel-app [data-slot=checkbox][data-checked]{border-color:var(--travel-blue);background:var(--travel-blue)}

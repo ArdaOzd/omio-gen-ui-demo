@@ -118,8 +118,8 @@
         "width": 1280,
         "height": 1032
       },
-      "sha256": "b64e9c0106aef780023fbc3435e6fe5c0c592bd701e64efd76efc6a5428f32a9",
-      "condition": "accepted model scene after named successful local interaction"
+      "sha256": "51b8eb37e095463bbd7db8aee0ed016972c91ffd2da4084a9a297ed4bcffe657",
+      "condition": "accepted model scene before fare selection, with corrected select control sizing"
     },
     {
       "path": "screenshots/fixed-date-picker-post-fix-mobile.png",
@@ -130,10 +130,10 @@
       },
       "pixelDimensions": {
         "width": 390,
-        "height": 1428
+        "height": 1079
       },
-      "sha256": "f7ac3085da6b5ed07ea7f6fcc494754e2cfb42844567e6e7d9dd3bb3ca989c85",
-      "condition": "same accepted model scene and persisted local interaction at 390 CSS pixels"
+      "sha256": "424ac75f385c672229e76043b7e8637eab7f7796baf0ccedce4e23439b7784a7",
+      "condition": "same accepted model scene before fare selection at 390 CSS pixels, with corrected select control sizing"
     }
   ],
   "acceptedScene": {
