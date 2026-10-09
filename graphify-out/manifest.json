@@ -408,9 +408,9 @@
     "semantic_hash": ""
   },
   "src/generative/chat/thread-shell.tsx": {
-    "mtime": 1791449665.027836,
-    "seen": 1791474417.633798,
-    "ast_hash": "efce6b2cce08fd9f1b35032f9ac91b86",
+    "mtime": 1791556584.871617,
+    "seen": 1791556875.8242261,
+    "ast_hash": "3458d8b4d0529b9741793b070470b536",
     "semantic_hash": ""
   },
   "src/generative/chat/transport.test.ts": {
@@ -936,9 +936,9 @@
     "semantic_hash": "e219c42617641cd0618749d938bdd042"
   },
   "src/generative/chat/thread-shell.test.tsx": {
-    "mtime": 1791449692.519605,
-    "seen": 1791474417.633798,
-    "ast_hash": "e473cdf32ab6c2cfa721081f20130daf",
+    "mtime": 1791556633.2460496,
+    "seen": 1791556875.8242261,
+    "ast_hash": "3d0fb871ce33af2b3fb6eb2bc97dd821",
     "semantic_hash": ""
   },
   "src/generative/smart-planner-handoff.ts": {
