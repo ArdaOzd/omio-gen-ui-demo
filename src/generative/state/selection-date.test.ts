@@ -75,6 +75,20 @@ it('retains an explicit authored multi-date choice and exports the aligned date 
   router.dispose()
 })
 
+it('keeps a covered selection ready when reconciliation needs no new scope', async () => {
+  const statuses: CoverageLoadStatus[] = []
+  const { state, router, fare, selectionScope } = await fixture('london', 'paris', { from: dates[0]!, to: dates.at(-1)! }, status => statuses.push(status))
+  const selected = fare('2026-10-10')
+
+  router.selectFromQuery({ kind: 'select', artifactId: id, fareId: selected, selected: true }, selectionScope([selected]))
+  await router.whenIdle(id)
+
+  expect(state.get(id).selectedFareIds).toEqual([selected])
+  expect(statuses.filter(status => status.status === 'error')).toEqual([])
+  expect(statuses.at(-1)?.status).toBe('ready')
+  router.dispose()
+})
+
 it('rejects a stale native point offer and an obsolete committed result without silently aligning dates', async () => {
   const { state, router, fare, selectionScope, replaceResult } = await fixture()
   const existing = fare('2026-10-09')

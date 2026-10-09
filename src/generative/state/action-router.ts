@@ -161,7 +161,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     const controller = new AbortController()
     const captured = signature(state)
     options.onCoverageStatus?.({ artifactId, status: missing.length ? 'loading' : 'ready' })
-    const promise = (async () => {
+    const promise = Promise.resolve().then(async () => {
       const loadedKeys: ResourceKey[] = []
       try {
         for (const scope of missing) {
@@ -211,7 +211,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
       } finally {
         if (requests.get(artifactId)?.controller === controller) requests.delete(artifactId)
       }
-    })()
+    })
     requests.set(artifactId, { controller, promise })
     return promise
   }
