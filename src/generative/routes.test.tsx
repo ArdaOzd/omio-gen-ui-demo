@@ -12,7 +12,7 @@ vi.mock('./data/fare-data-bridge',()=>({createFareDataBridge:()=>({})}))
 vi.mock('./state/action-router',()=>({createActionRouter:()=>Object.assign(vi.fn(),{whenIdle:async()=>{},dispose:()=>{}})}))
 vi.mock('./chat/runtime-provider',async()=>{
  const [{TravelProvider},{PlanningTracker}]=await Promise.all([import('./catalog/context'),import('./tracker/planning-tracker')])
- return{GenerativeChat:({initialMessages,initialRunMessageId,services,planning,capture,onLiveMessages}:{initialMessages:UIMessage[];initialRunMessageId?:string;services:TravelServices;planning:PlanningStore;capture:()=>Promise<unknown>;onLiveMessages:(messages:UIMessage[])=>void})=><TravelProvider services={services}><div data-testid="restored-chat" data-run-message={initialRunMessageId}>{initialMessages.flatMap(message=>message.parts.map(part=>part.type==='text'?part.text:'')).join(' ')}</div><button type="button" onClick={()=>void capture().then(io.capture)}>Capture agent context</button><button type="button" onClick={()=>onLiveMessages([])}>Regenerate without old scene</button><PlanningTracker store={planning}/></TravelProvider>}
+ return{GenerativeChat:({initialMessages,initialRunMessageId,services,planning,capture,onLiveMessages}:{initialMessages:UIMessage[];initialRunMessageId?:string;services:TravelServices;planning:PlanningStore;capture:()=>Promise<unknown>;onLiveMessages:(messages:UIMessage[])=>void})=><TravelProvider services={services}><div data-testid="restored-chat" data-run-message={initialRunMessageId}>{initialMessages.flatMap(message=>message.parts.map(part=>part.type==='text'?part.text:'')).join(' ')}</div><button type="button" onClick={()=>void capture().then(io.capture)}>Capture agent context</button><button type="button" onClick={()=>{services.createArtifact?.();void capture().then(io.capture)}}>Create artifact and capture</button><button type="button" onClick={()=>onLiveMessages([])}>Regenerate without old scene</button><PlanningTracker store={planning}/></TravelProvider>}
 })
 import { GenerativeRoute } from './routes'
 beforeEach(()=>{vi.clearAllMocks();localStorage.clear();sessionStorage.clear();window.history.replaceState({},'','/generative')})
@@ -31,6 +31,26 @@ it('persists a smart-planner prompt before opening chat and marks it to run',asy
  render(<GenerativeRoute/>);const chat=await screen.findByTestId('restored-chat')
  expect(chat.textContent).toBe(handoff.prompt);expect(chat.dataset.runMessage).toBe(handoff.id)
  expect(io.save).toHaveBeenCalledOnce();expect(io.save.mock.calls[0][1].messages).toEqual([{id:handoff.id,role:'user',parts:[{type:'text',text:handoff.prompt}]}])
+})
+it('captures a newly created active artifact before its first scene is presented',async()=>{
+ io.load.mockResolvedValue(null);io.save.mockResolvedValue(undefined)
+ render(<GenerativeRoute/>);await screen.findByTestId('restored-chat')
+ await userEvent.setup().click(screen.getByRole('button',{name:'Create artifact and capture'}));await waitFor(()=>expect(io.capture).toHaveBeenCalledOnce())
+ const context=io.capture.mock.calls[0]?.[0]
+ expect(context.artifacts).toHaveLength(1)
+ expect(context.activeArtifactId).toBe(context.artifacts[0].artifactId)
+})
+it('keeps the accepted scene while prioritizing a new active artifact in continuation context',async()=>{
+ const accepted=ArtifactIdSchema.parse('accepted-scene'),savedState=createUIStateStore();savedState.initializeMissing(accepted,{})
+ const messages:UIMessage[]=[{id:'accepted-message',role:'assistant',parts:[{type:'tool-present',toolCallId:'accepted-present',state:'output-available',input:{$type:'TravelSurface',artifactRef:accepted},output:{}}]}]
+ io.load.mockResolvedValue({messages,artifacts:[{state:savedState.get(accepted)}],activeArtifactId:accepted,plannedFares:[],sceneSnapshots:[]})
+ io.restore.mockImplementation(async(_record:unknown,_bridge:unknown,store:UIStateStore)=>{store.initializeMissing(accepted,savedState.get(accepted))})
+ io.save.mockResolvedValue(undefined)
+ render(<GenerativeRoute/>);await screen.findByTestId('restored-chat')
+ await userEvent.setup().click(screen.getByRole('button',{name:'Create artifact and capture'}));await waitFor(()=>expect(io.capture).toHaveBeenCalledOnce())
+ const context=io.capture.mock.calls[0]?.[0]
+ expect(context.artifacts.map((artifact:{artifactId:string})=>artifact.artifactId)).toEqual([context.activeArtifactId,accepted])
+ expect(context.activeArtifactId).not.toBe(accepted)
 })
 it('restores the per-chat fare basket with buying controls and persists cancellation',async()=>{
  const owner=ArtifactIdSchema.parse('retained-basket'),savedState=createUIStateStore();savedState.initializeMissing(owner,{citySequence:['madrid','barcelona']})

@@ -302,9 +302,10 @@ function SessionConversation(props: SessionConversationProps) {
     if (!lifecycle) throw new Error('Scene lifecycle unavailable')
     await lifecycle.prepareTurn(messagesRef.current)
     const { layouts, bindings } = getSceneMetadata(messagesRef.current,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
-    const activeArtifactIds = lifecycle.activeArtifactIds(messagesRef.current)
+    const sceneArtifactIds = lifecycle.activeArtifactIds(messagesRef.current)
     const currentActiveArtifactId = runtime.artifacts.getActiveId()
-    const activeArtifactId = currentActiveArtifactId && activeArtifactIds.includes(currentActiveArtifactId) ? currentActiveArtifactId : activeArtifactIds[0]
+    const activeArtifactIds = [...new Set([...sceneArtifactIds, ...(currentActiveArtifactId ? [currentActiveArtifactId] : [])])]
+    const activeArtifactId = currentActiveArtifactId ?? activeArtifactIds[0]
     return captureAgentContextWithSelectedFares({
       turnId: `turn-${crypto.randomUUID()}`,
       activeArtifactId,
