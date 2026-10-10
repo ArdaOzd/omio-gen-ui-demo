@@ -368,11 +368,20 @@ async function mockGeneratedPlanner(page: Page): Promise<void> {
     const item = serialized.includes('Beta UI-created itinerary') ? beta : alpha
     const count = (requestCounts.get(item.id) ?? 0) + 1
     requestCounts.set(item.id, count)
-    const artifactMatch = serialized.match(/"activeArtifactId":"([^"]+)"/)
-    const artifactId = artifactMatch?.[1] ?? item.artifactId
+    const artifactId = serialized.match(/"artifactId":"([^"]+)"/)?.[1]
     const datasetId = resourceKeyFor(item)
     let events: unknown[]
     if (count === 1) {
+      events = [
+        { type: 'start', messageId: `assistant-${item.id}` },
+        { type: 'start-step' },
+        { type: 'tool-input-start', toolCallId: `create-${item.id}`, toolName: 'create_artifact' },
+        { type: 'tool-input-available', toolCallId: `create-${item.id}`, toolName: 'create_artifact', input: {} },
+        { type: 'finish-step' },
+        { type: 'finish', finishReason: 'tool-calls' },
+      ]
+    } else if (count === 2) {
+      if (!artifactId) throw new Error('Expected the host-created artifact in the continued chat request')
       const input = {
         artifactRef: artifactId,
         expectedRevision: 0,
@@ -389,7 +398,8 @@ async function mockGeneratedPlanner(page: Page): Promise<void> {
         { type: 'finish-step' },
         { type: 'finish', finishReason: 'tool-calls' },
       ]
-    } else if (count === 2) {
+    } else if (count === 3) {
+      if (!artifactId) throw new Error('Expected the edited artifact in the continued chat request')
       const input = {
         $type: 'TravelSurface',
         $key: 'root',
@@ -397,13 +407,18 @@ async function mockGeneratedPlanner(page: Page): Promise<void> {
         title: `${item.title} live generated itinerary`,
         children: [
           { $type: 'ModeChips', $key: 'modes', artifactRef: artifactId, datasetRef: datasetId, legIndex: 0 },
+          { $type: 'DirectToggle', $key: 'direct', artifactRef: artifactId },
           { $type: 'FareCards', $key: 'fares', artifactRef: artifactId, datasetRef: datasetId, legIndex: 0 },
+          { $type: 'CheapestFastest', $key: 'compare', artifactRef: artifactId, datasetRef: datasetId, legIndex: 0 },
           { $type: 'SyntheticTotal', $key: 'total', artifactRef: artifactId },
         ],
       }
       events = [
         { type: 'start', messageId: `assistant-${item.id}` },
         { type: 'start-step' },
+        { type: 'text-start', id: `orientation-${item.id}` },
+        { type: 'text-delta', id: `orientation-${item.id}`, delta: `Here is a focused comparison for ${item.title}.` },
+        { type: 'text-end', id: `orientation-${item.id}` },
         { type: 'tool-input-start', toolCallId: `present-${item.id}`, toolName: 'present' },
         { type: 'tool-input-available', toolCallId: `present-${item.id}`, toolName: 'present', input },
         { type: 'finish-step' },
@@ -434,19 +449,37 @@ async function expectSession(page: Page, item: SessionFixture): Promise<void> {
   await expect(chat.getByText(item.prompt, { exact: true })).toBeVisible()
   await expect(chat.getByText(`${item.title} assistant narrative.`, { exact: true })).toBeVisible()
   await expect(chat.getByText(`${item.title} generated itinerary`, { exact: true })).toBeVisible()
-  const tracker = page.getByRole('complementary', { name: 'Planning tracker' })
+  const tracker = page.getByRole('complementary', { name: 'Fare buying tracker' })
   await expect(tracker).toContainText(item.carrier)
   await expect(tracker).toContainText(new RegExp(item.origin, 'i'))
   await expect(tracker).toContainText(new RegExp(item.destination, 'i'))
 }
 
-async function expectDesktopShellGeometry(page: Page, trackerVisible: boolean, longHistory = false): Promise<void> {
+type ShellGeometryExpectation = {
+  desktop: boolean
+  trackerVisible: boolean
+  longHistory?: boolean
+  collapsed?: boolean
+}
+
+async function expectShellGeometry(page: Page, expectation: ShellGeometryExpectation): Promise<void> {
+  const composer = page.locator('.travel-composer')
+  if (!expectation.desktop) await composer.scrollIntoViewIfNeeded()
   const metrics = await page.evaluate(shouldScrollHistory => {
     const rect = (selector: string) => {
       const element = document.querySelector(selector)
       if (!(element instanceof HTMLElement)) return null
       const box = element.getBoundingClientRect()
-      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height }
+      return {
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        bottom: box.bottom,
+        documentTop: box.top + scrollY,
+        documentBottom: box.bottom + scrollY,
+        width: box.width,
+        height: box.height,
+      }
     }
     const sessionList = document.querySelector('.travel-session-list')
     if (shouldScrollHistory && sessionList instanceof HTMLElement) sessionList.scrollTop = sessionList.scrollHeight
@@ -456,14 +489,17 @@ async function expectDesktopShellGeometry(page: Page, trackerVisible: boolean, l
       : null
     return {
       viewport: { width: innerWidth, height: innerHeight },
-      scrollWidth: document.documentElement.scrollWidth,
+      scrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
       sidebar: rect('.travel-session-sidebar'),
       tracker: rect('.travel-planning-tracker'),
       chat: rect('.travel-chat'),
       composer: rect('.travel-composer'),
+      collapse: rect('.travel-session-collapse'),
+      newChat: rect('.travel-session-new'),
       sessionList: sessionList instanceof HTMLElement && sessionListBox ? {
         bottom: sessionListBox.bottom,
         clientHeight: sessionList.clientHeight,
+        display: getComputedStyle(sessionList).display,
         lastSessionBottom: lastSessionBox?.bottom ?? null,
         lastSessionTop: lastSessionBox?.top ?? null,
         overflowY: getComputedStyle(sessionList).overflowY,
@@ -472,27 +508,49 @@ async function expectDesktopShellGeometry(page: Page, trackerVisible: boolean, l
         top: sessionListBox.top,
       } : null,
     }
-  }, longHistory)
+  }, expectation.longHistory ?? false)
   expect(metrics.sidebar).not.toBeNull()
   expect(metrics.chat).not.toBeNull()
   expect(metrics.composer).not.toBeNull()
   expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport.width)
   expect(metrics.sidebar!.left).toBe(0)
-  expect(metrics.sidebar!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
-  expect(metrics.tracker === null).toBe(!trackerVisible)
-  if (trackerVisible) {
-    expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.tracker!.left)
-    expect(metrics.tracker!.right).toBeLessThanOrEqual(metrics.chat!.left)
+  expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.viewport.width)
+  expect(metrics.tracker === null).toBe(!expectation.trackerVisible)
+  expect(metrics.collapse).not.toBeNull()
+  expect(metrics.newChat).not.toBeNull()
+  expect(metrics.collapse!.documentBottom).toBeLessThanOrEqual(metrics.newChat!.documentTop)
+  if (expectation.desktop) {
+    expect(metrics.sidebar!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
+    if (expectation.trackerVisible) {
+      expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.tracker!.left)
+      expect(metrics.tracker!.right).toBeLessThanOrEqual(metrics.chat!.left)
+      expect(metrics.tracker!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
+    } else {
+      expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.chat!.left)
+    }
   } else {
-    expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.chat!.left)
+    const afterSidebar = expectation.trackerVisible ? metrics.tracker : metrics.chat
+    expect(afterSidebar).not.toBeNull()
+    expect(metrics.sidebar!.documentBottom).toBeLessThanOrEqual(afterSidebar!.documentTop)
+    if (expectation.trackerVisible) {
+      expect(metrics.tracker!.documentBottom).toBeLessThanOrEqual(metrics.chat!.documentTop)
+      expect(metrics.tracker!.left).toBeGreaterThanOrEqual(0)
+      expect(metrics.tracker!.right).toBeLessThanOrEqual(metrics.viewport.width)
+    }
   }
-  expect(metrics.chat!.width).toBeGreaterThan(700)
+  expect(metrics.chat!.left).toBeGreaterThanOrEqual(0)
+  expect(metrics.chat!.right).toBeLessThanOrEqual(metrics.viewport.width)
+  expect(metrics.chat!.width).toBeGreaterThan(250)
   expect(metrics.composer!.left).toBeGreaterThanOrEqual(metrics.chat!.left)
   expect(metrics.composer!.right).toBeLessThanOrEqual(metrics.chat!.right)
   expect(metrics.composer!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
   expect(metrics.sessionList).not.toBeNull()
-  expect(metrics.sessionList!.bottom).toBeLessThanOrEqual(metrics.sidebar!.bottom)
-  if (longHistory) {
+  if (!expectation.desktop && expectation.collapsed) {
+    expect(metrics.sessionList!.display).toBe('none')
+  } else {
+    expect(metrics.sessionList!.bottom).toBeLessThanOrEqual(metrics.sidebar!.bottom)
+  }
+  if (expectation.longHistory) {
     expect(metrics.sessionList!.clientHeight).toBeLessThan(metrics.sessionList!.scrollHeight)
     expect(metrics.sessionList!.overflowY).toMatch(/auto|scroll/)
     expect(metrics.sessionList!.scrollTop).toBeGreaterThan(0)
@@ -501,22 +559,121 @@ async function expectDesktopShellGeometry(page: Page, trackerVisible: boolean, l
   }
 }
 
-for (const width of [1440, 2544]) test(`desktop shell keeps navigation, tracker, chat, and composer in view at ${width}px`, async ({ page }) => {
-  await page.setViewportSize({ width, height: 900 })
+const responsiveShellViewports = [
+  { label: 'narrow phone portrait', width: 320, height: 568 },
+  { label: 'phone portrait', width: 360, height: 800 },
+  { label: 'short high-density phone portrait', width: 390, height: 568 },
+  { label: 'high-density phone portrait', width: 390, height: 844 },
+  { label: 'large phone portrait', width: 430, height: 932 },
+  { label: 'last compact-nav width', width: 480, height: 720 },
+  { label: 'first regular-nav width', width: 481, height: 720 },
+  { label: 'short phone landscape', width: 667, height: 375 },
+  { label: 'tablet portrait', width: 768, height: 1024 },
+  { label: 'tablet below desktop breakpoint', width: 899, height: 720 },
+  { label: 'tablet at desktop breakpoint', width: 900, height: 480 },
+  { label: 'narrow desktop above breakpoint', width: 901, height: 720 },
+  { label: 'compact desktop', width: 960, height: 540 },
+  { label: 'short small desktop', width: 1024, height: 600 },
+  { label: 'small desktop', width: 1024, height: 720 },
+  { label: 'very short desktop', width: 1280, height: 480 },
+  { label: 'short desktop', width: 1280, height: 720 },
+  { label: 'standard desktop', width: 1440, height: 900 },
+  { label: 'full HD desktop', width: 1920, height: 1080 },
+  { label: 'wide desktop', width: 2544, height: 1395 },
+] as const
+
+for (const viewport of responsiveShellViewports) test(`responsive shell stays usable at ${viewport.label} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+  const desktop = viewport.width >= 901
+  await page.setViewportSize(viewport)
   await page.goto('/generative')
   await expect(page.getByRole('textbox', { name: 'Message' })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toHaveCount(0)
-  await expectDesktopShellGeometry(page, false)
+  await expectShellGeometry(page, { desktop, trackerVisible: false })
   await page.getByRole('button', { name: 'Collapse session sidebar' }).click()
-  await expectDesktopShellGeometry(page, false)
+  await expectShellGeometry(page, { desktop, trackerVisible: false, collapsed: true })
 
   await mockFareApi(page)
-  await seedSessions(page, 24)
+  await seedSessions(page, 40)
   await page.goto('/generative')
   await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
-  await expectDesktopShellGeometry(page, true, true)
+  await expectShellGeometry(page, { desktop, trackerVisible: true, longHistory: true })
   await page.getByRole('button', { name: 'Collapse session sidebar' }).click()
-  await expectDesktopShellGeometry(page, true, true)
+  await expectShellGeometry(page, { desktop, trackerVisible: true, longHistory: desktop, collapsed: true })
+})
+
+test('a selected chat survives a desktop-mobile-desktop resize round trip', async ({ page }) => {
+  await mockFareApi(page)
+  await seedSessions(page, 40)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/generative')
+  const composer = page.getByRole('textbox', { name: 'Message' })
+  const draft = 'Keep this draft while the viewport changes.'
+  await composer.fill(draft)
+  await expect(page.getByText(`${alpha.title} generated itinerary`, { exact: true })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+  await expectShellGeometry(page, { desktop: true, trackerVisible: true, longHistory: true })
+
+  await page.setViewportSize({ width: 667, height: 375 })
+  await expectShellGeometry(page, { desktop: false, trackerVisible: true, longHistory: true })
+  await expect(composer).toHaveValue(draft)
+  await expect(page.getByText(`${alpha.title} generated itinerary`, { exact: true })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await expectShellGeometry(page, { desktop: true, trackerVisible: true, longHistory: true })
+  await expect(composer).toHaveValue(draft)
+  await expect(page.getByText(`${alpha.title} generated itinerary`, { exact: true })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+})
+
+test.describe('mobile touch shell', () => {
+  test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true })
+
+  for (const viewport of [
+    { label: 'portrait', width: 390, height: 844 },
+    { label: 'short landscape', width: 667, height: 375 },
+  ]) test(`keeps sessions, composer, fare controls, and checkout reachable in ${viewport.label}`, async ({ page }) => {
+    await page.setViewportSize(viewport)
+    await mockFareApi(page)
+    await seedSessions(page, 40)
+    await page.goto('/generative')
+
+    await page.getByRole('button', { name: beta.title }).tap()
+    await expect(page.getByText(`${beta.title} generated itinerary`, { exact: true })).toBeVisible()
+    await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(beta.carrier)
+    await page.getByRole('button', { name: alpha.prompt }).tap()
+    await expect(page.getByText(`${alpha.title} generated itinerary`, { exact: true })).toBeVisible()
+
+    const composer = page.getByRole('textbox', { name: 'Message' })
+    await composer.scrollIntoViewIfNeeded()
+    await composer.tap()
+    await composer.fill('Mobile touch draft')
+    await expect(composer).toHaveValue('Mobile touch draft')
+
+    const tracker = page.getByRole('complementary', { name: 'Fare buying tracker' })
+    await tracker.scrollIntoViewIfNeeded()
+    await tracker.getByRole('button', { name: 'Buy' }).tap()
+    await expect(page.getByRole('dialog')).toContainText('Congrats, you are set for the trip.')
+    await page.getByRole('button', { name: 'Close' }).tap()
+
+    const selectFare = page.getByRole('button', { name: /^Select train Alpha Rail /i }).first()
+    await tracker.getByRole('button', { name: /^Cancel / }).tap()
+    await expect(tracker).toHaveCount(0)
+    await selectFare.scrollIntoViewIfNeeded()
+    await selectFare.tap()
+    await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+    await page.getByRole('button', { name: 'Clear all' }).tap()
+    await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toHaveCount(0)
+    await selectFare.tap()
+    await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+
+    await page.getByRole('button', { name: 'Collapse session sidebar' }).tap()
+    await expect(page.getByRole('navigation', { name: 'Previous chats' })).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Start new chat' })).toBeVisible()
+    await page.getByRole('button', { name: 'Expand session sidebar' }).tap()
+    await expect(page.getByRole('button', { name: beta.prompt })).toBeVisible()
+    await expectShellGeometry(page, { desktop: false, trackerVisible: true, longHistory: true })
+  })
 })
 
 test('landing keyboard controls submit or open a fresh empty chat deliberately', async ({ page }) => {
@@ -590,7 +747,7 @@ for (const width of [360, 1280]) test(`fare lists show seven complete rows witho
   await expect(eighth).toContainText('Alpha Rail 8')
   await eighth.getByRole('button').click()
   await expect(eighth.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText('Alpha Rail 8')
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText('Alpha Rail 8')
 
   await page.getByRole('button', { name: beta.title }).click()
   const shortList = page.getByRole('region', { name: 'Fare options' })
@@ -612,10 +769,10 @@ test('UI-created sessions save generated cards, filters, and selected fares befo
   await expect(page.getByText(`${alpha.title} is ready.`, { exact: true })).toBeVisible()
   await expect(page.getByText(`${alpha.title} live generated itinerary`, { exact: true })).toBeVisible()
   await page.getByRole('button', { name: /^Select / }).first().click()
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(alpha.carrier)
-  const alphaTrain = page.getByRole('button', { name: 'Train', exact: true })
-  await alphaTrain.click()
-  await expect(alphaTrain).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+  const alphaDirectOnly = page.getByRole('checkbox', { name: 'Direct connections only' })
+  await alphaDirectOnly.check()
+  await expect(alphaDirectOnly).toBeChecked()
   await composer.fill('Alpha unsent draft')
 
   await page.getByRole('button', { name: 'Start new chat' }).click()
@@ -624,20 +781,20 @@ test('UI-created sessions save generated cards, filters, and selected fares befo
   await page.getByRole('button', { name: 'Send message' }).click()
   await expect(page.getByText(`${beta.title} is ready.`, { exact: true })).toBeVisible()
   await page.getByRole('button', { name: /^Select / }).first().click()
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(beta.carrier)
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(beta.carrier)
 
   await page.getByRole('button', { name: 'Alpha UI-created itinerary' }).click()
   await expect(page.getByText(`${alpha.title} is ready.`, { exact: true })).toBeVisible()
   await expect(page.getByText(`${alpha.title} live generated itinerary`, { exact: true })).toBeVisible()
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(alpha.carrier)
-  await expect(page.getByRole('button', { name: 'Train', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+  await expect(page.getByRole('checkbox', { name: 'Direct connections only' })).toBeChecked()
   await expect(page.getByRole('textbox', { name: 'Message' })).toHaveValue('Alpha unsent draft')
   await expect(page.getByText(`${beta.title} is ready.`, { exact: true })).toHaveCount(0)
 
   await page.reload()
   await expect(page.getByText(`${alpha.title} is ready.`, { exact: true })).toBeVisible()
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toContainText(alpha.carrier)
-  await expect(page.getByRole('button', { name: 'Train', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+  await expect(page.getByRole('checkbox', { name: 'Direct connections only' })).toBeChecked()
   await expect(page.getByRole('textbox', { name: 'Message' })).toHaveValue('Alpha unsent draft')
 })
 
@@ -753,9 +910,28 @@ test('New chat cancels a held local fare load before waiting for session actions
       // Canceling the owning session may abort the intercepted search first.
     }
   })
+  let chatRequestCount = 0
   await page.route('**/api/chat', async route => {
     const serialized = JSON.stringify(route.request().postDataJSON())
-    const artifactId = serialized.match(/"activeArtifactId":"([^"]+)"/)?.[1] ?? alpha.artifactId
+    chatRequestCount += 1
+    if (chatRequestCount === 1) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        headers: { 'x-vercel-ai-ui-message-stream': 'v1' },
+        body: dataStream([
+          { type: 'start', messageId: 'held-create-assistant' },
+          { type: 'start-step' },
+          { type: 'tool-input-start', toolCallId: 'held-create', toolName: 'create_artifact' },
+          { type: 'tool-input-available', toolCallId: 'held-create', toolName: 'create_artifact', input: {} },
+          { type: 'finish-step' },
+          { type: 'finish', finishReason: 'tool-calls' },
+        ]),
+      })
+      return
+    }
+    const artifactId = serialized.match(/"artifactId":"([^"]+)"/)?.[1]
+    if (!artifactId) throw new Error('Expected the host-created artifact in the continued chat request')
     const input = {
       artifactRef: artifactId,
       expectedRevision: 0,
@@ -790,7 +966,7 @@ test('New chat cancels a held local fare load before waiting for session actions
   await expect(page.getByRole('region', { name: 'Travel planning welcome' })).toBeVisible({ timeout: 3_000 })
   releaseSearch?.()
   await page.waitForTimeout(100)
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toHaveCount(0)
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toHaveCount(0)
   await expect(page.locator('.travel-chat').getByText(prompt, { exact: true })).toHaveCount(0)
 })
 
@@ -799,7 +975,7 @@ for (const width of [360, 1280]) test(`session sidebar stays usable when collaps
   await mockFareApi(page)
   await seedSessions(page)
   await page.goto('/generative')
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toBeVisible()
   const collapse = page.getByRole('button', { name: 'Collapse session sidebar' })
   const newChat = page.getByRole('button', { name: 'Start new chat' })
   const expectCollapseAboveNewChat = async (collapseButton: typeof collapse) => {
@@ -814,7 +990,7 @@ for (const width of [360, 1280]) test(`session sidebar stays usable when collaps
   await expect(expand).toHaveAttribute('aria-expanded', 'false')
   await expect(newChat).toBeVisible()
   await expectCollapseAboveNewChat(expand)
-  await expect(page.getByRole('complementary', { name: 'Planning tracker' })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toBeVisible()
   await newChat.focus()
   await expect(newChat).toBeFocused()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
