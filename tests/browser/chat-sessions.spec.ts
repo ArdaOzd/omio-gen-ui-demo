@@ -277,9 +277,15 @@ function threadRecord(item: SessionFixture) {
   }
 }
 
-async function seedSessions(page: Page): Promise<void> {
+async function seedSessions(page: Page, sessionCount = 2): Promise<void> {
   await page.goto('/')
   const now = '2026-10-07T12:00:00.000Z'
+  const extraSessions = Array.from({ length: Math.max(0, sessionCount - 2) }, (_, index) => ({
+    id: `travel-session-extra-${index}`,
+    title: `Archived trip ${index + 1}`,
+    createdAt: now,
+    updatedAt: `2026-10-07T11:${String(index).padStart(2, '0')}:00.000Z`,
+  }))
   const history = {
     version: 1,
     activeSessionId: alpha.id,
@@ -287,6 +293,7 @@ async function seedSessions(page: Page): Promise<void> {
     sessions: [
       { id: alpha.id, title: alpha.title, createdAt: now, updatedAt: now },
       { id: beta.id, title: beta.title, createdAt: now, updatedAt: '2026-10-07T12:01:00.000Z' },
+      ...extraSessions,
     ],
   }
   const threads: Array<[string, ReturnType<typeof threadRecord>]> = [
@@ -432,6 +439,85 @@ async function expectSession(page: Page, item: SessionFixture): Promise<void> {
   await expect(tracker).toContainText(new RegExp(item.origin, 'i'))
   await expect(tracker).toContainText(new RegExp(item.destination, 'i'))
 }
+
+async function expectDesktopShellGeometry(page: Page, trackerVisible: boolean, longHistory = false): Promise<void> {
+  const metrics = await page.evaluate(shouldScrollHistory => {
+    const rect = (selector: string) => {
+      const element = document.querySelector(selector)
+      if (!(element instanceof HTMLElement)) return null
+      const box = element.getBoundingClientRect()
+      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height }
+    }
+    const sessionList = document.querySelector('.travel-session-list')
+    if (shouldScrollHistory && sessionList instanceof HTMLElement) sessionList.scrollTop = sessionList.scrollHeight
+    const sessionListBox = sessionList instanceof HTMLElement ? sessionList.getBoundingClientRect() : null
+    const lastSessionBox = sessionList?.lastElementChild instanceof HTMLElement
+      ? sessionList.lastElementChild.getBoundingClientRect()
+      : null
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      scrollWidth: document.documentElement.scrollWidth,
+      sidebar: rect('.travel-session-sidebar'),
+      tracker: rect('.travel-planning-tracker'),
+      chat: rect('.travel-chat'),
+      composer: rect('.travel-composer'),
+      sessionList: sessionList instanceof HTMLElement && sessionListBox ? {
+        bottom: sessionListBox.bottom,
+        clientHeight: sessionList.clientHeight,
+        lastSessionBottom: lastSessionBox?.bottom ?? null,
+        lastSessionTop: lastSessionBox?.top ?? null,
+        overflowY: getComputedStyle(sessionList).overflowY,
+        scrollTop: sessionList.scrollTop,
+        scrollHeight: sessionList.scrollHeight,
+        top: sessionListBox.top,
+      } : null,
+    }
+  }, longHistory)
+  expect(metrics.sidebar).not.toBeNull()
+  expect(metrics.chat).not.toBeNull()
+  expect(metrics.composer).not.toBeNull()
+  expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport.width)
+  expect(metrics.sidebar!.left).toBe(0)
+  expect(metrics.sidebar!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
+  expect(metrics.tracker === null).toBe(!trackerVisible)
+  if (trackerVisible) {
+    expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.tracker!.left)
+    expect(metrics.tracker!.right).toBeLessThanOrEqual(metrics.chat!.left)
+  } else {
+    expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.chat!.left)
+  }
+  expect(metrics.chat!.width).toBeGreaterThan(700)
+  expect(metrics.composer!.left).toBeGreaterThanOrEqual(metrics.chat!.left)
+  expect(metrics.composer!.right).toBeLessThanOrEqual(metrics.chat!.right)
+  expect(metrics.composer!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
+  expect(metrics.sessionList).not.toBeNull()
+  expect(metrics.sessionList!.bottom).toBeLessThanOrEqual(metrics.sidebar!.bottom)
+  if (longHistory) {
+    expect(metrics.sessionList!.clientHeight).toBeLessThan(metrics.sessionList!.scrollHeight)
+    expect(metrics.sessionList!.overflowY).toMatch(/auto|scroll/)
+    expect(metrics.sessionList!.scrollTop).toBeGreaterThan(0)
+    expect(metrics.sessionList!.lastSessionTop).toBeGreaterThanOrEqual(metrics.sessionList!.top)
+    expect(metrics.sessionList!.lastSessionBottom).toBeLessThanOrEqual(metrics.sessionList!.bottom)
+  }
+}
+
+for (const width of [1440, 2544]) test(`desktop shell keeps navigation, tracker, chat, and composer in view at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 })
+  await page.goto('/generative')
+  await expect(page.getByRole('textbox', { name: 'Message' })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toHaveCount(0)
+  await expectDesktopShellGeometry(page, false)
+  await page.getByRole('button', { name: 'Collapse session sidebar' }).click()
+  await expectDesktopShellGeometry(page, false)
+
+  await mockFareApi(page)
+  await seedSessions(page, 24)
+  await page.goto('/generative')
+  await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
+  await expectDesktopShellGeometry(page, true, true)
+  await page.getByRole('button', { name: 'Collapse session sidebar' }).click()
+  await expectDesktopShellGeometry(page, true, true)
+})
 
 test('landing keyboard controls submit or open a fresh empty chat deliberately', async ({ page }) => {
   const requests: unknown[] = []

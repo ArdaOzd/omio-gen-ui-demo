@@ -91,15 +91,15 @@ html .travel-app .travel-workspace {
     grid-template-columns: 72px minmax(280px, 320px) minmax(0, 1fr);
   }
 
-  html .travel-app .travel-session-sidebar {
+  html .travel-app .travel-workspace:has(.travel-planning-tracker) > .travel-session-sidebar {
     grid-area: sessions;
   }
 
-  html .travel-app .travel-planning-tracker {
+  html .travel-app .travel-workspace:has(.travel-planning-tracker) > .travel-planning-tracker {
     grid-area: tracker;
   }
 
-  html .travel-app .travel-chat {
+  html .travel-app .travel-workspace:has(.travel-planning-tracker) > .travel-chat {
     grid-area: chat;
   }
 }
