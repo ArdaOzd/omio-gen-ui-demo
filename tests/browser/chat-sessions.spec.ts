@@ -482,6 +482,29 @@ async function expectShellGeometry(page: Page, expectation: ShellGeometryExpecta
       }
     }
     const sessionList = document.querySelector('.travel-session-list')
+    const workspace = document.querySelector('.travel-workspace')
+    const chat = document.querySelector('.travel-chat')
+    const workspaceBox = workspace instanceof HTMLElement ? workspace.getBoundingClientRect() : null
+    const chatBox = chat instanceof HTMLElement ? chat.getBoundingClientRect() : null
+    const workspaceStyle = workspace instanceof HTMLElement ? getComputedStyle(workspace) : null
+    const siblingBoxes = workspace instanceof HTMLElement && chat instanceof HTMLElement
+      ? [...workspace.children]
+        .filter((child): child is HTMLElement => child instanceof HTMLElement && child !== chat)
+        .map(child => child.getBoundingClientRect())
+      : []
+    const columnGap = Number.parseFloat(workspaceStyle?.columnGap ?? '0')
+    const leftNeighbors = chatBox ? siblingBoxes.filter(box => box.right <= chatBox.left + 1) : []
+    const rightNeighbors = chatBox ? siblingBoxes.filter(box => box.left >= chatBox.right - 1) : []
+    const availableLeft = workspaceBox && workspaceStyle
+      ? leftNeighbors.length
+        ? Math.max(...leftNeighbors.map(box => box.right)) + columnGap
+        : workspaceBox.left + Number.parseFloat(workspaceStyle.paddingLeft)
+      : null
+    const availableRight = workspaceBox && workspaceStyle
+      ? rightNeighbors.length
+        ? Math.min(...rightNeighbors.map(box => box.left)) - columnGap
+        : workspaceBox.right - Number.parseFloat(workspaceStyle.paddingRight)
+      : null
     if (shouldScrollHistory && sessionList instanceof HTMLElement) sessionList.scrollTop = sessionList.scrollHeight
     const sessionListBox = sessionList instanceof HTMLElement ? sessionList.getBoundingClientRect() : null
     const lastSessionBox = sessionList?.lastElementChild instanceof HTMLElement
@@ -493,6 +516,9 @@ async function expectShellGeometry(page: Page, expectation: ShellGeometryExpecta
       sidebar: rect('.travel-session-sidebar'),
       tracker: rect('.travel-planning-tracker'),
       chat: rect('.travel-chat'),
+      chatCenterOffset: chatBox && availableLeft !== null && availableRight !== null
+        ? (chatBox.left + chatBox.right) / 2 - (availableLeft + availableRight) / 2
+        : null,
       composer: rect('.travel-composer'),
       collapse: rect('.travel-session-collapse'),
       newChat: rect('.travel-session-new'),
@@ -520,6 +546,8 @@ async function expectShellGeometry(page: Page, expectation: ShellGeometryExpecta
   expect(metrics.newChat).not.toBeNull()
   expect(metrics.collapse!.documentBottom).toBeLessThanOrEqual(metrics.newChat!.documentTop)
   if (expectation.desktop) {
+    if (metrics.chatCenterOffset === null) throw new Error('Chat center offset must be measurable')
+    expect(Math.abs(metrics.chatCenterOffset)).toBeLessThanOrEqual(1)
     expect(metrics.sidebar!.bottom).toBeLessThanOrEqual(metrics.viewport.height)
     if (expectation.trackerVisible) {
       expect(metrics.sidebar!.right).toBeLessThanOrEqual(metrics.tracker!.left)
@@ -580,6 +608,8 @@ const responsiveShellViewports = [
   { label: 'standard desktop', width: 1440, height: 900 },
   { label: 'full HD desktop', width: 1920, height: 1080 },
   { label: 'wide desktop', width: 2544, height: 1395 },
+  { label: 'ultra wide desktop', width: 3840, height: 1600 },
+  { label: '5K desktop', width: 5120, height: 1800 },
 ] as const
 
 for (const viewport of responsiveShellViewports) test(`responsive shell stays usable at ${viewport.label} (${viewport.width}x${viewport.height})`, async ({ page }) => {
