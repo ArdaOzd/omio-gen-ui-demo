@@ -1386,9 +1386,9 @@
     "semantic_hash": "b8b387fa7fee7023318da1c969c613cb"
   },
   "tests/browser/chat-sessions.spec.ts": {
-    "mtime": 1791475227.4888859,
-    "seen": 1791475382.430238,
-    "ast_hash": "b0bede14a98fdf791fd4481afb07c735",
+    "mtime": 1791625862.7621167,
+    "seen": 1791625957.508246,
+    "ast_hash": "f5a2d974d98d662d669d1a53bd496502",
     "semantic_hash": ""
   },
   "docs/server-driven-generative-ui-implementation-plan.md": {
@@ -1699,7 +1699,7 @@
   },
   "reports/generative-capabilities/capability-audit.json": {
     "mtime": 1791569809.3882923,
-    "seen": 1791572530.2498481,
+    "seen": 1791625957.508113,
     "ast_hash": "",
     "semantic_hash": ""
   },
