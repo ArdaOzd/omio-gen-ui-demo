@@ -4,6 +4,7 @@ import { assertNoBulkData } from '../contracts/privacy'
 import type { FrozenDisplayContext } from '../contracts/display-context'
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
 import type { DisplayContextStore } from './display-context'
+import { abortable } from './abortable'
 type ExportInput={turnId:string;activeArtifactId?:ArtifactId;artifactIds:ArtifactId[];store:UIStateStore;bridge:ServerFareDataBridge;displayStore:DisplayContextStore;selectedFareFacts?:BoundedFareFact[];plannedFareFacts?:readonly BoundedFareFact[];olderArtifactSummaries?:OlderArtifactSummary[];layoutSummaries?:ReadonlyMap<string,string>;componentBindings?:ReadonlyMap<string,readonly ComponentBinding[]>}
 type SnapshotRecord={snapshot:CompactArtifactSnapshot;lastInteractionAt:string;authoredBindingCount:number}
 type PreparedCapture={turnId:string;activeArtifactId?:ArtifactId;records:SnapshotRecord[];bindings:Map<string,FareScopeBinding>;plannedFareIds:ReturnType<UIStateStore['get']>['selectedFareIds'];displayContext:FrozenDisplayContext;pinsBySource:Map<string,LookupPin[]>;cachedFacts:BoundedFareFact[]}
@@ -192,9 +193,10 @@ function capturePreparedContext(prepared:PreparedCapture,selectedFareFacts:Bound
 export function captureAgentContext(input:Omit<ExportInput,'olderArtifactSummaries'>):AgentContextEnvelope{
  return capturePreparedContext(prepareCapture(input),input.selectedFareFacts??[])
 }
-export async function captureAgentContextWithSelectedFares(input:Omit<ExportInput,'olderArtifactSummaries'|'selectedFareFacts'>):Promise<AgentContextEnvelope>{
+export async function captureAgentContextWithSelectedFares(input:Omit<ExportInput,'olderArtifactSummaries'|'selectedFareFacts'>,signal=new AbortController().signal):Promise<AgentContextEnvelope>{
  const prepared=prepareCapture(input)
- const resolved=await Promise.allSettled([...prepared.pinsBySource].map(([sourceVersion,pins])=>input.bridge.lookupPins({version:1,requestId:`pins-${crypto.randomUUID()}`,sourceVersion,pins},new AbortController().signal)))
+ const resolved=await Promise.allSettled([...prepared.pinsBySource].map(([sourceVersion,pins])=>abortable(input.bridge.lookupPins({version:1,requestId:`pins-${crypto.randomUUID()}`,sourceVersion,pins},signal),signal)))
+ signal.throwIfAborted()
  const remote=resolved.flatMap(result=>result.status==='fulfilled'?result.value.items:[]).map(item=>{const{availableSeats:_availableSeats,...fact}=item;return fact})
  const facts=[...new Map([...prepared.cachedFacts,...remote].map(fact=>[fact.id,fact])).values()]
  return capturePreparedContext(prepared,facts)

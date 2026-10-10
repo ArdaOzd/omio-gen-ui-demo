@@ -44,6 +44,7 @@ export type TravelServices = {
   record?: (input: unknown) => void
   whenIdle?: (id: ReturnType<typeof ArtifactIdSchema.parse>) => Promise<void>
   createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse>
+  interactionsLocked?: () => boolean
 }
 
 const TravelContext = createContext<TravelServices | null>(null)

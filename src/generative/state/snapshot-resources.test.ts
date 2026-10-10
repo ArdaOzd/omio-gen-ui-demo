@@ -251,6 +251,23 @@ it('captures one immutable selection version while fare lookup is pending', asyn
   expect(store.get(artifactId).selectedFareIds).toEqual([newFareId])
 })
 
+it('cancels a held fare lookup with the logical turn', async () => {
+  const artifactId = ArtifactIdSchema.parse('cancelled-selection')
+  const selectedFare = fare({ id: 'fare-cancelled', originId: 'berlin', destinationId: 'prague', serviceDate: '2026-10-06', durationMinutes: 90, departureMinutes: 480 })
+  const fixed = createFixedProjectionFixture({ rows: [selectedFare], sourceVersion: 'cancelled-source-v1' })
+  const binding = await cacheScope(fixed.bridge, scope(fixed, 'berlin', 'prague', '2026-10-06'))
+  const store = createUIStateStore()
+  store.initializeMissing(artifactId, { datasetRefs: [binding.datasetId], selectedFareIds: [selectedFare.id] })
+  const held = new Promise<never>(()=>{})
+  const bridge: ServerFareDataBridge = { ...fixed.bridge, lookupPins: async () => held }
+  const controller = new AbortController()
+
+  const pending = captureAgentContextWithSelectedFares({ turnId: 'cancelled', activeArtifactId: artifactId, artifactIds: [artifactId], store, bridge, displayStore: displayStore() },controller.signal)
+  controller.abort(new DOMException('Stopped','AbortError'))
+
+  await expect(pending).rejects.toMatchObject({name:'AbortError'})
+})
+
 it('includes host basket facts without restoring archived artifact resources', async () => {
   const artifactId = ArtifactIdSchema.parse('current-scene')
   const archivedFare = fare({ id: 'archived-fare', originId: 'london', destinationId: 'paris', serviceDate: '2026-10-08', carrierName: 'Archive Rail' })

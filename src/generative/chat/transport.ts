@@ -4,9 +4,18 @@ import { assertNoBulkData } from '../contracts/privacy'
 import { projectNetworkHistory } from './history-projection'
 import type { HttpChatTransportInitOptions, PrepareSendMessagesRequest, UIMessage } from 'ai'
 
-export function snapshotRequest<T extends UIMessage>(capture: () => unknown | Promise<unknown>): PrepareSendMessagesRequest<T> {
+export type SnapshotCaptureRequest = { ownerMessageId: string }
+
+function latestUserMessageId(messages: readonly UIMessage[]): string {
+  let message: UIMessage | undefined
+  for (let index=messages.length-1;index>=0;index-=1) if(messages[index]?.role==='user'){message=messages[index];break}
+  if (!message) throw new Error('A user message is required to capture reply context')
+  return message.id
+}
+
+export function snapshotRequest<T extends UIMessage>(capture: (request: SnapshotCaptureRequest) => unknown | Promise<unknown>): PrepareSendMessagesRequest<T> {
   return async (options) => {
-    const currentContext = parseAgentContext(await capture())
+    const currentContext = parseAgentContext(await capture({ ownerMessageId: latestUserMessageId(options.messages) }))
     assertNoBulkData(currentContext)
     return { body: {
       ...options.body,
@@ -21,7 +30,7 @@ export function snapshotRequest<T extends UIMessage>(capture: () => unknown | Pr
 }
 
 export function createSnapshotTransport<T extends UIMessage>(options: {
-  capture: () => unknown | Promise<unknown>
+  capture: (request: SnapshotCaptureRequest) => unknown | Promise<unknown>
   transport?: Omit<HttpChatTransportInitOptions<T>, 'prepareSendMessagesRequest'>
 }) {
   return new AssistantChatTransport<T>({

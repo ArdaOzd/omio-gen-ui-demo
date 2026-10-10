@@ -31,6 +31,18 @@ export type CalendarDateSelectionScope = {
 }
 
 export type CoverageLoadStatus = { artifactId: ArtifactId; status: 'loading' | 'ready' | 'error'; message?: string }
+export type ReplyTurnLease = { token: number; ownerMessageId: string; ready: Promise<void>; signal: AbortSignal }
+export type ReplyTurnGate = {
+  beginTurn: (ownerMessageId: string) => ReplyTurnLease
+  markTurnRunning: (token: number) => boolean
+  abortTurn: () => void
+  releaseTurn: (token: number) => void
+  currentTurnToken: (ownerMessageId: string) => number | undefined
+  isTurnLocked: () => boolean
+  isTurnCurrent: (token: number) => boolean
+  subscribeTurn: (listener: () => void) => () => void
+  turnSignal: () => AbortSignal
+}
 
 const signature = (state: ArtifactUIState) => JSON.stringify({
   dates: state.dates,
@@ -76,6 +88,44 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
   const selections = new Map<ArtifactId, { token: symbol; controller: AbortController; promise: Promise<void> }>()
   type SourceWatch = { sourceVersion: string; selectedLegByFare: ReadonlyMap<FareId, string>; stop: () => void }
   const sourceWatches = new Map<ArtifactId, Map<ResourceKey, SourceWatch>>()
+  const deferredSourceChanges = new Map<ArtifactId, Set<ResourceKey>>()
+  const turnListeners = new Set<() => void>()
+  let turnPhase: 'idle' | 'capturing' | 'running' = 'idle'
+  let turnToken = 0
+  let turnOwnerMessageId: string | undefined
+  let turnReady = Promise.resolve()
+  let turnController = new AbortController()
+
+  const isTurnLocked = () => turnPhase !== 'idle'
+  const isTurnCurrent = (token: number) => isTurnLocked() && token === turnToken && !turnController.signal.aborted
+  const notifyTurn = () => turnListeners.forEach(listener => listener())
+  const deferSourceChange = (artifactId: ArtifactId, resourceKey: ResourceKey) => {
+    const keys = deferredSourceChanges.get(artifactId) ?? new Set<ResourceKey>()
+    keys.add(resourceKey)
+    deferredSourceChanges.set(artifactId, keys)
+  }
+
+  const applySourceChange = (artifactId: ArtifactId, resourceKey: ResourceKey, watch: SourceWatch): void => {
+    const bridge = options.bridge
+    if (!bridge || sourceWatches.get(artifactId)?.get(resourceKey) !== watch) return
+    let latest
+    try { latest = bridge.getBinding(resourceKey) } catch { return }
+    const state = store.get(artifactId)
+    if (!state.datasetRefs.includes(latest.datasetId)) return
+    const changedKey = legKey(latest.manifest.coverage)
+    const route = routePairs(state, bridge).map(pair => `${pair.originId}:${pair.destinationId}`)
+    const changedIndex = route.indexOf(changedKey)
+    if (changedIndex < 0) return
+    for (const fareId of state.selectedFareIds) {
+      const selectedKey = watch.selectedLegByFare.get(fareId)
+      const selectedIndex = selectedKey ? route.indexOf(selectedKey) : -1
+      if (selectedIndex >= 0 && selectedIndex < changedIndex) continue
+      const currentState = store.get(artifactId)
+      if (currentState.selectedFareIds.includes(fareId)) store.dispatch({ kind: 'select', artifactId, fareId, selected: false, expectedRevision: currentState.revision })
+    }
+    options.onSourceChanged?.(artifactId, resourceKey)
+    void retry(artifactId, [])
+  }
 
   const syncSourceWatches = (artifactId: ArtifactId): void => {
     const bridge = options.bridge
@@ -104,20 +154,8 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
         const nextSource = latest.manifest.source.sourceVersion
         if (nextSource === watch.sourceVersion) return
         watch.sourceVersion = nextSource
-        const state = store.get(artifactId)
-        const changedKey = legKey(latest.manifest.coverage)
-        const route = routePairs(state, bridge).map(pair => `${pair.originId}:${pair.destinationId}`)
-        const changedIndex = route.indexOf(changedKey)
-        if (changedIndex < 0) return
-        for (const fareId of state.selectedFareIds) {
-          const selectedKey = watch.selectedLegByFare.get(fareId)
-          const selectedIndex = selectedKey ? route.indexOf(selectedKey) : -1
-          if (selectedIndex >= 0 && selectedIndex < changedIndex) continue
-          const currentState = store.get(artifactId)
-          if (currentState.selectedFareIds.includes(fareId)) store.dispatch({ kind: 'select', artifactId, fareId, selected: false, expectedRevision: currentState.revision })
-        }
-        options.onSourceChanged?.(artifactId, resourceKey)
-        void retry(artifactId, [])
+        if (isTurnLocked()) deferSourceChange(artifactId, resourceKey)
+        else applySourceChange(artifactId, resourceKey, watch)
       })
       current.set(resourceKey, watch)
     }
@@ -282,7 +320,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     selections.set(artifactId, { token, controller, promise })
   }
 
-  const route = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => {
+  const routeCommand = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => {
     if (command.kind === 'select' && command.selected && selectionScope && (!selectionScope.fareIds.includes(command.fareId) || !currentScope(command.artifactId, selectionScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
     if (command.kind === 'calendarDateByLeg' && (!calendarScope || !currentCalendarScope(command.artifactId, command, calendarScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
     const result = store.dispatch({ ...command, expectedRevision: command.expectedRevision ?? store.get(command.artifactId).revision })
@@ -299,20 +337,95 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     return result
   }
 
-  const cancelPending = () => {
+  const stale = (command: UICommand): DispatchResult => ({ status: 'stale', revision: store.get(command.artifactId).revision })
+  const route = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => isTurnLocked()
+    ? stale(command)
+    : routeCommand(command, selectionScope, calendarScope)
+  const routeAgent = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => turnPhase === 'running'
+    ? routeCommand(command, selectionScope, calendarScope)
+    : stale(command)
+  const dispatchAgent = Object.assign(
+    (command: UICommand): DispatchResult => routeAgent(command),
+    {
+      selectFromQuery: (command: Extract<UICommand, { kind: 'select' }>, scope: QueryFareSelectionScope) => routeAgent(command, scope),
+      calendarDateFromQuery: (command: Extract<UICommand, { kind: 'calendarDateByLeg' }>, scope: CalendarDateSelectionScope) => routeAgent(command, undefined, scope),
+    },
+  )
+
+  const waitForIdle = async (artifactId?: ArtifactId): Promise<void> => {
+    while (true) {
+      const pending = artifactId
+        ? [requests.get(artifactId)?.promise, selections.get(artifactId)?.promise].flatMap(value => value ? [value] : [])
+        : [...[...requests.values()].map(value => value.promise), ...[...selections.values()].map(value => value.promise)]
+      if (!pending.length) return
+      await Promise.allSettled(pending)
+    }
+  }
+
+  const beginTurn = (ownerMessageId: string): ReplyTurnLease => {
+    if (isTurnLocked()) {
+      if (ownerMessageId !== turnOwnerMessageId) throw new Error('A different reply already owns the travel state')
+      return { token: turnToken, ownerMessageId, ready: turnReady, signal: turnController.signal }
+    }
+    turnPhase = 'capturing'
+    turnToken += 1
+    turnOwnerMessageId = ownerMessageId
+    turnController = new AbortController()
+    notifyTurn()
+    turnReady = waitForIdle()
+    return { token: turnToken, ownerMessageId, ready: turnReady, signal: turnController.signal }
+  }
+  const markTurnRunning = (token: number): boolean => {
+    if (!isTurnCurrent(token)) return false
+    if (turnPhase !== 'running') {
+      turnPhase = 'running'
+      notifyTurn()
+    }
+    return true
+  }
+  const abortTurn = (): void => {
+    if (isTurnLocked()) turnController.abort()
     for (const request of requests.values()) request.controller.abort()
     requests.clear()
     selections.forEach(selection=>selection.controller.abort())
     selections.clear()
+  }
+  const releaseTurn = (token: number): void => {
+    if (!isTurnLocked() || token !== turnToken) return
+    abortTurn()
+    turnPhase = 'idle'
+    turnOwnerMessageId = undefined
+    notifyTurn()
+    const queued = [...deferredSourceChanges]
+    deferredSourceChanges.clear()
+    for (const [artifactId, resourceKeys] of queued) for (const resourceKey of resourceKeys) {
+      const watch = sourceWatches.get(artifactId)?.get(resourceKey)
+      if (watch) applySourceChange(artifactId, resourceKey, watch)
+    }
+  }
+
+  const cancelPending = () => {
+    abortTurn()
+    deferredSourceChanges.clear()
     for (const watches of sourceWatches.values()) for (const watch of watches.values()) watch.stop()
     sourceWatches.clear()
   }
   return Object.assign(route, {
-    retry,
+    retry: (id: ArtifactId) => isTurnLocked() ? Promise.resolve() : retry(id),
+    dispatchAgent,
     selectFromQuery: (command: Extract<UICommand, { kind: 'select' }>, scope: QueryFareSelectionScope) => route(command, scope),
     calendarDateFromQuery: (command: Extract<UICommand, { kind: 'calendarDateByLeg' }>, scope: CalendarDateSelectionScope) => route(command, undefined, scope),
-    whenIdle: async (id: ArtifactId) => { await Promise.all([requests.get(id)?.promise, selections.get(id)?.promise]) },
+    whenIdle: (id: ArtifactId) => waitForIdle(id),
+    beginTurn,
+    markTurnRunning,
+    abortTurn,
+    releaseTurn,
+    currentTurnToken: (ownerMessageId: string) => isTurnLocked() && ownerMessageId === turnOwnerMessageId ? turnToken : undefined,
+    isTurnLocked,
+    isTurnCurrent,
+    subscribeTurn: (listener: () => void) => { turnListeners.add(listener); return () => turnListeners.delete(listener) },
+    turnSignal: () => turnController.signal,
     cancelPending,
-    dispose: cancelPending,
+    dispose: () => { cancelPending(); if(isTurnLocked())releaseTurn(turnToken) },
   })
 }

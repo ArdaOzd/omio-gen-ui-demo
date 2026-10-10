@@ -17,6 +17,7 @@ import { createDisplayContextStore } from './state/display-context'
 import { createIndexedDBStorage, createThreadPersistence, ThreadConflictError, type PersistedThread } from './state/persistence'
 import { assertNoBulkData } from './contracts/privacy'
 import { GenerativeChat } from './chat/runtime-provider'
+import type { SnapshotCaptureRequest } from './chat/transport'
 import type { TravelServices } from './catalog/context'
 import { createRuntimePresentValidationScope } from './presentation/present-scope'
 import { completeSmartPlannerHandoff, readSmartPlannerHandoff, type SmartPlannerHandoff } from './smart-planner-handoff'
@@ -299,26 +300,37 @@ function SessionConversation(props: SessionConversationProps) {
     }
   }, [ready, registryRevision, runtime, save])
 
-  const capture = async (): Promise<AgentContextEnvelope> => {
+  const capture = async ({ ownerMessageId }: SnapshotCaptureRequest): Promise<AgentContextEnvelope> => {
     const lifecycle = sceneLifecycleRef.current
     if (!lifecycle) throw new Error('Scene lifecycle unavailable')
-    await lifecycle.prepareTurn(messagesRef.current)
-    const { layouts, bindings } = getSceneMetadata(messagesRef.current,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
-    const sceneArtifactIds = lifecycle.activeArtifactIds(messagesRef.current)
-    const currentActiveArtifactId = runtime.artifacts.getActiveId()
-    const activeArtifactIds = [...new Set([...sceneArtifactIds, ...(currentActiveArtifactId ? [currentActiveArtifactId] : [])])]
-    const activeArtifactId = currentActiveArtifactId ?? activeArtifactIds[0]
-    return captureAgentContextWithSelectedFares({
-      turnId: `turn-${crypto.randomUUID()}`,
-      activeArtifactId,
-      artifactIds: activeArtifactIds,
-      store: runtime.services.state,
-      bridge: runtime.services.bridge,
-      displayStore: runtime.displayStore,
-      plannedFareFacts: runtime.planning.get().map(entry => entry.fact),
-      layoutSummaries: layouts,
-      componentBindings: bindings,
-    })
+    const turn = runtime.router.beginTurn(ownerMessageId)
+    try {
+      await turn.ready
+      if (!runtime.router.isTurnCurrent(turn.token)) throw new Error('Reply was cancelled before capture completed')
+      const scenePreparation = lifecycle.prepareTurn(messagesRef.current,turn.signal)
+      const { layouts, bindings } = getSceneMetadata(messagesRef.current,createRuntimePresentValidationScope(runtime.artifacts.getIds(),runtime.services))
+      const sceneArtifactIds = lifecycle.activeArtifactIds(messagesRef.current)
+      const currentActiveArtifactId = runtime.artifacts.getActiveId()
+      const activeArtifactIds = [...new Set([...sceneArtifactIds, ...(currentActiveArtifactId ? [currentActiveArtifactId] : [])])]
+      const activeArtifactId = currentActiveArtifactId ?? activeArtifactIds[0]
+      const context = captureAgentContextWithSelectedFares({
+        turnId: `turn-${crypto.randomUUID()}`,
+        activeArtifactId,
+        artifactIds: activeArtifactIds,
+        store: runtime.services.state,
+        bridge: runtime.services.bridge,
+        displayStore: runtime.displayStore,
+        plannedFareFacts: runtime.planning.get().map(entry => entry.fact),
+        layoutSummaries: layouts,
+        componentBindings: bindings,
+      },turn.signal)
+      if (!runtime.router.markTurnRunning(turn.token)) throw new Error('Reply was cancelled before capture completed')
+      const [,captured] = await Promise.all([scenePreparation,context])
+      return captured
+    } catch (error) {
+      if (!turn.signal.aborted) runtime.router.releaseTurn(turn.token)
+      throw error
+    }
   }
 
   const readDiagnostics = async () => {
@@ -365,6 +377,9 @@ function SessionConversation(props: SessionConversationProps) {
     {notice && <Alert role="status">{notice}</Alert>}
     <GenerativeChat
       services={runtime.services}
+      agentDispatch={runtime.router.dispatchAgent}
+      turnGate={runtime.router}
+      onRunSettled={runtime.router.releaseTurn}
       planning={runtime.planning}
       sceneLifecycle={sceneLifecycle}
       displayStore={runtime.displayStore}

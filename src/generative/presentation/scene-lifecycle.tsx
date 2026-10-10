@@ -9,6 +9,7 @@ import { createRuntimePresentValidationScopeForTree } from './present-scope'
 import { validatePresentTree, type PresentNode } from './tree'
 import { DisplayContextProvider } from '../catalog/display-context-provider'
 import { createDisplayContextStore, type DisplayContextStore } from '../state/display-context'
+import { abortable } from '../state/abortable'
 import { releaseDatasetWhenUnowned } from '../state/dataset-ownership'
 
 export const SceneSnapshotSchema=z.strictObject({
@@ -75,7 +76,7 @@ function frozenServices(snapshot:PersistedSceneSnapshot,live:TravelServices):Tra
 }
 
 export type SceneLifecycle={
-  prepareTurn:(messages:UIMessage[])=>Promise<void>
+  prepareTurn:(messages:UIMessage[],signal?:AbortSignal)=>Promise<void>
   finishTurn:(messages:UIMessage[],result:{failed:boolean;willContinue:boolean})=>void
   exportSnapshots:(messages?:UIMessage[])=>PersistedSceneSnapshot[]
   activeArtifactIds:(messages:UIMessage[])=>ArtifactId[]
@@ -155,7 +156,7 @@ export function createSceneLifecycle(services:TravelServices,options:{initialMes
     pending=undefined
   }
   return{
-    async prepareTurn(messages){
+    async prepareTurn(messages,signal=new AbortController().signal){
       if(pending)return
       const scenes=reconcile(messages),latest=scenes.at(-1)
       if(latest&&!activeToolCallId)activeToolCallId=latest.toolCallId
@@ -173,7 +174,7 @@ export function createSceneLifecycle(services:TravelServices,options:{initialMes
         for(const state of states)for(const datasetId of state.datasetRefs){
           const binding=services.bridge.findBinding(datasetId)
           if(!binding)continue
-          const manifest=await services.bridge.loadScope(binding.manifest.coverage,new AbortController().signal)
+          const manifest=await abortable(services.bridge.loadScope(binding.manifest.coverage,signal),signal)
           snapshot.pins.push({datasetId,resourceKey:manifest.resourceKey})
         }
       }catch(error){

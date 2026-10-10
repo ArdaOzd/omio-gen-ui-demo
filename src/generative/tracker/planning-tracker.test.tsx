@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { TravelProvider, type TravelServices } from '../catalog/context'
@@ -55,6 +55,32 @@ async function fixture(selected = true) {
 }
 
 describe('planning tracker', () => {
+  it('freezes buying controls without changing the plan', async () => {
+    const { planning, services, state, first } = await fixture()
+    render(<TravelProvider services={services}><PlanningTracker store={planning} disabled /></TravelProvider>)
+    const tracker = screen.getByRole('complementary', { name: 'Fare buying tracker' })
+    const before = planning.get()
+    for (const button of within(tracker).getAllByRole('button')) expect(button).toBeDisabled()
+    fireEvent.click(within(tracker).getByRole('button', { name: 'Clear all' }))
+    expect(planning.get()).toEqual(before)
+    expect(state.get(first).selectedFareIds).toEqual([rows[0]!.id])
+  })
+
+  it('blocks a tracker callback as soon as the live turn gate closes', async () => {
+    const { planning, services, state, first } = await fixture()
+    let locked = false
+    render(<TravelProvider services={{...services,interactionsLocked:()=>locked}}><PlanningTracker store={planning} /></TravelProvider>)
+    const tracker = screen.getByRole('complementary', { name: 'Fare buying tracker' })
+    const clear = within(tracker).getByRole('button', { name: 'Clear all' })
+    expect(clear).toBeEnabled()
+
+    locked = true
+    fireEvent.click(clear)
+
+    expect(planning.get()).toHaveLength(2)
+    expect(state.get(first).selectedFareIds).toEqual([rows[0]!.id])
+  })
+
   it('stays hidden until a fare is selected', async () => {
     const { planning, services } = await fixture(false)
     render(<TravelProvider services={services}><PlanningTracker store={planning} /></TravelProvider>)

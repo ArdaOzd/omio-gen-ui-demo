@@ -108,6 +108,118 @@ function bindingFor(bridge: FixedProjectionFixture['bridge'], refs: readonly Far
 }
 
 describe('direct action coverage routing', () => {
+  it('settles work started before Send while blocking user writes and allowing agent edits', async () => {
+    let started = () => {}
+    let finish = () => {}
+    const observed = new Promise<void>(resolve => { started = resolve })
+    const held = new Promise<void>(resolve => { finish = resolve })
+    const { fixed } = fixture({ rows: async value => {
+      if (value.dateWindow.from === '2026-11-01') {
+        started()
+        await held
+      }
+      return dates(value).map(date => fare(value, date))
+    } })
+    const initial = await loadAndCache(fixed, scope())
+    const store = createUIStateStore()
+    const id = ArtifactIdSchema.parse('reply-turn-gate')
+    store.initializeMissing(id, { dates: { start: '2026-10-02' }, citySequence: ['london', 'paris'], datasetRefs: [initial.datasetId] })
+    const router = createActionRouter(store, { bridge: fixed.bridge })
+
+    router({ kind: 'dates', artifactId: id, dates: { start: '2026-11-01' } })
+    await observed
+    const turn = router.beginTurn('user-settle')
+    const turnSignal = router.turnSignal()
+    const continuation = router.beginTurn('user-settle')
+    expect(() => router.beginTurn('different-user')).toThrow('A different reply already owns the travel state')
+    expect(continuation).toEqual(turn)
+    expect(continuation.signal).toBe(turnSignal)
+    expect(router.isTurnLocked()).toBe(true)
+    expect(router({ kind: 'route', artifactId: id, citySequence: ['london', 'rome'] })).toEqual({ status: 'stale', revision: store.get(id).revision })
+    expect(router.dispatchAgent({ kind: 'route', artifactId: id, citySequence: ['london', 'prague'] })).toEqual({ status: 'stale', revision: store.get(id).revision })
+    finish()
+    await turn.ready
+
+    const settled = store.get(id)
+    expect(settled.dates.start).toBe('2026-11-01')
+    expect(router.markTurnRunning(turn.token)).toBe(true)
+    expect(router.dispatchAgent({ kind: 'route', artifactId: id, citySequence: ['london', 'paris', 'prague'], expectedRevision: settled.revision })).toMatchObject({ status: 'applied' })
+    expect(router({ kind: 'route', artifactId: id, citySequence: ['london', 'rome'] })).toEqual({ status: 'stale', revision: store.get(id).revision })
+    expect(store.get(id).citySequence).toEqual(['london', 'paris', 'prague'])
+
+    router.releaseTurn(turn.token)
+    expect(router.isTurnLocked()).toBe(false)
+    expect(turnSignal.aborted).toBe(true)
+    expect(router.dispatchAgent({ kind: 'route', artifactId: id, citySequence: ['london', 'prague'] })).toEqual({ status: 'stale', revision: store.get(id).revision })
+    expect(router({ kind: 'route', artifactId: id, citySequence: ['london', 'rome'] })).toMatchObject({ status: 'applied' })
+    router.dispose()
+  })
+
+  it('aborts held pre-Send work without reopening writes before the turn releases', async () => {
+    let started = () => {}
+    const observed = new Promise<void>(resolve => { started = resolve })
+    const { fixed } = fixture({ rows: async (value, signal) => {
+      if (value.dateWindow.from === '2026-11-01') {
+        started()
+        await new Promise<void>((_resolve, reject) => signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true }))
+      }
+      return dates(value).map(date => fare(value, date))
+    } })
+    const initial = await loadAndCache(fixed, scope())
+    const store = createUIStateStore()
+    const id = ArtifactIdSchema.parse('reply-turn-abort')
+    store.initializeMissing(id, { dates: { start: '2026-10-02' }, citySequence: ['london', 'paris'], datasetRefs: [initial.datasetId] })
+    const router = createActionRouter(store, { bridge: fixed.bridge })
+
+    router({ kind: 'dates', artifactId: id, dates: { start: '2026-11-01' } })
+    await observed
+    const turn = router.beginTurn('user-abort')
+    router.cancelPending()
+    await turn.ready
+
+    expect(router.isTurnLocked()).toBe(true)
+    expect(router.turnSignal().aborted).toBe(true)
+    expect(router.isTurnCurrent(turn.token)).toBe(false)
+    expect(router.markTurnRunning(turn.token)).toBe(false)
+    expect(router({ kind: 'route', artifactId: id, citySequence: ['london', 'rome'] })).toEqual({ status: 'stale', revision: store.get(id).revision })
+    router.releaseTurn(turn.token)
+    expect(router.isTurnLocked()).toBe(false)
+    router.dispose()
+  })
+
+  it('keeps a cancelled settling lease from altering the next turn', async () => {
+    let started = () => {}
+    const observed = new Promise<void>(resolve => { started = resolve })
+    const { fixed } = fixture({ rows: async (value, signal) => {
+      if (value.dateWindow.from === '2026-11-01') {
+        started()
+        await new Promise<void>((_resolve, reject) => signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true }))
+      }
+      return dates(value).map(date => fare(value, date))
+    } })
+    const initial = await loadAndCache(fixed, scope())
+    const store = createUIStateStore()
+    const id = ArtifactIdSchema.parse('reply-turn-superseded')
+    store.initializeMissing(id, { dates: { start: '2026-10-02' }, citySequence: ['london', 'paris'], datasetRefs: [initial.datasetId] })
+    const router = createActionRouter(store, { bridge: fixed.bridge })
+
+    router({ kind: 'dates', artifactId: id, dates: { start: '2026-11-01' } })
+    await observed
+    const first = router.beginTurn('user-first')
+    router.cancelPending()
+    router.releaseTurn(first.token)
+    const second = router.beginTurn('user-second')
+    await first.ready
+
+    expect(first.signal.aborted).toBe(true)
+    expect(router.isTurnCurrent(first.token)).toBe(false)
+    expect(router.isTurnCurrent(second.token)).toBe(true)
+    router.releaseTurn(first.token)
+    expect(router.isTurnCurrent(second.token)).toBe(true)
+    router.releaseTurn(second.token)
+    router.dispose()
+  })
+
   it('rejects a calendar day captured from an obsolete committed result', async () => {
     const { fixed } = fixture()
     const binding = await loadAndCache(fixed, scope('london', 'paris', '2026-10-02', '2026-10-08'))

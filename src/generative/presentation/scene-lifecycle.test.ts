@@ -46,6 +46,23 @@ describe('scene lifecycle',()=>{
     expect(fixed.bridge.getBinding(binding.resourceKey).datasetId).toBe(binding.datasetId)
   })
 
+  it('rolls back promptly when a held scene pin is cancelled',async()=>{
+    const value=fixture(),fixed=createFixedProjectionFixture({rows:[],sourceVersion:'scene-cancel-v1'})
+    const binding=await fixed.bridge.loadScope(fixed.scope({originId:'london',destinationId:'paris',dateWindow:{from:'2026-11-08',to:'2026-11-08'},passengers:1,earliestDeparture:{date:'2026-11-08',minutes:0}}),new AbortController().signal).then(manifest=>fixed.bridge.getBinding(manifest.resourceKey))
+    value.state.replace({...value.state.get(value.first),datasetRefs:[binding.datasetId]})
+    const services:TravelServices={...value.services,bridge:fixed.bridge},firstMessage=present('first-scene',value.first,'London to Paris')
+    const lifecycle=createSceneLifecycle(services,{initialMessages:[firstMessage]})
+    vi.spyOn(fixed.bridge,'loadScope').mockImplementationOnce(()=>new Promise(()=>{}))
+    const controller=new AbortController()
+
+    const preparation=lifecycle.prepareTurn([firstMessage],controller.signal)
+    expect(lifecycle.view('first-scene').kind).toBe('frozen')
+    controller.abort(new DOMException('Stopped','AbortError'))
+
+    await expect(preparation).rejects.toMatchObject({name:'AbortError'})
+    expect(lifecycle.view('first-scene')).toEqual({kind:'active'})
+  })
+
   it('freezes the previous scene before live artifact edits and activates the accepted replacement',async()=>{
     const value=fixture(),firstMessage=present('first-scene',value.first,'London to Paris')
     const lifecycle=createSceneLifecycle(value.services,{initialMessages:[firstMessage]})

@@ -8,9 +8,9 @@ import { assistantWorkingPuns,ThreadShell } from './thread-shell'
 
 const services={bridge:createFareDataBridge(),state:createUIStateStore(),activate:()=>{},activeId:()=>undefined} satisfies TravelServices
 
-function Chat({messages,onNew}:{messages:ThreadMessageLike[];onNew?:(message:AppendMessage)=>Promise<void>}){
+function Chat({messages,onNew,locked=false,onStop}:{messages:ThreadMessageLike[];onNew?:(message:AppendMessage)=>Promise<void>;locked?:boolean;onStop?:()=>void}){
  const runtime=useExternalStoreRuntime({messages,isRunning:messages.at(-1)?.status?.type==='running',convertMessage:value=>fromThreadMessageLike(value,'assistant-test',{type:'complete',reason:'unknown'}),onNew:onNew??(async()=>{})})
- return <TravelProvider services={services}><AssistantRuntimeProvider runtime={runtime}><ThreadShell/></AssistantRuntimeProvider></TravelProvider>
+ return <TravelProvider services={services}><AssistantRuntimeProvider runtime={runtime}><ThreadShell locked={locked} onStop={onStop}/></AssistantRuntimeProvider></TravelProvider>
 }
 
 const assistant=(status:NonNullable<ThreadMessageLike['status']>,text='',id='assistant-test'):ThreadMessageLike=>({id,role:'assistant',content:text?[{type:'text',text}]:[],status})
@@ -19,6 +19,19 @@ beforeEach(()=>{Object.defineProperty(HTMLElement.prototype,'scrollTo',{configur
 afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();vi.unstubAllGlobals();Reflect.deleteProperty(HTMLElement.prototype,'scrollTo')})
 
 describe('assistant message activity',()=>{
+ it('freezes message controls and Send without putting Stop inside the frozen region',()=>{
+  const onStop=vi.fn()
+  render(<Chat messages={[assistant({type:'complete',reason:'stop'},'Tool response finished')]} locked onStop={onStop}/>)
+  expect(screen.getByRole('textbox',{name:'Message'})).toBeDisabled()
+  expect(screen.getByRole('button',{name:'Send message'})).toBeDisabled()
+  const stop=screen.getByRole('button',{name:'Stop response'})
+  expect(stop.closest('[inert]')).toBeNull()
+  expect(stop).toBeEnabled()
+  fireEvent.click(stop)
+  expect(onStop).toHaveBeenCalledOnce()
+  expect(document.querySelector('.travel-message')?.closest('[inert]')).toHaveAttribute('aria-disabled','true')
+ })
+
  it('sends each curated prompt from a concise default option',async()=>{
   const onNew=vi.fn<(message:AppendMessage)=>Promise<void>>(async()=>{}),options=[
    ['View a departure board','Show me the London to Paris journeys on 8 November 2026 as a visual departure board. Start with simple route orientation, then put the options in chronological departure and arrival order so I can understand the day at a glance. Finish with a small actionable shortlist and help me choose between saving time and saving money.'],

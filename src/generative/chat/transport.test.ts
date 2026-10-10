@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createSnapshotTransport, snapshotRequest } from './transport'
 import type { UIMessage } from 'ai'
 
@@ -8,13 +8,15 @@ const messages: UIMessage[] = [{ id: 'u1', role: 'user', parts: [{ type: 'text',
 
 describe('snapshot-aware native assistant-ui transport', () => {
   it('preserves augmented tools/system/config and complete request identity', async () => {
-    const prepare = snapshotRequest(() => envelope('turn-2'))
+    const capture = vi.fn(() => envelope('turn-2'))
+    const prepare = snapshotRequest(capture)
     const options = {
       id: 'thread-1', messages, requestMetadata: { source: 'retry' },
       body: { system: 'policy', tools: { present: { parameters: { type: 'object' } } }, config: { temperature: 0 }, callSettings: { budget: 4 } },
       credentials: undefined, headers: undefined, api: '/api/chat', trigger: 'regenerate-message' as const, messageId: 'a1',
     }
     const prepared = await prepare(options)
+    expect(capture).toHaveBeenCalledWith({ ownerMessageId: 'u1' })
     expect(prepared.body).toEqual({ ...options.body, id: options.id, messages, trigger: options.trigger, messageId: 'a1', metadata: options.requestMetadata, currentContext: envelope('turn-2') })
   })
 

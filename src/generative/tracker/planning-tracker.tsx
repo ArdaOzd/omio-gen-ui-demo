@@ -18,16 +18,18 @@ function arrival(fare: BoundedFareFact): string {
   return `${departure(total % 1440)}${nextDay ? ` +${nextDay}d` : ''}`
 }
 
-export function PlanningTracker({ store }: { store: PlanningStore }) {
+export function PlanningTracker({ store, disabled = false }: { store: PlanningStore; disabled?: boolean }) {
   const services = useTravelServices()
   const fares = useSyncExternalStore(store.subscribe, store.get, store.get)
   const ordered = useMemo(() => [...fares].sort(comparePlannedFares), [fares])
   const [dialogOpen, setDialogOpen] = useState(false)
   const tracker = useRef<HTMLDivElement>(null)
+  const interactionsDisabled = () => disabled || services.interactionsLocked?.() === true
 
   if (!ordered.length) return null
 
   const remove = (fare: PlannedFare) => {
+    if (interactionsDisabled()) return
     const active = services.activeId()
     const dispatch = services.dispatch ?? services.state.dispatch
     for (const owner of fare.owners) {
@@ -42,6 +44,7 @@ export function PlanningTracker({ store }: { store: PlanningStore }) {
   }
 
   const clear = () => {
+    if (interactionsDisabled()) return
     const active = services.activeId()
     const dispatch = services.dispatch ?? services.state.dispatch
     for (const fare of ordered) {
@@ -56,10 +59,10 @@ export function PlanningTracker({ store }: { store: PlanningStore }) {
     if (active && services.activeId() !== active) services.activate(active)
   }
 
-  return <Card ref={tracker} className="travel-planning-tracker" role="complementary" aria-label="Fare buying tracker">
+  return <Card ref={tracker} className="travel-planning-tracker" role="complementary" aria-label="Fare buying tracker" aria-disabled={disabled||undefined}>
     <div className="travel-planning-header">
       <div><span className="travel-planning-eyebrow">Your trip</span><h2>Fare buying tracker</h2></div>
-      <Button type="button" variant="outline" className="travel-planning-clear" onClick={clear}>Clear all</Button>
+      <Button type="button" variant="outline" className="travel-planning-clear" onClick={clear} disabled={disabled}>Clear all</Button>
     </div>
     <ol className="travel-planning-list">
       {ordered.map(({ fact, owners }) => <li key={fact.id} className="travel-planning-fare">
@@ -68,11 +71,11 @@ export function PlanningTracker({ store }: { store: PlanningStore }) {
           <span>{fact.serviceDate} · {departure(fact.departureMinutes)}–{arrival(fact)}</span>
         </div>
         <div className="travel-planning-detail"><span>{cityLabel(fact.mode)} · {carrierLabel(fact, services.bridge)}</span><strong>{money(fact.priceCents)}</strong></div>
-        <Button type="button" variant="outline" className="travel-planning-cancel" aria-label={`Cancel ${cityLabel(fact.originId)} to ${cityLabel(fact.destinationId)} on ${fact.serviceDate}`} onClick={() => remove({ fact, owners })}>Cancel</Button>
+        <Button type="button" variant="outline" className="travel-planning-cancel" aria-label={`Cancel ${cityLabel(fact.originId)} to ${cityLabel(fact.destinationId)} on ${fact.serviceDate}`} onClick={() => remove({ fact, owners })} disabled={disabled}>Cancel</Button>
       </li>)}
     </ol>
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild><Button type="button" className="travel-planning-buy">Buy</Button></DialogTrigger>
+    <Dialog open={!disabled&&dialogOpen} onOpenChange={open=>{if(!disabled)setDialogOpen(open)}}>
+      <DialogTrigger asChild><Button type="button" className="travel-planning-buy" disabled={disabled}>Buy</Button></DialogTrigger>
       <DialogContent container={tracker.current?.closest<HTMLElement>('.travel-app')} overlayClassName="travel-dialog-backdrop" className="travel-dialog" showCloseButton={false}>
         <DialogTitle id="travel-confirmation-title">Congrats, you are set for the trip.</DialogTitle><DialogDescription className="sr-only">Your selected synthetic itinerary is ready.</DialogDescription>
         <DialogClose asChild><Button type="button">Close</Button></DialogClose>

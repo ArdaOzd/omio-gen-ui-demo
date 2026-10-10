@@ -87,12 +87,20 @@ describe('source-version selection invalidation', () => {
     const router = createActionRouter(store, { bridge, onSourceChanged: (_artifactId, resourceKey) => changed.push(resourceKey) })
     await router.retry(artifactId)
 
+    const turn = router.beginTurn('user-source-refresh')
+    await turn.ready
+    expect(router.markTurnRunning(turn.token)).toBe(true)
     sourceVersion = 'source-2'
     await bridge.refreshScope(firstScope, new AbortController().signal)
+    expect(store.get(artifactId).selectedFareIds).toEqual([fares[0]!.id, fares[1]!.id])
+    expect(changed).toEqual([])
+
+    router.releaseTurn(turn.token)
     await router.whenIdle(artifactId)
 
     expect(store.get(artifactId).selectedFareIds).toEqual([])
-    expect(changed).toContain(first.resourceKey)
+    expect(changed.filter(resourceKey => resourceKey === first.resourceKey)).toHaveLength(1)
+    expect(new Set(changed).size).toBe(changed.length)
     const currentSecond = bridge.findBinding(DatasetIdSchema.parse(second.resourceKey))
     expect(currentSecond?.manifest.coverage.earliestDeparture).toEqual({ date: '2026-10-27', minutes: 0 })
     router.dispose()
