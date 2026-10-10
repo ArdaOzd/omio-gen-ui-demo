@@ -156,9 +156,10 @@ export function createSceneLifecycle(services:TravelServices,options:{initialMes
   }
   return{
     async prepareTurn(messages){
+      if(pending)return
       const scenes=reconcile(messages),latest=scenes.at(-1)
       if(latest&&!activeToolCallId)activeToolCallId=latest.toolCallId
-      if(!activeToolCallId||pending)return
+      if(!activeToolCallId)return
       const active=scenes.find(scene=>scene.toolCallId===activeToolCallId)
       if(!active)return
       const states=structuredClone(artifactIds(active.tree).map(id=>services.state.get(id)))

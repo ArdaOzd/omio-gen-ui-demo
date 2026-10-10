@@ -65,6 +65,25 @@ describe('scene lifecycle',()=>{
     expect(lifecycle.activeArtifactIds([firstMessage,secondMessage])).toEqual([value.second])
   })
 
+  it('keeps agent edits and their exact revision across tool continuations',async()=>{
+    const value=fixture(),firstMessage=present('first-scene',value.first,'London to Paris')
+    const lifecycle=createSceneLifecycle(value.services,{initialMessages:[firstMessage]})
+
+    await lifecycle.prepareTurn([firstMessage])
+    const first=value.state.dispatch({kind:'route',artifactId:value.first,citySequence:['london','paris','prague'],expectedRevision:value.state.get(value.first).revision})
+    expect(first).toEqual({status:'applied',revision:1})
+    lifecycle.finishTurn([firstMessage],{failed:false,willContinue:true})
+
+    await lifecycle.prepareTurn([firstMessage])
+    expect(value.state.get(value.first)).toMatchObject({revision:1,citySequence:['london','paris','prague']})
+    expect(lifecycle.view('first-scene').kind).toBe('frozen')
+    const second=value.state.dispatch({kind:'stays',artifactId:value.first,stays:[{cityId:'paris',nights:2}],expectedRevision:value.state.get(value.first).revision})
+    expect(second).toEqual({status:'applied',revision:2})
+
+    await lifecycle.prepareTurn([firstMessage])
+    expect(value.state.get(value.first)).toMatchObject({revision:2,citySequence:['london','paris','prague'],stays:[{cityId:'paris',nights:2}]})
+  })
+
   it('restores and reactivates the prior scene when replacement fails',async()=>{
     const value=fixture(),firstMessage=present('first-scene',value.first,'London to Paris')
     const lifecycle=createSceneLifecycle(value.services,{initialMessages:[firstMessage]})
