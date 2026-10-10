@@ -91,18 +91,45 @@ describe('generated fare selection', () => {
     expect(state.get(artifactId).selectedFareIds).toEqual([rows[1]!.id])
   })
 
-  it('toggles the exact plotted fare with an accessible pressed state', async () => {
+  it('inspects a plotted fare and changes the trip from its anchored detail card', async () => {
     const user = userEvent.setup()
     const { services, state } = await fixture()
     render(<TravelProvider services={services}><CatalogNode kind="DurationPricePlot" artifactRef={artifactId} /></TravelProvider>)
 
-    const point = await screen.findByRole('button', { name: 'Add Bus 7h 50m €23.00 to trip' })
+    const chart = await screen.findByRole('group', { name: 'Duration and price comparison' })
+    expect(within(chart).getByText('€20')).toBeInTheDocument()
+    expect(within(chart).getByText('2h 0m')).toBeInTheDocument()
+    const point = await screen.findByRole('button', { name: 'View Bus FlixBus, 7h 50m, €23.00' })
     expect(point).toHaveAttribute('aria-pressed', 'false')
+    expect(point).toHaveAttribute('aria-expanded', 'false')
+    await user.hover(point)
+    expect(screen.getByRole('status', { name: '€23.00, 7h 50m' })).toBeInTheDocument()
+
     await user.click(point)
-    expect(state.get(artifactId).selectedFareIds).toEqual([rows[0]!.id])
-    expect(screen.getByRole('button', { name: 'Remove Bus 7h 50m €23.00 from trip' })).toHaveAttribute('aria-pressed', 'true')
-    await user.click(screen.getByRole('button', { name: 'Remove Bus 7h 50m €23.00 from trip' }))
     expect(state.get(artifactId).selectedFareIds).toEqual([])
+    expect(point).toHaveAttribute('aria-expanded', 'true')
+    const details = screen.getByRole('dialog', { name: 'FlixBus fare details' })
+    expect(details).toHaveTextContent('London → Paris')
+    expect(details).toHaveTextContent('Departure9 Oct 2026 · 10:00')
+    expect(details).toHaveTextContent('Arrival9 Oct 2026 · 17:50')
+    expect(details).toHaveTextContent('Duration7h 50m')
+
+    const add = within(details).getByRole('button', { name: 'Add Bus €23.00 to trip' })
+    await user.click(add)
+    expect(state.get(artifactId).selectedFareIds).toEqual([rows[0]!.id])
+    expect(screen.getByRole('dialog', { name: 'FlixBus fare details' })).toBeInTheDocument()
+    await user.click(within(details).getByRole('button', { name: 'Remove Bus €23.00 from trip' }))
+    expect(state.get(artifactId).selectedFareIds).toEqual([])
+
+    await user.click(screen.getByRole('heading', { name: 'Price and journey time' }))
+    expect(screen.queryByRole('dialog', { name: 'FlixBus fare details' })).toBeNull()
+
+    point.focus()
+    await user.keyboard('{Enter}')
+    expect(within(screen.getByRole('dialog', { name: 'FlixBus fare details' })).getByRole('button', { name: 'Add Bus €23.00 to trip' })).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog', { name: 'FlixBus fare details' })).toBeNull()
+    expect(point).toHaveFocus()
   })
 
   it('keeps calendar date browsing separate from adding that day cheapest fare', async () => {

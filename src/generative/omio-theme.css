@@ -514,6 +514,142 @@ html .travel-app .travel-price {
   font-weight: 800;
 }
 
+html .travel-app .travel-plot {
+  container-type: inline-size;
+}
+
+html .travel-app .travel-plot-canvas {
+  position: relative;
+  width: min(100%, 640px);
+  margin-inline: auto;
+}
+
+html .travel-app .travel-plot-chart {
+  display: block;
+  width: 100%;
+  aspect-ratio: 470 / 294;
+  max-height: none;
+  overflow: visible;
+  color: var(--travel-muted);
+  font-size: 13px;
+}
+
+html .travel-app .travel-plot-axis {
+  fill: none;
+  stroke: var(--travel-ink);
+  stroke-width: 1.5;
+}
+
+html .travel-app .travel-plot-tick line {
+  stroke: var(--travel-line);
+  stroke-width: 1;
+}
+
+html .travel-app .travel-plot-tick text {
+  fill: var(--travel-muted);
+}
+
+html .travel-app .travel-plot-axis-title {
+  fill: var(--travel-ink);
+  font-weight: 750;
+}
+
+html .travel-app .travel-plot-guides > line {
+  pointer-events: none;
+  stroke: var(--travel-coral-dark);
+  stroke-dasharray: 4 4;
+  stroke-width: 1.5;
+}
+
+html .travel-app .travel-plot-readout rect {
+  fill: var(--travel-ink);
+}
+
+html .travel-app .travel-plot-readout text {
+  fill: #fff;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+html .travel-app .travel-plot-point {
+  cursor: pointer;
+  outline: none;
+}
+
+html .travel-app .travel-plot-hit-area {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+
+html .travel-app .travel-plot-point .travel-dot {
+  stroke: #fff;
+  stroke-width: 2;
+  transition: r 120ms ease, stroke-width 120ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+html .travel-app .travel-plot-point:hover .travel-dot,
+html .travel-app .travel-plot-point:focus-visible .travel-dot,
+html .travel-app .travel-plot-point[aria-expanded='true'] .travel-dot {
+  r: 9px;
+  stroke: var(--travel-ink);
+  stroke-width: 3;
+}
+
+html .travel-app .travel-plot-point.is-selected .travel-dot {
+  stroke: var(--travel-ink);
+  stroke-width: 4;
+}
+
+html .travel-app .travel-plot-stem {
+  position: absolute;
+  z-index: 2;
+  width: 2px;
+  height: 16px;
+  background: var(--travel-coral-dark);
+  transform: translateX(-50%);
+}
+
+html .travel-app .travel-plot-popover {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  width: min(290px, calc(100% - 16px));
+  gap: 10px;
+  padding: 16px;
+  border: 2px solid var(--travel-accent);
+  transform: translateX(-50%);
+  box-shadow: 0 14px 30px rgba(19, 41, 104, 0.22);
+}
+
+html .travel-app .travel-plot-popover > p {
+  margin: 0;
+}
+
+html .travel-app .travel-plot-popover-heading,
+html .travel-app .travel-plot-popover-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html .travel-app .travel-plot-popover-heading {
+  justify-content: space-between;
+}
+
+html .travel-app .travel-plot-popover [data-slot='button'] {
+  width: 100%;
+}
+
+@container (max-width: 306px) {
+  html .travel-app .travel-plot-popover {
+    left: 50% !important;
+  }
+}
+
 html .travel-app .travel-total {
   border-radius: 8px;
   background: linear-gradient(135deg, var(--travel-blue), var(--travel-navy-2));
