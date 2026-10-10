@@ -7,6 +7,7 @@ import { useTravelServices,type TravelServices } from '../catalog/context'
 import { ArtifactIdSchema,DatasetIdSchema,type ArtifactUIState } from '../contracts'
 import { prunePresentTree,validatePresentTree,type PresentNode } from './tree'
 import { isDatasetBoundComponent,resolvePlannerDatasetRef } from '../catalog/trip-planning/binding'
+import { normalizeLegacyRouteTextBindings } from '../catalog/route-text'
 import { legKey } from '../state/leg-bindings'
 import { createRuntimePresentValidationScopeForTree } from './present-scope'
 import type { ComponentRef } from '../contracts/display-context'
@@ -42,13 +43,14 @@ function PresentContent(props:Props&{nativeRender?:ComponentType<Props>}){
   if(!candidate)return <Skeleton className="travel-skeleton" role="status">Preparing your view…</Skeleton>
   let tree=partial?prunePresentTree(props.args,createRuntimePresentValidationScopeForTree(candidate,services),meta?.state==='partial'?meta.partialPath:undefined):validatePresentTree(props.args,createRuntimePresentValidationScopeForTree(candidate,services))
   if(!tree)return <Skeleton className="travel-skeleton" role="status">Preparing your view…</Skeleton>
+  tree=normalizeLegacyRouteTextBindings(tree)
   const sceneRef=`present-${props.toolCallId.replace(/[^a-zA-Z0-9_.:-]/g,'_').slice(-96)}`
   const normalize=(node:PresentNode)=>withDisplayComponentIdentity(node,'root',current=>{
    services.state.get(ArtifactIdSchema.parse(current.artifactRef))
-   if(current.datasetRef&&!resolvePlannerDatasetRef({kind:current.$type,artifactRef:current.artifactRef,datasetRef:current.datasetRef,legIndex:current.legIndex},services.state,services.bridge))throw new Error('Unavailable leg binding')
+   if(current.datasetRef&&isDatasetBoundComponent(current.$type)&&!resolvePlannerDatasetRef({kind:current.$type,artifactRef:current.artifactRef,datasetRef:current.datasetRef,legIndex:current.legIndex},services.state,services.bridge))throw new Error('Unavailable leg binding')
   },sceneRef)
   tree=normalize(tree)
-  const refs=(node:PresentNode):void=>{services.state.get(ArtifactIdSchema.parse(node.artifactRef));if(node.datasetRef&&!resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge))throw new Error('Unavailable dataset binding');if(Array.isArray(node.children))node.children.forEach(refs);else if(node.children&&typeof node.children!=='string')refs(node.children)}
+  const refs=(node:PresentNode):void=>{services.state.get(ArtifactIdSchema.parse(node.artifactRef));if(node.datasetRef&&isDatasetBoundComponent(node.$type)&&!resolvePlannerDatasetRef({kind:node.$type,artifactRef:node.artifactRef,datasetRef:node.datasetRef,legIndex:node.legIndex},services.state,services.bridge))throw new Error('Unavailable dataset binding');if(Array.isArray(node.children))node.children.forEach(refs);else if(node.children&&typeof node.children!=='string')refs(node.children)}
   if(!partial)refs(tree)
   const NativeRender=props.nativeRender
   if(!NativeRender)throw new Error("Native present renderer unavailable")

@@ -2,7 +2,8 @@ import type { BookingOwnership, ComponentDescriptor } from '../contracts';
 const refs = [
   {name:'artifactRef',kind:'ref',required:true}, {name:'datasetRef',kind:'ref',required:false},
   {name:'actionRef',kind:'ref',required:false}, {name:'selectorRef',kind:'ref',required:false},
-  {name:'title',kind:'text',required:false}, {name:'variant',kind:'variant',required:false}, {name:'body',kind:'text',required:false},
+  {name:'title',kind:'text',required:false}, {name:'tabLabel',kind:'text',required:false}, {name:'routeTextLegIndex',kind:'number',required:false},
+  {name:'variant',kind:'variant',required:false}, {name:'body',kind:'text',required:false},
 ] satisfies ComponentDescriptor['props'];
 const legRefs = [refs[0],refs[1],{name:'legIndex',kind:'number',required:true} as const,...refs.slice(2)] satisfies ComponentDescriptor['props'];
 const descriptor = (name: string, group: ComponentDescriptor['group'], description: string, children = false, legBound = false, bookingOwnership?: BookingOwnership): ComponentDescriptor => ({ name, group, description, props: legBound?legRefs:refs, children, ...(bookingOwnership ? { bookingOwnership } : {}) });
@@ -15,7 +16,7 @@ export const descriptors: ReadonlyArray<ComponentDescriptor> = [
   descriptor('StayDuration','control','Destination stay slider from 0 to 30 days. legIndex is the stable zero-based logical leg identity and datasetRef is its initial arriving-leg handle; its destination becomes the next leg origin, and selected arrival plus this stay sets the next minimum departure',false,true),
   descriptor('TravelDate','control','Same-leg local departure date. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; the first leg changes the trip display window and later legs preserve route offsets while the host enforces any preceding arrival threshold',false,true),
   descriptor('CityField','control','Editable origin and destination city fields backed by host location suggestions. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; changes write the artifact citySequence, where each destination connects to its stay and the next leg origin',false,true),
-  descriptor('TravelHero','layout','Travel artifact headline and introduction',true),
+  descriptor('TravelHero','layout','Travel artifact headline and introduction. Route or city text must use the registered live route tokens instead of copied city names',true),
   descriptor('Carousel','layout','Accessible horizontal panels',true),
   descriptor('DateWindow','control','Bounded local date window'),
   descriptor('FarePicker','control','Compact direct fare selector for one leg',false,true),
@@ -27,8 +28,8 @@ export const descriptors: ReadonlyArray<ComponentDescriptor> = [
   descriptor('ResponsiveGrid','layout','Responsive equal-column arrangement',true),
   descriptor('SplitPane','layout','Responsive primary and supporting sections',true),
   descriptor('StickySummary','layout','Persistent selected-trip summary',true),
-  descriptor('Tabs','layout','Accessible tabbed sections',true),
-  descriptor('Callout','layout','Short heading and explanatory body text up to600 characters',true),
+  descriptor('Tabs','layout','Accessible tabbed sections. Child tabLabel props may use registered live route tokens',true),
+  descriptor('Callout','layout','Short heading and explanatory body text up to600 characters. Route or city text must use registered live route tokens',true),
   descriptor('DateStrip','control','Direct local date selection'),
   descriptor('ModeChips','control','Direct local transport mode filtering',false,true),
   descriptor('CarrierFilter','control','Direct local carrier selection',false,true),

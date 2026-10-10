@@ -1,8 +1,8 @@
 # Shared catalog 1.1.0
 
-Manifest hash: 7432fe5d0a44d6fe9297b11cdbdce2d762b0d0d13c6745eb8137dcd5b8520690
+Manifest hash: 3193392c12377c68fdbe3f59903cd4a567c22f1147ee0317f3f2ab7c0915f16c
 
-Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. Dataset-bound components also require legIndex, a zero-based integer from 0 through 7, to keep their logical leg identity through route, date and coverage changes. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
+Every component accepts registered scalar artifactRef, datasetRef, actionRef and selectorRef. Dataset-bound components also require legIndex, a zero-based integer from 0 through 7, to keep their logical leg identity through route, date and coverage changes. Route and city text in title, body, string children or tabLabel must use live tokens: {{tripRoute}}, {{tripOrigin}}, {{tripDestination}}, {{legNumber}}, {{legRoute}}, {{legFrom}}, {{legTo}}, {{startDateLong}} and {{staySummary}}. Set routeTextLegIndex for leg tokens on containers; dataset-bound components may use their legIndex. No fare rows, arbitrary objects, URLs, code or styles are permitted. Titles and tab labels have at most160 characters. Callout explanatory body text has at most600 characters; body is appended after action in B positional calls. Variant is default, compact or emphasis. B positional argument order is append-only within this version.
 
 - MultiCityPlanGrid: All-leg booking workflow for distinct city stops with an optional final return to the origin. It owns every resolved leg in the artifact; composes CityField, TravelDate, TransportSelect, FareOrder and FadeFares per leg, inserts StayDuration for each destination, and cascades selected arrival plus stay into the next leg minimum departure.
 - FareCalendar: Bound-leg flexible-dates booking workflow within one exact display date window. Use exactly one FareCalendar for each requested leg when calendars are the trip booking interface. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle. It uses that leg modes and minimum departure, defaults each day to its local cheapest synthetic fare, and opens that day fares without sending rows to the model.
@@ -12,7 +12,7 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - StayDuration: Destination stay slider from 0 to 30 days. legIndex is the stable zero-based logical leg identity and datasetRef is its initial arriving-leg handle; its destination becomes the next leg origin, and selected arrival plus this stay sets the next minimum departure.
 - TravelDate: Same-leg local departure date. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; the first leg changes the trip display window and later legs preserve route offsets while the host enforces any preceding arrival threshold.
 - CityField: Editable origin and destination city fields backed by host location suggestions. legIndex is the stable zero-based logical leg identity and datasetRef is its initial load handle; changes write the artifact citySequence, where each destination connects to its stay and the next leg origin.
-- TravelHero: Travel artifact headline and introduction. May contain catalog children.
+- TravelHero: Travel artifact headline and introduction. Route or city text must use the registered live route tokens instead of copied city names. May contain catalog children.
 - Carousel: Accessible horizontal panels. May contain catalog children.
 - DateWindow: Bounded local date window.
 - FarePicker: Compact direct fare selector for one leg.
@@ -24,8 +24,8 @@ Every component accepts registered scalar artifactRef, datasetRef, actionRef and
 - ResponsiveGrid: Responsive equal-column arrangement. May contain catalog children.
 - SplitPane: Responsive primary and supporting sections. May contain catalog children.
 - StickySummary: Persistent selected-trip summary. May contain catalog children.
-- Tabs: Accessible tabbed sections. May contain catalog children.
-- Callout: Short heading and explanatory body text up to600 characters. May contain catalog children.
+- Tabs: Accessible tabbed sections. Child tabLabel props may use registered live route tokens. May contain catalog children.
+- Callout: Short heading and explanatory body text up to600 characters. Route or city text must use registered live route tokens. May contain catalog children.
 - DateStrip: Direct local date selection.
 - ModeChips: Direct local transport mode filtering.
 - CarrierFilter: Direct local carrier selection.

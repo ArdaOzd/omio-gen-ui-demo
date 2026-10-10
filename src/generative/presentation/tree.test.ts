@@ -26,6 +26,16 @@ describe('native present boundary',()=>{
  it('rejects executable sources, raw rows, invented refs, unknown components and props',()=>{
   for(const input of [tree([{...leaf('FareCards','f'),rows:[{secret:LEAKAGE_SENTINEL}]}]),tree([leaf('Iframe','x')]),tree([{...leaf('ModeChips','m'),actionRef:'fetch'}]),tree([{...leaf('FareCards','f'),datasetRef:'unknown'}]),tree([{...leaf('Section','s'),html:'<script>alert(1)</script>'}]),tree([{...leaf('FareCards','f'),title:LEAKAGE_SENTINEL}])])expect(()=>validatePresentTree(input,scope)).toThrow()
  })
+ it('accepts registered live route text and rejects unknown or unbound leg tokens',()=>{
+  expect(validatePresentTree(tree([{...leaf('Section','route'),title:'{{legNumber}} · {{legRoute}}',routeTextLegIndex:0}]),scope)).toBeTruthy()
+  expect(()=>validatePresentTree(tree([{...leaf('Section','route'),title:'{{unknownRoute}}'}]),scope)).toThrow('Unknown route text token')
+  expect(()=>validatePresentTree(tree([{...leaf('Section','route'),title:'{{unknown_route_2}}'}]),scope)).toThrow('Unknown route text token')
+  expect(()=>validatePresentTree(tree([{...leaf('Section','route'),title:'{{legRoute'}]),scope)).toThrow('Unknown route text token')
+  expect(()=>validatePresentTree(tree([{...leaf('Section','route'),title:'{{legRoute}}'}]),scope)).toThrow('Leg route text requires leg index')
+  const mismatched={...leaf('FareCards','mismatched-route'),title:'{{legRoute}}',legIndex:0,routeTextLegIndex:1}
+  expect(()=>validatePresentTree(tree([mismatched]),scope)).toThrow('Route text leg index must match dataset leg index')
+  expect(prunePresentTree(tree([mismatched]),scope)?.children).toEqual([])
+ })
  it('rejects unbounded recursion and ambiguous duplicate identity',()=>{
   expect(()=>validatePresentTree(tree([leaf('FareCards','same'),leaf('FareCards','same')]),scope)).toThrow('Duplicate')
   let node:unknown=leaf('FareCards','f');for(let i=0;i<10;i++)node={...leaf('Stack',`stack-${i}`),children:[node]}

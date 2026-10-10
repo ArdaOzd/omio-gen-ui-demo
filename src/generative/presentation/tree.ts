@@ -3,6 +3,7 @@ import { LIMITS } from '../contracts'
 import { assertNoBulkData } from '../contracts/privacy'
 import { catalogDescriptors, nodePropsSchema } from '../catalog/generated/catalog'
 import { isDatasetBoundComponent, isLegBoundPlannerComponent } from '../catalog/trip-planning/binding'
+import { routeTextHasUnknownToken, routeTextNeedsLeg } from '../catalog/route-text'
 export type PresentNode=z.infer<typeof nodePropsSchema>&{$type:string;$key?:string;children?:PresentNode|PresentNode[]|string}
 const names=new Set<string>(catalogDescriptors.map(d=>d.name));const layouts=new Set<string>(catalogDescriptors.filter(d=>d.children).map(d=>d.name))
 const bookingScopes=new Map<string,'all-legs'|'bound-leg'>()
@@ -22,6 +23,12 @@ export const registeredActions=new Set(['filters','dates','sort','sortByLeg','ca
 export const registeredSelectors=new Set(['visibleFares','priceByDay','modeCounts','carrierCounts','cheapestFastest','selectedItinerary','syntheticTotal','coverage','route','timeline','legSchedule'])
 const componentKey=z.string().min(1).max(96).regex(/^[a-zA-Z0-9_.:-]+$/)
 const nodeSchema:z.ZodType<PresentNode>=z.lazy(()=>nodePropsSchema.extend({$type:z.string().refine(name=>names.has(name),'Unregistered component'),$key:componentKey.optional(),children:z.union([z.string().max(160),nodeSchema,z.array(nodeSchema).max(LIMITS.treeNodes)]).optional()}))
+function assertRouteTextBindings(node:PresentNode):void{
+ const values=[node.title,node.body,node.tabLabel,typeof node.children==='string'?node.children:undefined].filter((value):value is string=>value!==undefined)
+ if(values.some(routeTextHasUnknownToken))throw new Error('Unknown route text token')
+ if(node.legIndex!==undefined&&node.routeTextLegIndex!==undefined&&node.legIndex!==node.routeTextLegIndex)throw new Error('Route text leg index must match dataset leg index')
+ if(values.some(routeTextNeedsLeg)&&node.routeTextLegIndex===undefined&&node.legIndex===undefined)throw new Error('Leg route text requires leg index')
+}
 type BookingClaim={artifactRef:string;scope:'all-legs'|'bound-leg';legIndex?:number}
 function bookingClaims(root:PresentNode):BookingClaim[]{
  const claims:BookingClaim[]=[]
@@ -82,6 +89,7 @@ export function validatePresentTree(input:unknown,scope?:PresentValidationScope)
   if(scope&&node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(datasetBound&&node.legIndex!==undefined))throw new Error('Unknown dataset reference')
   if(node.actionRef&&!registeredActions.has(node.actionRef))throw new Error('Unknown action reference')
   if(node.selectorRef&&!registeredSelectors.has(node.selectorRef))throw new Error('Unknown selector reference')
+  assertRouteTextBindings(node)
   if(node.$key){if(keys.has(node.$key))throw new Error('Duplicate node key');keys.add(node.$key)}
   if(node.children&&!layouts.has(node.$type))throw new Error('Leaf component has children')
   if(Array.isArray(node.children))node.children.forEach(child=>visit(child,depth+1));else if(node.children&&typeof node.children!=='string')visit(node.children,depth+1)
@@ -109,6 +117,7 @@ export function prunePresentTree(input:unknown,scope?:PresentValidationScope,par
   if(depth===1&&node.$type!=='TravelSurface')return undefined
   if(scope&&(!scope.artifactIds.has(node.artifactRef)||(node.datasetRef&&!scope.datasetIds.has(node.datasetRef)&&!(datasetBound&&node.legIndex!==undefined))))return undefined
   if(node.actionRef&&!registeredActions.has(node.actionRef)||node.selectorRef&&!registeredSelectors.has(node.selectorRef))return undefined
+  try{assertRouteTextBindings(node)}catch{return undefined}
   if(node.$key){if(keys.has(node.$key))return undefined;keys.add(node.$key)}
   if(!layouts.has(node.$type))return node
   const childPath=path?.[0]==='children'?path.slice(1):undefined

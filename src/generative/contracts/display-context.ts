@@ -93,6 +93,7 @@ export const ComponentIdentitySchema = z.strictObject({
   scope: DisplayScopeSchema,
   authored: z.strictObject({
     title: text.optional(),
+    tabLabel: text.optional(),
     body: text.optional(),
     variant: z.enum(['default', 'compact', 'emphasis']).optional(),
     actionRef: ref.optional(),
