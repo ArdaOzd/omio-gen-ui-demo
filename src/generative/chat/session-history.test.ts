@@ -4,6 +4,7 @@ import {
   createSessionSummary,
   orderedSessions,
   readSessionHistory,
+  renameSessionSummary,
   sessionTitle,
   updateSessionSummary,
   updateSessionDraft,
@@ -42,5 +43,14 @@ describe('browser-local session history', () => {
     const touched = updateSessionSummary(history, older.id, 'Old plan', new Date('2026-10-07T12:00:00Z'))
     expect(orderedSessions(touched.sessions).map(session => session.title)).toEqual(['Old plan', 'New plan'])
     expect(updateSessionDraft(touched, older.id, 'Unsent details').sessions.find(session => session.id === older.id)?.draft).toBe('Unsent details')
+  })
+
+  it('preserves a custom title when later message saves refresh the session summary', () => {
+    const session = createSessionSummary({ title: 'Original audit prompt', now: new Date('2026-10-07T10:00:00Z') })
+    const history: SessionHistory = { version: 1, activeSessionId: session.id, collapsed: false, sessions: [session] }
+    const renamed = renameSessionSummary(history, session.id, '  #3  ', new Date('2026-10-07T11:00:00Z'))
+    const flushed = updateSessionSummary(renamed, session.id, 'Original audit prompt', new Date('2026-10-07T12:00:00Z'))
+
+    expect(flushed.sessions[0]).toMatchObject({ title: '#3', customTitle: true, updatedAt: '2026-10-07T12:00:00.000Z' })
   })
 })

@@ -1,5 +1,7 @@
-import { PanelLeftClose, PanelLeftOpen, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Check, PanelLeftClose, PanelLeftOpen, Pencil, Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { orderedSessions, type SessionSummary } from './session-history'
 
 export type SessionSidebarProps = {
@@ -9,10 +11,13 @@ export type SessionSidebarProps = {
   switching?: boolean
   onNew: () => void
   onSelect: (id: string) => void
+  onRename: (id: string, title: string) => void
   onCollapsedChange: (collapsed: boolean) => void
 }
 
 export function SessionSidebar(props: SessionSidebarProps) {
+  const [renameDraft, setRenameDraft] = useState<{ sessionId: string; title: string }>()
+
   return <aside className="travel-session-sidebar" aria-label="Chat sessions" data-collapsed={props.collapsed || undefined}>
     <div className="travel-session-sidebar-header">
       <Button
@@ -32,20 +37,63 @@ export function SessionSidebar(props: SessionSidebarProps) {
       </Button>
     </div>
     <nav className="travel-session-list" aria-label="Previous chats">
-      {orderedSessions(props.sessions).map(session => <Button
-        key={session.id}
-        type="button"
-        variant="ghost"
-        className="travel-session-item"
-        data-active={session.id === props.activeSessionId || undefined}
-        aria-current={session.id === props.activeSessionId ? 'page' : undefined}
-        aria-label={props.collapsed ? session.title : undefined}
-        disabled={props.switching}
-        onClick={() => props.onSelect(session.id)}
-      >
-        <span className="travel-session-mark" aria-hidden="true">{session.title.slice(0, 1).toLocaleUpperCase()}</span>
-        <span className="travel-session-title">{session.title}</span>
-      </Button>)}
+      {orderedSessions(props.sessions).map(session => <div key={session.id} style={{ display: 'flex', minWidth: 0, alignItems: 'center', gap: 4 }}>
+        {renameDraft?.sessionId === session.id
+          ? <form
+              aria-label={`Rename chat ${session.title}`}
+              style={{ display: 'flex', minWidth: 0, flex: 1, alignItems: 'center', gap: 4 }}
+              onSubmit={event => {
+                event.preventDefault()
+                if (!renameDraft.title.trim()) return
+                props.onRename(session.id, renameDraft.title)
+                setRenameDraft(undefined)
+              }}
+            >
+              <Input
+                autoFocus
+                aria-label="Chat name"
+                value={renameDraft.title}
+                onChange={event => setRenameDraft({ sessionId: session.id, title: event.target.value })}
+                onKeyDown={event => {
+                  if (event.key !== 'Escape') return
+                  event.preventDefault()
+                  setRenameDraft(undefined)
+                }}
+              />
+              <Button type="submit" variant="ghost" size="icon" aria-label="Save chat name" disabled={!renameDraft.title.trim()}>
+                <Check aria-hidden="true" />
+              </Button>
+              <Button type="button" variant="ghost" size="icon" aria-label="Cancel renaming chat" onClick={() => setRenameDraft(undefined)}>
+                <X aria-hidden="true" />
+              </Button>
+            </form>
+          : <>
+              <Button
+                type="button"
+                variant="ghost"
+                className="travel-session-item"
+                style={{ flex: 1 }}
+                data-active={session.id === props.activeSessionId || undefined}
+                aria-current={session.id === props.activeSessionId ? 'page' : undefined}
+                aria-label={props.collapsed ? session.title : undefined}
+                disabled={props.switching}
+                onClick={() => props.onSelect(session.id)}
+              >
+                <span className="travel-session-mark" aria-hidden="true">{session.title.slice(0, 1).toLocaleUpperCase()}</span>
+                <span className="travel-session-title">{session.title}</span>
+              </Button>
+              {!props.collapsed && <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={`Rename chat ${session.title}`}
+                disabled={props.switching}
+                onClick={() => setRenameDraft({ sessionId: session.id, title: session.title })}
+              >
+                <Pencil aria-hidden="true" />
+              </Button>}
+            </>}
+      </div>)}
     </nav>
   </aside>
 }

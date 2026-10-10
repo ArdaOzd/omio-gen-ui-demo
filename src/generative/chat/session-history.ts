@@ -10,6 +10,7 @@ const SessionSummarySchema = z.strictObject({
   updatedAt: z.string().datetime(),
   handoffId: z.string().min(1).max(128).optional(),
   draft: z.string().optional(),
+  customTitle: z.boolean().optional(),
 })
 
 const SessionHistorySchema = z.strictObject({
@@ -64,7 +65,21 @@ export function updateSessionSummary(history: SessionHistory, id: string, title:
     ...history,
     sessions: history.sessions.map(session => session.id === id ? {
       ...session,
-      title: title.trim() || session.title,
+      title: session.customTitle ? session.title : title.trim() || session.title,
+      updatedAt: now.toISOString(),
+    } : session),
+  }
+}
+
+export function renameSessionSummary(history: SessionHistory, id: string, title: string, now = new Date()): SessionHistory {
+  const nextTitle = title.trim()
+  if (!nextTitle) return history
+  return {
+    ...history,
+    sessions: history.sessions.map(session => session.id === id ? {
+      ...session,
+      title: nextTitle,
+      customTitle: true,
       updatedAt: now.toISOString(),
     } : session),
   }

@@ -22,6 +22,7 @@ import { createRuntimePresentValidationScope } from './presentation/present-scop
 import { completeSmartPlannerHandoff, readSmartPlannerHandoff, type SmartPlannerHandoff } from './smart-planner-handoff'
 import {
   createSessionSummary,
+  renameSessionSummary,
   readSessionHistory,
   sessionTitle,
   updateSessionDraft,
@@ -93,6 +94,7 @@ type SessionConversationProps = {
   registerFlush: RegisterFlush
   onNew: () => void
   onSelect: (id: string) => void
+  onRename: (id: string, title: string) => void
   onCollapsedChange: (collapsed: boolean) => void
   onSessionSaved: (id: string, title: string) => void
   onSessionDraft: (id: string, draft: string) => void
@@ -347,6 +349,7 @@ function SessionConversation(props: SessionConversationProps) {
     switching={props.switching}
     onNew={props.onNew}
     onSelect={props.onSelect}
+    onRename={props.onRename}
     onCollapsedChange={props.onCollapsedChange}
   />
 
@@ -486,6 +489,10 @@ export function GenerativeRoute() {
     setHistory(current => current ? { ...current, collapsed } : current)
   }, [])
 
+  const renameSession = useCallback((id: string, title: string) => {
+    setHistory(current => current ? renameSessionSummary(current, id, title) : current)
+  }, [])
+
   const onSessionSaved = useCallback((id: string, title: string) => {
     setHistory(current => current ? updateSessionSummary(current, id, title) : current)
   }, [])
@@ -512,6 +519,7 @@ export function GenerativeRoute() {
     registerFlush={registerFlush}
     onNew={newSession}
     onSelect={selectSession}
+    onRename={renameSession}
     onCollapsedChange={setCollapsed}
     onSessionSaved={onSessionSaved}
     onSessionDraft={onSessionDraft}
