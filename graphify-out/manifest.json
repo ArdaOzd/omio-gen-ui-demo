@@ -504,9 +504,9 @@
     "semantic_hash": "82a07ffa16369018b0c2799e59ab8b8e"
   },
   "src/generative/routes.tsx": {
-    "mtime": 1791572386.657165,
-    "seen": 1791572530.249949,
-    "ast_hash": "a8af62c4786f339e6724450696c45e30",
+    "mtime": 1791644005.2428138,
+    "seen": 1791644146.9520462,
+    "ast_hash": "66178f6103293fd96c64145e1b57a363",
     "semantic_hash": ""
   },
   "src/generative/state/action-router.test.ts": {
@@ -750,9 +750,9 @@
     "semantic_hash": ""
   },
   "src/generative/routes.test.tsx": {
-    "mtime": 1791572386.6765769,
-    "seen": 1791572530.2499478,
-    "ast_hash": "75cd14c89b7f589f85569de12eaaae78",
+    "mtime": 1791644046.93922,
+    "seen": 1791644146.952045,
+    "ast_hash": "99fba63a8799ef7fad1996a339612915",
     "semantic_hash": ""
   },
   "verification/generative-ui/root-saved-chat-reload.json": {
@@ -1699,7 +1699,7 @@
   },
   "reports/generative-capabilities/capability-audit.json": {
     "mtime": 1791569809.3882923,
-    "seen": 1791627608.256146,
+    "seen": 1791644146.9519439,
     "ast_hash": "",
     "semantic_hash": ""
   },
