@@ -1,0 +1,1053 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-10T16:54:45.021Z",
+  "appUrl": "http://127.0.0.1:5173/generative",
+  "comparison": "Exact counts of model-authored $type nodes from persisted scene sources in the original and rewritten chats.",
+  "savedChatsReopened": true,
+  "title": "Natural-language prompt audit",
+  "acceptanceRule": "The generated chat must match the original chat's component types and the count of every type.",
+  "result": {
+    "passingCases": 5,
+    "totalCases": 5,
+    "allPassed": true
+  },
+  "cases": [
+    {
+      "id": 8,
+      "originalChatName": "#8",
+      "generatedChatName": "#8 user",
+      "originalThreadId": "travel-e01126f7-f873-4a6b-83c7-9199525a4d06",
+      "generatedThreadId": "travel-f2dad3c1-48d2-4e30-91f3-6e00e33f4327",
+      "originalPrompt": "Show expanded fare cards for Berlin to Amsterdam on 8 December 2026. Put a simple one-day departure picker plus mode and carrier filters directly above them so I can change the day or operator and add a fare.",
+      "prompt": "Show me Berlin-to-Amsterdam journeys for 8 December 2026 in one easy-to-read list, with the company, departure and arrival times, journey length, stops and price for each, and a way to add one to my trip. Above the list, I want to change the departure day and filter the results by company and by train, bus or flight. For the transport filter, give me small buttons I can turn on or off independently, so I can include more than one type. Keep these choices together on one line and the rest of the view in one column. Under the details, compare the cheapest and fastest journeys so I can decide whether the time saving is worth paying more.",
+      "attemptCount": 3,
+      "originalInventory": [
+        {
+          "type": "CarrierFilter",
+          "count": 1
+        },
+        {
+          "type": "CheapestFastest",
+          "count": 1
+        },
+        {
+          "type": "FareCards",
+          "count": 1
+        },
+        {
+          "type": "Inline",
+          "count": 1
+        },
+        {
+          "type": "ModeChips",
+          "count": 1
+        },
+        {
+          "type": "Stack",
+          "count": 1
+        },
+        {
+          "type": "TravelDate",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "generatedInventory": [
+        {
+          "type": "CarrierFilter",
+          "count": 1
+        },
+        {
+          "type": "CheapestFastest",
+          "count": 1
+        },
+        {
+          "type": "FareCards",
+          "count": 1
+        },
+        {
+          "type": "Inline",
+          "count": 1
+        },
+        {
+          "type": "ModeChips",
+          "count": 1
+        },
+        {
+          "type": "Stack",
+          "count": 1
+        },
+        {
+          "type": "TravelDate",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "comparison": {
+        "exactTypeSetMatch": true,
+        "exactInstanceCountMatch": true,
+        "exactMatch": true,
+        "missingTypes": [],
+        "extraTypes": [],
+        "countMismatches": []
+      },
+      "reopenedCheck": {
+        "number": 8,
+        "chatName": "#8 user",
+        "exactPrompt": true,
+        "sameCounts": true,
+        "renderError": false,
+        "idle": true,
+        "threadId": "travel-f2dad3c1-48d2-4e30-91f3-6e00e33f4327"
+      }
+    },
+    {
+      "id": 10,
+      "originalChatName": "#10",
+      "generatedChatName": "#10 user",
+      "originalThreadId": "travel-ee49d057-66a4-484b-b6b9-094cce72cbf6",
+      "generatedThreadId": "travel-a2086213-92ad-4805-a159-a4073f954eab",
+      "originalPrompt": "Turn my London to Paris options on 8 December 2026 into a compact journey story. Use a hero, a two-tab comparison, and a swipeable set of option panels. Keep the main decision area beside a persistent summary, and include one short callout explaining that prices are synthetic.",
+      "prompt": "I'm going from London to Paris on 8 December 2026 and want an easy way to choose. Start with a quick introduction to the trip. Let me switch between a small table of the exact options and a chart showing what each price buys me in travel time. Under that, let me swipe between a cheapest-versus-fastest comparison and the day's departure and arrival schedule. Keep those choices next to my chosen journey and its total cost, and keep my selection visible while I browse. Add a short reminder that these are demo prices.",
+      "attemptCount": 1,
+      "originalInventory": [
+        {
+          "type": "Callout",
+          "count": 1
+        },
+        {
+          "type": "Carousel",
+          "count": 1
+        },
+        {
+          "type": "CheapestFastest",
+          "count": 1
+        },
+        {
+          "type": "ComparisonTable",
+          "count": 1
+        },
+        {
+          "type": "DurationPricePlot",
+          "count": 1
+        },
+        {
+          "type": "ItineraryTimeline",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 4
+        },
+        {
+          "type": "SelectedItinerary",
+          "count": 1
+        },
+        {
+          "type": "SplitPane",
+          "count": 1
+        },
+        {
+          "type": "Stack",
+          "count": 1
+        },
+        {
+          "type": "StickySummary",
+          "count": 1
+        },
+        {
+          "type": "SyntheticTotal",
+          "count": 1
+        },
+        {
+          "type": "Tabs",
+          "count": 1
+        },
+        {
+          "type": "TravelHero",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "generatedInventory": [
+        {
+          "type": "Callout",
+          "count": 1
+        },
+        {
+          "type": "Carousel",
+          "count": 1
+        },
+        {
+          "type": "CheapestFastest",
+          "count": 1
+        },
+        {
+          "type": "ComparisonTable",
+          "count": 1
+        },
+        {
+          "type": "DurationPricePlot",
+          "count": 1
+        },
+        {
+          "type": "ItineraryTimeline",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 4
+        },
+        {
+          "type": "SelectedItinerary",
+          "count": 1
+        },
+        {
+          "type": "SplitPane",
+          "count": 1
+        },
+        {
+          "type": "Stack",
+          "count": 1
+        },
+        {
+          "type": "StickySummary",
+          "count": 1
+        },
+        {
+          "type": "SyntheticTotal",
+          "count": 1
+        },
+        {
+          "type": "Tabs",
+          "count": 1
+        },
+        {
+          "type": "TravelHero",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "comparison": {
+        "exactTypeSetMatch": true,
+        "exactInstanceCountMatch": true,
+        "exactMatch": true,
+        "missingTypes": [],
+        "extraTypes": [],
+        "countMismatches": []
+      },
+      "reopenedCheck": {
+        "number": 10,
+        "chatName": "#10 user",
+        "exactPrompt": true,
+        "sameCounts": true,
+        "renderError": false,
+        "idle": true,
+        "threadId": "travel-a2086213-92ad-4805-a159-a4073f954eab"
+      }
+    },
+    {
+      "id": 12,
+      "originalChatName": "#12",
+      "generatedChatName": "#12 user",
+      "originalThreadId": "travel-763fc507-af44-4728-b777-f974ad32c8a1",
+      "generatedThreadId": "travel-9d5890ca-9864-4eca-9b30-104a3cade217",
+      "originalPrompt": "Build a manual editor for a London to Paris to Barcelona trip starting 8 December 2026, with two nights in Paris. For the first leg, show separate origin and destination fields, its local departure date, transport selector, Paris stay slider, fare order, and scrollable fares outside the combined planner so I can see each edit before I add a fare.",
+      "prompt": "I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.",
+      "attemptCount": 3,
+      "originalInventory": [
+        {
+          "type": "CheapestFastest",
+          "count": 2
+        },
+        {
+          "type": "CityField",
+          "count": 1
+        },
+        {
+          "type": "FadeFares",
+          "count": 1
+        },
+        {
+          "type": "FareOrder",
+          "count": 1
+        },
+        {
+          "type": "Inline",
+          "count": 1
+        },
+        {
+          "type": "MultiCityPlanGrid",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 2
+        },
+        {
+          "type": "SelectedItinerary",
+          "count": 1
+        },
+        {
+          "type": "StayDuration",
+          "count": 1
+        },
+        {
+          "type": "StickySummary",
+          "count": 1
+        },
+        {
+          "type": "SyntheticTotal",
+          "count": 1
+        },
+        {
+          "type": "TransportSelect",
+          "count": 1
+        },
+        {
+          "type": "TravelDate",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "generatedInventory": [
+        {
+          "type": "CheapestFastest",
+          "count": 2
+        },
+        {
+          "type": "CityField",
+          "count": 1
+        },
+        {
+          "type": "FadeFares",
+          "count": 1
+        },
+        {
+          "type": "FareOrder",
+          "count": 1
+        },
+        {
+          "type": "Inline",
+          "count": 1
+        },
+        {
+          "type": "MultiCityPlanGrid",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 2
+        },
+        {
+          "type": "SelectedItinerary",
+          "count": 1
+        },
+        {
+          "type": "StayDuration",
+          "count": 1
+        },
+        {
+          "type": "StickySummary",
+          "count": 1
+        },
+        {
+          "type": "SyntheticTotal",
+          "count": 1
+        },
+        {
+          "type": "TransportSelect",
+          "count": 1
+        },
+        {
+          "type": "TravelDate",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "comparison": {
+        "exactTypeSetMatch": true,
+        "exactInstanceCountMatch": true,
+        "exactMatch": true,
+        "missingTypes": [],
+        "extraTypes": [],
+        "countMismatches": []
+      },
+      "reopenedCheck": {
+        "number": 12,
+        "chatName": "#12 user",
+        "exactPrompt": true,
+        "sameCounts": true,
+        "renderError": false,
+        "idle": true,
+        "threadId": "travel-9d5890ca-9864-4eca-9b30-104a3cade217"
+      }
+    },
+    {
+      "id": 13,
+      "originalChatName": "#13",
+      "generatedChatName": "#13 user",
+      "originalThreadId": "travel-6487afc1-214d-4f4f-ad26-7104abcc9ce6",
+      "generatedThreadId": "travel-16705d0e-b0c1-4e70-9840-0ed0fb12004e",
+      "originalPrompt": "Plan London to Paris to Barcelona starting 8 December 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.",
+      "prompt": "Plan London to Paris to Barcelona starting on 8 December 2026, with two nights in Paris and four nights in Barcelona. Start with a quick overview of the trip and show the cities in the order I'll visit them. Let me adjust how many nights I spend in each place and edit and choose every journey for the whole trip together. Give each journey its own part, side by side when there is room, showing its cheapest and fastest options and whether the available timetable covers what I asked for. Show how many fares I've chosen. In your chat reply, explain how arriving in Paris and staying two nights affects when I can leave for Barcelona.",
+      "attemptCount": 2,
+      "originalInventory": [
+        {
+          "type": "CheapestFastest",
+          "count": 2
+        },
+        {
+          "type": "CitySequence",
+          "count": 1
+        },
+        {
+          "type": "CoverageSummary",
+          "count": 2
+        },
+        {
+          "type": "MultiCityPlanGrid",
+          "count": 1
+        },
+        {
+          "type": "ResponsiveGrid",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 2
+        },
+        {
+          "type": "SelectedFareCount",
+          "count": 1
+        },
+        {
+          "type": "StayAllocation",
+          "count": 1
+        },
+        {
+          "type": "TravelHero",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "generatedInventory": [
+        {
+          "type": "CheapestFastest",
+          "count": 2
+        },
+        {
+          "type": "CitySequence",
+          "count": 1
+        },
+        {
+          "type": "CoverageSummary",
+          "count": 2
+        },
+        {
+          "type": "MultiCityPlanGrid",
+          "count": 1
+        },
+        {
+          "type": "ResponsiveGrid",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 2
+        },
+        {
+          "type": "SelectedFareCount",
+          "count": 1
+        },
+        {
+          "type": "StayAllocation",
+          "count": 1
+        },
+        {
+          "type": "TravelHero",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "comparison": {
+        "exactTypeSetMatch": true,
+        "exactInstanceCountMatch": true,
+        "exactMatch": true,
+        "missingTypes": [],
+        "extraTypes": [],
+        "countMismatches": []
+      },
+      "reopenedCheck": {
+        "number": 13,
+        "chatName": "#13 user",
+        "exactPrompt": true,
+        "sameCounts": true,
+        "renderError": false,
+        "idle": true,
+        "threadId": "travel-16705d0e-b0c1-4e70-9840-0ed0fb12004e"
+      }
+    },
+    {
+      "id": 18,
+      "originalChatName": "#18",
+      "generatedChatName": "#18 user",
+      "originalThreadId": "travel-f09e7c4e-8e6c-4964-8f39-ba0921a299ad",
+      "generatedThreadId": "travel-a8f6a7d8-a32c-43d3-ac0a-0b80569e4ba6",
+      "originalPrompt": "I can leave London for Paris any day from 8 through 14 December 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.",
+      "prompt": "I can leave London for Paris any day from 8 through 14 December 2026. Show the week's lowest prices for each day so I can spot a good date, and let me browse the previous or next week. Below that, let me type or pick one exact departure date in a date box, choose a company and sort that day's journeys by cheapest, fastest or departure time, with those choices next to each other. Show the full details of the journeys for that date and let me add any one to my trip. In this chosen-day part, also compare the cheapest and fastest journeys. The week I'm browsing should stay where I left it when I enter a different departure date.",
+      "attemptCount": 2,
+      "originalInventory": [
+        {
+          "type": "CarrierFilter",
+          "count": 1
+        },
+        {
+          "type": "CheapestFastest",
+          "count": 1
+        },
+        {
+          "type": "FareCards",
+          "count": 1
+        },
+        {
+          "type": "FareOrder",
+          "count": 1
+        },
+        {
+          "type": "Inline",
+          "count": 1
+        },
+        {
+          "type": "PriceCalendar",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 2
+        },
+        {
+          "type": "TravelDate",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "generatedInventory": [
+        {
+          "type": "CarrierFilter",
+          "count": 1
+        },
+        {
+          "type": "CheapestFastest",
+          "count": 1
+        },
+        {
+          "type": "FareCards",
+          "count": 1
+        },
+        {
+          "type": "FareOrder",
+          "count": 1
+        },
+        {
+          "type": "Inline",
+          "count": 1
+        },
+        {
+          "type": "PriceCalendar",
+          "count": 1
+        },
+        {
+          "type": "Section",
+          "count": 2
+        },
+        {
+          "type": "TravelDate",
+          "count": 1
+        },
+        {
+          "type": "TravelSurface",
+          "count": 1
+        }
+      ],
+      "comparison": {
+        "exactTypeSetMatch": true,
+        "exactInstanceCountMatch": true,
+        "exactMatch": true,
+        "missingTypes": [],
+        "extraTypes": [],
+        "countMismatches": []
+      },
+      "reopenedCheck": {
+        "number": 18,
+        "chatName": "#18 user",
+        "exactPrompt": true,
+        "sameCounts": true,
+        "renderError": false,
+        "idle": true,
+        "threadId": "travel-a8f6a7d8-a32c-43d3-ac0a-0b80569e4ba6"
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "number": 8,
+      "attempt": 1,
+      "prompt": "I'm going from Berlin to Amsterdam on 8 December 2026. I want to see each fare with its details: the company, departure and arrival times, journey length, stops and price, and be able to add it to my trip. Let me change the departure day, choose how I travel and pick a company just above the options, so I don't have to ask again each time. Keep everything easy to scan in one place, and show me the cheapest option beside the fastest one so I can decide whether saving time is worth the extra money.",
+      "threadId": "travel-96eaf2ca-8ad6-4404-bf97-0c687a510996",
+      "counts": {
+        "CarrierFilter": 1,
+        "CheapestFastest": 1,
+        "FareCards": 1,
+        "Inline": 1,
+        "SplitPane": 1,
+        "TransportSelect": 1,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [
+        "ModeChips",
+        "Stack"
+      ],
+      "extra": [
+        "SplitPane",
+        "TransportSelect"
+      ],
+      "countDiffs": [
+        {
+          "component": "ModeChips",
+          "expected": 1,
+          "actual": 0
+        },
+        {
+          "component": "Stack",
+          "expected": 1,
+          "actual": 0
+        },
+        {
+          "component": "SplitPane",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "component": "TransportSelect",
+          "expected": 0,
+          "actual": 1
+        }
+      ],
+      "sameTypes": false,
+      "sameCounts": false,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": false
+    },
+    {
+      "number": 8,
+      "attempt": 2,
+      "prompt": "I'm travelling from Berlin to Amsterdam on 8 December 2026. I want to see each fare's company, departure and arrival times, journey length, stops and price, and be able to add it to my trip. Above the results, let me change the day, include or exclude trains, buses and flights, and choose a company, with those choices together on one line. Keep everything in one column, with one journey below the next and the cheapest-versus-fastest comparison underneath, so I can tell whether saving time is worth paying more.",
+      "threadId": "travel-683a6b9a-0ea6-453c-b2a6-38f63407d206",
+      "counts": {
+        "CarrierFilter": 1,
+        "CheapestFastest": 1,
+        "FareCards": 1,
+        "Inline": 1,
+        "Stack": 1,
+        "TransportSelect": 1,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [
+        "ModeChips"
+      ],
+      "extra": [
+        "TransportSelect"
+      ],
+      "countDiffs": [
+        {
+          "component": "ModeChips",
+          "expected": 1,
+          "actual": 0
+        },
+        {
+          "component": "TransportSelect",
+          "expected": 0,
+          "actual": 1
+        }
+      ],
+      "sameTypes": false,
+      "sameCounts": false,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": false
+    },
+    {
+      "number": 8,
+      "attempt": 3,
+      "prompt": "Show me Berlin-to-Amsterdam journeys for 8 December 2026 in one easy-to-read list, with the company, departure and arrival times, journey length, stops and price for each, and a way to add one to my trip. Above the list, I want to change the departure day and filter the results by company and by train, bus or flight. For the transport filter, give me small buttons I can turn on or off independently, so I can include more than one type. Keep these choices together on one line and the rest of the view in one column. Under the details, compare the cheapest and fastest journeys so I can decide whether the time saving is worth paying more.",
+      "threadId": "travel-f2dad3c1-48d2-4e30-91f3-6e00e33f4327",
+      "counts": {
+        "CarrierFilter": 1,
+        "CheapestFastest": 1,
+        "FareCards": 1,
+        "Inline": 1,
+        "ModeChips": 1,
+        "Stack": 1,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [],
+      "countDiffs": [],
+      "sameTypes": true,
+      "sameCounts": true,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": true
+    },
+    {
+      "number": 10,
+      "attempt": 1,
+      "prompt": "I'm going from London to Paris on 8 December 2026 and want an easy way to choose. Start with a quick introduction to the trip. Let me switch between a small table of the exact options and a chart showing what each price buys me in travel time. Under that, let me swipe between a cheapest-versus-fastest comparison and the day's departure and arrival schedule. Keep those choices next to my chosen journey and its total cost, and keep my selection visible while I browse. Add a short reminder that these are demo prices.",
+      "threadId": "travel-a2086213-92ad-4805-a159-a4073f954eab",
+      "counts": {
+        "Callout": 1,
+        "Carousel": 1,
+        "CheapestFastest": 1,
+        "ComparisonTable": 1,
+        "DurationPricePlot": 1,
+        "ItineraryTimeline": 1,
+        "Section": 4,
+        "SelectedItinerary": 1,
+        "SplitPane": 1,
+        "Stack": 1,
+        "StickySummary": 1,
+        "SyntheticTotal": 1,
+        "Tabs": 1,
+        "TravelHero": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [],
+      "countDiffs": [],
+      "sameTypes": true,
+      "sameCounts": true,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": true
+    },
+    {
+      "number": 12,
+      "attempt": 1,
+      "prompt": "I'm planning London to Paris to Barcelona from 8 December 2026, with two nights in Paris. I want to tweak the first journey separately before choosing anything: where I'm leaving from and going to, the departure day, how I travel, how long I stay in Paris, and whether journeys are ordered by price, travel time or departure. Keep the travel type, Paris stay and ordering choices together above a list of journeys I can scroll through, and show me the cheapest and fastest London-to-Paris choices there. Below that, let me edit and choose every journey for the whole trip in one place, with the cheapest and fastest Paris-to-Barcelona choices too. Keep my chosen journeys and total cost visible while I work.",
+      "threadId": "travel-5012e21a-9f36-456c-9787-900453ec5b79",
+      "counts": {
+        "CheapestFastest": 2,
+        "CityField": 1,
+        "FadeFares": 1,
+        "FareOrder": 1,
+        "Inline": 2,
+        "MultiCityPlanGrid": 1,
+        "Section": 2,
+        "SelectedItinerary": 1,
+        "SplitPane": 1,
+        "Stack": 1,
+        "StayDuration": 1,
+        "StickySummary": 1,
+        "SyntheticTotal": 1,
+        "TransportSelect": 1,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [
+        "SplitPane",
+        "Stack"
+      ],
+      "countDiffs": [
+        {
+          "component": "Inline",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "component": "SplitPane",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "component": "Stack",
+          "expected": 0,
+          "actual": 1
+        }
+      ],
+      "sameTypes": false,
+      "sameCounts": false,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": false
+    },
+    {
+      "number": 12,
+      "attempt": 2,
+      "prompt": "I'm planning London to Paris to Barcelona from 8 December 2026, with two nights in Paris. Give me a separate place to edit the London-to-Paris journey first, with the whole-trip editor underneath it. In the first area, put where I'm leaving from and going to on its own row, and the departure day below that. Then let me change how I travel, my Paris stay and the order of the journeys together on one line. I want to scroll through the matching journeys, add one, and compare the cheapest and fastest choices before deciding. Underneath, let me edit and choose every journey for the whole trip together, including the cheapest and fastest Paris-to-Barcelona choices. Keep a compact summary of my chosen journeys and total cost beneath these two areas, visible while I browse.",
+      "threadId": "travel-c43a2739-4599-4109-b8ef-9651f84cb0f6",
+      "counts": {
+        "CheapestFastest": 2,
+        "CityField": 1,
+        "FadeFares": 1,
+        "FareOrder": 1,
+        "Inline": 2,
+        "MultiCityPlanGrid": 1,
+        "Section": 2,
+        "SelectedItinerary": 1,
+        "Stack": 1,
+        "StayDuration": 1,
+        "StickySummary": 1,
+        "SyntheticTotal": 1,
+        "TransportSelect": 1,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [
+        "Stack"
+      ],
+      "countDiffs": [
+        {
+          "component": "Inline",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "component": "Stack",
+          "expected": 0,
+          "actual": 1
+        }
+      ],
+      "sameTypes": false,
+      "sameCounts": false,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": false
+    },
+    {
+      "number": 12,
+      "attempt": 3,
+      "prompt": "I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.",
+      "threadId": "travel-9d5890ca-9864-4eca-9b30-104a3cade217",
+      "counts": {
+        "CheapestFastest": 2,
+        "CityField": 1,
+        "FadeFares": 1,
+        "FareOrder": 1,
+        "Inline": 1,
+        "MultiCityPlanGrid": 1,
+        "Section": 2,
+        "SelectedItinerary": 1,
+        "StayDuration": 1,
+        "StickySummary": 1,
+        "SyntheticTotal": 1,
+        "TransportSelect": 1,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [],
+      "countDiffs": [],
+      "sameTypes": true,
+      "sameCounts": true,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": true
+    },
+    {
+      "number": 13,
+      "attempt": 1,
+      "prompt": "Plan London to Paris to Barcelona starting on 8 December 2026, with two nights in Paris and four nights in Barcelona. Start with a quick overview of the trip and show the cities in the order I'll visit them. Let me adjust how many nights I spend in each place and edit and choose every journey for the whole trip together. Give each journey its own part, side by side when there is room, showing its cheapest and fastest options and whether the available timetable covers what I asked for. Show how many fares I've chosen and explain how arriving in Paris and staying two nights affects when I can leave for Barcelona.",
+      "threadId": "travel-3f7aff15-4bf4-4af5-b232-fe78304495fa",
+      "counts": {
+        "Callout": 1,
+        "CheapestFastest": 2,
+        "CitySequence": 1,
+        "CoverageSummary": 2,
+        "MultiCityPlanGrid": 1,
+        "ResponsiveGrid": 1,
+        "Section": 2,
+        "SelectedFareCount": 1,
+        "StayAllocation": 1,
+        "TravelHero": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [
+        "Callout"
+      ],
+      "countDiffs": [
+        {
+          "component": "Callout",
+          "expected": 0,
+          "actual": 1
+        }
+      ],
+      "sameTypes": false,
+      "sameCounts": false,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": true,
+      "passed": false
+    },
+    {
+      "number": 13,
+      "attempt": 2,
+      "prompt": "Plan London to Paris to Barcelona starting on 8 December 2026, with two nights in Paris and four nights in Barcelona. Start with a quick overview of the trip and show the cities in the order I'll visit them. Let me adjust how many nights I spend in each place and edit and choose every journey for the whole trip together. Give each journey its own part, side by side when there is room, showing its cheapest and fastest options and whether the available timetable covers what I asked for. Show how many fares I've chosen. In your chat reply, explain how arriving in Paris and staying two nights affects when I can leave for Barcelona.",
+      "threadId": "travel-16705d0e-b0c1-4e70-9840-0ed0fb12004e",
+      "counts": {
+        "CheapestFastest": 2,
+        "CitySequence": 1,
+        "CoverageSummary": 2,
+        "MultiCityPlanGrid": 1,
+        "ResponsiveGrid": 1,
+        "Section": 2,
+        "SelectedFareCount": 1,
+        "StayAllocation": 1,
+        "TravelHero": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [],
+      "countDiffs": [],
+      "sameTypes": true,
+      "sameCounts": true,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": true
+    },
+    {
+      "number": 18,
+      "attempt": 1,
+      "prompt": "I can leave London for Paris any day from 8 through 14 December 2026. I'd like two clear parts: the week's lowest prices by day at the top, with a way to browse the previous or next week, and the full journey details for my chosen day below. Let me change the departure date directly, choose a company and order the journeys by cheapest, fastest or departure time, with those choices together on one line above the details. Let me add any journey to my trip and keep the cheapest-versus-fastest comparison visible. Changing my departure day should not move the week I'm looking at.",
+      "threadId": "travel-b93e3874-d9ce-4eb3-964b-c4363ecb01f4",
+      "counts": {
+        "CarrierFilter": 1,
+        "CheapestFastest": 1,
+        "DateStrip": 1,
+        "FareCards": 1,
+        "FareOrder": 1,
+        "Inline": 1,
+        "PriceCalendar": 1,
+        "Section": 2,
+        "SplitPane": 1,
+        "StickySummary": 1,
+        "TravelSurface": 1
+      },
+      "missing": [
+        "TravelDate"
+      ],
+      "extra": [
+        "DateStrip",
+        "SplitPane",
+        "StickySummary"
+      ],
+      "countDiffs": [
+        {
+          "component": "TravelDate",
+          "expected": 1,
+          "actual": 0
+        },
+        {
+          "component": "DateStrip",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "component": "SplitPane",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "component": "StickySummary",
+          "expected": 0,
+          "actual": 1
+        }
+      ],
+      "sameTypes": false,
+      "sameCounts": false,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": false
+    },
+    {
+      "number": 18,
+      "attempt": 2,
+      "prompt": "I can leave London for Paris any day from 8 through 14 December 2026. Show the week's lowest prices for each day so I can spot a good date, and let me browse the previous or next week. Below that, let me type or pick one exact departure date in a date box, choose a company and sort that day's journeys by cheapest, fastest or departure time, with those choices next to each other. Show the full details of the journeys for that date and let me add any one to my trip. In this chosen-day part, also compare the cheapest and fastest journeys. The week I'm browsing should stay where I left it when I enter a different departure date.",
+      "threadId": "travel-a8f6a7d8-a32c-43d3-ac0a-0b80569e4ba6",
+      "counts": {
+        "CarrierFilter": 1,
+        "CheapestFastest": 1,
+        "FareCards": 1,
+        "FareOrder": 1,
+        "Inline": 1,
+        "PriceCalendar": 1,
+        "Section": 2,
+        "TravelDate": 1,
+        "TravelSurface": 1
+      },
+      "missing": [],
+      "extra": [],
+      "countDiffs": [],
+      "sameTypes": true,
+      "sameCounts": true,
+      "exactPrompt": true,
+      "assistantSaved": true,
+      "saved": true,
+      "renderError": false,
+      "passed": true
+    }
+  ]
+}
