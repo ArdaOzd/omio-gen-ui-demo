@@ -125,6 +125,7 @@ html .travel-app .travel-session-sidebar[data-collapsed] .travel-session-collaps
 
 html .travel-app .travel-chat {
   width: min(1136px, 100%);
+  margin-inline: auto;
   height: calc(100vh - 52px);
   height: calc(100dvh - 52px);
   min-height: calc(100vh - 52px);
