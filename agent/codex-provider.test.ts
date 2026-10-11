@@ -3,10 +3,10 @@ import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-const mocks=vi.hoisted(()=>({spawn:vi.fn(),mkdtemp:vi.fn(),readFile:vi.fn(),rm:vi.fn()}));
+const mocks=vi.hoisted(()=>({spawn:vi.fn(),access:vi.fn(),mkdtemp:vi.fn(),readFile:vi.fn(),rm:vi.fn()}));
 vi.mock('node:child_process',()=>({spawn:mocks.spawn}));
-vi.mock('node:fs/promises',()=>({mkdtemp:mocks.mkdtemp,readFile:mocks.readFile,rm:mocks.rm}));
-import { codexDecision } from './codex-provider';
+vi.mock('node:fs/promises',()=>({access:mocks.access,mkdtemp:mocks.mkdtemp,readFile:mocks.readFile,rm:mocks.rm}));
+import { codexDecision, resolveCodexBinary } from './codex-provider';
 import { InvalidModelOutputError, withOneRepair } from './repair';
 import { validationReason } from './validation-reason';
 
@@ -27,9 +27,34 @@ class ModelProcess extends EventEmitter {
  decision(output:string){this.message({method:'item/agentMessage/delta',params:{delta:output}});this.message({method:'turn/completed',params:{}});}
 }
 let child:ModelProcess;
-beforeEach(()=>{child=new ModelProcess();mocks.spawn.mockImplementation(()=>child);mocks.mkdtemp.mockResolvedValue('/tmp/model-only-test');mocks.readFile.mockResolvedValue('');mocks.rm.mockResolvedValue(undefined);});
-afterEach(()=>{vi.useRealTimers();vi.resetAllMocks();});
+let originalBinary:string|undefined,originalPath:string|undefined;
+beforeEach(()=>{originalBinary=process.env.CODEX_BINARY;originalPath=process.env.PATH;process.env.CODEX_BINARY='/test/codex';process.env.PATH='/test/bin';child=new ModelProcess();mocks.spawn.mockImplementation(()=>child);mocks.access.mockResolvedValue(undefined);mocks.mkdtemp.mockResolvedValue('/tmp/model-only-test');mocks.readFile.mockResolvedValue('');mocks.rm.mockResolvedValue(undefined);});
+afterEach(()=>{if(originalBinary===undefined)delete process.env.CODEX_BINARY;else process.env.CODEX_BINARY=originalBinary;if(originalPath===undefined)delete process.env.PATH;else process.env.PATH=originalPath;vi.useRealTimers();vi.resetAllMocks();});
 const options=(signal=new AbortController().signal)=>({prompt:'compact context',toolNames:['present'],signal,onDelta:vi.fn()});
+describe('Codex executable discovery',()=>{
+ it('uses an executable CODEX_BINARY override first',async()=>{
+  process.env.CODEX_BINARY='/custom/codex';
+  await expect(resolveCodexBinary()).resolves.toBe('/custom/codex');
+  expect(mocks.access).toHaveBeenCalledWith('/custom/codex',expect.any(Number));
+ });
+ it('finds codex on PATH before checking app bundles',async()=>{
+  delete process.env.CODEX_BINARY;process.env.PATH='/first:/second';
+  mocks.access.mockImplementation(async path=>{if(path!=='/second/codex')throw new Error('missing')});
+  await expect(resolveCodexBinary()).resolves.toBe('/second/codex');
+  expect(mocks.access).toHaveBeenCalledWith('/first/codex',expect.any(Number));
+  expect(mocks.access).toHaveBeenCalledWith('/second/codex',expect.any(Number));
+ });
+ it('falls back to the installed ChatGPT app bundle',async()=>{
+  delete process.env.CODEX_BINARY;process.env.PATH='/missing';
+  const bundled='/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex';
+  mocks.access.mockImplementation(async path=>{if(path!==bundled)throw new Error('missing')});
+  await expect(resolveCodexBinary()).resolves.toBe(bundled);
+ });
+ it('explains how to recover when no executable is available',async()=>{
+  delete process.env.CODEX_BINARY;process.env.PATH='/missing';mocks.access.mockRejectedValue(new Error('missing'));
+  await expect(resolveCodexBinary()).rejects.toThrow('Install Codex on PATH or set CODEX_BINARY');
+ });
+});
 describe('isolated model provider failure classification and cancellation',()=>{
  it('returns a valid decision and cleans up process, timer and directory',async()=>{
   vi.useFakeTimers();const input=options();await expect(codexDecision(input)).resolves.toEqual(valid);
@@ -59,12 +84,12 @@ describe('isolated model provider failure classification and cancellation',()=>{
  });
  it('checks cancellation after asynchronous directory creation',async()=>{
   let created:(value:string)=>void=()=>{};mocks.mkdtemp.mockImplementation(()=>new Promise<string>(resolve=>{created=resolve}));const controller=new AbortController();
-  const result=codexDecision(options(controller.signal)),rejected=expect(result).rejects.toThrow('cancelled');controller.abort();created('/tmp/model-only-test');await rejected;
+  const result=codexDecision(options(controller.signal)),rejected=expect(result).rejects.toThrow('cancelled');await vi.waitFor(()=>expect(mocks.mkdtemp).toHaveBeenCalledOnce());controller.abort();created('/tmp/model-only-test');await rejected;
   expect(mocks.spawn).not.toHaveBeenCalled();expect(mocks.readFile).not.toHaveBeenCalled();expect(mocks.rm).toHaveBeenCalledOnce();
  });
  it('checks cancellation after asynchronous configuration reading',async()=>{
   let read:(value:string)=>void=()=>{};mocks.readFile.mockImplementation(()=>new Promise<string>(resolve=>{read=resolve}));const controller=new AbortController();
-  const result=codexDecision(options(controller.signal)),rejected=expect(result).rejects.toThrow('cancelled');await Promise.resolve();expect(mocks.readFile).toHaveBeenCalledOnce();controller.abort();read('');await rejected;
+  const result=codexDecision(options(controller.signal)),rejected=expect(result).rejects.toThrow('cancelled');await vi.waitFor(()=>expect(mocks.readFile).toHaveBeenCalledOnce());controller.abort();read('');await rejected;
   expect(mocks.spawn).not.toHaveBeenCalled();expect(mocks.rm).toHaveBeenCalledOnce();
  });
  it('handles cancellation in the child startup/listener window without sending RPCs',async()=>{

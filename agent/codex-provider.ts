@@ -1,7 +1,8 @@
 import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { delimiter, join } from 'node:path';
 import { z } from 'zod';
 import { InvalidModelOutputError, MODEL_REQUEST_TIMEOUT_MS } from './repair';
 export const CODEX_MODEL = 'gpt-6.1-sol';
@@ -10,7 +11,18 @@ export const DecisionSchema = z.strictObject({intro:z.string().max(4000),toolNam
 export type Decision = z.infer<typeof DecisionSchema>;
 export type DecisionDelta = (field:'intro'|'toolInput'|'outro', delta:string, toolName:string) => void;
 export const CODEX_DEVELOPER_INSTRUCTIONS='One decision per response. Output intro, toolName, toolInput, outro in that order. toolInput is serialized JSON conforming to the chosen frontend tool schema. Use none and {} for text-only replies and to finalize fulfilled tool-backed requests after successful tool acknowledgments. An accepted scene already fulfills presentation for that artifact at that UI revision; do not reauthor it merely because the original user request appears again in continuation history. Continue tools only for unmet requested work, such as a different requested artifact, a new UI revision, missing coverage, or a real tool error requiring repair. Once the requested work is fulfilled, finish with a concise text reply and none. On tool continuations, do not repeat intro or outro prose already emitted in the current visible turn; add only new information or a brief completion. A new explicit user request may repeat earlier wording. Do not invent refs, fare data, component names or tools. Never emit rows, SQL, HTML, CSS, JavaScript or URLs.';
-const binary = process.env.CODEX_BINARY ?? '/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex';
+const bundledCodexCandidates=[
+ '/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex',
+ '/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex',
+];
+async function isExecutable(path:string):Promise<boolean>{try{await access(path,constants.X_OK);return true;}catch{return false;}}
+export async function resolveCodexBinary():Promise<string>{
+ const override=process.env.CODEX_BINARY?.trim();
+ if(override){if(await isExecutable(override))return override;throw new Error(`CODEX_BINARY is not executable: ${override}`);}
+ const pathCandidates=(process.env.PATH??'').split(delimiter).filter(Boolean).map(directory=>join(directory,'codex'));
+ for(const candidate of [...pathCandidates,...bundledCodexCandidates])if(await isExecutable(candidate))return candidate;
+ throw new Error('Signed-in Codex runtime unavailable. Install Codex on PATH or set CODEX_BINARY to an executable Codex path, then run `codex login status`.');
+}
 function readString(source:string,field:string):string|undefined {
  const match = new RegExp(`"${field}"\\s*:\\s*"`).exec(source);
  if(!match) return undefined;
@@ -28,6 +40,8 @@ function readString(source:string,field:string):string|undefined {
  return undefined;
 }
 export async function codexDecision(options:{prompt:string;toolNames:string[];signal:AbortSignal;onDelta:DecisionDelta}):Promise<Decision> {
+ if(options.signal.aborted)throw new Error('Generation cancelled');
+ const binary=await resolveCodexBinary();
  if(options.signal.aborted)throw new Error('Generation cancelled');
  const cwd=await mkdtemp(join(tmpdir(),'omio-model-only-'));
  try{
