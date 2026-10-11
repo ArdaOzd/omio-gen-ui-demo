@@ -492,8 +492,6 @@ section[id], aside[id] { scroll-margin-top: 32px; }
   letter-spacing: 0;
 }
 
-.case-status { color: var(--muted); font-size: 0.72rem; font-weight: 400; letter-spacing: 0; }
-
 .case-body {
   display: grid;
   padding: 8px 0 36px;
@@ -503,6 +501,8 @@ section[id], aside[id] { scroll-margin-top: 32px; }
 }
 
 .case-copy { min-width: 0; grid-column: 2; grid-row: 1; padding-top: 2px; }
+
+.case-body:has(> .composition-gallery) > .case-copy { grid-column: 1 / -1; grid-row: 2; max-width: 76ch; }
 
 blockquote {
   margin: 0 0 25px;
@@ -536,7 +536,17 @@ blockquote {
 
 .internal-note { margin: 18px 0 0; color: var(--muted); font-size: 0.78rem; line-height: 1.7; }
 
-.composition-figure, .composition-placeholder { min-width: 0; margin: 0; grid-column: 1; grid-row: 1; }
+.composition-figure, .composition-gallery { min-width: 0; margin: 0; grid-column: 1; grid-row: 1; }
+
+.composition-gallery {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.composition-gallery > .composition-figure { grid-column: auto; grid-row: auto; }
 
 .composition-figure a {
   display: block;
@@ -552,37 +562,7 @@ blockquote {
 
 .composition-figure img { display: block; width: 100%; height: auto; }
 
-.composition-figure figcaption, .composition-placeholder figcaption { margin-top: 12px; color: var(--muted); font-size: 0.72rem; line-height: 1.6; }
-
-.composition-placeholder {
-  display: flex;
-  min-height: 350px;
-  padding: clamp(28px, 5vw, 60px);
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  border: 1px dashed var(--image-line);
-  border-radius: var(--radius);
-  background: var(--blue-faint);
-}
-
-.composition-placeholder > div { max-width: 430px; }
-
-.composition-placeholder span { color: var(--muted); font-size: 0.77rem; }
-
-.composition-placeholder strong {
-  display: block;
-  margin: 14px 0;
-  color: var(--blue);
-  font-size: clamp(1.6rem, 2.6vw, 2.7rem);
-  font-weight: 550;
-  letter-spacing: -0.045em;
-  line-height: 1.15;
-}
-
-.composition-placeholder p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
-
-.composition-placeholder figcaption { margin-top: 40px; }
+.composition-figure figcaption { margin-top: 12px; color: var(--muted); font-size: 0.72rem; line-height: 1.6; }
 
 .technical-chapter { margin-top: clamp(56px, 6vw, 86px); }
 
@@ -726,11 +706,10 @@ footer p { max-width: 65ch; margin: 0; }
   .case summary h4 { gap: 14px; font-size: 1.05rem; }
   .case-body { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 8px 0 32px; }
   .case-copy { grid-column: 1; grid-row: 2; padding-top: 0; }
-  .composition-figure, .composition-placeholder { grid-column: 1; grid-row: 1; }
+  .composition-figure, .composition-gallery { grid-column: 1; grid-row: 1; }
   blockquote { max-width: 70ch; font-size: 0.92rem; line-height: 1.75; }
   .components li { font-size: 0.68rem; }
   .components a { min-height: 44px; }
-  .composition-placeholder { min-height: 280px; }
   .chapter-heading { grid-template-columns: minmax(0, 1fr); gap: 14px; padding-top: 24px; }
   .chapter-heading > p { margin: 0; }
   .chapter-heading h3 { font-size: 2rem; }
@@ -781,8 +760,7 @@ footer p { max-width: 65ch; margin: 0; }
   .case summary h4 > span:nth-child(2) { flex: 1; }
   .case summary::after { width: 32px; height: 32px; }
   .case-number { font-size: 0.66rem; }
-  .case-status { display: none; }
-  .case-planned summary h4 > span:nth-child(2)::after { display: block; margin-top: 4px; color: var(--muted); content: "Concept"; font-size: 0.7rem; font-weight: 400; }
+  .composition-gallery { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .chapter-heading h3 { font-size: 1.75rem; }
   .chapter-heading div > p { font-size: 0.9rem; }
   .component-roles { grid-template-columns: minmax(0, 1fr); }
