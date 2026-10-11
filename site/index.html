@@ -26,8 +26,8 @@
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
-        <p class="hero-kicker">A generative UI study for travel</p>
-        <h1 id="hero-title"><span>Answers become</span><span>interfaces.</span></h1>
+        <p class="hero-kicker">A generative UI study for Omio</p>
+        <h1 id="hero-title"><span>Answers become</span> <span>interfaces.</span></h1>
         <p class="hero-description">An unofficial prototype where an agent assembles interactive travel views from a finite, data-bound component catalog.</p>
         <p class="hero-intro">The work asks a practical question: can one conversation produce the right interface for each travel decision?</p>
       </section>
@@ -44,224 +44,278 @@
         <p class="film-link"><a href="https://www.youtube.com/watch?v=ILb2iuDdnrM">Watch the full video on YouTube</a><small>17:21 silent walkthrough</small></p>
       </section>
 
+      <nav class="contents" aria-label="Contents">
+        <span>Contents</span>
+        <a href="#compositions">Components</a>
+        <a href="#system-architecture">System architecture</a>
+        <a href="#component-connections">Component connections</a>
+        <a href="#runtime-flow">Runtime flow</a>
+        <a href="#source">Source</a>
+      </nav>
+
       <section class="compositions" id="compositions" aria-labelledby="compositions-title">
         <div class="section-heading">
           <h2 id="compositions-title">Dynamically composed components</h2>
-          <p>These are the ten prompts selected from the capability audit. Nine produced accepted compositions. The final concept is upvoted but has not been run.</p>
+          <p>These are the ten prompts selected from the capability audit.</p>
         </div>
 
         <div class="case-list">
-          <article class="case" id="mode-dashboard">
+          <details class="case" id="mode-dashboard" open>
+            <summary><h3><span class="case-number">01</span><span>Transport mode comparison</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>01</span><span>Observed in 3 accepted runs</span></div>
-              <h3>Transport mode comparison</h3>
-              <blockquote>Help me choose how to travel from London to Paris on 8 December 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Help me choose how to travel from London to Paris on 8 December 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>TravelHero</li><li>ResponsiveGrid</li><li>ModeBreakdown</li><li>ComparisonMatrix</li><li>CheapestFastest</li><li>ComparisonTable</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/01-mode-dashboard.png"><img src="assets/01-mode-dashboard.png" width="1280" height="1086" loading="lazy" alt="Accepted transport mode comparison composition with mode summaries and comparison views"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/01-mode-dashboard.png"><img src="assets/01-mode-dashboard.png" width="1280" height="1086" loading="lazy" alt="Transport mode comparison composition with mode summaries and comparison views"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="tradeoff-dashboard">
+          <details class="case" id="tradeoff-dashboard">
+            <summary><h3><span class="case-number">02</span><span>Price versus time dashboard</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>02</span><span>Observed in 2 accepted runs</span></div>
-              <h3>Price versus time dashboard</h3>
-              <blockquote>I’m going from London to Paris on 8 December 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> I’m going from London to Paris on 8 December 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>CheapestFastest</li><li>ResponsiveGrid</li><li>ComparisonTable</li><li>DurationPricePlot</li><li>SplitPane</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/02-tradeoff-dashboard.png"><img src="assets/02-tradeoff-dashboard.png" width="1280" height="1032" loading="lazy" alt="Accepted price versus time composition with comparison table and duration price plot"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/02-tradeoff-dashboard.png"><img src="assets/02-tradeoff-dashboard.png" width="1280" height="1032" loading="lazy" alt="Price versus time composition with comparison table and duration price plot"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="budget-shortlist">
+          <details class="case" id="budget-shortlist">
+            <summary><h3><span class="case-number">03</span><span>Direct budget shortlist</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>03</span><span>Accepted evidence, with one unresolved failed sibling</span></div>
-              <h3>Direct budget shortlist</h3>
-              <blockquote>Find me a direct London to Paris trip between 8 and 14 December 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Find me a direct London to Paris trip between 8 and 14 December 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>Section</li><li>Inline</li><li>DateWindow</li><li>ModeChips</li><li>CarrierFilter</li><li>PriceRange</li><li>DirectToggle</li><li>ComparisonTable</li><li>CheapestFastest</li><li>SelectedFareCount</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/03-budget-shortlist.png"><img src="assets/03-budget-shortlist.png" width="1280" height="1086" loading="lazy" alt="Accepted direct budget shortlist composition with date, mode, carrier, price and direct trip controls"></a>
-              <figcaption>Accepted desktop evidence</figcaption>
+              <a href="assets/03-budget-shortlist.png"><img src="assets/03-budget-shortlist.png" width="1280" height="1086" loading="lazy" alt="Direct budget shortlist composition with date, mode, carrier, price and direct trip controls"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="date-strip-price-calendar">
+          <details class="case" id="date-strip-price-calendar">
+            <summary><h3><span class="case-number">04</span><span>Date strip and price-by-day calendar</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>04</span><span>Observed in 1 accepted run</span></div>
-              <h3>Date strip and price-by-day calendar</h3>
-              <blockquote>Track Berlin to Amsterdam fares from 8 to 14 December 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Track Berlin to Amsterdam fares from 8 to 14 December 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>DateStrip</li><li>PriceCalendar</li><li>CheapestFastest</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/04-date-calendar.png"><img src="assets/04-date-calendar.png" width="1280" height="1032" loading="lazy" alt="Accepted composition with a date strip, price calendar and cheapest versus fastest comparison"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/04-date-calendar.png"><img src="assets/04-date-calendar.png" width="1280" height="1032" loading="lazy" alt="Composition with a date strip, price calendar and cheapest versus fastest comparison"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="fare-cards-controls">
+          <details class="case" id="fare-cards-controls">
+            <summary><h3><span class="case-number">05</span><span>Expanded fare cards with local controls</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>05</span><span>Observed in 1 accepted run</span></div>
-              <h3>Expanded fare cards with local controls</h3>
-              <blockquote>Show me Berlin-to-Amsterdam journeys for 8 December 2026 in one easy-to-read list, with the company, departure and arrival times, journey length, stops and price for each, and a way to add one to my trip. Above the list, I want to change the departure day and filter the results by company and by train, bus or flight. For the transport filter, give me small buttons I can turn on or off independently, so I can include more than one type. Keep these choices together on one line and the rest of the view in one column. Under the details, compare the cheapest and fastest journeys so I can decide whether the time saving is worth paying more.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Show me Berlin-to-Amsterdam journeys for 8 December 2026 in one easy-to-read list, with the company, departure and arrival times, journey length, stops and price for each, and a way to add one to my trip. Above the list, I want to change the departure day and filter the results by company and by train, bus or flight. For the transport filter, give me small buttons I can turn on or off independently, so I can include more than one type. Keep these choices together on one line and the rest of the view in one column. Under the details, compare the cheapest and fastest journeys so I can decide whether the time saving is worth paying more.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>Stack</li><li>Inline</li><li>TravelDate</li><li>ModeChips</li><li>CarrierFilter</li><li>FareCards</li><li>CheapestFastest</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/05-fare-cards.png"><img src="assets/05-fare-cards.png" width="1440" height="1286" loading="lazy" alt="Accepted expanded fare card composition with local departure, mode and carrier controls"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/05-fare-cards.png"><img src="assets/05-fare-cards.png" width="1440" height="1286" loading="lazy" alt="Expanded fare card composition with local departure, mode and carrier controls"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="story-layouts">
+          <details class="case" id="story-layouts">
+            <summary><h3><span class="case-number">06</span><span>Tabbed journey story</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>06</span><span>Observed in 2 accepted runs</span></div>
-              <h3>Tabbed journey story</h3>
-              <blockquote>I'm going from London to Paris on 8 December 2026 and want an easy way to choose. Start with a quick introduction to the trip. Let me switch between a small table of the exact options and a chart showing what each price buys me in travel time. Under that, let me swipe between a cheapest-versus-fastest comparison and the day's departure and arrival schedule. Keep those choices next to my chosen journey and its total cost, and keep my selection visible while I browse.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> I'm going from London to Paris on 8 December 2026 and want an easy way to choose. Start with a quick introduction to the trip. Let me switch between a small table of the exact options and a chart showing what each price buys me in travel time. Under that, let me swipe between a cheapest-versus-fastest comparison and the day's departure and arrival schedule. Keep those choices next to my chosen journey and its total cost, and keep my selection visible while I browse.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>TravelHero</li><li>SplitPane</li><li>Tabs</li><li>Section</li><li>Carousel</li><li>CheapestFastest</li><li>ComparisonMatrix</li><li>ComparisonTable</li><li>StickySummary</li><li>SelectedItinerary</li><li>SyntheticTotal</li><li>Callout</li><li>Stack</li><li>ItineraryTimeline</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/06-story-layout.png"><img src="assets/06-story-layout.png" width="1280" height="1086" loading="lazy" alt="Accepted tabbed journey story composition with comparison views, carousel and selected journey summary"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/06-story-layout.png"><img src="assets/06-story-layout.png" width="1280" height="1086" loading="lazy" alt="Tabbed journey story composition with comparison views, carousel and selected journey summary"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="flexible-calendar">
+          <details class="case" id="flexible-calendar">
+            <summary><h3><span class="case-number">07</span><span>Flexible-date booking calendar</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>07</span><span>Observed in 1 accepted run</span></div>
-              <h3>Flexible-date booking calendar</h3>
-              <blockquote>I want a flexible-date booking workspace for London to Paris from 8 through 14 December 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> I want a flexible-date booking workspace for London to Paris from 8 through 14 December 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>SplitPane</li><li>FareCalendar</li><li>StickySummary</li><li>CheapestFastest</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/07-flexible-calendar.png"><img src="assets/07-flexible-calendar.png" width="1280" height="1032" loading="lazy" alt="Accepted flexible-date calendar composition with selected journey summary and cheapest versus fastest comparison"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/07-flexible-calendar.png"><img src="assets/07-flexible-calendar.png" width="1280" height="1032" loading="lazy" alt="Flexible-date calendar composition with selected journey summary and cheapest versus fastest comparison"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="manual-leg-editor">
+          <details class="case" id="manual-leg-editor">
+            <summary><h3><span class="case-number">08</span><span>Direct leg editing controls</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>08</span><span>Observed in 1 accepted run</span></div>
-              <h3>Direct leg editing controls</h3>
-              <blockquote>I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>Section</li><li>CityField</li><li>Inline</li><li>TravelDate</li><li>TransportSelect</li><li>StayDuration</li><li>FareOrder</li><li>FadeFares</li><li>ResponsiveGrid</li><li>CheapestFastest</li><li>MultiCityPlanGrid</li><li>StickySummary</li><li>SelectedItinerary</li><li>SyntheticTotal</li>
               </ul>
             </div>
             <figure class="composition-figure">
-              <a href="assets/08-manual-leg.png"><img src="assets/08-manual-leg.png" width="1280" height="1032" loading="lazy" alt="Accepted manual multi-city leg editor composition with controls, fares and compact trip summary"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/08-manual-leg.png"><img src="assets/08-manual-leg.png" width="1280" height="1032" loading="lazy" alt="Manual multi-city leg editor composition with controls, fares and compact trip summary"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
 
-          <article class="case" id="multi-city-workspace">
+          <details class="case" id="multi-city-workspace">
+            <summary><h3><span class="case-number">09</span><span>Editable multi-city workspace</span></h3></summary>
+            <div class="case-body">
             <div class="case-copy">
-              <div class="case-meta"><span>09</span><span>Observed in 1 accepted run</span></div>
-              <h3>Editable multi-city workspace</h3>
-              <blockquote>Plan London to Paris to Barcelona starting 8 December 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.</blockquote>
-              <p class="component-label">Observed composition</p>
-              <ul class="components" aria-label="Observed components">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Plan London to Paris to Barcelona starting 8 December 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
                 <li>TravelSurface</li><li>TravelHero</li><li>CitySequence</li><li>StayAllocation</li><li>MultiCityPlanGrid</li><li>ResponsiveGrid</li><li>CheapestFastest</li><li>Inline</li><li>SelectedFareCount</li><li>CoverageSummary</li>
               </ul>
               <p class="internal-note">MultiCityPlanGrid internally rendered CityField, TravelDate, StayDuration, TransportSelect, FareOrder and FadeFares for each leg.</p>
             </div>
             <figure class="composition-figure">
-              <a href="assets/09-multi-city.png"><img src="assets/09-multi-city.png" width="1280" height="1032" loading="lazy" alt="Accepted editable multi-city composition with city sequence, stay allocation and all-leg workspace"></a>
-              <figcaption>Accepted desktop composition</figcaption>
+              <a href="assets/09-multi-city.png"><img src="assets/09-multi-city.png" width="1280" height="1032" loading="lazy" alt="Editable multi-city composition with city sequence, stay allocation and all-leg workspace"></a>
+              <figcaption>Desktop composition</figcaption>
             </figure>
-          </article>
-
-          <article class="case case-planned" id="weekly-fare-browser">
-            <div class="case-copy">
-              <div class="case-meta"><span>10</span><span>Planned and unrun</span></div>
-              <h3>Flexible week fare browser</h3>
-              <blockquote>I can leave London for Paris any day from 8 through 14 December 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.</blockquote>
-              <p class="component-label">Planned targets</p>
-              <ul class="components" aria-label="Planned components">
-                <li>PriceCalendar</li><li>DateStrip</li><li>CarrierFilter</li><li>SortSelect</li><li>FareCards</li>
-              </ul>
-              <p class="internal-note">No accepted scene exists for this prompt, so there is no observed composition to show.</p>
             </div>
-            <figure class="composition-placeholder" aria-label="Reserved space for the unrun flexible week fare browser composition">
+          </details>
+
+          <details class="case case-planned" id="weekly-fare-browser">
+            <summary><h3><span class="case-number">10</span><span>Flexible week fare browser</span></h3></summary>
+            <div class="case-body">
+            <div class="case-copy">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> I can leave London for Paris any day from 8 through 14 December 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.</blockquote>
+            </div>
+            <figure class="composition-placeholder" aria-label="Reserved space for the flexible week fare browser composition">
               <div>
                 <span>Concept space</span>
-                <strong>No observed composition yet</strong>
-                <p>This panel stays empty until the prompt produces an accepted scene.</p>
+                <strong>Flexible week fare browser</strong>
+                <p>Reserved for a future composition image.</p>
               </div>
-              <figcaption>Planned, not generated</figcaption>
+              <figcaption>Reserved concept space</figcaption>
             </figure>
-          </article>
+            </div>
+          </details>
         </div>
       </section>
 
       <section class="technical" id="technical-details" aria-labelledby="technical-title">
         <div class="section-heading">
           <h2 id="technical-title">Technical details</h2>
-          <p>The model chooses a registered React tree. It does not write React code, query raw fare rows, or control the surrounding application.</p>
+          <p>The model proposes a small tree of registered components and live references. The browser validates it, renders source-owned React, and keeps data queries and interaction state outside the model.</p>
         </div>
 
-        <ol class="architecture-flow" aria-label="Wayfinder request and rendering flow">
-          <li><span>1</span><strong>Prompt and compact context</strong><small>Current artifacts, scope manifests, displayed facts and selected fare facts</small></li>
-          <li><span>2</span><strong>Codex model decision</strong><small>Catalog, locations and four bounded tools</small></li>
-          <li><span>3</span><strong>Strict validation</strong><small>Schema, component names, references, ownership and size budgets</small></li>
-          <li><span>4</span><strong>Host execution</strong><small>Typed state updates and source-owned React rendering</small></li>
-          <li><span>5</span><strong>Bounded projections</strong><small>Typed slices from the 50-million-row synthetic SQLite fixture</small></li>
-          <li><span>6</span><strong>Local interaction</strong><small>Controls update browser state without another model call</small></li>
-        </ol>
+        <section class="technical-chapter" id="system-architecture" aria-labelledby="system-architecture-title">
+          <div class="chapter-heading">
+            <p>01 / System architecture</p>
+            <div>
+              <h3 id="system-architecture-title">A bounded local loop</h3>
+              <p>The browser sends the prompt and a compact snapshot to a local model agent. A validated scene returns to the catalog renderer, while a separate Python service supplies bounded projections from the server-side synthetic fare fixture.</p>
+            </div>
+          </div>
+          <figure class="architecture-diagram">
+            <div class="diagram-scroll" tabindex="0" aria-label="Scrollable Wayfinder system architecture diagram">
+              <img src="assets/architecture-system.svg" width="1793" height="744" loading="lazy" alt="Source-backed architecture diagram showing the traveler, browser chat shell, strict local Codex agent, validation gate, TravelSurface component families, browser-owned state and PlanningTracker, bounded projection coordinator, closed Python query API and server-side 50-million-row synthetic SQLite fare fixture.">
+            </div>
+            <figcaption><span>System boundary</span>The model chooses a registered scene. The browser owns rendering, typed interactions, selection state and bounded fare queries; SQLite stays server-side.</figcaption>
+          </figure>
+        </section>
 
-        <div class="technical-grid">
-          <article>
-            <h3>Input and context</h3>
-            <p>The browser sends the visible message history plus a compact snapshot of the current artifacts, query scope, selected fare facts and immutable display records. Privacy checks reject normalized fare rows and other bulk-data keys before the request reaches the local agent.</p>
-          </article>
-          <article>
-            <h3>Tools and model runtime</h3>
-            <p>The agent exposes four tools: <code>inspect_display</code>, <code>present</code>, <code>edit_artifact</code> and <code>create_artifact</code>. A signed-in local Codex model receives their schemas, the registered catalog and bounded context, then returns explanatory text with at most one tool decision.</p>
-          </article>
-          <article>
-            <h3>What a predefined component is</h3>
-            <p>Each catalog entry is a source-owned React component with allowed scalar props, data bindings and child rules. <code>TravelSurface</code> is the required root. Layout components may receive agent-authored children. Leaf components keep their implementation fixed.</p>
-          </article>
-          <article>
-            <h3>Composition and validation</h3>
-            <p>The model selects component names and scalar references in JSON. Streaming prefixes are pruned while they arrive. The final tree is checked for registered names, allowlisted props, current artifact and dataset references, unique keys, booking ownership, depth, node count and byte limits. Invalid output gets one repair attempt.</p>
-          </article>
-          <article>
-            <h3>Data and browser runtime</h3>
-            <p>The full 50-million-row deterministic fixture stays in server-side SQLite. The Python API returns typed fare pages, calendar days, carrier facets, mode summaries and highlights. A page is capped at 100 rows. The browser caches bounded projections, manifests, pinned items and selected-trip state.</p>
-          </article>
-          <article>
-            <h3>Host and agent ownership</h3>
-            <p>The agent owns the registered composition and its scalar references. The host owns the chat shell, PlanningTracker, data queries, saved state, UI primitives and direct interactions. <code>MultiCityPlanGrid</code> is a fixed composite with its own per-leg controls. Full fare rows never enter model context or tool payloads.</p>
-          </article>
-        </div>
+        <section class="technical-chapter" id="component-connections" aria-labelledby="component-connections-title">
+          <div class="chapter-heading">
+            <p>02 / Component connections</p>
+            <div>
+              <h3 id="component-connections-title">Registered pieces, fixed behavior</h3>
+              <p><code>TravelSurface</code> is the required root. The agent chooses registered layouts and leaves, while their React implementations, state updates, queries and selection behavior remain source-owned.</p>
+            </div>
+          </div>
 
-        <aside class="runtime-note" aria-labelledby="runtime-title">
+          <div class="component-roles" aria-label="High-level component roles">
+            <article>
+              <p>Root and layouts</p>
+              <h4>Compose the page</h4>
+              <p><code>TravelSurface</code> is the required root for one artifact. Only registered layout nodes, including heroes, sections, stacks, grids, panes, tabs and carousels, accept composed children.</p>
+            </article>
+            <article>
+              <p>Controls</p>
+              <h4>Update typed state</h4>
+              <p>Date, route, mode, carrier, price, duration, direct-trip, sorting and stay controls write to the browser state store. They do not start another model turn.</p>
+            </article>
+            <article>
+              <p>Data views</p>
+              <h4>Read bounded projections</h4>
+              <p><code>FareCards</code>, calendars, comparisons, timelines and <code>CheapestFastest</code> request fixed projection types. Selection-capable views send exact displayed fare references to the shared tracker.</p>
+            </article>
+            <article>
+              <p>Fixed composite</p>
+              <h4>Own the complex workflow</h4>
+              <p><code>MultiCityPlanGrid</code> is one agent-visible leaf. React fixes each leg as <code>CityField</code> → <code>TravelDate</code> → <code>TransportSelect</code> → <code>FareOrder</code> → <code>FadeFares</code>, with <code>StayDuration</code> between legs.</p>
+            </article>
+            <article>
+              <p>Trip summaries</p>
+              <h4>Reflect shared selections</h4>
+              <p><code>SelectedItinerary</code>, <code>SyntheticTotal</code> and <code>SelectedFareCount</code> read the current selected-fare state. <code>StickySummary</code> keeps that context visible beside longer result views.</p>
+            </article>
+            <article>
+              <p>Host shell</p>
+              <h4>Keep conversation and selection stable</h4>
+              <p>The chat runtime, display ledger and <code>PlanningTracker</code> sit outside the composed tree. They preserve what was shown, local interactions and selected fares across scene changes.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="technical-chapter" id="runtime-flow" aria-labelledby="runtime-flow-title">
+          <div class="chapter-heading">
+            <p>03 / Runtime flow</p>
+            <div>
+              <h3 id="runtime-flow-title">Five controlled handoffs</h3>
+              <p>Each boundary narrows what crosses it. The model makes the composition decision; the host executes everything that touches application state or fare data.</p>
+            </div>
+          </div>
+          <ol class="runtime-flow" aria-label="Wayfinder request and rendering flow">
+            <li><span>1</span><div><strong>Capture compact context</strong><p>The prompt travels with current artifacts, live references, selected bounded facts and a record of what the user saw.</p></div></li>
+            <li><span>2</span><div><strong>Choose a registered scene</strong><p>The model returns component names and scalar references, not React, HTML, CSS, SQL or fare rows.</p></div></li>
+            <li><span>3</span><div><strong>Validate before rendering</strong><p>The boundary checks registered names, allowlisted props, live references, ownership and strict size limits.</p></div></li>
+            <li><span>4</span><div><strong>Render and interact locally</strong><p>Source-owned React renders the scene. Direct controls update typed browser state without another model call.</p></div></li>
+            <li><span>5</span><div><strong>Request bounded data</strong><p>The coordinator asks the Python API for fixed projections. Selected displayed fares flow into the host-owned tracker.</p></div></li>
+          </ol>
+        </section>
+
+        <aside class="runtime-note" id="source" aria-labelledby="runtime-title">
           <div>
             <h3 id="runtime-title">Why this page is static</h3>
             <p>This GitHub Pages presentation documents the prototype. The working demo also needs the Python fare API, the Node agent, the SQLite fixture and a signed-in local Codex runtime.</p>

@@ -1,0 +1,359 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1793" height="744" viewBox="0 0 1793 744" preserveAspectRatio="xMidYMid meet" style="--mask:#fbfcff" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
+        <title id="archify-diagram-title">Wayfinder: bounded generative travel UI</title>
+        <desc id="archify-diagram-description">A source-backed system diagram. A traveler request moves from the browser chat shell to a strict local Codex agent, through scene validation into a TravelSurface of registered React components. Browser-owned state, the PlanningTracker and bounded projection coordinator remain outside model control; a closed Python API queries the server-side 50-million-row synthetic SQLite fixture.</desc>
+        <!-- Definitions -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+
+          <style>
+            text { font-family: "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif; }
+            .c-grid { fill:none; stroke:#dbe1f0; opacity:.5; }
+            .c-region { fill:#f5f7fd; stroke:#b7c5eb; }
+            .c-security-group { fill:#fff8f6; stroke:#ed9da2; stroke-dasharray:6 5; }
+            .c-mask { fill:#fbfcff; stroke:none; }
+            .c-frontend { fill:#ffffff; stroke:#132968; }
+            .c-backend { fill:#e9eefc; stroke:#4563ad; }
+            .c-database { fill:#fff0ee; stroke:#d84e59; }
+            .c-security { fill:#fff8f6; stroke:#d84e59; }
+            .c-external { fill:#ffffff; stroke:#56617d; }
+            .semantic-sigil { fill:none; stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; }
+            .s-frontend { stroke:#132968; color:#132968; }
+            .s-backend { stroke:#4563ad; color:#4563ad; }
+            .s-database, .s-security { stroke:#d84e59; color:#d84e59; }
+            .s-external { stroke:#56617d; color:#56617d; }
+            .sigil-fill { fill:currentColor; stroke:none; }
+            .t-primary { fill:#101d48; }
+            .t-muted { fill:#56617d; }
+            .t-cloud, .t-frontend { fill:#132968; }
+            .t-backend { fill:#4563ad; }
+            .t-database, .t-security { fill:#a4303a; }
+            .t-edge-default { fill:#132968; }
+            .t-edge-emphasis, .t-edge-security { fill:#a4303a; }
+            .a-default { fill:none; stroke:#132968; }
+            .a-emphasis, .a-security { fill:none; stroke:#d84e59; }
+            .a-dashed { fill:none; stroke:#7384b8; stroke-dasharray:7 7; }
+            .m-default { fill:#132968; }
+            .m-emphasis, .m-security { fill:#d84e59; }
+            .m-dashed { fill:#7384b8; }
+          </style>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="#fbfcff" />
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Boundaries (behind everything) -->
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Browser + host-owned UI" x="260" y="223" width="1158" height="453" rx="12" class="c-region" stroke-width="1"/>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="1" data-composition-frame-label="Local model boundary" x="466" y="43" width="230" height="129" rx="8" class="c-security-group" stroke-width="1"/>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" data-composition-frame-label="Python + server-side inventory" x="1509" y="373" width="244" height="303" rx="12" class="c-region" stroke-width="1"/>
+
+        <!-- Connection paths (before components for correct z-order) -->
+        <g data-graph-role="automatic-crossover" style="--step:0">
+          <path data-graph-role="automatic-crossover-underlay" d="M 190 286 L 284 286" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="traveler" data-edge-to="chatShell" data-edge-label="travel request" data-edge-key="0" data-edge-id="travelerRequest" data-composition-points="190,286;284,286" data-composition-crossover="halo" data-composition-independent="true" d="M 190 286 L 284 286" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:1">
+          <path data-graph-role="automatic-crossover-underlay" d="M 371 250 L 371 119 Q 371 111 379 111 L 486 111" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="chatShell" data-edge-to="codexAgent" data-edge-label="POST compact context" data-edge-key="1" data-edge-id="compactContext" data-composition-points="371,250;371,111;486,111" data-composition-crossover="halo" data-composition-independent="true" d="M 371 250 L 371 119 Q 371 111 379 111 L 486 111" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:2">
+          <path data-graph-role="automatic-crossover-underlay" d="M 581 152 L 581 250" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="codexAgent" data-edge-to="sceneGate" data-edge-label="text + one tool call" data-edge-key="2" data-edge-id="modelDecision" data-composition-points="581,152;581,250" data-composition-crossover="halo" data-composition-independent="true" d="M 581 152 L 581 250" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:3">
+          <path data-graph-role="automatic-crossover-underlay" d="M 676 291 L 798 291" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="sceneGate" data-edge-to="travelSurface" data-edge-label="validated scene JSON" data-edge-key="3" data-edge-id="validatedScene" data-composition-points="676,291;798,291" data-composition-crossover="halo" data-composition-independent="true" d="M 676 291 L 798 291" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:4">
+          <path data-graph-role="automatic-crossover-underlay" d="M 891 328 L 891 356 Q 891 364 899 364 L 913 364 Q 921 364 921 372 L 921 400" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="travelSurface" data-edge-to="componentFamilies" data-edge-label="registered children" data-edge-key="4" data-edge-id="rootContains" data-composition-points="891,328;891,364;921,364;921,400" data-composition-crossover="halo" data-composition-independent="true" d="M 891 328 L 891 356 Q 891 364 899 364 L 913 364 Q 921 364 921 372 L 921 400" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:5">
+          <path data-graph-role="automatic-crossover-underlay" d="M 798 443 L 674 443" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="componentFamilies" data-edge-to="uiState" data-edge-label="read + typed actions" data-edge-key="5" data-edge-id="typedState" data-composition-points="798,443;674,443" data-composition-crossover="halo" data-composition-independent="true" d="M 798 443 L 674 443" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:6">
+          <path data-graph-role="automatic-crossover-underlay" d="M 929.05 486 L 929.05 570" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="componentFamilies" data-edge-to="multiCity" data-edge-label="fixed composite view" data-edge-key="6" data-edge-id="fixedPlanner" data-composition-points="929.05,486;929.05,570" data-composition-crossover="halo" data-composition-independent="true" d="M 929.05 486 L 929.05 570" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:7">
+          <path data-graph-role="automatic-crossover-underlay" d="M 914 486 L 914 502 Q 914 510 906 510 L 579 510 Q 571 510 571 518 L 571 570" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="componentFamilies" data-edge-to="planningTracker" data-edge-label="selected fare facts" data-edge-key="7" data-edge-id="selectedFares" data-composition-points="914,486;914,510;571,510;571,570" data-composition-crossover="halo" data-composition-independent="true" d="M 914 486 L 914 502 Q 914 510 906 510 L 579 510 Q 571 510 571 518 L 571 570" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:8">
+          <path data-graph-role="automatic-crossover-underlay" d="M 1044 443 L 1176 443" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="componentFamilies" data-edge-to="projectionCoordinator" data-edge-label="fixed projection needs" data-edge-key="8" data-edge-id="projectionNeeds" data-composition-points="1044,443;1176,443" data-composition-crossover="halo" data-composition-independent="true" d="M 1044 443 L 1176 443" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:9">
+          <path data-graph-role="automatic-crossover-underlay" d="M 1394 443 L 1531 443" fill="none" stroke="var(--mask)" stroke-width="5.8" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="projectionCoordinator" data-edge-to="queryApi" data-edge-label="POST · bounded response" data-edge-key="9" data-edge-id="boundedQuery" data-composition-points="1394,443;1531,443" data-composition-crossover="halo" data-composition-independent="true" d="M 1394 443 L 1531 443" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:10">
+          <path data-graph-role="automatic-crossover-underlay" d="M 1631 486 L 1631 570" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="queryApi" data-edge-to="fareFixture" data-edge-label="validated fixed SQL" data-edge-key="10" data-edge-id="fixedSql" data-composition-points="1631,486;1631,570" data-composition-crossover="halo" data-composition-independent="true" d="M 1631 486 L 1631 570" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+
+        <!-- Components -->
+        <g id="node-traveler" data-node-id="traveler" data-node-label="Traveler" data-node-kind="external" data-node-sublabel="request + direct controls" data-node-context="Architecture component">
+          <title>Traveler · request + direct controls · Architecture component</title>
+          <rect x="40" y="250" width="150" height="72" rx="6" class="c-mask"/>
+          <rect x="40" y="250" width="150" height="72" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 256) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="115" y="284" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Traveler</text>
+        <text data-detail="context" x="115" y="300" class="t-muted" font-size="9" text-anchor="middle">request + direct controls</text>
+        </g>
+
+        <g id="node-chatShell" data-node-id="chatShell" data-node-label="Chat shell" data-node-kind="frontend" data-node-sublabel="compact state snapshot" data-node-context="Browser + host-owned UI">
+          <title>Chat shell · compact state snapshot · Browser + host-owned UI</title>
+          <rect x="284" y="250" width="174" height="76" rx="6" class="c-mask"/>
+          <rect x="284" y="250" width="174" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(290 256) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="371" y="286" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Chat shell</text>
+        <text data-detail="context" x="371" y="302" class="t-muted" font-size="9" text-anchor="middle">compact state snapshot</text>
+        </g>
+
+        <g id="node-codexAgent" data-node-id="codexAgent" data-node-label="Local Codex agent" data-node-kind="backend" data-node-sublabel="catalog-aware composition" data-node-tag="strict tools" data-node-context="Local model boundary">
+          <title>Local Codex agent · catalog-aware composition · Local model boundary · strict tools</title>
+          <rect x="486" y="70" width="190" height="82" rx="6" class="c-mask"/>
+          <rect x="486" y="70" width="190" height="82" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(492 76) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="581" y="109" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Local Codex agent</text>
+        <text data-detail="context" x="581" y="125" class="t-muted" font-size="9" text-anchor="middle">catalog-aware composition</text>
+        <text data-detail="fine" x="581" y="144" class="t-backend" font-size="7" text-anchor="middle">strict tools</text>
+        </g>
+
+        <g id="node-sceneGate" data-node-id="sceneGate" data-node-label="Scene gate" data-node-kind="security" data-node-sublabel="validate refs + limits" data-node-tag="one repair" data-node-context="Browser + host-owned UI">
+          <title>Scene gate · validate refs + limits · Browser + host-owned UI · one repair</title>
+          <rect x="486" y="250" width="190" height="82" rx="6" class="c-mask"/>
+          <rect x="486" y="250" width="190" height="82" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(492 256) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="581" y="289" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Scene gate</text>
+        <text data-detail="context" x="581" y="305" class="t-muted" font-size="9" text-anchor="middle">validate refs + limits</text>
+        <text data-detail="fine" x="581" y="324" class="t-security" font-size="7" text-anchor="middle">one repair</text>
+        </g>
+
+        <g id="node-travelSurface" data-node-id="travelSurface" data-node-label="TravelSurface" data-node-kind="frontend" data-node-sublabel="required scene root" data-node-context="Browser + host-owned UI">
+          <title>TravelSurface · required scene root · Browser + host-owned UI</title>
+          <rect x="798" y="250" width="186" height="78" rx="6" class="c-mask"/>
+          <rect x="798" y="250" width="186" height="78" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(804 256) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="891" y="287" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TravelSurface</text>
+        <text data-detail="context" x="891" y="303" class="t-muted" font-size="9" text-anchor="middle">required scene root</text>
+        </g>
+
+        <g id="node-componentFamilies" data-node-id="componentFamilies" data-node-label="Component families" data-node-kind="frontend" data-node-sublabel="layouts · controls · views · status" data-node-tag="49 fixed React nodes" data-node-context="Browser + host-owned UI">
+          <title>Component families · layouts · controls · views · status · Browser + host-owned UI · 49 fixed React nodes</title>
+          <rect x="798" y="400" width="246" height="86" rx="6" class="c-mask"/>
+          <rect x="798" y="400" width="246" height="86" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(804 406) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="921" y="441" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Component families</text>
+        <text data-detail="context" x="921" y="457" class="t-muted" font-size="9" text-anchor="middle">layouts · controls · views · status</text>
+        <text data-detail="fine" x="921" y="478" class="t-frontend" font-size="7" text-anchor="middle">49 fixed React nodes</text>
+        </g>
+
+        <g id="node-uiState" data-node-id="uiState" data-node-label="Browser state" data-node-kind="database" data-node-sublabel="route · dates · filters · selection" data-node-tag="typed actions" data-node-context="Browser + host-owned UI">
+          <title>Browser state · route · dates · filters · selection · Browser + host-owned UI · typed actions</title>
+          <rect x="468" y="400" width="206" height="86" rx="6" class="c-mask"/>
+          <rect x="468" y="400" width="206" height="86" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(474 406) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="571" y="441" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Browser state</text>
+        <text data-detail="context" x="571" y="457" class="t-muted" font-size="9" text-anchor="middle">route · dates · filters · selection</text>
+        <text data-detail="fine" x="571" y="478" class="t-database" font-size="7" text-anchor="middle">typed actions</text>
+        </g>
+
+        <g id="node-multiCity" data-node-id="multiCity" data-node-label="MultiCityPlanGrid" data-node-kind="frontend" data-node-sublabel="fixed all-leg planner" data-node-tag="one catalog leaf" data-node-context="Browser + host-owned UI">
+          <title>MultiCityPlanGrid · fixed all-leg planner · Browser + host-owned UI · one catalog leaf</title>
+          <rect x="798" y="570" width="246" height="86" rx="6" class="c-mask"/>
+          <rect x="798" y="570" width="246" height="86" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(804 576) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="921" y="611" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MultiCityPlanGrid</text>
+        <text data-detail="context" x="921" y="627" class="t-muted" font-size="9" text-anchor="middle">fixed all-leg planner</text>
+        <text data-detail="fine" x="921" y="648" class="t-frontend" font-size="7" text-anchor="middle">one catalog leaf</text>
+        </g>
+
+        <g id="node-planningTracker" data-node-id="planningTracker" data-node-label="PlanningTracker" data-node-kind="frontend" data-node-sublabel="shared selected-fare tray" data-node-tag="host-owned" data-node-context="Browser + host-owned UI">
+          <title>PlanningTracker · shared selected-fare tray · Browser + host-owned UI · host-owned</title>
+          <rect x="468" y="570" width="206" height="86" rx="6" class="c-mask"/>
+          <rect x="468" y="570" width="206" height="86" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(474 576) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="571" y="611" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PlanningTracker</text>
+        <text data-detail="context" x="571" y="627" class="t-muted" font-size="9" text-anchor="middle">shared selected-fare tray</text>
+        <text data-detail="fine" x="571" y="648" class="t-frontend" font-size="7" text-anchor="middle">host-owned</text>
+        </g>
+
+        <g id="node-projectionCoordinator" data-node-id="projectionCoordinator" data-node-label="Projection coordinator" data-node-kind="backend" data-node-sublabel="grouped bounded queries" data-node-tag="browser-local cache" data-node-context="Browser + host-owned UI">
+          <title>Projection coordinator · grouped bounded queries · Browser + host-owned UI · browser-local cache</title>
+          <rect x="1176" y="400" width="218" height="86" rx="6" class="c-mask"/>
+          <rect x="1176" y="400" width="218" height="86" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1182 406) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1285" y="441" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Projection coordinator</text>
+        <text data-detail="context" x="1285" y="457" class="t-muted" font-size="9" text-anchor="middle">grouped bounded queries</text>
+        <text data-detail="fine" x="1285" y="478" class="t-backend" font-size="7" text-anchor="middle">browser-local cache</text>
+        </g>
+
+        <g id="node-queryApi" data-node-id="queryApi" data-node-label="Closed query API" data-node-kind="backend" data-node-sublabel="POST /api/query-groups" data-node-tag="fixed projections" data-node-context="Python + server-side inventory">
+          <title>Closed query API · POST /api/query-groups · Python + server-side inventory · fixed projections</title>
+          <rect x="1531" y="400" width="200" height="86" rx="6" class="c-mask"/>
+          <rect x="1531" y="400" width="200" height="86" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1537 406) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1631" y="441" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Closed query API</text>
+        <text data-detail="context" x="1631" y="457" class="t-muted" font-size="9" text-anchor="middle">POST /api/query-groups</text>
+        <text data-detail="fine" x="1631" y="478" class="t-backend" font-size="7" text-anchor="middle">fixed projections</text>
+        </g>
+
+        <g id="node-fareFixture" data-node-id="fareFixture" data-node-label="SQLite fare fixture" data-node-kind="database" data-node-sublabel="50M synthetic fares" data-node-tag="server-side only" data-node-context="Python + server-side inventory">
+          <title>SQLite fare fixture · 50M synthetic fares · Python + server-side inventory · server-side only</title>
+          <rect x="1531" y="570" width="200" height="86" rx="6" class="c-mask"/>
+          <rect x="1531" y="570" width="200" height="86" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1537 576) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="1631" y="611" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite fare fixture</text>
+        <text data-detail="context" x="1631" y="627" class="t-muted" font-size="9" text-anchor="middle">50M synthetic fares</text>
+        <text data-detail="fine" x="1631" y="648" class="t-database" font-size="7" text-anchor="middle">server-side only</text>
+        </g>
+
+        <!-- Connection labels -->
+        <g data-detail="context" data-edge-from="traveler" data-edge-to="chatShell" data-edge-label="travel request" data-edge-key="0" data-edge-id="travelerRequest">
+          <rect x="198.4" y="266" width="77.2" height="14" rx="3" class="c-mask"/>
+          <text x="237" y="276" class="t-edge-emphasis" font-size="8" text-anchor="middle">travel request</text>
+        </g>
+        <g data-detail="context" data-edge-from="chatShell" data-edge-to="codexAgent" data-edge-label="POST compact context" data-edge-key="1" data-edge-id="compactContext">
+          <rect x="375.5" y="91" width="106" height="14" rx="3" class="c-mask"/>
+          <text x="428.5" y="101" class="t-edge-default" font-size="8" text-anchor="middle">POST compact context</text>
+        </g>
+        <g data-detail="context" data-edge-from="codexAgent" data-edge-to="sceneGate" data-edge-label="text + one tool call" data-edge-key="2" data-edge-id="modelDecision">
+          <rect x="469" y="194" width="106" height="14" rx="3" class="c-mask"/>
+          <text x="522" y="204" class="t-edge-security" font-size="8" text-anchor="middle">text + one tool call</text>
+        </g>
+        <g data-detail="context" data-edge-from="sceneGate" data-edge-to="travelSurface" data-edge-label="validated scene JSON" data-edge-key="3" data-edge-id="validatedScene">
+          <rect x="684" y="271" width="106" height="14" rx="3" class="c-mask"/>
+          <text x="737" y="281" class="t-edge-security" font-size="8" text-anchor="middle">validated scene JSON</text>
+        </g>
+        <g data-detail="context" data-edge-from="travelSurface" data-edge-to="componentFamilies" data-edge-label="registered children" data-edge-key="4" data-edge-id="rootContains">
+          <rect x="855.4" y="344" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="906" y="354" class="t-edge-default" font-size="8" text-anchor="middle">registered children</text>
+        </g>
+        <g data-detail="context" data-edge-from="componentFamilies" data-edge-to="uiState" data-edge-label="read + typed actions" data-edge-key="5" data-edge-id="typedState">
+          <rect x="683" y="423" width="106" height="14" rx="3" class="c-mask"/>
+          <text x="736" y="433" class="t-edge-default" font-size="8" text-anchor="middle">read + typed actions</text>
+        </g>
+        <g data-detail="context" data-edge-from="componentFamilies" data-edge-to="multiCity" data-edge-label="fixed composite view" data-edge-key="6" data-edge-id="fixedPlanner">
+          <rect x="817.05" y="521" width="106" height="14" rx="3" class="c-mask"/>
+          <text x="870.05" y="531" class="t-edge-default" font-size="8" text-anchor="middle">fixed composite view</text>
+        </g>
+        <g data-detail="context" data-edge-from="componentFamilies" data-edge-to="planningTracker" data-edge-label="selected fare facts" data-edge-key="7" data-edge-id="selectedFares">
+          <rect x="691.9" y="490" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="742.5" y="500" class="t-edge-emphasis" font-size="8" text-anchor="middle">selected fare facts</text>
+        </g>
+        <g data-detail="context" data-edge-from="componentFamilies" data-edge-to="projectionCoordinator" data-edge-label="fixed projection needs" data-edge-key="8" data-edge-id="projectionNeeds">
+          <rect x="1052.2" y="423" width="115.6" height="14" rx="3" class="c-mask"/>
+          <text x="1110" y="433" class="t-edge-default" font-size="8" text-anchor="middle">fixed projection needs</text>
+        </g>
+        <g data-detail="context" data-edge-from="projectionCoordinator" data-edge-to="queryApi" data-edge-label="POST · bounded response" data-edge-key="9" data-edge-id="boundedQuery">
+          <rect x="1402.3" y="423" width="120.39999999999999" height="14" rx="3" class="c-mask"/>
+          <text x="1462.5" y="433" class="t-edge-emphasis" font-size="8" text-anchor="middle">POST · bounded response</text>
+        </g>
+        <g data-detail="context" data-edge-from="queryApi" data-edge-to="fareFixture" data-edge-label="validated fixed SQL" data-edge-key="10" data-edge-id="fixedSql">
+          <rect x="1523.8000000000002" y="521" width="101.2" height="14" rx="3" class="c-mask"/>
+          <text x="1574.4" y="531" class="t-edge-default" font-size="8" text-anchor="middle">validated fixed SQL</text>
+        </g>
+
+        <!-- Boundary labels (foreground masks keep routes out of titles) -->
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Browser + host-owned UI">
+          <rect data-graph-role="structural-frame-label-mask" x="264" y="227" width="169.63485250967742" height="19" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="268" y="242.56774293548386" class="t-cloud" font-size="11.56774293548387" font-weight="600">Browser + host-owned UI</text>
+        </g>
+
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="1" data-composition-frame-kind="security-group" data-composition-frame-label="Local model boundary">
+          <rect data-graph-role="structural-frame-label-mask" x="470" y="47" width="148.81291522580645" height="19" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="474" y="62.56774293548387" class="t-security" font-size="11.56774293548387" font-weight="600">Local model boundary</text>
+        </g>
+
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="2" data-composition-frame-kind="region" data-composition-frame-label="Python + server-side inventory">
+          <rect data-graph-role="structural-frame-label-mask" x="1513" y="377" width="218.2193728387097" height="19" rx="3" class="c-mask"/>
+          <text data-boundary-label="" x="1517" y="392.56774293548386" class="t-cloud" font-size="11.56774293548387" font-weight="600">Python + server-side inventory</text>
+        </g>
+
+        <!-- Legend -->
+        <g data-legend="" data-legend-bridge="">
+          <text x="40" y="708" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="728" data-legend-width="83">
+            <rect x="40" y="719" width="16" height="10" rx="2.5" class="c-frontend" stroke-width="1"/>
+            <text x="62" y="728" class="t-muted" font-size="10" font-weight="500">Frontend</text>
+          </g>
+          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Backend" data-legend-x="145" data-legend-baseline="728" data-legend-width="78">
+            <rect x="145" y="719" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
+            <text x="167" y="728" class="t-muted" font-size="10" font-weight="500">Backend</text>
+          </g>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Database" data-legend-x="245" data-legend-baseline="728" data-legend-width="83">
+            <rect x="245" y="719" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="267" y="728" class="t-muted" font-size="10" font-weight="500">Database</text>
+          </g>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Security" data-legend-x="350" data-legend-baseline="728" data-legend-width="83">
+            <rect x="350" y="719" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="372" y="728" class="t-muted" font-size="10" font-weight="500">Security</text>
+          </g>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="455" data-legend-baseline="728" data-legend-width="83">
+            <rect x="455" y="719" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="477" y="728" class="t-muted" font-size="10" font-weight="500">External</text>
+          </g>
+        </g>
+      </svg>
