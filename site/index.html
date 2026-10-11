@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Wayfinder is an unofficial generative travel UI prototype built from a finite, data-bound component catalog.">
     <meta name="theme-color" content="#0e1728">
+    <script src="theme.js"></script>
     <title>Wayfinder | Generative travel UI</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23132968'/%3E%3Ccircle cx='32' cy='32' r='13' fill='%23fb7074'/%3E%3C/svg%3E">
     <link rel="preload" as="image" href="assets/04-date-calendar.png">
@@ -18,6 +19,11 @@
         <span aria-hidden="true"></span>
         wayfinder
       </a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="true" title="Switch to light mode" hidden>
+        <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 14A8.8 8.8 0 0 1 10 3.4 8.8 8.8 0 1 0 20.6 14Z"></path></svg>
+        <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4m0-14.2-1.4 1.4M6.3 17.7l-1.4 1.4"></path></svg>
+        <span data-theme-label>Dark</span>
+      </button>
       <nav aria-label="Page navigation">
         <a href="#compositions">Compositions</a>
         <a href="#technical-details">Technical details</a>
