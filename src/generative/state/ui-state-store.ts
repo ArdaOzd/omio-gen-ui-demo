@@ -1,4 +1,5 @@
 import { ArtifactUIStateSchema, CompactArtifactSnapshotSchema, DateSchema, UIStateRevisionSchema, CATALOG_VERSION, type ArtifactId, type ArtifactUIState, type UIStateStore, type UICommand, type DispatchResult } from '../contracts'
+import { fallbackLegDate } from './itinerary-schedule'
 
 const dayDelta = (from: string, to: string): number => (Date.parse(`${to}T00:00:00.000Z`) - Date.parse(`${from}T00:00:00.000Z`)) / 86_400_000
 const shiftDate = (date: string, days: number): string => DateSchema.parse(new Date(Date.parse(`${date}T00:00:00.000Z`) + days * 86_400_000).toISOString().slice(0, 10))
@@ -7,6 +8,19 @@ export function withTripDates(current:ArtifactUIState,dates:ArtifactUIState['dat
   const endDelta=dayDelta(current.dates.end??current.dates.start,dates.end??dates.start)
   const displayWindowByLeg=Object.fromEntries(Object.entries(current.displayWindowByLeg).map(([key,window])=>[key,{from:shiftDate(window.from,startDelta),to:shiftDate(window.to,endDelta)}]))
   return {...current,dates,displayWindowByLeg}
+}
+
+export function withCalendarDates(current:ArtifactUIState,dates:ArtifactUIState['dates']):ArtifactUIState {
+  const next={...current,dates}
+  const departure=(key:string,state:ArtifactUIState)=>{
+    const separator=key.indexOf(':')
+    return fallbackLegDate(state,separator<0?(state.citySequence[0]??key):key.slice(0,separator))
+  }
+  const calendarDateByLeg=Object.fromEntries(Object.entries(current.calendarDateByLeg).map(([key,date])=>{
+    const previousDeparture=departure(key,current)
+    return[key,date===previousDeparture?departure(key,next):date]
+  }))
+  return{...next,calendarDateByLeg}
 }
 
 export function withStayAllocations(current:ArtifactUIState,stays:ArtifactUIState['stays']):ArtifactUIState {
@@ -50,7 +64,11 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
         const shifted=withTripDates(current,command.dates)
         patch={dates:shifted.dates,displayWindowByLeg:shifted.displayWindowByLeg};break
       }
-      case 'calendarDates':patch={dates:command.dates};break
+      case 'calendarDates':{
+        const aligned=withCalendarDates(current,command.dates)
+        patch={dates:aligned.dates,calendarDateByLeg:aligned.calendarDateByLeg};break
+      }
+      case 'calendarSelection':patch={dates:command.dates,calendarDateByLeg:command.calendarDateByLeg};break
       case 'sort': patch={sort:command.sort};break
       case 'sortByLeg':patch={sortByLeg:command.sortByLeg};break
       case 'calendarDateByLeg':patch={calendarDateByLeg:command.calendarDateByLeg};break

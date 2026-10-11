@@ -265,7 +265,7 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
       recordDisplayInteraction(node.store, { artifactId: plan.state.artifactId, componentRef: node.componentRef, action: 'input', inputFields: ['serviceDate'] })
       if (legIndex <= 0) {
         const dates = tripDatesForLegDeparture(plan.state, leg.originId, valid)
-        dispatch({ kind: 'dates', artifactId: plan.state.artifactId, dates })
+        dispatch({ kind: plan.state.dates.end ? 'dates' : 'calendarDates', artifactId: plan.state.artifactId, dates })
       } else {
         if (!minimumDate || valid < minimumDate) throw new Error('Departure is before the preceding arrival')
         const nights = (Date.parse(`${valid}T00:00:00.000Z`) - Date.parse(`${minimumDate}T00:00:00.000Z`)) / 86_400_000
@@ -476,7 +476,7 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
   const baseRef=componentRef??displayNode.componentRef??`${artifactRef}:leg-${legIndex??0}.fares`
   const [cursor,setCursor]=useState<string|null>(null)
   const [accumulated,setAccumulated]=useState<{identity:string;pages:FareStripPage[]}>({identity:'',pages:[]})
-  const result = useOrderedFares(artifactRef,{componentRef:baseRef,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,cursor,limit:pageSize})
+  const result = useOrderedFares(artifactRef,{componentRef:baseRef,purpose:'trip-fare-strip',legKey:resolved?.leg.key,datasetRef,dateScope:plan.state.dates.end?'display':'trip',cursor,limit:pageSize})
   const pagingIdentity=JSON.stringify({
     datasetId:result.requirement.datasetId,
     datasetRevision:result.requirement.datasetRevision,

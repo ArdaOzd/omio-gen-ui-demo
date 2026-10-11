@@ -54,6 +54,122 @@ async function assertNoHorizontalOverflow(page: Page, root: Locator): Promise<vo
   expect(box!.x + box!.width).toBeLessThanOrEqual((await page.evaluate(() => window.innerWidth)) + 1)
 }
 
+async function assertOpaquePlotDialog(dialog: Locator): Promise<void> {
+  await dialog.scrollIntoViewIfNeeded()
+  const appearance = await dialog.evaluate(element => {
+    const style = window.getComputedStyle(element)
+    const rgba = style.backgroundColor.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/)
+    const rect = element.getBoundingClientRect()
+    const topmost = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundAlpha: rgba ? Number(rgba[1]) : style.backgroundColor === 'transparent' ? 0 : 1,
+      opacity: Number(style.opacity),
+      coversPlot: Boolean(topmost && element.contains(topmost)),
+    }
+  })
+
+  expect(appearance.backgroundColor).not.toBe('transparent')
+  expect(appearance.backgroundAlpha).toBe(1)
+  expect(appearance.opacity).toBe(1)
+  expect(appearance.coversPlot).toBe(true)
+}
+
+async function assertInlineTransportLabelsStack(root: Locator): Promise<void> {
+  const metrics = await root.locator('.trip-mode-options button').evaluateAll(buttons => buttons.map(button => {
+    const icon = button.querySelector('svg')!.getBoundingClientRect()
+    const label = button.querySelector('span')!.getBoundingClientRect()
+    const style = window.getComputedStyle(button)
+    return {
+      label: button.textContent?.trim() ?? '',
+      display: style.display,
+      direction: style.flexDirection,
+      iconCenter: icon.left + icon.width / 2,
+      labelCenter: label.left + label.width / 2,
+      iconBottom: icon.bottom,
+      labelTop: label.top,
+      labelWidth: label.width,
+      labelHeight: label.height,
+    }
+  }))
+
+  expect(metrics.map(metric => metric.label)).toEqual(['Train', 'Bus', 'Flight'])
+  for (const metric of metrics) {
+    expect(metric.display).toBe('flex')
+    expect(metric.direction).toBe('column')
+    expect(metric.labelWidth).toBeGreaterThan(0)
+    expect(metric.labelHeight).toBeGreaterThan(0)
+    expect(Math.abs(metric.iconCenter - metric.labelCenter)).toBeLessThanOrEqual(1)
+    expect(metric.iconBottom).toBeLessThanOrEqual(metric.labelTop)
+  }
+}
+
+async function assertPlannerFieldsDoNotOverlap(root: Locator): Promise<void> {
+  const legs = await root.locator('.trip-plan-leg').evaluateAll(elements => elements.map((leg, legIndex) => {
+    const inputs = Array.from(leg.querySelectorAll<HTMLInputElement>('input:not([type]), input[type="text"], input[type="date"]')).map(input => ({
+      name: `${input.type}:${input.value}`,
+      rect: input.getBoundingClientRect().toJSON(),
+    }))
+    const overlaps: string[] = []
+    for (let leftIndex = 0; leftIndex < inputs.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < inputs.length; rightIndex += 1) {
+        const left = inputs[leftIndex]
+        const right = inputs[rightIndex]
+        const overlapX = Math.min(left.rect.right, right.rect.right) - Math.max(left.rect.left, right.rect.left)
+        const overlapY = Math.min(left.rect.bottom, right.rect.bottom) - Math.max(left.rect.top, right.rect.top)
+        if (overlapX > 0 && overlapY > 0) overlaps.push(`leg ${legIndex + 1}: ${left.name} overlaps ${right.name} by ${overlapX}x${overlapY}px`)
+      }
+    }
+    return { inputCount: inputs.length, overlaps }
+  }))
+
+  expect(legs).toHaveLength(2)
+  for (const leg of legs) {
+    expect(leg.inputCount).toBe(3)
+    expect(leg.overlaps).toEqual([])
+  }
+}
+
+async function calendarWindow(root: Locator): Promise<string[]> {
+  const dayLabels = root.locator('.travel-calendar-option > button:first-child span')
+  await expect(dayLabels).toHaveCount(7, { timeout: 45_000 })
+  const labels = await dayLabels.allTextContents()
+  expect(labels).toHaveLength(7)
+  expect(new Set(labels).size).toBe(7)
+  return labels
+}
+
+async function assertAllFareCardPagesMatchDate(root: Locator, serviceDate: string): Promise<void> {
+  const pager = root.locator('.travel-pagination[aria-label="Fare result pages"]')
+  const panel = pager.locator('xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " travel-panel ")][1]')
+  const caption = panel.locator('.travel-caption')
+  await expect(caption).toContainText('matches', { timeout: 45_000 })
+  const total = Number.parseInt((await caption.innerText()).match(/\d+/)?.[0] ?? '0', 10)
+  expect(total).toBeGreaterThan(0)
+
+  let displayed = 0
+  for (let expectedPage = 1; expectedPage <= 50; expectedPage += 1) {
+    const pageLabel = pager.locator('span')
+    await expect(pageLabel).toHaveText(`Page ${expectedPage}`)
+    const rows = await panel.locator('.travel-fare').allTextContents()
+    expect(rows.length).toBeGreaterThan(0)
+    expect(rows.every(row => row.includes(serviceDate))).toBe(true)
+    displayed += rows.length
+    const next = pager.getByRole('button', { name: 'Next' })
+    if (!(await next.isEnabled())) break
+    await next.click()
+  }
+  expect(displayed).toBe(total)
+
+  const previous = pager.getByRole('button', { name: 'Previous' })
+  while (await previous.isEnabled()) await previous.click()
+  await expect(pager.locator('span')).toHaveText('Page 1')
+}
+
+const dec1To7 = ['Tue 1 Dec', 'Wed 2 Dec', 'Thu 3 Dec', 'Fri 4 Dec', 'Sat 5 Dec', 'Sun 6 Dec', 'Mon 7 Dec']
+const dec8To14 = ['Tue 8 Dec', 'Wed 9 Dec', 'Thu 10 Dec', 'Fri 11 Dec', 'Sat 12 Dec', 'Sun 13 Dec', 'Mon 14 Dec']
+const dec9To15 = ['Wed 9 Dec', 'Thu 10 Dec', 'Fri 11 Dec', 'Sat 12 Dec', 'Sun 13 Dec', 'Mon 14 Dec', 'Tue 15 Dec']
+
 test('all ten audited compositions are live, interactive, bounded, and responsive', async ({ page }) => {
   test.setTimeout(240_000)
 
@@ -110,6 +226,17 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   expect(Math.abs((dotBox!.x + dotBox!.width / 2) - (stemBox!.x + stemBox!.width / 2))).toBeLessThanOrEqual(3)
   expect(stemBox!.x).toBeGreaterThanOrEqual(dialogBox!.x - 1)
   expect(stemBox!.x).toBeLessThanOrEqual(dialogBox!.x + dialogBox!.width + 1)
+  const initialTheme = await page.locator('html').getAttribute('data-theme')
+  await assertOpaquePlotDialog(plotDialog)
+  await page.locator('#theme-toggle').click()
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', initialTheme ?? '')
+  await plotPoint.click()
+  await expect(plotDialog).toBeVisible()
+  await assertOpaquePlotDialog(plotDialog)
+  await page.locator('#theme-toggle').click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme ?? '')
+  await plotPoint.click()
+  await expect(plotDialog).toBeVisible()
   const plotSelection = plotDialog.locator('button[aria-pressed]')
   await plotSelection.click()
   await expect(plotSelection).toHaveAttribute('aria-pressed', 'true')
@@ -136,6 +263,7 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   await parisStay.fill(String(Math.min(3, stayMaximum)))
   await manual.getByRole('button', { name: 'Fastest', exact: true }).first().click()
   await expect(manual.getByRole('button', { name: 'Fastest', exact: true }).first()).toHaveAttribute('aria-pressed', 'true')
+  await assertInlineTransportLabelsStack(manual)
 
   const multiCity = roots.get('multi-city-workspace')!
   await expect(multiCity.getByRole('region', { name: 'Edit your trip' })).toBeVisible()
@@ -152,13 +280,18 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   await stripInput.fill('2026-12-07')
   await expect(stripInput).toHaveValue('2026-12-07')
   const previousDates = dateCalendar.getByRole('button', { name: 'Previous dates' })
-  for (let index = 0; index < 3 && await previousDates.isEnabled(); index += 1) await previousDates.click()
-  await expect(previousDates).toBeDisabled()
   const nextDates = dateCalendar.getByRole('button', { name: 'Next dates' })
-  for (let index = 0; index < 4 && await nextDates.isEnabled(); index += 1) await nextDates.click()
+  expect(await calendarWindow(dateCalendar)).toEqual(dec8To14)
+  await nextDates.click()
+  expect(await calendarWindow(dateCalendar)).toEqual(dec9To15)
   await expect(nextDates).toBeDisabled()
+  await previousDates.click()
+  expect(await calendarWindow(dateCalendar)).toEqual(dec8To14)
+  await previousDates.click()
+  expect(await calendarWindow(dateCalendar)).toEqual(dec1To7)
+  await expect(previousDates).toBeDisabled()
   const calendarDays = dateCalendar.locator('.travel-calendar-option > button:first-child')
-  expect(await calendarDays.count()).toBeGreaterThan(0)
+  await expect(calendarDays).toHaveCount(7)
   const disabledDayCount = await calendarDays.locator(':disabled').count()
   expect(disabledDayCount).toBeGreaterThanOrEqual(0)
   const addCalendarFare = dateCalendar.getByRole('button', { name: /^(Add|Remove) cheapest fare on 2026-12-/ }).first()
@@ -258,20 +391,73 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   const weekly = roots.get('weekly-fare-browser')!
   const weeklyDate = weekly.locator('input[type="date"]')
   await expect(weeklyDate).toHaveAttribute('min', '2026-12-01')
-  await expect(weeklyDate).toHaveAttribute('max', '2026-12-09')
+  await expect(weeklyDate).toHaveAttribute('max', '2026-12-15')
+  await expect(weeklyDate).toHaveValue('2026-12-08')
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
   const initialWeeklyRows = await weekly.locator('.travel-fare').allTextContents()
   expect(initialWeeklyRows.length).toBeGreaterThan(0)
   expect(initialWeeklyRows.every(row => row.includes('2026-12-08'))).toBe(true)
-  await weeklyDate.fill('2026-12-09')
-  await expect(weeklyDate).toHaveValue('2026-12-09')
-  const shiftedWeekDays = weekly.locator('.travel-calendar-option > button:first-child span')
-  await expect(shiftedWeekDays.first()).toContainText('9 Dec')
-  await expect(shiftedWeekDays.last()).toContainText('15 Dec')
+
+  const chooseWeeklyDay = async (label: string, serviceDate: string): Promise<void> => {
+    const day = weekly.locator('.travel-calendar-option > button:first-child').filter({ hasText: label })
+    await expect(day).toBeEnabled({ timeout: 45_000 })
+    await day.click()
+    await expect(weeklyDate).toHaveValue(serviceDate)
+    await expect(weekly.locator('.travel-fare').first()).toContainText(serviceDate, { timeout: 45_000 })
+    await expect(day).toHaveAttribute('aria-pressed', 'true')
+  }
+
+  await chooseWeeklyDay('Thu 10 Dec', '2026-12-10')
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+  await assertAllFareCardPagesMatchDate(weekly, '2026-12-10')
+  await chooseWeeklyDay('Tue 8 Dec', '2026-12-08')
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+
+  await weeklyDate.fill('2026-12-14')
+  await expect(weeklyDate).toHaveValue('2026-12-14')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-14', { timeout: 45_000 })
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+  await weeklyDate.fill('2026-12-15')
+  await expect(weeklyDate).toHaveValue('2026-12-15')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-15', { timeout: 45_000 })
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+  await weeklyDate.fill('2026-12-01')
+  await expect(weeklyDate).toHaveValue('2026-12-01')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-01', { timeout: 45_000 })
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+  await weeklyDate.fill('2026-12-16')
+  await expect(weeklyDate).toHaveValue('2026-12-01')
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+
+  const weeklyPreviousDates = weekly.getByRole('button', { name: 'Previous dates' })
+  const weeklyNextDates = weekly.getByRole('button', { name: 'Next dates' })
+  await weeklyPreviousDates.click()
+  expect(await calendarWindow(weekly)).toEqual(dec1To7)
+  await expect(weeklyPreviousDates).toBeDisabled()
+  await expect(weeklyDate).toHaveValue('2026-12-01')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-01')
+  await weeklyNextDates.click()
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+  await expect(weeklyDate).toHaveValue('2026-12-01')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-01')
+  await weeklyNextDates.click()
+  expect(await calendarWindow(weekly)).toEqual(dec9To15)
+  await expect(weeklyNextDates).toBeDisabled()
+  await expect(weeklyDate).toHaveValue('2026-12-01')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-01')
+  await weeklyPreviousDates.click()
+  expect(await calendarWindow(weekly)).toEqual(dec8To14)
+  await weeklyPreviousDates.click()
+  expect(await calendarWindow(weekly)).toEqual(dec1To7)
+  await expect(weeklyPreviousDates).toBeDisabled()
+  await expect(weeklyDate).toHaveValue('2026-12-01')
+  await expect(weekly.locator('.travel-fare').first()).toContainText('2026-12-01')
+
   await weekly.getByRole('button', { name: 'Fastest', exact: true }).click()
   await expect(weekly.getByRole('button', { name: 'Fastest', exact: true })).toHaveAttribute('aria-pressed', 'true')
   const shiftedWeeklyRows = await weekly.locator('.travel-fare').allTextContents()
   expect(shiftedWeeklyRows.length).toBeGreaterThan(0)
-  expect(shiftedWeeklyRows.every(row => /2026-12-(09|1[0-5])/.test(row))).toBe(true)
+  expect(shiftedWeeklyRows.every(row => row.includes('2026-12-01'))).toBe(true)
   await toggleFirstFare(weekly)
 
   // Rapid changes exercise stale-result rejection while the worker recomputes locally.
@@ -327,10 +513,19 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   await toggleFirstFare(cards)
   await expect(page.locator('.composition-live button[aria-pressed="true"]').filter({ hasText: /Added|Selected/ })).toHaveCount(0)
 
-  await page.setViewportSize({ width: 390, height: 844 })
-  for (const key of scenarioKeys) await assertNoHorizontalOverflow(page, roots.get(key)!)
-  await page.setViewportSize({ width: 320, height: 720 })
-  for (const key of scenarioKeys) await assertNoHorizontalOverflow(page, roots.get(key)!)
+  for (const viewport of [
+    { width: 1470, height: 960 },
+    { width: 1440, height: 960 },
+    { width: 960, height: 800 },
+    { width: 390, height: 844 },
+    { width: 320, height: 720 },
+  ]) {
+    await page.setViewportSize(viewport)
+    for (const key of scenarioKeys) await assertNoHorizontalOverflow(page, roots.get(key)!)
+    await assertInlineTransportLabelsStack(manual)
+    await assertPlannerFieldsDoNotOverlap(manual)
+    await assertPlannerFieldsDoNotOverlap(multiCity)
+  }
 
   expect(apiRequests).toEqual([])
   expect(unexpectedLoopbackRequests).toEqual([])

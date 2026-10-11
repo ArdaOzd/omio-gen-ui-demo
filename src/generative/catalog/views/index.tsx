@@ -21,7 +21,8 @@ import {recordDisplayInteraction,useDisplayNode,usePublishDisplay} from '../disp
 import {useCalendarDays,useFareHighlights,useModeStats,useOrderedFares,useItineraryPlan} from '../context'
 import { FareRouteDetails } from '../fare-route-details'
 import {fareMatchesScope} from '../../data/server-query-client'
-import { clampDateWindow } from '../../state/date-bounds'
+import {commandRespectsDateBounds,type TravelDateBounds} from '../../state/date-bounds'
+import {withCalendarDates} from '../../state/ui-state-store'
 function fareDateTime(serviceDate:string,minutes:number){
  const day=Math.floor(minutes/1440),date=new Date(Date.parse(`${serviceDate}T00:00:00.000Z`)+day*86_400_000)
  return `${date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})} · ${departure(minutes%1440)}`
@@ -47,16 +48,27 @@ function shiftCalendarDate(date:string,days:number){
  const candidate=DateSchema.safeParse(new Date(instant).toISOString().slice(0,10))
  return candidate.success?candidate.data:undefined
 }
-function adjacentCalendarWindow(window:{from:string;to:string},direction:'previous'|'next'){
- const days=direction==='next'?7:-7,from=shiftCalendarDate(window.from,days),to=shiftCalendarDate(window.to,days)
- return from&&to?{from,to}:undefined
+function calendarPage(window:{from:string;to:string},direction:'previous'|'next',bounds?:TravelDateBounds){
+ if(!bounds){const days=direction==='next'?7:-7,from=shiftCalendarDate(window.from,days),to=shiftCalendarDate(window.to,days);return from&&to?{from,to}:undefined}
+ const width=Math.min(Math.round((Date.parse(`${window.to}T00:00:00.000Z`)-Date.parse(`${window.from}T00:00:00.000Z`))/calendarDayMs)+1,Math.round((Date.parse(`${bounds.to}T00:00:00.000Z`)-Date.parse(`${bounds.from}T00:00:00.000Z`))/calendarDayMs)+1)
+ if(!Number.isSafeInteger(width)||width<1)return undefined
+ const lastStart=shiftCalendarDate(bounds.to,1-width)
+ if(!lastStart)return undefined
+ const starts:string[]=[]
+ for(let start:string|undefined=bounds.from;start&&start<=lastStart;start=shiftCalendarDate(start,7))starts.push(start)
+ if(starts.at(-1)!==lastStart)starts.push(lastStart)
+ if(window.from>=bounds.from&&window.from<=lastStart&&!starts.includes(window.from))starts.push(window.from)
+ starts.sort()
+ const index=starts.indexOf(window.from),target=starts[index+(direction==='next'?1:-1)]
+ const to=target&&shiftCalendarDate(target,width-1)
+ return target&&to?{from:target,to}:undefined
 }
 function fareDisplay(items:readonly FareItem[],total:number,viewport?:{offset:number;limit:number;cursor?:string},rankOffset=0):DisplayRepresentation{const omitted=Math.max(0,total-items.length);return{payload:{kind:'fare-order',orderedFareRefs:items.map((item,index)=>({fareId:item.id,rank:rankOffset+index+1})),...(items.length?{renderedRange:{fromRank:rankOffset+1,toRank:rankOffset+items.length}}:{}),...(viewport?{viewport}:{})},totalDisplayed:total,includedCount:items.length,complete:omitted===0,omittedCount:omitted}}
 function useSelection(props:WidgetProps){const selection=useQueryFareSelection(props.artifactRef),display=useDisplayNode();return{state:selection.state,toggle(item:{id:FareItem['id']},source:QueryFareSelectionSource,fareIds:readonly FareItem['id'][]){const selected=selection.state.selectedFareIds.includes(item.id);recordDisplayInteraction(display.store,{artifactId:props.artifactRef,componentRef:display.componentRef,action:selected?'deselect':'select'});return selection.toggle(item,source,fareIds)}}}
 export function FareCards(props:WidgetProps) {
  const node=useDisplayNode(),{services,state}=useArtifact(props.artifactRef),selection=useSelection(props),pageSize=7
  const [cursor,setCursor]=useState<string|null>(null),[cursorHistory,setCursorHistory]=useState<Array<string|null>>([])
- const result=useOrderedFares(props.artifactRef,{componentRef:node.componentRef??`${props.artifactRef}:fare-cards`,purpose:'fare-cards',datasetRef:props.datasetRef,cursor,limit:pageSize})
+ const result=useOrderedFares(props.artifactRef,{componentRef:node.componentRef??`${props.artifactRef}:fare-cards`,purpose:'fare-cards',groupPurpose:'exact-fare-cards',datasetRef:props.datasetRef,dateScope:'trip',cursor,limit:pageSize})
  const pagingIdentity=JSON.stringify({datasetRef:props.datasetRef,datasetRevision:result.requirement.datasetRevision,sourceVersion:result.requirement.sourceVersion,filters:state.filters,sort:state.sort,dates:state.dates,citySequence:state.citySequence})
  useEffect(()=>{setCursor(null);setCursorHistory([])},[pagingIdentity])
  const items=result.data?.items??[],total=result.data?.pageInfo.total??0
@@ -90,15 +102,21 @@ export function PriceCalendar(props:WidgetProps) {
  const fareIds=days.flatMap(day=>day.representative?[day.representative.id]:[])
  const renderedResult=committedQueryResult(result.queryState),binding=state.datasetRefs.flatMap(datasetId=>services.bridge.findBinding(datasetId)??[]).find(candidate=>`${candidate.manifest.coverage.originId}:${candidate.manifest.coverage.destinationId}`===legKey)
  const window=state.displayWindowByLeg[legKey]??result.requirement.scope.dateWindow,queryReady=!!renderedResult&&result.currentResultKey()===renderedResult.resultKey
- const previousWindow=adjacentCalendarWindow(window,'previous'),nextWindow=adjacentCalendarWindow(window,'next')
- const boundedPrevious=previousWindow&&services.dateBounds?clampDateWindow(previousWindow,services.dateBounds):previousWindow
- const boundedNext=nextWindow&&services.dateBounds?clampDateWindow(nextWindow,services.dateBounds):nextWindow
- const previousDisabled=!queryReady||!boundedPrevious||boundedPrevious.from===window.from&&boundedPrevious.to===window.to
- const nextDisabled=!queryReady||!boundedNext||boundedNext.from===window.from&&boundedNext.to===window.to
+ const previousWindow=calendarPage(window,'previous',services.dateBounds),nextWindow=calendarPage(window,'next',services.dateBounds)
+ const previousDisabled=!queryReady||!previousWindow
+ const nextDisabled=!queryReady||!nextWindow
+ const calendarCommand=(date:string)=>{
+  const dates={start:date}
+  if(props.legIndex===0&&!state.dates.end){
+   const calendarDateByLeg={...withCalendarDates(state,dates).calendarDateByLeg,[legKey]:date}
+   return{kind:'calendarSelection' as const,artifactId:state.artifactId,dates,calendarDateByLeg,expectedRevision:state.revision}
+  }
+  return{kind:'calendarDateByLeg' as const,artifactId:state.artifactId,calendarDateByLeg:{...state.calendarDateByLeg,[legKey]:date},expectedRevision:state.revision}
+ }
+ const dateIsSelectable=(date:string)=>!services.dateBounds||commandRespectsDateBounds(state,calendarCommand(date),services.dateBounds,services.bridge)
  const chooseDate=(date:string)=>{
   if(!renderedResult||!binding)return
-  const calendarDateByLeg={...state.calendarDateByLeg,[legKey]:date}
-  const command={kind:'calendarDateByLeg' as const,artifactId:state.artifactId,calendarDateByLeg,expectedRevision:state.revision}
+  const command=calendarCommand(date)
   const scope={legKey,date,availableDates:days.filter(day=>day.count>0).map(day=>day.date),resourceKey:binding.resourceKey,datasetId:binding.datasetId,datasetRevision:binding.datasetRevision,sourceVersion:binding.manifest.source.sourceVersion,resultKey:renderedResult.resultKey,currentResultKey:result.currentResultKey,selectionKey:JSON.stringify(state.selectedFareIds)}
   return services.dispatch?.calendarDateFromQuery?.(command,scope)??services.state.dispatch(command)
  }
@@ -113,7 +131,7 @@ export function PriceCalendar(props:WidgetProps) {
   return services.dispatch.selectFromQuery({...command,expectedRevision:services.state.get(state.artifactId).revision},scope)
  }
  const navigate=(target:{from:string;to:string}|undefined)=>{if(!target)return;dispatch({kind:'displayWindowByLeg',artifactId:state.artifactId,displayWindowByLeg:{...state.displayWindowByLeg,[legKey]:target}})}
- return <Card className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-inline" role="group" aria-label="Calendar date pages"><Button variant="outline" type="button" aria-label="Previous dates" disabled={previousDisabled} onClick={()=>navigate(boundedPrevious)}><span aria-hidden="true">←</span></Button><Button variant="outline" type="button" aria-label="Next dates" disabled={nextDisabled} onClick={()=>navigate(boundedNext)}><span aria-hidden="true">→</span></Button></div><div className="travel-calendar">{days.map(day=>{const item=day.representative,fareSelected=item?selection.state.selectedFareIds.includes(item.id):false,dateSelected=state.calendarDateByLeg[legKey]===day.date,itemReady=!!item&&!!binding&&queryReady&&fareMatchesScope(item,binding.manifest.coverage);return <div className="travel-calendar-option" key={day.date}><Button variant="outline" type="button" disabled={!itemReady} aria-pressed={dateSelected} onClick={()=>{if(item)chooseDate(day.date)}}><span>{new Date(`${day.date}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{item?money(item.priceCents):'No fare'}</strong><small>{day.count} options</small></Button>{item&&<Button type="button" size="sm" variant={fareSelected?'default':'outline'} disabled={!itemReady} aria-pressed={fareSelected} aria-label={`${fareSelected?'Remove':'Add'} cheapest fare on ${day.date} ${fareSelected?'from':'to'} trip`} onClick={()=>toggleFare(item)}>{fareSelected?'Added':'Add cheapest'}</Button>}</div>})}</div>{!days.length&&<p role="status">No options match. Use the arrows to try another week.</p>}</Card>
+ return <Card className="travel-panel"><h3>{props.title??'Find your best day'}</h3><div className="travel-inline" role="group" aria-label="Calendar date pages"><Button variant="outline" type="button" aria-label="Previous dates" disabled={previousDisabled} onClick={()=>navigate(previousWindow)}><span aria-hidden="true">←</span></Button><Button variant="outline" type="button" aria-label="Next dates" disabled={nextDisabled} onClick={()=>navigate(nextWindow)}><span aria-hidden="true">→</span></Button></div><div className="travel-calendar">{days.map(day=>{const item=day.representative,fareSelected=item?selection.state.selectedFareIds.includes(item.id):false,dateSelected=state.calendarDateByLeg[legKey]===day.date,itemReady=!!item&&!!binding&&queryReady&&fareMatchesScope(item,binding.manifest.coverage)&&dateIsSelectable(day.date);return <div className="travel-calendar-option" key={day.date}><Button variant="outline" type="button" disabled={!itemReady} aria-pressed={dateSelected} onClick={()=>{if(item)chooseDate(day.date)}}><span>{new Date(`${day.date}T12:00:00`).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</span><strong>{item?money(item.priceCents):'No fare'}</strong><small>{day.count} options</small></Button>{item&&<Button type="button" size="sm" variant={fareSelected?'default':'outline'} disabled={!itemReady} aria-pressed={fareSelected} aria-label={`${fareSelected?'Remove':'Add'} cheapest fare on ${day.date} ${fareSelected?'from':'to'} trip`} onClick={()=>toggleFare(item)}>{fareSelected?'Added':'Add cheapest'}</Button>}</div>})}</div>{!days.length&&<p role="status">No options match. Use the arrows to try another week.</p>}</Card>
 }
 export function Comparison(props:WidgetProps) {
  const node=useDisplayNode(),result=useModeStats(props.artifactRef,{componentRef:node.componentRef??`${props.artifactRef}:comparison`,purpose:'comparison-matrix',datasetRef:props.datasetRef,baseline:'active'}),modes=result.data?.modes??[]

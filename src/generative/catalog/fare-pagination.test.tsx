@@ -110,7 +110,7 @@ describe('interactive selector pagination',()=>{
     await screen.findByRole('option',{name:/Selector Rail 1 ·/})
     fireEvent.click(within(screen.getByLabelText('Fare picker pages')).getByRole('button',{name:'Next'}))
     const second=await screen.findByRole('option',{name:/Selector Rail 13 ·/})
-    fireEvent.change(screen.getByLabelText('Choose a synthetic fare'),{target:{value:second.getAttribute('value')}})
+    fireEvent.change(screen.getByLabelText('Choose a fare'),{target:{value:second.getAttribute('value')}})
     expect(state.get(artifactId).selectedFareIds).toEqual([selectorItems[12]!.id])
     const capture=displayStore.capture({captureId:'picker-page-2',artifactIds:[artifactId]})
     expect(capture.exposedOrderedIds).toEqual(selectorItems.slice(12).map(item=>item.id))

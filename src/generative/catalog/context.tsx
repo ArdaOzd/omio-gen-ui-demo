@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
-import type { CalendarDateSelectionScope, QueryFareSelectionScope } from '../state/action-router'
+import type { CalendarDateCommand, CalendarDateSelectionScope, QueryFareSelectionScope } from '../state/action-router'
 import {
   ArtifactIdSchema,
   DatasetIdSchema,
@@ -40,7 +40,7 @@ export type TravelServices = {
   dispatch?: ((command: UICommand) => DispatchResult) & {
     retry?: (id: ReturnType<typeof ArtifactIdSchema.parse>) => Promise<void>
     selectFromQuery?: (command: Extract<UICommand, { kind: 'select' }>, scope: QueryFareSelectionScope) => DispatchResult
-    calendarDateFromQuery?: (command: Extract<UICommand, { kind: 'calendarDateByLeg' }>, scope: CalendarDateSelectionScope) => DispatchResult
+    calendarDateFromQuery?: (command: CalendarDateCommand, scope: CalendarDateSelectionScope) => DispatchResult
   }
   record?: (input: unknown) => void
   whenIdle?: (id: ReturnType<typeof ArtifactIdSchema.parse>) => Promise<void>
@@ -92,6 +92,7 @@ export type ComponentQueryOptions = {
   groupPurpose?: string
   legKey?: string
   datasetRef?: string
+  dateScope?: 'display' | 'trip'
 }
 
 export type FarePageQueryOptions = ComponentQueryOptions & {
@@ -162,9 +163,15 @@ function scopeBinding(state: ArtifactUIState, bridge: ServerFareDataBridge, opti
   const destinationId = requestedLeg?.destinationId ?? binding?.manifest.coverage.destinationId
   if (!originId || !destinationId) throw new Error('The component has no fare scope')
   const key = `${originId}:${destinationId}`
-  const window = state.displayWindowByLeg[key]
-    ?? binding?.manifest.coverage.dateWindow
-    ?? { from: state.dates.start, to: state.dates.end ?? state.dates.start }
+  const tripFrom = fallbackLegDate(state, originId)
+  const tripTo = state.dates.end
+    ? fallbackLegDate({ ...state, dates: { start: state.dates.end } }, originId)
+    : tripFrom
+  const window = options.dateScope === 'trip'
+    ? { from: tripFrom, to: tripTo }
+    : state.displayWindowByLeg[key]
+      ?? binding?.manifest.coverage.dateWindow
+      ?? { from: state.dates.start, to: state.dates.end ?? state.dates.start }
   const previous = [...selectedFacts(state, bridge)].reverse().find(fare => fare.destinationId === originId)
   const threshold = previous
     ? addMinutes(previous.serviceDate, previous.departureMinutes + previous.durationMinutes

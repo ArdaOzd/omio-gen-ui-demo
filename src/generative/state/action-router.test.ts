@@ -247,6 +247,7 @@ describe('direct action coverage routing', () => {
     currentResultKey = ResultKeySchema.parse('calendar-result-2')
     const before = store.get(id)
     expect(router.calendarDateFromQuery({ kind: 'calendarDateByLeg', artifactId: id, calendarDateByLeg: { 'london:paris': '2026-10-03' } }, captured)).toEqual({ status: 'stale', revision: before.revision })
+    expect(router.calendarDateFromQuery({ kind: 'calendarSelection', artifactId: id, dates: { start: '2026-10-03' }, calendarDateByLeg: { 'london:paris': '2026-10-03' } }, captured)).toEqual({ status: 'stale', revision: before.revision })
     expect(store.get(id)).toEqual(before)
     router.dispose()
   })

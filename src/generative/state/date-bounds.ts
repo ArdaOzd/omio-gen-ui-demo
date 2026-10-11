@@ -3,7 +3,7 @@ import { ArtifactUIStateSchema, DateSchema, type ArtifactUIState, type BoundedFa
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
 import { orderedLegResources } from './leg-bindings'
 import { fallbackLegDate, fareArrivalInstant, scheduleLegs } from './itinerary-schedule'
-import { withStayAllocations, withTripDates } from './ui-state-store'
+import { withCalendarDates, withStayAllocations, withTripDates } from './ui-state-store'
 
 const DAY_MS = 86_400_000
 
@@ -119,7 +119,8 @@ export function stateRespectsDateBounds(
 
 function projectedState(current: ArtifactUIState, command: UICommand): ArtifactUIState {
   if (command.kind === 'dates') return withTripDates(current, command.dates)
-  if (command.kind === 'calendarDates') return { ...current, dates: command.dates }
+  if (command.kind === 'calendarDates') return withCalendarDates(current, command.dates)
+  if (command.kind === 'calendarSelection') return { ...current, dates: command.dates, calendarDateByLeg: command.calendarDateByLeg }
   if (command.kind === 'stays') return withStayAllocations(current, command.stays)
   if (command.kind === 'route') {
     const legKeys = new Set(command.citySequence.slice(1).map((destination, index) => `${command.citySequence[index]}:${destination}`))

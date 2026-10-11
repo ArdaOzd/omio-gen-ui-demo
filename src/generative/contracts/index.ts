@@ -192,7 +192,7 @@ export type QueryIR = z.infer<typeof QueryIRSchema>;
 export type ValidatedQueryIR = QueryIR;
 export type BoundedQueryResult = { rows: Array<Record<string, JsonScalar>>; total: number; truncated: boolean; datasetRevision: DatasetRevision; requestId: string };
 export type UICommand = { artifactId: ArtifactId; expectedRevision?: UIStateRevision } & (
-  { kind: 'filters'; filters: TravelFilters } | { kind: 'dates'|'calendarDates'; dates: ArtifactUIState['dates'] } |
+  { kind: 'filters'; filters: TravelFilters } | { kind: 'dates'|'calendarDates'; dates: ArtifactUIState['dates'] } | {kind:'calendarSelection';dates:ArtifactUIState['dates'];calendarDateByLeg:ArtifactUIState['calendarDateByLeg']} |
   { kind: 'sort'; sort: SortSpec } | {kind:'sortByLeg';sortByLeg:ArtifactUIState['sortByLeg']} | {kind:'calendarDateByLeg';calendarDateByLeg:ArtifactUIState['calendarDateByLeg']} | { kind: 'select'; fareId: FareId; selected: boolean } |
   { kind: 'runtimeVariables'; runtimeVariables: ArtifactUIState['runtimeVariables'] } | { kind: 'modesByLeg'; modesByLeg: ArtifactUIState['modesByLeg'] } | {kind:'availableModesByLeg';availableModesByLeg:ArtifactUIState['availableModesByLeg']} | {kind:'requestedModesByLeg';requestedModesByLeg:ArtifactUIState['requestedModesByLeg']} | {kind:'displayWindowByLeg';displayWindowByLeg:ArtifactUIState['displayWindowByLeg']} | { kind: 'route'; citySequence: ArtifactUIState['citySequence'] } | { kind: 'stays'; stays: StayAllocation[] } | { kind: 'datasets'; datasetRefs: DatasetId[]; datasetBindings?: ArtifactUIState['datasetBindings'] });
 export type DispatchResult = { status: 'applied'; revision: UIStateRevision } | { status: 'stale'; revision: UIStateRevision };

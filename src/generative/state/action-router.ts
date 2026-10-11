@@ -6,6 +6,7 @@ import { availableModes, legDate, legKey, legRequest, manifestCovers, orderedLeg
 import { scheduleLegs, staleDownstreamFareIds } from './itinerary-schedule'
 import { releaseDatasetWhenUnowned } from './dataset-ownership'
 import { commandRespectsDateBounds, TravelDateBoundsSchema, type TravelDateBounds } from './date-bounds'
+import { withCalendarDates } from './ui-state-store'
 
 export type QueryFareSelectionScope = {
   kind: 'query-result'
@@ -30,6 +31,8 @@ export type CalendarDateSelectionScope = {
   currentResultKey: () => ResultKey | undefined
   selectionKey: string
 }
+
+export type CalendarDateCommand = Extract<UICommand, { kind: 'calendarDateByLeg' | 'calendarSelection' }>
 
 export type CoverageLoadStatus = { artifactId: ArtifactId; status: 'loading' | 'ready' | 'error'; message?: string }
 export type ReplyTurnLease = { token: number; ownerMessageId: string; ready: Promise<void>; signal: AbortSignal }
@@ -175,14 +178,21 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
       && binding.manifest.source.sourceVersion === scope.sourceVersion
   }
 
-  const currentCalendarScope = (artifactId: ArtifactId, command: Extract<UICommand, { kind: 'calendarDateByLeg' }>, scope: CalendarDateSelectionScope): boolean => {
+  const currentCalendarScope = (artifactId: ArtifactId, command: CalendarDateCommand, scope: CalendarDateSelectionScope): boolean => {
     const bridge = options.bridge
     if (!bridge || scope.resultKey !== scope.currentResultKey()) return false
     const state = store.get(artifactId)
     const binding = bridge.findBinding(scope.datasetId)
     if (!binding || !state.datasetRefs.includes(scope.datasetId) || binding.resourceKey !== scope.resourceKey || legKey(binding.manifest.coverage) !== scope.legKey || binding.datasetRevision !== scope.datasetRevision || binding.manifest.source.sourceVersion !== scope.sourceVersion || scope.selectionKey !== JSON.stringify(state.selectedFareIds)) return false
+    if(command.kind==='calendarSelection'){
+      const firstLeg=state.citySequence.length>1?`${state.citySequence[0]}:${state.citySequence[1]}`:undefined
+      if(firstLeg!==scope.legKey||command.dates.end!==undefined||command.dates.start!==scope.date||!scope.date||!scope.availableDates.includes(scope.date))return false
+      const expected={...withCalendarDates(state,command.dates).calendarDateByLeg,[scope.legKey]:scope.date}
+      const keys=new Set([...Object.keys(expected),...Object.keys(command.calendarDateByLeg)])
+      return [...keys].every(key=>expected[key]===command.calendarDateByLeg[key])
+    }
     const changed = [...new Set([...Object.keys(state.calendarDateByLeg), ...Object.keys(command.calendarDateByLeg)])].filter(key => state.calendarDateByLeg[key] !== command.calendarDateByLeg[key])
-    return changed.length === 1 && changed[0] === scope.legKey && command.calendarDateByLeg[scope.legKey] === scope.date && (!scope.date || scope.availableDates.includes(scope.date))
+    return changed.length===1&&changed[0]===scope.legKey&&command.calendarDateByLeg[scope.legKey]===scope.date&&(!scope.date||scope.availableDates.includes(scope.date))
   }
 
   const retry = (artifactId: ArtifactId, suppliedFacts?: readonly BoundedFareFact[]): Promise<void> => {
@@ -324,7 +334,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
 
   const routeCommand = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => {
     if (command.kind === 'select' && command.selected && selectionScope && (!selectionScope.fareIds.includes(command.fareId) || !currentScope(command.artifactId, selectionScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
-    if (command.kind === 'calendarDateByLeg' && (!calendarScope || !currentCalendarScope(command.artifactId, command, calendarScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
+    if ((command.kind === 'calendarDateByLeg'||command.kind==='calendarSelection') && (!calendarScope || !currentCalendarScope(command.artifactId, command, calendarScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
     if (dateBounds && !commandRespectsDateBounds(store.get(command.artifactId), command, dateBounds, options.bridge)) return { status: 'stale', revision: store.get(command.artifactId).revision }
     const result = store.dispatch({ ...command, expectedRevision: command.expectedRevision ?? store.get(command.artifactId).revision })
     if (result.status !== 'applied') return result
@@ -332,7 +342,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     options.activate?.(command.artifactId)
     if (!options.bridge) return result
     if (command.kind === 'select') reconcileSelection(command.artifactId, command, selectionScope)
-    else if (['dates', 'calendarDates', 'route', 'stays'].includes(command.kind)) {
+    else if (['dates', 'calendarDates', 'calendarSelection', 'route', 'stays'].includes(command.kind)) {
       reconcileSelection(command.artifactId, undefined, undefined)
     } else if (['filters', 'modesByLeg', 'displayWindowByLeg'].includes(command.kind)) {
       void retry(command.artifactId)
@@ -351,7 +361,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     (command: UICommand): DispatchResult => routeAgent(command),
     {
       selectFromQuery: (command: Extract<UICommand, { kind: 'select' }>, scope: QueryFareSelectionScope) => routeAgent(command, scope),
-      calendarDateFromQuery: (command: Extract<UICommand, { kind: 'calendarDateByLeg' }>, scope: CalendarDateSelectionScope) => routeAgent(command, undefined, scope),
+      calendarDateFromQuery: (command: CalendarDateCommand, scope: CalendarDateSelectionScope) => routeAgent(command, undefined, scope),
     },
   )
 
@@ -417,7 +427,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
     retry: (id: ArtifactId) => isTurnLocked() ? Promise.resolve() : retry(id),
     dispatchAgent,
     selectFromQuery: (command: Extract<UICommand, { kind: 'select' }>, scope: QueryFareSelectionScope) => route(command, scope),
-    calendarDateFromQuery: (command: Extract<UICommand, { kind: 'calendarDateByLeg' }>, scope: CalendarDateSelectionScope) => route(command, undefined, scope),
+    calendarDateFromQuery: (command: CalendarDateCommand, scope: CalendarDateSelectionScope) => route(command, undefined, scope),
     whenIdle: (id: ArtifactId) => waitForIdle(id),
     beginTurn,
     markTurnRunning,

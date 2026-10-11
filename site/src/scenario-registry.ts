@@ -469,7 +469,7 @@ const weeklyFareBrowser: ShowcaseScenario = {
   scopes: [londonParisScope],
   initialState: state({
     citySequence: ['london', 'paris'],
-    dates: INITIAL_WEEK,
+    dates: { start: INITIAL_DAY },
     displayWindowByLeg: { 'london:paris': INITIAL_WEEK_WINDOW },
     calendarDateByLeg: { 'london:paris': INITIAL_DAY },
   }),

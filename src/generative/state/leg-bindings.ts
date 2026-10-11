@@ -22,11 +22,13 @@ export function availableModes(manifest: Pick<FareScopeManifest, 'availableModes
 export function manifestCovers(manifest: FareScopeManifest, request: FareScope): boolean {
   const coverage = manifest.coverage
   const available = manifest.availableDateWindow
+  const thresholdCovered = coverage.earliestDeparture.date < request.earliestDeparture.date
+    || coverage.earliestDeparture.date === request.earliestDeparture.date
+      && coverage.earliestDeparture.minutes <= request.earliestDeparture.minutes
   return coverage.originId === request.originId
     && coverage.destinationId === request.destinationId
     && coverage.passengers === request.passengers
-    && coverage.earliestDeparture.date === request.earliestDeparture.date
-    && coverage.earliestDeparture.minutes === request.earliestDeparture.minutes
+    && thresholdCovered
     && available !== null
     && request.dateWindow.from >= available.from
     && request.dateWindow.to <= available.to

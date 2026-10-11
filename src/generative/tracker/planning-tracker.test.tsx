@@ -32,8 +32,8 @@ async function fixture(selected = true) {
   const [late, early] = await Promise.all(rows.map(fare => load(fixed.bridge, fare)))
   await fixed.bridge.lookupPins({ version: 1, requestId: 'tracker-pins', sourceVersion: late.manifest.source.sourceVersion, pins: [{ fareId: rows[0]!.id, resourceKey: late.resourceKey }, { fareId: rows[1]!.id, resourceKey: early.resourceKey }] }, signal())
   const state = createUIStateStore()
-  state.initializeMissing(first, { datasetRefs: [late.datasetId], selectedFareIds: selected ? [rows[0]!.id] : [] })
-  state.initializeMissing(second, { datasetRefs: [early.datasetId, late.datasetId], selectedFareIds: selected ? [rows[1]!.id, rows[0]!.id] : [] })
+  state.initializeMissing(first, { datasetRefs: [late.datasetId], dates: { start: rows[0]!.serviceDate }, selectedFareIds: selected ? [rows[0]!.id] : [] })
+  state.initializeMissing(second, { datasetRefs: [early.datasetId, late.datasetId], dates: { start: rows[1]!.serviceDate, end: rows[0]!.serviceDate }, selectedFareIds: selected ? [rows[1]!.id, rows[0]!.id] : [] })
   const planning = createPlanningStore()
   if (selected) {
     const [lateFare, earlyFare] = rows
