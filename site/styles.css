@@ -235,15 +235,26 @@ nav a:hover {
 
 .film-link a {
   display: inline-block;
+  margin: -7px -10px -6px;
   border-bottom: 2px solid var(--coral);
-  padding-bottom: 4px;
+  border-radius: 8px;
+  padding: 7px 10px 6px;
   color: var(--blue);
   font-weight: 750;
   text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.film-link a:hover {
-  color: #0a163e;
+.film-link a:is(:hover, :focus-visible) {
+  border-bottom-color: transparent;
+  background: var(--coral);
+  color: #351216;
+  box-shadow: 0 8px 20px rgb(251 112 116 / 28%);
+  transform: translateY(-2px);
+}
+
+.film-link a:focus-visible {
+  outline-color: var(--blue);
 }
 
 .film-link small {
