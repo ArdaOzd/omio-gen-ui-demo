@@ -341,6 +341,101 @@ section[id], aside[id] { scroll-margin-top: 32px; }
   text-wrap: pretty;
 }
 
+.compositions > .section-heading h2 { color: var(--coral-text); }
+
+.component-chapter { margin-top: 38px; }
+
+.component-heading { max-width: 800px; }
+
+.component-heading h3 {
+  margin: 0;
+  color: var(--blue);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.component-heading p {
+  max-width: 65ch;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.subcomponents { margin-top: clamp(64px, 7vw, 96px); }
+
+.shared-properties { max-width: 85ch; margin-top: 24px; color: var(--muted); font-size: 0.84rem; line-height: 1.75; }
+
+.shared-properties p { margin: 0 0 12px; }
+
+.shared-properties strong { color: var(--ink); font-weight: 600; }
+
+.shared-properties code { color: var(--ink); font-family: var(--mono); font-size: 0.78rem; overflow-wrap: anywhere; }
+
+.subcomponent-reference { margin-top: 28px; border-top: 1px solid var(--line); }
+
+.reference-group { border-bottom: 1px solid var(--line); }
+
+.reference-group > summary {
+  display: flex;
+  min-height: 72px;
+  padding: 18px 4px;
+  align-items: center;
+  gap: 16px;
+  color: var(--blue);
+  cursor: pointer;
+  list-style: none;
+}
+
+.reference-group > summary::-webkit-details-marker { display: none; }
+
+.reference-group > summary::after {
+  margin-left: auto;
+  content: "+";
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.reference-group[open] > summary::after { content: "−"; }
+
+.reference-group > summary:hover { color: var(--coral-text); }
+
+.reference-group > summary:focus-visible { outline-offset: -3px; }
+
+.reference-group h4 { margin: 0; font-size: 1.08rem; font-weight: 600; }
+
+.reference-count { color: var(--muted); font-family: var(--mono); font-size: 0.72rem; }
+
+.reference-table {
+  width: 100%;
+  margin-bottom: 24px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  text-align: left;
+}
+
+.reference-table caption { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.reference-table th, .reference-table td { padding: 16px 20px 16px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+
+.reference-table thead th { color: var(--muted); font-size: 0.72rem; font-weight: 500; }
+
+.reference-table thead th:first-child { width: 23%; }
+
+.reference-table thead th:nth-child(2) { width: 36%; }
+
+.reference-table tbody th { color: var(--blue); font-family: var(--mono); font-size: 0.8rem; font-weight: 500; overflow-wrap: anywhere; }
+
+.reference-table td { color: var(--muted); font-size: 0.86rem; line-height: 1.65; }
+
+.reference-table code { color: var(--ink); font-family: var(--mono); font-size: 0.78rem; overflow-wrap: anywhere; }
+
+.reference-label { display: none; }
+
 .case-list { margin-top: 38px; border-top: 1px solid var(--line); }
 
 .case { border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
@@ -382,7 +477,7 @@ section[id], aside[id] { scroll-margin-top: 32px; }
 
 .case summary:focus-visible { outline-offset: -3px; }
 
-.case summary h3 {
+.case summary h4 {
   display: flex;
   margin: 0;
   align-items: baseline;
@@ -630,7 +725,7 @@ footer p { max-width: 65ch; margin: 0; }
   .section-heading p { margin-top: 18px; }
   .case-list { margin-top: 28px; }
   .case summary { min-height: 76px; gap: 16px; }
-  .case summary h3 { gap: 14px; font-size: 1.05rem; }
+  .case summary h4 { gap: 14px; font-size: 1.05rem; }
   .case-body { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 8px 0 32px; }
   .case-copy { grid-column: 1; grid-row: 2; padding-top: 0; }
   .composition-figure, .composition-placeholder { grid-column: 1; grid-row: 1; }
@@ -673,13 +768,23 @@ footer p { max-width: 65ch; margin: 0; }
   .compositions, .technical { padding-top: 56px; }
   .section-heading h2 { font-size: 2rem; }
   .section-heading p { font-size: 0.91rem; line-height: 1.75; }
+  .component-chapter { margin-top: 28px; }
+  .component-heading p { font-size: 0.91rem; }
+  .reference-group > summary { padding: 18px 0; }
+  .reference-table, .reference-table tbody { display: block; }
+  .reference-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .reference-table tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: 20px 0; gap: 8px; border-top: 1px solid var(--line); }
+  .reference-table th, .reference-table td { display: block; padding: 0; border: 0; }
+  .reference-table tbody th { font-size: 0.85rem; }
+  .reference-table td { font-size: 0.86rem; }
+  .reference-label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 0.7rem; }
   .case summary { padding: 18px 0; gap: 12px; }
-  .case summary h3 { gap: 12px; font-size: 0.95rem; }
-  .case summary h3 > span:nth-child(2) { flex: 1; }
+  .case summary h4 { gap: 12px; font-size: 0.95rem; }
+  .case summary h4 > span:nth-child(2) { flex: 1; }
   .case summary::after { width: 32px; height: 32px; }
   .case-number { font-size: 0.66rem; }
   .case-status { display: none; }
-  .case-planned summary h3 > span:nth-child(2)::after { display: block; margin-top: 4px; color: var(--muted); content: "Concept"; font-size: 0.7rem; font-weight: 400; }
+  .case-planned summary h4 > span:nth-child(2)::after { display: block; margin-top: 4px; color: var(--muted); content: "Concept"; font-size: 0.7rem; font-weight: 400; }
   .chapter-heading h3 { font-size: 1.75rem; }
   .chapter-heading div > p { font-size: 0.9rem; }
   .component-roles { grid-template-columns: minmax(0, 1fr); }
