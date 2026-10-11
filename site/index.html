@@ -8,7 +8,6 @@
     <script src="theme.js"></script>
     <title>Wayfinder | Generative travel UI</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23132968'/%3E%3Ccircle cx='32' cy='32' r='13' fill='%23fb7074'/%3E%3C/svg%3E">
-    <link rel="preload" as="image" href="assets/04-date-calendar.png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -37,27 +36,22 @@
           <p class="hero-kicker">A generative UI study for Omio</p>
           <h1 id="hero-title"><span>Answers become</span> <span>interfaces.</span></h1>
           <p class="hero-description">An agent assembles interactive travel views from a finite, data-bound catalog, using synthetic fares and browser-owned controls.</p>
-          <a class="hero-cta" href="#dynamic-components-title">Explore compositions <span aria-hidden="true">↘</span></a>
-        </div>
-        <figure class="hero-proof">
-          <a href="assets/04-date-calendar.png" aria-label="View the full-size date controls and price calendar capture">
-            <img src="assets/04-date-calendar.png" width="1280" height="1032" fetchpriority="high" alt="Captured Wayfinder prototype with a departure-date control, a price-by-day calendar and a shared trip tracker.">
-          </a>
-          <figcaption><span>Date controls, fare views, one shared tracker.</span><a href="assets/04-date-calendar.png">View full capture <span aria-hidden="true">↗</span></a></figcaption>
-        </figure>
-      </section>
-
-      <section class="film" aria-labelledby="film-title">
-        <div class="film-frame">
-          <img class="film-art" src="assets/film-routes.jpg" width="1672" height="941" loading="lazy" alt="">
-          <div class="film-copy">
-            <p>Project film</p>
-            <h2 id="film-title">See the prototype in use.</h2>
-            <span>17:21 silent walkthrough. Edited preview coming soon.</span>
-            <a class="film-link" href="https://www.youtube.com/watch?v=ILb2iuDdnrM">Watch the full video on YouTube <span aria-hidden="true">↗</span></a>
-            <p class="film-followup">More <a href="#dynamic-components-title">Compositions</a> are possible, investigate them below.</p>
+          <div class="hero-actions">
+            <a class="hero-video-cta" href="https://www.youtube.com/watch?v=ILb2iuDdnrM">Watch the full video on YouTube <span aria-hidden="true">↗</span></a>
+            <a class="hero-cta" href="#dynamic-components-title">Explore Compositions <span aria-hidden="true">↘</span></a>
           </div>
         </div>
+        <figure class="hero-proof">
+          <div class="hero-placeholder" role="img" aria-label="GIF or video preview placeholder for the Wayfinder prototype">
+            <div class="hero-placeholder-copy">
+              <span class="hero-placeholder-label">GIF / VIDEO</span>
+              <strong>Prototype preview</strong>
+              <span>Coming soon</span>
+            </div>
+            <span class="hero-placeholder-play" aria-hidden="true">▶</span>
+          </div>
+          <figcaption><span>Animated prototype preview coming soon.</span></figcaption>
+        </figure>
       </section>
 
       <nav class="contents" aria-label="Contents">
@@ -73,7 +67,7 @@
 
         <section class="component-chapter" aria-labelledby="dynamic-components-title">
           <div class="component-heading">
-            <h3 id="dynamic-components-title">Compositions</h3>
+            <h3 id="dynamic-components-title">Dynamic Compositions</h3>
             <p>Ten prompts selected from the capability audit. Open a composition to inspect its prompt, registered components and captured interface.</p>
           </div>
 
