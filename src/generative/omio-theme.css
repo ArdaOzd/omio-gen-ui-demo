@@ -621,6 +621,8 @@ html .travel-app .travel-plot-popover {
   gap: 10px;
   padding: 16px;
   border: 2px solid var(--travel-accent);
+  color: var(--travel-ink);
+  background: var(--travel-paper);
   transform: translateX(-50%);
   box-shadow: 0 14px 30px rgba(19, 41, 104, 0.22);
 }

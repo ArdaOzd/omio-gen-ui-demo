@@ -7,6 +7,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* The static component page builds from site/, so register the shared
+   source-owned primitives that sit outside that Vite root. */
+@source "./components/ui";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
