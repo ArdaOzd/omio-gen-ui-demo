@@ -230,7 +230,7 @@ function Showcase({ prepared }: { prepared: PreparedShowcase }) {
   }
   return <Fragment>
     <div className="showcase-toolbar">
-      <span className="showcase-range">All synthetic departures · 1–15 Dec 2026</span>
+      <span className="showcase-range">All departures · 1–15 Dec 2026</span>
       <button className="showcase-reset" type="button" disabled={resetStatus === 'pending'} onClick={reset}>
         {resetStatus === 'pending' ? 'Resetting…' : 'Reset composition'}
       </button>

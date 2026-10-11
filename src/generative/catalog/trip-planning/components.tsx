@@ -559,10 +559,10 @@ function FareStrip({ artifactRef, datasetRef, legIndex, componentRef, compact = 
     },page.rows.map(candidate=>candidate.id))
   }
   if (!resolved) return <EmptyPlanningState />
-  if (!pages.length&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding synthetic fares…</Skeleton>
-  if (!pages.length&&result.queryState.status === 'error') return <Alert>These synthetic fares could not load. Try the date again.</Alert>
+  if (!pages.length&&result.queryState.status !== 'error') return <Skeleton className="trip-fare-skeleton" role="status">Finding fares…</Skeleton>
+  if (!pages.length&&result.queryState.status === 'error') return <Alert>These fares could not load. Try the date again.</Alert>
   return <div className={`trip-fare-strip${compact ? ' is-compact' : ''}`}>
-    <p className="trip-fare-caption">Synthetic fares per passenger</p>
+    <p className="trip-fare-caption">Fares per passenger</p>
     {pages.map((page,pageIndex)=><FareStripPagePublisher key={page.resultKey} artifactRef={artifactRef} baseRef={baseRef} legIndex={resolved.index} legKey={resolved.leg.key} resourceKey={resolved.leg.resourceKey} page={page} pageIndex={pageIndex}/>)}
     <FieldGroup key={pagingIdentity} className="trip-fare-results-scroll" role="region" aria-label={`Scrollable fares from ${cityLabel(resolved.leg.originId)} to ${cityLabel(resolved.leg.destinationId)}`} tabIndex={0} onScroll={loadMore}>
     {shown.length > 0 ? <div className="trip-fare-results-grid">{shown.map(row => {
@@ -709,11 +709,11 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     })}</div>
     <div className="trip-calendar-results" aria-live="polite">
       <h4>{new Date(`${selectedDate}T12:00:00.000Z`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}</h4>
-      <p className="trip-fare-caption">Synthetic fares per passenger</p>
+      <p className="trip-fare-caption">Fares per passenger</p>
       {selectedRows.length > 0 ? <div>{selectedRows.map(row => {
         const selected = plan.state.selectedFareIds.includes(row.id)
         return <div key={row.id} className={`trip-calendar-result${selected ? ' is-selected' : ''}`}><span>{modeIcon(row.mode)}{departure(row.departureMinutes)} · {cityLabel(row.mode)}</span><strong>{money(row.priceCents)}</strong><small>{duration(row.durationMinutes)} · {carrierLabel(row, plan.services.bridge, resolved.leg.resourceKey)} · {row.direct?'Direct':`${Math.max(1,row.legs.length-1)} change${row.legs.length===2?'':'s'}`}</small><Button type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected} onClick={() => selection.toggle(row,selectedResult,selectedFareIds)}>{selected ? 'Selected' : 'Choose'}</Button></div>
-      })}</div> : <p role="status">No synthetic fares match this day and transport selection.</p>}
+      })}</div> : <p role="status">No fares match this day and transport selection.</p>}
       <div className="travel-pagination" aria-label={`Calendar fare pages for ${selectedDate}`}><Button type="button" variant="outline" disabled={!activeCursorHistory.length} onClick={()=>{recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:activeRef,action:'input',inputFields:['cursor']});const previous=activeCursorHistory.at(-1)??null;setActiveCursorHistory(history=>history.slice(0,-1));setActiveCursor(previous)}}>Previous</Button><span>Page {activePageIndex+1}</span><Button type="button" variant="outline" disabled={!selectedResult.data.pageInfo.hasNextPage||!selectedResult.data.pageInfo.nextCursor} onClick={()=>{const next=selectedResult.data?.pageInfo.nextCursor;if(next){recordDisplayInteraction(displayNode.store,{artifactId:artifactRef,componentRef:activeRef,action:'input',inputFields:['cursor']});setActiveCursorHistory(history=>[...history,activeCursor]);setActiveCursor(next)}}}>Next</Button></div>
     </div>
   </Card>
@@ -749,7 +749,7 @@ function LegRow({ plan, leg, index, locations, parentRef }: { plan: Plan; leg: P
 }
 
 function EmptyPlanningState() {
-  return <Card className="trip-planning-empty" role="status"><MapPin aria-hidden="true" /><div><strong>No route is ready yet</strong><p>Ask the assistant to add at least two cities and load synthetic fares.</p></div></Card>
+  return <Card className="trip-planning-empty" role="status"><MapPin aria-hidden="true" /><div><strong>No route is ready yet</strong><p>Ask the assistant to add at least two cities and load fares.</p></div></Card>
 }
 
 export function MultiCityPlanGrid(props: WidgetProps) {
@@ -772,7 +772,7 @@ export function MultiCityPlanGrid(props: WidgetProps) {
       <LegRow plan={plan} leg={leg} index={index} locations={catalog.locations} parentRef={parentRef} />
       {index < plan.legs.length - 1 && <div className="trip-stay-bridge"><span aria-hidden="true" /><Card><InternalLegNode plan={plan} leg={leg} index={index} parentRef={parentRef} suffix="stay" componentType="StayDurationInternal"><StayDurationControl plan={plan} leg={leg} nextLeg={plan.legs[index + 1]} /></InternalLegNode></Card></div>}
     </div>)}</div>
-    <p className="trip-synthetic-note">Explore 50 million synthetic fares. All fares and totals are demo data; prices are per passenger and include demo fees.</p>
+    <p className="trip-synthetic-note">Explore 50 million fares. Prices are per passenger and include demo fees.</p>
   </Card>
 }
 

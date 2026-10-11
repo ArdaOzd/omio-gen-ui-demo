@@ -80,7 +80,7 @@ const priceVersusTime: ShowcaseScenario = {
         $type: 'ResponsiveGrid',
         $key: 'exact-options-and-tradeoff',
         children: [
-          { artifactRef: priceVersusTimeArtifact, datasetRef: priceVersusTimeDataset, title: 'Exact synthetic options', legIndex: 0, $type: 'ComparisonTable', $key: 'leg-0-exact-options' },
+          { artifactRef: priceVersusTimeArtifact, datasetRef: priceVersusTimeDataset, title: 'Exact fare options', legIndex: 0, $type: 'ComparisonTable', $key: 'leg-0-exact-options' },
           { artifactRef: priceVersusTimeArtifact, datasetRef: priceVersusTimeDataset, title: 'Price versus journey time', legIndex: 0, $type: 'DurationPricePlot', $key: 'leg-0-price-duration' },
         ],
       },
@@ -128,7 +128,7 @@ const manualLegEditor: ShowcaseScenario = {
               { artifactRef: manualLegArtifact, datasetRef: manualLegFirstDataset, legIndex: 0, $type: 'FareOrder', $key: 'first-leg-order' },
             ],
           },
-          { artifactRef: manualLegArtifact, datasetRef: manualLegFirstDataset, title: 'Browse synthetic fares', legIndex: 0, $type: 'FadeFares', $key: 'first-leg-scrollable-fares' },
+          { artifactRef: manualLegArtifact, datasetRef: manualLegFirstDataset, title: 'Browse fares', legIndex: 0, $type: 'FadeFares', $key: 'first-leg-scrollable-fares' },
         ],
       },
       {
@@ -227,7 +227,7 @@ const dateStripPriceCalendar: ShowcaseScenario = {
     $key: 'berlin-amsterdam-tracker',
     children: [
       { artifactRef: dateStripArtifact, datasetRef: dateStripDataset, title: 'Browse departure dates', $type: 'DateStrip', $key: 'departure-date-strip' },
-      { artifactRef: dateStripArtifact, datasetRef: dateStripDataset, title: 'Synthetic prices by day', legIndex: 0, $type: 'PriceCalendar', $key: 'price-by-day-calendar' },
+      { artifactRef: dateStripArtifact, datasetRef: dateStripDataset, title: 'Prices by day', legIndex: 0, $type: 'PriceCalendar', $key: 'price-by-day-calendar' },
       { artifactRef: dateStripArtifact, datasetRef: dateStripDataset, title: 'Cheapest versus fastest', legIndex: 0, $type: 'CheapestFastest', $key: 'cheapest-versus-fastest-leg-0' },
     ],
   }),
@@ -249,7 +249,7 @@ const modeDashboard: ShowcaseScenario = {
     $type: 'TravelSurface',
     $key: 'london-paris-dashboard',
     children: [
-      { artifactRef: modeDashboardArtifact, title: 'London → Paris · 8 December 2026', body: 'Compare synthetic fares by transport mode, then weigh price against journey time.', $type: 'TravelHero', $key: 'dashboard-heading' },
+      { artifactRef: modeDashboardArtifact, title: 'London → Paris · 8 December 2026', body: 'Compare fares by transport mode, then weigh price against journey time.', $type: 'TravelHero', $key: 'dashboard-heading' },
       {
         artifactRef: modeDashboardArtifact,
         $type: 'ResponsiveGrid',
@@ -260,7 +260,7 @@ const modeDashboard: ShowcaseScenario = {
         ],
       },
       { artifactRef: modeDashboardArtifact, datasetRef: modeDashboardDataset, title: 'Overall savings versus speed', legIndex: 0, $type: 'CheapestFastest', $key: 'leg-0-cheapest-fastest' },
-      { artifactRef: modeDashboardArtifact, datasetRef: modeDashboardDataset, title: 'Compare and choose a synthetic fare', variant: 'compact', legIndex: 0, $type: 'ComparisonTable', $key: 'short-fare-comparison' },
+      { artifactRef: modeDashboardArtifact, datasetRef: modeDashboardDataset, title: 'Compare and choose a fare', variant: 'compact', legIndex: 0, $type: 'ComparisonTable', $key: 'short-fare-comparison' },
     ],
   }),
 }
@@ -279,7 +279,7 @@ const budgetShortlist: ShowcaseScenario = {
   }),
   tree: tree({
     artifactRef: budgetArtifact,
-    title: 'London → Paris · synthetic shortlist',
+    title: 'London → Paris · fare shortlist',
     $type: 'TravelSurface',
     $key: 'london-paris-shortlist',
     children: [
@@ -343,7 +343,7 @@ const fareCardsControls: ShowcaseScenario = {
               { artifactRef: fareCardsArtifact, datasetRef: fareCardsDataset, title: 'Operator', legIndex: 0, $type: 'CarrierFilter', $key: 'carrier-filter-0' },
             ],
           },
-          { artifactRef: fareCardsArtifact, datasetRef: fareCardsDataset, title: 'Expanded synthetic fares', legIndex: 0, $type: 'FareCards', $key: 'expanded-fares-0' },
+          { artifactRef: fareCardsArtifact, datasetRef: fareCardsDataset, title: 'Expanded fare list', legIndex: 0, $type: 'FareCards', $key: 'expanded-fares-0' },
           { artifactRef: fareCardsArtifact, datasetRef: fareCardsDataset, title: 'Lowest price or shortest journey?', legIndex: 0, $type: 'CheapestFastest', $key: 'cheapest-fastest-0' },
         ],
       },
@@ -418,7 +418,7 @@ const storyLayouts: ShowcaseScenario = {
           },
         ],
       },
-      { artifactRef: storyArtifact, title: 'Demo prices, not live offers', body: 'All fares, schedules and totals are synthetic demo data. Selecting an option does not reserve, book or purchase travel.', $type: 'Callout', $key: 'synthetic-price-note' },
+      { artifactRef: storyArtifact, title: 'Demo prices, not live offers', body: 'Selecting an option does not reserve, book or purchase travel.', $type: 'Callout', $key: 'synthetic-price-note' },
     ],
   }),
 }
@@ -446,7 +446,7 @@ const flexibleCalendar: ShowcaseScenario = {
         $type: 'SplitPane',
         $key: 'calendar-and-comparison',
         children: [
-          { artifactRef: flexibleArtifact, datasetRef: flexibleDataset, title: 'Cheapest synthetic fare for each date', legIndex: 0, $type: 'FareCalendar', $key: 'london-paris-calendar-0' },
+          { artifactRef: flexibleArtifact, datasetRef: flexibleDataset, title: 'Cheapest fare for each date', legIndex: 0, $type: 'FareCalendar', $key: 'london-paris-calendar-0' },
           {
             artifactRef: flexibleArtifact,
             $type: 'StickySummary',
@@ -478,14 +478,14 @@ const weeklyFareBrowser: ShowcaseScenario = {
     $type: 'TravelSurface',
     $key: 'departure-explorer',
     children: [
-      { artifactRef: weeklyArtifact, title: '{{tripRoute}}', body: 'Compare synthetic daily lows, then explore one exact departure date.', $type: 'TravelHero', $key: 'explorer-heading' },
+      { artifactRef: weeklyArtifact, title: '{{tripRoute}}', body: 'Compare daily low fares, then explore one exact departure date.', $type: 'TravelHero', $key: 'explorer-heading' },
       {
         artifactRef: weeklyArtifact,
         title: 'Find a good departure day',
         $type: 'Section',
         $key: 'weekly-overview',
         children: [
-          { artifactRef: weeklyArtifact, datasetRef: weeklyDataset, title: 'Lowest synthetic price each day', legIndex: 0, $type: 'PriceCalendar', $key: 'weekly-lowest-prices' },
+          { artifactRef: weeklyArtifact, datasetRef: weeklyDataset, title: 'Lowest fare each day', legIndex: 0, $type: 'PriceCalendar', $key: 'weekly-lowest-prices' },
         ],
       },
       {

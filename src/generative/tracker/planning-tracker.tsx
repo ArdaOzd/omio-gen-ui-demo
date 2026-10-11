@@ -77,7 +77,7 @@ export function PlanningTracker({ store, disabled = false }: { store: PlanningSt
     <Dialog open={!disabled&&dialogOpen} onOpenChange={open=>{if(!disabled)setDialogOpen(open)}}>
       <DialogTrigger asChild><Button type="button" className="travel-planning-buy" disabled={disabled}>Buy</Button></DialogTrigger>
       <DialogContent container={tracker.current?.closest<HTMLElement>('.travel-app')} overlayClassName="travel-dialog-backdrop" className="travel-dialog" showCloseButton={false}>
-        <DialogTitle id="travel-confirmation-title">Congrats, you are set for the trip.</DialogTitle><DialogDescription className="sr-only">Your selected synthetic itinerary is ready.</DialogDescription>
+        <DialogTitle id="travel-confirmation-title">Congrats, you are set for the trip.</DialogTitle><DialogDescription className="sr-only">Your selected itinerary is ready.</DialogDescription>
         <DialogClose asChild><Button type="button">Close</Button></DialogClose>
       </DialogContent>
     </Dialog>

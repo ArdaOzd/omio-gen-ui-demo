@@ -501,4 +501,4 @@ export const cityLabel = (id: string) => id.replace(/[-_]/g, ' ').replace(/\b\w/
 export const departure = (minutes: number) => `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
 export const carrierLabel = (item: { carrierId: string; carrierName?: string | null }, bridge: ServerFareDataBridge, resourceKey?: string) => item.carrierName
   ?? bridge.getCarrierLabel(item.carrierId, resourceKey ? ResourceKeySchema.parse(resourceKey) : undefined)
-  ?? `Synthetic carrier ${item.carrierId}`
+  ?? `Carrier ${item.carrierId}`
