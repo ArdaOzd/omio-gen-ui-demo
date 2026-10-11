@@ -26,6 +26,7 @@ import { stableFingerprint, type ProjectionRequirement } from '../data/projectio
 import type { ServerFareDataBridge } from '../data/fare-data-bridge'
 import { fallbackLegDate } from '../state/itinerary-schedule'
 import { earliestDepartureInWindow } from '../state/leg-bindings'
+import type { TravelDateBounds } from '../state/date-bounds'
 export { filterPredicate } from '../state/filter-predicate'
 export { legKey, legState, resolveBoundDatasetId } from '../state/leg-bindings'
 
@@ -45,6 +46,8 @@ export type TravelServices = {
   whenIdle?: (id: ReturnType<typeof ArtifactIdSchema.parse>) => Promise<void>
   createArtifact?: () => ReturnType<typeof ArtifactIdSchema.parse>
   interactionsLocked?: () => boolean
+  dateBounds?: TravelDateBounds
+  loadLocations?: (signal: AbortSignal) => Promise<ReadonlyArray<{ id: string; label: string }>>
 }
 
 const TravelContext = createContext<TravelServices | null>(null)
@@ -314,6 +317,12 @@ export function useQueryFareSelection(ref: string) {
       if (selected || !services.dispatch?.selectFromQuery) return dispatch(command)
       const captured = committedResult(source.queryState)
       if (!captured) return { status: 'stale' as const, revision: services.state.get(state.artifactId).revision }
+      const binding = services.bridge.findBinding(captured.datasetId)
+      if (!binding
+        || binding.datasetRevision !== captured.datasetRevision
+        || binding.manifest.source.sourceVersion !== captured.sourceVersion) {
+        return { status: 'stale' as const, revision: services.state.get(state.artifactId).revision }
+      }
       services.activate(ref)
       return services.dispatch.selectFromQuery({
         ...command,
@@ -323,7 +332,7 @@ export function useQueryFareSelection(ref: string) {
         fareIds,
         resultKey: captured.resultKey,
         currentResultKey: source.currentResultKey,
-        resourceKey: captured.resourceKey,
+        resourceKey: binding.resourceKey,
         datasetId: captured.datasetId,
         datasetRevision: captured.datasetRevision,
         sourceVersion: captured.sourceVersion,

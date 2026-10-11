@@ -9,6 +9,7 @@ graphify-out/cache/
 # Frontend build artifacts
 node_modules/
 dist/
+site-dist/
 npm-debug.log*
 
 # Worktree-local verification artifacts

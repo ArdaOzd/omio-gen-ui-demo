@@ -1,4 +1,4 @@
-:root {
+html:root {
   color-scheme: light;
   --blue: #132968;
   --blue-soft: #e9eef8;
@@ -20,7 +20,7 @@
   --shadow: 19 41 104;
 }
 
-:root[data-theme="dark"] {
+html:root[data-theme="dark"] {
   color-scheme: dark;
   --blue: #c4d1ff;
   --blue-soft: #202f4d;
@@ -573,6 +573,62 @@ blockquote {
 
 .composition-figure figcaption { margin-top: 12px; color: var(--muted); font-size: 0.72rem; line-height: 1.6; }
 
+.composition-live.travel-app {
+  min-width: 0;
+  min-height: 360px;
+  grid-column: 1;
+  grid-row: 1;
+  overflow: clip;
+  border: 1px solid var(--image-line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 8px 24px rgb(var(--shadow) / 6%);
+}
+
+.composition-live > .travel-travelsurface { margin: 0; border: 0; border-radius: inherit; box-shadow: none; }
+
+.composition-live .showcase-toolbar {
+  display: flex;
+  min-height: 52px;
+  padding: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--blue-faint);
+}
+
+.composition-live .showcase-range { color: var(--muted); font-size: 0.72rem; font-weight: 600; }
+
+.composition-live .showcase-reset {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--white);
+  color: var(--blue);
+  font: 600 0.72rem/1 var(--font);
+  cursor: pointer;
+}
+
+.composition-live .showcase-reset:hover { border-color: var(--blue); }
+.composition-live .travel-planning-tracker { position: static; max-height: none; margin: 16px 24px 24px; }
+
+.composition-loading,
+.composition-error {
+  display: grid;
+  min-height: 360px;
+  margin: 0;
+  padding: 32px;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.composition-error { color: var(--coral-text); }
+
 .technical-chapter { margin-top: clamp(56px, 6vw, 86px); }
 
 .chapter-heading {
@@ -680,7 +736,7 @@ footer { display: grid; width: var(--content); margin: clamp(76px, 10vw, 128px) 
 footer p { max-width: 65ch; margin: 0; }
 
 @media (max-width: 1100px) {
-  :root { --content: min(1280px, calc(100% - 56px)); }
+  html:root { --content: min(1280px, calc(100% - 56px)); }
   .hero { gap: 28px; }
   .hero h1 { font-size: clamp(2.4rem, 4.4vw, 3.2rem); }
   .hero-proof figcaption { flex-direction: column; gap: 2px; }
@@ -693,7 +749,7 @@ footer p { max-width: 65ch; margin: 0; }
 }
 
 @media (max-width: 800px) {
-  :root { --content: min(100% - 40px, 680px); }
+  html:root { --content: min(100% - 40px, 680px); }
   .site-header { min-height: 76px; padding: 16px 0; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "theme theme" "brand navigation"; gap: 8px 18px; }
   .theme-toggle { grid-area: theme; }
   .wordmark { grid-area: brand; }
@@ -716,7 +772,7 @@ footer p { max-width: 65ch; margin: 0; }
   .case summary h4 { gap: 14px; font-size: 1.05rem; }
   .case-body { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 8px 0 32px; }
   .case-copy { grid-column: 1; grid-row: 2; padding-top: 0; }
-  .composition-figure, .composition-gallery { grid-column: 1; grid-row: 1; }
+  .composition-figure, .composition-gallery, .composition-live.travel-app { grid-column: 1; grid-row: 1; }
   blockquote { max-width: 70ch; font-size: 0.92rem; line-height: 1.75; }
   .components li { font-size: 0.68rem; }
   .components a { min-height: 44px; }
@@ -735,7 +791,7 @@ footer p { max-width: 65ch; margin: 0; }
 }
 
 @media (max-width: 540px) {
-  :root { --content: min(100% - 32px, 680px); }
+  html:root { --content: min(100% - 32px, 680px); }
   .site-header { min-height: 108px; grid-template-areas: "theme theme" "brand brand" "navigation navigation"; gap: 4px 0; padding: 16px 0 4px; }
   .wordmark { width: 100%; font-size: 1.22rem; }
   .site-header nav { width: 100%; justify-content: space-between; gap: 8px; }

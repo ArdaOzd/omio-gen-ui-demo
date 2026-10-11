@@ -91,6 +91,35 @@ describe('generated fare selection', () => {
     expect(state.get(artifactId).selectedFareIds).toEqual([rows[1]!.id])
   })
 
+  it('selects a fare from a narrower query while retaining its owned broader dataset binding', async () => {
+    const user = userEvent.setup()
+    const fixed = createFixedProjectionFixture({ rows, sourceVersion: 'fare-actions-v1' })
+    const manifest = await fixed.bridge.loadScope(fixed.scope({
+      originId: 'london',
+      destinationId: 'paris',
+      dateWindow: { from: '2026-10-08', to: '2026-10-10' },
+      passengers: 1,
+      earliestDeparture: { date: '2026-10-08', minutes: 0 },
+    }), new AbortController().signal)
+    const binding = fixed.bridge.getBinding(manifest.resourceKey)
+    const state = createUIStateStore()
+    state.initializeMissing(artifactId, {
+      datasetRefs: [binding.datasetId],
+      citySequence: ['london', 'paris'],
+      dates: { start: '2026-10-09', end: '2026-10-09' },
+      displayWindowByLeg: { 'london:paris': { from: '2026-10-09', to: '2026-10-09' } },
+    })
+    const router = createActionRouter(state, { bridge: fixed.bridge })
+    const services = { bridge: fixed.bridge, state, dispatch: router, activeId: () => artifactId, activate: () => {} } satisfies TravelServices
+
+    render(<TravelProvider services={services}><CatalogNode kind="ComparisonTable" artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0} /></TravelProvider>)
+
+    await user.click(await screen.findByRole('button', { name: 'Add Bus €23.00 to trip' }))
+    expect(state.get(artifactId).selectedFareIds).toEqual([rows[0]!.id])
+    await router.whenIdle(artifactId)
+    expect(state.get(artifactId).selectedFareIds).toEqual([rows[0]!.id])
+  })
+
   it('inspects a plotted fare and changes the trip from its anchored detail card', async () => {
     const user = userEvent.setup()
     const { services, state } = await fixture()

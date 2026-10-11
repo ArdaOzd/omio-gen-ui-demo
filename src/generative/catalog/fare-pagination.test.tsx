@@ -332,6 +332,32 @@ describe('interactive selector pagination',()=>{
     router.dispose()
   })
 
+  it('changes a day after refreshing a narrowed calendar within its owned broader dataset',async()=>{
+    const datedItems=['2026-10-26','2026-10-27'].flatMap((serviceDate,dateIndex)=>[
+      FareItemSchema.parse({...items[0],id:`calendar-cheap-${dateIndex}`,serviceDate,priceCents:2000+dateIndex*100,durationMinutes:240,carrierName:'Cheap Rail',legs:[{...items[0]!.legs[0],durationMinutes:240,carrierName:'Cheap Rail'}]}),
+      FareItemSchema.parse({...items[0],id:`calendar-fast-${dateIndex}`,serviceDate,priceCents:4000+dateIndex*100,durationMinutes:90,carrierName:'Fast Rail',legs:[{...items[0]!.legs[0],durationMinutes:90,carrierName:'Fast Rail'}]}),
+    ])
+    const fixture=createFixedProjectionFixture({rows:datedItems,sourceVersion:'calendar-owned-scope-v1'})
+    const manifest=await fixture.bridge.loadScope({...scope,dateWindow:{from:'2026-10-25',to:'2026-10-28'},earliestDeparture:{date:'2026-10-25',minutes:0}},new AbortController().signal)
+    const binding=fixture.bridge.getBinding(manifest.resourceKey)
+    const artifactId=ArtifactIdSchema.parse('artifact-calendar-owned-scope')
+    const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
+    state.initializeMissing(artifactId,{
+      datasetRefs:[binding.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-26',end:'2026-10-27'},
+      displayWindowByLeg:{'london:paris':{from:'2026-10-26',to:'2026-10-27'}},availableModesByLeg:{'london:paris':['train']},
+    })
+    const router=createActionRouter(state,{bridge:fixture.bridge})
+    const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+    render(<TravelProvider services={services}><FareCalendar artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></TravelProvider>)
+
+    await screen.findByLabelText('Calendar fare pages for 2026-10-26')
+    fireEvent.click(screen.getByRole('radio',{name:'Fastest'}))
+    await waitFor(()=>expect(screen.getByRole('radio',{name:'Fastest'})).toHaveAttribute('aria-checked','true'))
+    fireEvent.click(screen.getByRole('button',{name:/Tue 27 Oct/}))
+    expect(state.get(artifactId).calendarDateByLeg['london:paris']).toBe('2026-10-27')
+    router.dispose()
+  })
+
   it('moves a persisted FareCalendar day into a shifted trip window',async()=>{
     const datedItems=['2026-10-26','2026-10-27'].map((serviceDate,index)=>FareItemSchema.parse({
       ...items[0],

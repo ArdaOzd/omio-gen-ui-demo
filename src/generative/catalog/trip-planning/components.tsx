@@ -23,6 +23,7 @@ import {
   useItineraryPlan,
   useOrderedFares,
   useQueryFareSelection,
+  useTravelServices,
   useTravelAction,
 } from '../context'
 import type { WidgetProps } from '../layout'
@@ -30,6 +31,7 @@ import { DisplayNodeProvider, recordDisplayInteraction, useDisplayNode, usePubli
 import { fareInspectionItems, useProjectionDisplay } from '../display-records'
 import { DISPLAY_LIMITS, type ComponentIdentity } from '../../contracts/display-context'
 import { FareRouteDetails } from '../fare-route-details'
+import { latestTripStartDate, maximumStayNights } from '../../state/date-bounds'
 
 type Plan = ReturnType<typeof useItineraryPlan>
 type PlanLeg = Plan['legs'][number]
@@ -63,24 +65,29 @@ function parseLocations(value: unknown): LocationOption[] {
 }
 
 function useLocationCatalog(): { status: 'loading' | 'ready' | 'error'; locations: LocationOption[] } {
+  const { loadLocations } = useTravelServices()
   const [result, setResult] = useState<{ status: 'loading' | 'ready' | 'error'; locations: LocationOption[] }>({ status: 'loading', locations: [] })
   useEffect(() => {
     const controller = new AbortController()
-    fetch('/api/locations', { signal: controller.signal })
-      .then(response => {
+    const request = loadLocations
+      ? loadLocations(controller.signal)
+      : fetch('/api/locations', { signal: controller.signal }).then(response => {
         if (!response.ok) throw new Error('Location catalog request failed')
-        return response.json()
+        return response.json().then(parseLocations)
       })
+    request
       .then((value: unknown) => {
         if (controller.signal.aborted) return
-        const locations = parseLocations(value)
+        const locations = Array.isArray(value) ? value.filter((location): location is LocationOption => (
+          isRecord(location) && typeof location.id === 'string' && typeof location.label === 'string'
+        )) : parseLocations(value)
         setResult(locations.length ? { status: 'ready', locations } : { status: 'error', locations: [] })
       })
       .catch(() => {
         if (!controller.signal.aborted) setResult({ status: 'error', locations: [] })
       })
     return () => controller.abort()
-  }, [])
+  }, [loadLocations])
   return result
 }
 
@@ -247,7 +254,11 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
   const legIndex = plan.legs.findIndex(candidate => candidate.key === leg.key)
   const stayIndex = plan.state.stays.findIndex(stay => stay.cityId === leg.originId)
   const currentNights = stayIndex >= 0 ? plan.state.stays[stayIndex]?.nights ?? 0 : 0
-  const minimumDate = legIndex > 0 ? new Date(Date.parse(`${leg.threshold.date}T00:00:00.000Z`) - currentNights * 86_400_000).toISOString().slice(0, 10) : undefined
+  const calculatedMinimum = legIndex > 0 ? new Date(Date.parse(`${leg.threshold.date}T00:00:00.000Z`) - currentNights * 86_400_000).toISOString().slice(0, 10) : undefined
+  const minimumDate = calculatedMinimum && calculatedMinimum > (plan.services.dateBounds?.from ?? '') ? calculatedMinimum : plan.services.dateBounds?.from
+  const maximumDate = plan.services.dateBounds
+    ? legIndex <= 0 ? latestTripStartDate(plan.state.dates, plan.services.dateBounds) : plan.services.dateBounds.to
+    : undefined
   const change = (date: string) => {
     try {
       const valid = DateSchema.parse(date)
@@ -272,7 +283,7 @@ function TravelDateControl({ plan, leg, label }: { plan: Plan; leg: PlanLeg; lab
   usePublishDisplay({ inputs: { serviceDate: leg.threshold.date }, provenance: node.store?.provenance(plan.state.artifactId, ['serviceDate']) })
   return <div className="trip-date-control">
     <Label><CalendarDays aria-hidden="true" />{label ?? 'Departure'}
-      <Input type="date" value={leg.threshold.date} min={minimumDate} onChange={event => change(event.target.value)} />
+      <Input type="date" value={leg.threshold.date} min={minimumDate} max={maximumDate} onChange={event => change(event.target.value)} />
     </Label>
     {leg.threshold.minutes > 0 && <small>After {departure(leg.threshold.minutes)} following your previous arrival</small>}
     {error && <Alert>{error}</Alert>}
@@ -291,8 +302,9 @@ function StayDurationControl({ plan, leg, nextLeg, title }: { plan: Plan; leg: P
   const node = useDisplayNode()
   const stay = plan.state.stays.find(item => item.cityId === leg.destinationId)
   const nights = stay?.nights ?? 0
+  const maximumNights = plan.services.dateBounds ? maximumStayNights(plan.state, leg.destinationId, plan.services.dateBounds) : 30
   const setNights = (value: number) => {
-    if (!Number.isInteger(value) || value < 0 || value > 30) return
+    if (!Number.isInteger(value) || value < 0 || value > maximumNights) return
     const existing = plan.state.stays.findIndex(item => item.cityId === leg.destinationId)
     const stays = existing >= 0
       ? plan.state.stays.map((item, index) => index === existing ? { ...item, nights: value } : item)
@@ -303,7 +315,7 @@ function StayDurationControl({ plan, leg, nextLeg, title }: { plan: Plan; leg: P
   usePublishDisplay({ inputs: { stayNights: nights }, provenance: node.store?.provenance(plan.state.artifactId, ['stayNights']) })
   return <div className="trip-stay-control">
     <div><strong>{title ?? `Stay in ${cityLabel(leg.destinationId)}`}</strong><span>{nights} night{nights === 1 ? '' : 's'}</span></div>
-    <Input type="range" min="0" max="30" step="1" value={nights} aria-label={`Stay in ${cityLabel(leg.destinationId)}`} onChange={event => setNights(Number(event.target.value))} />
+    <Input type="range" min="0" max={maximumNights} step="1" value={nights} aria-label={`Stay in ${cityLabel(leg.destinationId)}`} onChange={event => setNights(Number(event.target.value))} />
     {nextLeg && <small>Next departure: {new Date(thresholdDateTime(nextLeg.threshold)).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })}</small>}
   </div>
 }
@@ -637,10 +649,12 @@ function FareCalendarView({ artifactRef, datasetRef, legIndex, title }: { artifa
     if (!calendarKey) return
     const current=representatives.queryState.status==='ready'||representatives.queryState.status==='refreshing'?representatives.queryState.current:representatives.queryState.status==='error'?representatives.queryState.previous:undefined
     if(!current)return
+    const binding=plan.services.bridge.findBinding(current.datasetId)
+    if(!binding||binding.datasetRevision!==current.datasetRevision||binding.manifest.source.sourceVersion!==current.sourceVersion)return
     const calendarDateByLeg={...plan.state.calendarDateByLeg}
     if(date)calendarDateByLeg[calendarKey]=date;else delete calendarDateByLeg[calendarKey]
     const command={kind:'calendarDateByLeg' as const,artifactId:plan.state.artifactId,calendarDateByLeg,expectedRevision:plan.state.revision}
-    const scope={legKey:calendarKey,date,availableDates:[...availableDates],resourceKey:current.resourceKey,datasetId:current.datasetId,datasetRevision:current.datasetRevision,sourceVersion:current.sourceVersion,resultKey:current.resultKey,currentResultKey:representatives.currentResultKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
+    const scope={legKey:calendarKey,date,availableDates:[...availableDates],resourceKey:binding.resourceKey,datasetId:current.datasetId,datasetRevision:current.datasetRevision,sourceVersion:current.sourceVersion,resultKey:current.resultKey,currentResultKey:representatives.currentResultKey,selectionKey:JSON.stringify(plan.state.selectedFareIds)}
     return plan.services.dispatch?.calendarDateFromQuery?.(command,scope)??plan.services.state.dispatch(command)
   }
   const chooseDate = (date: string) => {

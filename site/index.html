@@ -68,29 +68,12 @@
         <section class="component-chapter" aria-labelledby="dynamic-components-title">
           <div class="component-heading">
             <h3 id="dynamic-components-title">Dynamic Compositions</h3>
-            <p>Ten prompts selected from the capability audit. Open a composition to inspect its prompt, registered components and captured interface.</p>
+            <p>Ten prompts selected from the capability audit. Open a composition to use the actual registered components with every matching synthetic fare from 1–15 December 2026.</p>
           </div>
 
         <div class="case-list">
-          <details class="case" id="mode-dashboard" open>
-            <summary><h4><span class="case-number">01</span><span>Transport mode comparison</span></h4></summary>
-            <div class="case-body">
-            <div class="case-copy">
-              <blockquote><strong class="prompt-label">Prompts like:</strong> Help me choose how to travel from London to Paris on 8 December 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</blockquote>
-              <p class="component-label">Components used</p>
-              <ul class="components" aria-label="Components used in this composition">
-                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-mode-breakdown">ModeBreakdown</a></li><li><a href="#subcomponent-comparison-matrix">ComparisonMatrix</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li>
-              </ul>
-            </div>
-            <figure class="composition-figure">
-              <a href="assets/components/transport-mode-comparison.png" aria-label="Open full-size captured composition for mode dashboard"><img src="assets/components/transport-mode-comparison.png" width="1106" height="1366" loading="lazy" alt="Transport mode comparison showing option counts, minimum fares and fastest journeys for London to Paris."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
-            </div>
-          </details>
-
-          <details class="case" id="tradeoff-dashboard">
-            <summary><h4><span class="case-number">02</span><span>Price versus time dashboard</span></h4></summary>
+          <details class="case" id="tradeoff-dashboard" open>
+            <summary><h4><span class="case-number">01</span><span>Price versus time dashboard</span></h4></summary>
             <div class="case-body">
             <div class="case-copy">
               <blockquote><strong class="prompt-label">Prompts like:</strong> I’m going from London to Paris on 8 December 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.</blockquote>
@@ -99,27 +82,42 @@
                 <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-duration-price-plot">DurationPricePlot</a></li><li><a href="#subcomponent-split-pane">SplitPane</a></li>
               </ul>
             </div>
-            <figure class="composition-figure">
-              <a href="assets/components/price-versus-time-dashboard.png" aria-label="Open full-size captured composition for tradeoff dashboard"><img src="assets/components/price-versus-time-dashboard.png" width="1098" height="1362" loading="lazy" alt="Price versus time dashboard with exact London-to-Paris fares and a duration-versus-price comparison."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
+            <div class="composition-live travel-app" data-showcase-case="price-versus-time">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
             </div>
           </details>
 
-          <details class="case" id="budget-shortlist">
-            <summary><h4><span class="case-number">03</span><span>Direct budget shortlist</span></h4></summary>
+          <details class="case" id="manual-leg-editor">
+            <summary><h4><span class="case-number">02</span><span>Direct leg editing controls</span></h4></summary>
             <div class="case-body">
             <div class="case-copy">
-              <blockquote><strong class="prompt-label">Prompts like:</strong> Find me a direct London to Paris trip between 8 and 14 December 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.</blockquote>
+              <blockquote><strong class="prompt-label">Prompts like:</strong> I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-date-window">DateWindow</a></li><li><a href="#subcomponent-mode-chips">ModeChips</a></li><li><a href="#subcomponent-carrier-filter">CarrierFilter</a></li><li><a href="#subcomponent-price-range">PriceRange</a></li><li><a href="#subcomponent-direct-toggle">DirectToggle</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-selected-fare-count">SelectedFareCount</a></li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-city-field">CityField</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-travel-date">TravelDate</a></li><li><a href="#subcomponent-transport-select">TransportSelect</a></li><li><a href="#subcomponent-stay-duration">StayDuration</a></li><li><a href="#subcomponent-fare-order">FareOrder</a></li><li><a href="#subcomponent-fade-fares">FadeFares</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-multi-city-plan-grid">MultiCityPlanGrid</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-selected-itinerary">SelectedItinerary</a></li><li><a href="#subcomponent-synthetic-total">SyntheticTotal</a></li>
               </ul>
             </div>
-            <figure class="composition-figure">
-              <a href="assets/components/direct-budget-shortlist.png" aria-label="Open full-size captured composition for budget shortlist"><img src="assets/components/direct-budget-shortlist.png" width="1116" height="1354" loading="lazy" alt="Direct budget shortlist with date, mode, company and maximum-price filters above matching fares."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
+            <div class="composition-live travel-app" data-showcase-case="manual-leg-editor">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
+            </div>
+          </details>
+
+          <details class="case" id="multi-city-workspace">
+            <summary><h4><span class="case-number">03</span><span>Editable multi-city workspace</span></h4></summary>
+            <div class="case-body">
+            <div class="case-copy">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Plan London to Paris to Barcelona starting 8 December 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-city-sequence">CitySequence</a></li><li><a href="#subcomponent-stay-allocation">StayAllocation</a></li><li><a href="#subcomponent-multi-city-plan-grid">MultiCityPlanGrid</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-selected-fare-count">SelectedFareCount</a></li><li><a href="#subcomponent-coverage-summary">CoverageSummary</a></li>
+              </ul>
+              <p class="internal-note">MultiCityPlanGrid internally rendered CityField, TravelDate, StayDuration, TransportSelect, FareOrder and FadeFares for each leg.</p>
+            </div>
+            <div class="composition-live travel-app" data-showcase-case="multi-city-workspace">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
             </div>
           </details>
 
@@ -133,15 +131,46 @@
                 <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-date-strip">DateStrip</a></li><li><a href="#subcomponent-price-calendar">PriceCalendar</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li>
               </ul>
             </div>
-            <figure class="composition-figure">
-              <a href="assets/components/date-strip-price-by-day-calendar.png" aria-label="Open full-size captured composition for date strip price calendar"><img src="assets/components/date-strip-price-by-day-calendar.png" width="1182" height="882" loading="lazy" alt="Departure-date control above a price-by-day calendar and cheapest-versus-fastest fare comparison."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
+            <div class="composition-live travel-app" data-showcase-case="date-strip-price-calendar">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
+            </div>
+          </details>
+
+          <details class="case" id="mode-dashboard">
+            <summary><h4><span class="case-number">05</span><span>Transport mode comparison</span></h4></summary>
+            <div class="case-body">
+            <div class="case-copy">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Help me choose how to travel from London to Paris on 8 December 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-mode-breakdown">ModeBreakdown</a></li><li><a href="#subcomponent-comparison-matrix">ComparisonMatrix</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li>
+              </ul>
+            </div>
+            <div class="composition-live travel-app" data-showcase-case="mode-dashboard">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
+            </div>
+          </details>
+
+          <details class="case" id="budget-shortlist">
+            <summary><h4><span class="case-number">06</span><span>Direct budget shortlist</span></h4></summary>
+            <div class="case-body">
+            <div class="case-copy">
+              <blockquote><strong class="prompt-label">Prompts like:</strong> Find me a direct London to Paris trip between 8 and 14 December 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.</blockquote>
+              <p class="component-label">Components used</p>
+              <ul class="components" aria-label="Components used in this composition">
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-date-window">DateWindow</a></li><li><a href="#subcomponent-mode-chips">ModeChips</a></li><li><a href="#subcomponent-carrier-filter">CarrierFilter</a></li><li><a href="#subcomponent-price-range">PriceRange</a></li><li><a href="#subcomponent-direct-toggle">DirectToggle</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-selected-fare-count">SelectedFareCount</a></li>
+              </ul>
+            </div>
+            <div class="composition-live travel-app" data-showcase-case="budget-shortlist">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
             </div>
           </details>
 
           <details class="case" id="fare-cards-controls">
-            <summary><h4><span class="case-number">05</span><span>Expanded fare cards with local controls</span></h4></summary>
+            <summary><h4><span class="case-number">07</span><span>Expanded fare cards with local controls</span></h4></summary>
             <div class="case-body">
             <div class="case-copy">
               <blockquote><strong class="prompt-label">Prompts like:</strong> Show me Berlin-to-Amsterdam journeys for 8 December 2026 in one easy-to-read list, with the company, departure and arrival times, journey length, stops and price for each, and a way to add one to my trip. Above the list, I want to change the departure day and filter the results by company and by train, bus or flight. For the transport filter, give me small buttons I can turn on or off independently, so I can include more than one type. Keep these choices together on one line and the rest of the view in one column. Under the details, compare the cheapest and fastest journeys so I can decide whether the time saving is worth paying more.</blockquote>
@@ -150,15 +179,14 @@
                 <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-stack">Stack</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-travel-date">TravelDate</a></li><li><a href="#subcomponent-mode-chips">ModeChips</a></li><li><a href="#subcomponent-carrier-filter">CarrierFilter</a></li><li><a href="#subcomponent-fare-cards">FareCards</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li>
               </ul>
             </div>
-            <figure class="composition-figure">
-              <a href="assets/components/expanded-fare-cards-local-controls.png" aria-label="Open full-size captured composition for fare cards controls"><img src="assets/components/expanded-fare-cards-local-controls.png" width="722" height="1236" loading="lazy" alt="Expanded fare cards with local departure-date, transport-mode and company controls, followed by journey comparisons."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
+            <div class="composition-live travel-app" data-showcase-case="fare-cards-controls">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
             </div>
           </details>
 
           <details class="case" id="story-layouts">
-            <summary><h4><span class="case-number">06</span><span>Tabbed journey story</span></h4></summary>
+            <summary><h4><span class="case-number">08</span><span>Tabbed journey story</span></h4></summary>
             <div class="case-body">
             <div class="case-copy">
               <blockquote><strong class="prompt-label">Prompts like:</strong> I'm going from London to Paris on 8 December 2026 and want an easy way to choose. Start with a quick introduction to the trip. Let me switch between a small table of the exact options and a chart showing what each price buys me in travel time. Under that, let me swipe between a cheapest-versus-fastest comparison and the day's departure and arrival schedule. Keep those choices next to my chosen journey and its total cost, and keep my selection visible while I browse.</blockquote>
@@ -167,21 +195,14 @@
                 <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-split-pane">SplitPane</a></li><li><a href="#subcomponent-tabs">Tabs</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-carousel">Carousel</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-comparison-matrix">ComparisonMatrix</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-selected-itinerary">SelectedItinerary</a></li><li><a href="#subcomponent-synthetic-total">SyntheticTotal</a></li><li><a href="#subcomponent-callout">Callout</a></li><li><a href="#subcomponent-stack">Stack</a></li><li><a href="#subcomponent-itinerary-timeline">ItineraryTimeline</a></li>
               </ul>
             </div>
-            <div class="composition-gallery" role="group" aria-label="Two captures of this composition">
-              <figure class="composition-figure">
-                <a href="assets/components/tabbed-journey-story-view-1.png" aria-label="Open full-size view 1 · comparison table for story layouts"><img src="assets/components/tabbed-journey-story-view-1.png" width="1122" height="1394" loading="lazy" alt="Tabbed journey story, view 1: London-to-Paris fare comparison table beside the selected journey and synthetic total."></a>
-                <figcaption>View 1 · Comparison table</figcaption>
-              </figure>
-              <figure class="composition-figure">
-                <a href="assets/components/tabbed-journey-story-view-2.png" aria-label="Open full-size view 2 · price and duration chart for story layouts"><img src="assets/components/tabbed-journey-story-view-2.png" width="1070" height="1090" loading="lazy" alt="Tabbed journey story, view 2: duration-versus-price chart beside the same selected journey and synthetic total."></a>
-                <figcaption>View 2 · Price and duration chart</figcaption>
-              </figure>
+            <div class="composition-live travel-app" data-showcase-case="story-layouts">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
             </div>
             </div>
           </details>
 
           <details class="case" id="flexible-calendar">
-            <summary><h4><span class="case-number">07</span><span>Flexible-date booking calendar</span></h4></summary>
+            <summary><h4><span class="case-number">09</span><span>Flexible-date booking calendar</span></h4></summary>
             <div class="case-body">
             <div class="case-copy">
               <blockquote><strong class="prompt-label">Prompts like:</strong> I want a flexible-date booking workspace for London to Paris from 8 through 14 December 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.</blockquote>
@@ -190,56 +211,8 @@
                 <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-split-pane">SplitPane</a></li><li><a href="#subcomponent-fare-calendar">FareCalendar</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li>
               </ul>
             </div>
-            <figure class="composition-figure">
-              <a href="assets/components/flexible-date-booking-calendar.png" aria-label="Open full-size captured composition for flexible calendar"><img src="assets/components/flexible-date-booking-calendar.png" width="1118" height="1104" loading="lazy" alt="Flexible-date booking calendar showing available departure days, day-specific fares and a cheapest-versus-fastest comparison."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
-            </div>
-          </details>
-
-          <details class="case" id="manual-leg-editor">
-            <summary><h4><span class="case-number">08</span><span>Direct leg editing controls</span></h4></summary>
-            <div class="case-body">
-            <div class="case-copy">
-              <blockquote><strong class="prompt-label">Prompts like:</strong> I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.</blockquote>
-              <p class="component-label">Components used</p>
-              <ul class="components" aria-label="Components used in this composition">
-                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-city-field">CityField</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-travel-date">TravelDate</a></li><li><a href="#subcomponent-transport-select">TransportSelect</a></li><li><a href="#subcomponent-stay-duration">StayDuration</a></li><li><a href="#subcomponent-fare-order">FareOrder</a></li><li><a href="#subcomponent-fade-fares">FadeFares</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-multi-city-plan-grid">MultiCityPlanGrid</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-selected-itinerary">SelectedItinerary</a></li><li><a href="#subcomponent-synthetic-total">SyntheticTotal</a></li>
-              </ul>
-            </div>
-            <div class="composition-gallery" role="group" aria-label="Two captures of this composition">
-              <figure class="composition-figure">
-                <a href="assets/components/direct-leg-editing-controls-view-1.png" aria-label="Open full-size view 1 · edit one leg for manual leg editor"><img src="assets/components/direct-leg-editing-controls-view-1.png" width="1128" height="1344" loading="lazy" alt="Direct leg editing controls, view 1: editable London-to-Paris cities, date, transport, Paris stay, fare ordering and selectable fare cards."></a>
-                <figcaption>View 1 · Edit one leg</figcaption>
-              </figure>
-              <figure class="composition-figure">
-                <a href="assets/components/direct-leg-editing-controls-view-2.png" aria-label="Open full-size view 2 · choose both journeys for manual leg editor"><img src="assets/components/direct-leg-editing-controls-view-2.png" width="1138" height="1344" loading="lazy" alt="Direct leg editing controls, view 2: the complete London-to-Paris-to-Barcelona planner with both legs and the stay connecting them."></a>
-                <figcaption>View 2 · Choose both journeys</figcaption>
-              </figure>
-            </div>
-            </div>
-          </details>
-
-          <details class="case" id="multi-city-workspace">
-            <summary><h4><span class="case-number">09</span><span>Editable multi-city workspace</span></h4></summary>
-            <div class="case-body">
-            <div class="case-copy">
-              <blockquote><strong class="prompt-label">Prompts like:</strong> Plan London to Paris to Barcelona starting 8 December 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.</blockquote>
-              <p class="component-label">Components used</p>
-              <ul class="components" aria-label="Components used in this composition">
-                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-city-sequence">CitySequence</a></li><li><a href="#subcomponent-stay-allocation">StayAllocation</a></li><li><a href="#subcomponent-multi-city-plan-grid">MultiCityPlanGrid</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-selected-fare-count">SelectedFareCount</a></li><li><a href="#subcomponent-coverage-summary">CoverageSummary</a></li>
-              </ul>
-              <p class="internal-note">MultiCityPlanGrid internally rendered CityField, TravelDate, StayDuration, TransportSelect, FareOrder and FadeFares for each leg.</p>
-            </div>
-            <div class="composition-gallery" role="group" aria-label="Two captures of this composition">
-              <figure class="composition-figure">
-                <a href="assets/components/editable-multi-city-workspace-view-1.png" aria-label="Open full-size view 1 · stops and first leg for multi city workspace"><img src="assets/components/editable-multi-city-workspace-view-1.png" width="1090" height="1178" loading="lazy" alt="Editable multi-city workspace, view 1: London, Paris and Barcelona stops, nights in each destination and first-leg planning controls."></a>
-                <figcaption>View 1 · Stops and first leg</figcaption>
-              </figure>
-              <figure class="composition-figure">
-                <a href="assets/components/editable-multi-city-workspace-view-2.png" aria-label="Open full-size view 2 · connecting stay and second leg for multi city workspace"><img src="assets/components/editable-multi-city-workspace-view-2.png" width="1088" height="1334" loading="lazy" alt="Editable multi-city workspace, view 2: the Paris stay, Paris-to-Barcelona fares and cheapest-versus-fastest summaries for both legs."></a>
-                <figcaption>View 2 · Connecting stay and second leg</figcaption>
-              </figure>
+            <div class="composition-live travel-app" data-showcase-case="flexible-calendar">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
             </div>
             </div>
           </details>
@@ -250,10 +223,9 @@
             <div class="case-copy">
               <blockquote><strong class="prompt-label">Prompts like:</strong> I can leave London for Paris any day from 8 through 14 December 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.</blockquote>
             </div>
-            <figure class="composition-figure">
-              <a href="assets/components/flexible-week-fare-browser.png" aria-label="Open full-size captured composition for weekly fare browser"><img src="assets/components/flexible-week-fare-browser.png" width="1168" height="1376" loading="lazy" alt="Flexible week fare browser for London to Paris, with 8–14 December prices, week navigation, date and company controls, fare ordering and selectable journey cards."></a>
-              <figcaption>Captured composition</figcaption>
-            </figure>
+            <div class="composition-live travel-app" data-showcase-case="weekly-fare-browser">
+              <p class="composition-loading" role="status">Open this composition to load its interactive synthetic fares.</p>
+            </div>
             </div>
           </details>
         </div>
@@ -439,8 +411,8 @@
 
         <aside class="runtime-note" id="source" aria-labelledby="runtime-title">
           <div>
-            <h3 id="runtime-title">Why this page is static</h3>
-            <p>This GitHub Pages presentation documents the prototype. The working demo also needs the Python fare API, the Node agent, the SQLite fixture and a signed-in local Codex runtime.</p>
+            <h3 id="runtime-title">Interactive without a live backend</h3>
+            <p>These compositions run the source-owned React catalog directly in your browser. The full 1–15 December 2026 synthetic fare range is packaged as lazy-loaded static shards; no Python API, model agent, sign-in or live booking service runs on this page.</p>
           </div>
           <a href="https://github.com/ArdaOzd/omio-gen-ui-demo/tree/dev">View the source on GitHub</a>
         </aside>
@@ -451,5 +423,6 @@
       <p>Wayfinder is a personal, unofficial prototype. It is not affiliated with Omio.</p>
       <p>All schedules, prices and totals are deterministic synthetic demo data. No live inventory or booking is available. Any Buy control is a demo confirmation only.</p>
     </footer>
+    <script type="module" src="/src/showcase.tsx"></script>
   </body>
 </html>

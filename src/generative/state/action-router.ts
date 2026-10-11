@@ -5,6 +5,7 @@ import type { PlanningStore } from '../tracker/planning-store'
 import { availableModes, legDate, legKey, legRequest, manifestCovers, orderedLegResources } from './leg-bindings'
 import { scheduleLegs, staleDownstreamFareIds } from './itinerary-schedule'
 import { releaseDatasetWhenUnowned } from './dataset-ownership'
+import { commandRespectsDateBounds, TravelDateBoundsSchema, type TravelDateBounds } from './date-bounds'
 
 export type QueryFareSelectionScope = {
   kind: 'query-result'
@@ -83,7 +84,8 @@ function requestsFor(state: ArtifactUIState, bridge: ServerFareDataBridge, selec
 
 const scheduleCoverages = (scopes: readonly FareScope[]) => scopes.map(scope => ({ originIds: [scope.originId], destinationIds: [scope.destinationId] }))
 
-export function createActionRouter(store: UIStateStore, options: { bridge?: ServerFareDataBridge; planning?: PlanningStore; activate?: (id: ArtifactId) => void; onCoverageStatus?: (status: CoverageLoadStatus) => void; onSourceChanged?: (artifactId: ArtifactId, resourceKey: ResourceKey) => void } = {}) {
+export function createActionRouter(store: UIStateStore, options: { bridge?: ServerFareDataBridge; planning?: PlanningStore; dateBounds?: TravelDateBounds; activate?: (id: ArtifactId) => void; onCoverageStatus?: (status: CoverageLoadStatus) => void; onSourceChanged?: (artifactId: ArtifactId, resourceKey: ResourceKey) => void } = {}) {
+  const dateBounds = options.dateBounds ? TravelDateBoundsSchema.parse(options.dateBounds) : undefined
   const requests = new Map<ArtifactId, { controller: AbortController; promise: Promise<void> }>()
   const selections = new Map<ArtifactId, { token: symbol; controller: AbortController; promise: Promise<void> }>()
   type SourceWatch = { sourceVersion: string; selectedLegByFare: ReadonlyMap<FareId, string>; stop: () => void }
@@ -323,6 +325,7 @@ export function createActionRouter(store: UIStateStore, options: { bridge?: Serv
   const routeCommand = (command: UICommand, selectionScope?: QueryFareSelectionScope, calendarScope?: CalendarDateSelectionScope): DispatchResult => {
     if (command.kind === 'select' && command.selected && selectionScope && (!selectionScope.fareIds.includes(command.fareId) || !currentScope(command.artifactId, selectionScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
     if (command.kind === 'calendarDateByLeg' && (!calendarScope || !currentCalendarScope(command.artifactId, command, calendarScope))) return { status: 'stale', revision: store.get(command.artifactId).revision }
+    if (dateBounds && !commandRespectsDateBounds(store.get(command.artifactId), command, dateBounds, options.bridge)) return { status: 'stale', revision: store.get(command.artifactId).revision }
     const result = store.dispatch({ ...command, expectedRevision: command.expectedRevision ?? store.get(command.artifactId).revision })
     if (result.status !== 'applied') return result
     if (command.kind === 'select' && !command.selected) options.planning?.deselect(command.artifactId, command.fareId)

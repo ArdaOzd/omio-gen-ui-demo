@@ -9,6 +9,21 @@ export function withTripDates(current:ArtifactUIState,dates:ArtifactUIState['dat
   return {...current,dates,displayWindowByLeg}
 }
 
+export function withStayAllocations(current:ArtifactUIState,stays:ArtifactUIState['stays']):ArtifactUIState {
+  const previousNights=new Map(current.stays.map(stay=>[stay.cityId,stay.nights]))
+  const nextNights=new Map(stays.map(stay=>[stay.cityId,stay.nights]))
+  const displayWindowByLeg={...current.displayWindowByLeg}
+  let cumulativeDelta=0
+  for(let index=1;index<current.citySequence.length-1;index++){
+    const origin=current.citySequence[index]!
+    const destination=current.citySequence[index+1]!
+    cumulativeDelta+=(nextNights.get(origin)??0)-(previousNights.get(origin)??0)
+    const key=`${origin}:${destination}`,window=displayWindowByLeg[key]
+    if(window&&cumulativeDelta!==0)displayWindowByLeg[key]={from:shiftDate(window.from,cumulativeDelta),to:shiftDate(window.to,cumulativeDelta)}
+  }
+  return {...current,stays,displayWindowByLeg}
+}
+
 export function createUIStateStore(options: { now?: () => string } = {}): UIStateStore {
   const states = new Map<ArtifactId, ArtifactUIState>()
   const authoredDatasetBindings=new Map<ArtifactId,ArtifactUIState['datasetBindings']>()
@@ -40,18 +55,8 @@ export function createUIStateStore(options: { now?: () => string } = {}): UIStat
       case 'sortByLeg':patch={sortByLeg:command.sortByLeg};break
       case 'calendarDateByLeg':patch={calendarDateByLeg:command.calendarDateByLeg};break
       case 'stays': {
-        const previousNights=new Map(current.stays.map(stay=>[stay.cityId,stay.nights]))
-        const nextNights=new Map(command.stays.map(stay=>[stay.cityId,stay.nights]))
-        const displayWindowByLeg={...current.displayWindowByLeg}
-        let cumulativeDelta=0
-        for(let index=1;index<current.citySequence.length-1;index++){
-          const origin=current.citySequence[index]!
-          const destination=current.citySequence[index+1]!
-          cumulativeDelta+=(nextNights.get(origin)??0)-(previousNights.get(origin)??0)
-          const key=`${origin}:${destination}`,window=displayWindowByLeg[key]
-          if(window&&cumulativeDelta!==0)displayWindowByLeg[key]={from:shiftDate(window.from,cumulativeDelta),to:shiftDate(window.to,cumulativeDelta)}
-        }
-        patch={stays:command.stays,displayWindowByLeg};break
+        const allocated=withStayAllocations(current,command.stays)
+        patch={stays:allocated.stays,displayWindowByLeg:allocated.displayWindowByLeg};break
       }
       case 'route': {
         const legKeys=new Set(command.citySequence.slice(1).map((destination,index)=>`${command.citySequence[index]}:${destination}`))
