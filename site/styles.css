@@ -4,6 +4,7 @@
   --blue-soft: #e9eef8;
   --blue-faint: #f0f4fa;
   --coral: #fb7074;
+  --coral-text: #b83c50;
   --ink: #172747;
   --muted: #586681;
   --paper: #f8fafd;
@@ -306,9 +307,10 @@ section[id], aside[id] { scroll-margin-top: 32px; }
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  color: var(--ink);
-  font-size: 0.76rem;
-  font-weight: 500;
+  color: var(--coral-text);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   text-decoration: none;
 }
 
@@ -667,7 +669,7 @@ footer p { max-width: 65ch; margin: 0; }
   .film-copy > span { max-width: 30ch; font-size: 0.79rem; }
   .film-link { font-size: 0.76rem; gap: 10px; }
   .contents { padding-top: 8px; gap: 0 20px; }
-  .contents a { font-size: 0.71rem; }
+  .contents a { font-size: 1.05rem; }
   .compositions, .technical { padding-top: 56px; }
   .section-heading h2 { font-size: 2rem; }
   .section-heading p { font-size: 0.91rem; line-height: 1.75; }
@@ -694,6 +696,7 @@ footer p { max-width: 65ch; margin: 0; }
 @media (prefers-color-scheme: dark) {
   :root {
     --blue: #c4d1ff;
+    --coral-text: #ff969c;
     --blue-soft: #202f4d;
     --blue-faint: #141f34;
     --ink: #e0e7f4;
