@@ -6,7 +6,8 @@
     <meta name="description" content="Wayfinder is an unofficial generative travel UI prototype built from a finite, data-bound component catalog.">
     <meta name="theme-color" content="#132968">
     <title>Wayfinder | Generative travel UI</title>
-    <link rel="icon" href="data:,">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23132968'/%3E%3Ccircle cx='32' cy='32' r='13' fill='%23fb7074'/%3E%3C/svg%3E">
+    <link rel="preload" as="image" href="assets/04-date-calendar.png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -26,22 +27,30 @@
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
-        <p class="hero-kicker">A generative UI study for Omio</p>
-        <h1 id="hero-title"><span>Answers become</span> <span>interfaces.</span></h1>
-        <p class="hero-description">An unofficial prototype where an agent assembles interactive travel views from a finite, data-bound component catalog.</p>
-        <p class="hero-intro">The work asks a practical question: can one conversation produce the right interface for each travel decision?</p>
+        <div class="hero-copy">
+          <p class="hero-kicker">A generative UI study for Omio</p>
+          <h1 id="hero-title"><span>Answers become</span> <span>interfaces.</span></h1>
+          <p class="hero-description">An agent assembles interactive travel views from a finite, data-bound catalog, using synthetic fares and browser-owned controls.</p>
+          <a class="hero-cta" href="#compositions">Explore compositions <span aria-hidden="true">↘</span></a>
+        </div>
+        <figure class="hero-proof">
+          <a href="assets/04-date-calendar.png" aria-label="View the full-size date controls and price calendar capture">
+            <img src="assets/04-date-calendar.png" width="1280" height="1032" fetchpriority="high" alt="Captured Wayfinder prototype with a departure-date control, a price-by-day calendar and a shared trip tracker.">
+          </a>
+          <figcaption><span>Date controls, fare views, one shared tracker.</span><a href="assets/04-date-calendar.png">View full capture <span aria-hidden="true">↗</span></a></figcaption>
+        </figure>
       </section>
 
       <section class="film" aria-labelledby="film-title">
         <div class="film-frame">
-          <div>
+          <img class="film-art" src="assets/film-routes.jpg" width="1672" height="941" loading="lazy" alt="">
+          <div class="film-copy">
             <p>Project film</p>
-            <h2 id="film-title">Edited preview coming soon.</h2>
-            <span>The final preview will replace this 16:9 frame.</span>
+            <h2 id="film-title">See the prototype in use.</h2>
+            <span>17:21 silent walkthrough. Edited preview coming soon.</span>
+            <a class="film-link" href="https://www.youtube.com/watch?v=ILb2iuDdnrM">Watch the full video on YouTube <span aria-hidden="true">↗</span></a>
           </div>
-          <span class="film-duration">Full recording: 17:21</span>
         </div>
-        <p class="film-link"><a href="https://www.youtube.com/watch?v=ILb2iuDdnrM">Watch the full video on YouTube</a><small>17:21 silent walkthrough</small></p>
       </section>
 
       <nav class="contents" aria-label="Contents">
@@ -56,7 +65,7 @@
       <section class="compositions" id="compositions" aria-labelledby="compositions-title">
         <div class="section-heading">
           <h2 id="compositions-title">Dynamically composed components</h2>
-          <p>These are the ten prompts selected from the capability audit.</p>
+          <p>Ten prompts selected from the capability audit. Open a composition to inspect its prompt, registered components and captured interface.</p>
         </div>
 
         <div class="case-list">
@@ -215,7 +224,7 @@
           </details>
 
           <details class="case case-planned" id="weekly-fare-browser">
-            <summary><h3><span class="case-number">10</span><span>Flexible week fare browser</span></h3></summary>
+            <summary><h3><span class="case-number">10</span><span>Flexible week fare browser</span><span class="case-status">Concept</span></h3></summary>
             <div class="case-body">
             <div class="case-copy">
               <blockquote><strong class="prompt-label">Prompts like:</strong> I can leave London for Paris any day from 8 through 14 December 2026. Give me a week-at-a-glance price view with previous and next week browsing, a direct date field, carrier and sorting controls, and detailed fare cards I can add to my trip. Keep the selected day separate from the visible week.</blockquote>
@@ -241,23 +250,24 @@
 
         <section class="technical-chapter" id="system-architecture" aria-labelledby="system-architecture-title">
           <div class="chapter-heading">
-            <p>01 / System architecture</p>
+            <p>System architecture</p>
             <div>
               <h3 id="system-architecture-title">A bounded local loop</h3>
               <p>The browser sends the prompt and a compact snapshot to a local model agent. A validated scene returns to the catalog renderer, while a separate Python service supplies bounded projections from the server-side synthetic fare fixture.</p>
             </div>
           </div>
           <figure class="architecture-diagram">
+            <p class="diagram-hint">Pan horizontally to inspect the full system <span aria-hidden="true">↔</span></p>
             <div class="diagram-scroll" tabindex="0" aria-label="Scrollable Wayfinder system architecture diagram">
               <img src="assets/architecture-system.svg" width="1793" height="744" loading="lazy" alt="Source-backed architecture diagram showing the traveler, browser chat shell, strict local Codex agent, validation gate, TravelSurface component families, browser-owned state and PlanningTracker, bounded projection coordinator, closed Python query API and server-side 50-million-row synthetic SQLite fare fixture.">
             </div>
-            <figcaption><span>System boundary</span>The model chooses a registered scene. The browser owns rendering, typed interactions, selection state and bounded fare queries; SQLite stays server-side.</figcaption>
+            <figcaption><span>System boundary</span><span class="diagram-caption">The model chooses a registered scene. The browser owns rendering, typed interactions, selection state and bounded fare queries; SQLite stays server-side.</span><a href="assets/architecture-system.svg">Open diagram <span aria-hidden="true">↗</span></a></figcaption>
           </figure>
         </section>
 
         <section class="technical-chapter" id="component-connections" aria-labelledby="component-connections-title">
           <div class="chapter-heading">
-            <p>02 / Component connections</p>
+            <p>Component connections</p>
             <div>
               <h3 id="component-connections-title">Registered pieces, fixed behavior</h3>
               <p><code>TravelSurface</code> is the required root. The agent chooses registered layouts and leaves, while their React implementations, state updates, queries and selection behavior remain source-owned.</p>
@@ -300,7 +310,7 @@
 
         <section class="technical-chapter" id="runtime-flow" aria-labelledby="runtime-flow-title">
           <div class="chapter-heading">
-            <p>03 / Runtime flow</p>
+            <p>Runtime flow</p>
             <div>
               <h3 id="runtime-flow-title">Five controlled handoffs</h3>
               <p>Each boundary narrows what crosses it. The model makes the composition decision; the host executes everything that touches application state or fare data.</p>

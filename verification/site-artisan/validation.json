@@ -1,0 +1,95 @@
+{
+  "scope": "Static Wayfinder presentation in site/; interactive application unchanged.",
+  "baseline_commit": "dd67d8869cef",
+  "audited_source_sha256": {
+    "index.html": "e73883dd6186b7c48298bf031625c00db0c048f7600efb23d472aac9d4ab7585",
+    "styles.css": "4fd52c0a3bf4808c6dcb221ec4062306b332842d3ad8af5275eacb91627c66c8"
+  },
+  "static_checks": {
+    "status": "pass",
+    "preservation": {
+      "baseline": "HEAD:site/index.html",
+      "cases_checked": 10,
+      "prompts_checked": 10,
+      "component_lists_checked": 9,
+      "screenshot_urls_checked": 18,
+      "existing_ids_checked": 26,
+      "primary_nav_links_checked": 3,
+      "legal_footer_checked": true
+    },
+    "local_assets_and_fragment_links": "pass",
+    "image_intrinsic_dimensions": "pass",
+    "css_parse": "pass",
+    "svg_xml": "pass"
+  },
+  "browser_checks": {
+    "viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        768,
+        1024
+      ],
+      [
+        390,
+        844
+      ],
+      [
+        320,
+        568
+      ]
+    ],
+    "horizontal_page_overflow": "none at checked viewports, including expanded long prompt at 320px",
+    "native_disclosures": "Space closes first case; Enter opens second case and long-prompt eighth case; pointer opens eighth case at 320px",
+    "keyboard_focus": "visible outlines",
+    "diagram": "390px viewport: container width 341px, content width 1200px, ArrowRight moves internal scrollLeft from 0 to 40px without page overflow",
+    "javascript_dependency": "zero script elements; HTML navigation and native details controls",
+    "dark_palette": "desktop and mobile visually checked using a temporary mirror activating the existing dark media condition; production stylesheet retains system preference",
+    "reduced_motion": "stylesheet disables smooth scrolling, transitions and hover displacement for prefers-reduced-motion"
+  },
+  "lighthouse": {
+    "version": "13.5.0",
+    "environment": "Local HTTP preview with ephemeral headless Chromium; lab metrics are not deployed-site measurements",
+    "reports": {
+      "desktop": {
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100,
+          "agentic-browsing": 100
+        },
+        "metrics": {
+          "first-contentful-paint": "0.2\u00a0s",
+          "largest-contentful-paint": "0.3\u00a0s",
+          "speed-index": "0.7\u00a0s",
+          "total-blocking-time": "0\u00a0ms",
+          "cumulative-layout-shift": "0"
+        },
+        "runtime_error": null,
+        "failed_scored_accessibility": []
+      },
+      "mobile": {
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100,
+          "agentic-browsing": 100
+        },
+        "metrics": {
+          "first-contentful-paint": "0.9\u00a0s",
+          "largest-contentful-paint": "1.1\u00a0s",
+          "speed-index": "0.9\u00a0s",
+          "total-blocking-time": "0\u00a0ms",
+          "cumulative-layout-shift": "0"
+        },
+        "runtime_error": null,
+        "failed_scored_accessibility": []
+      }
+    },
+    "source_unchanged": true
+  }
+}
