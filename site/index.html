@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Wayfinder is an unofficial generative travel UI prototype built from a finite, data-bound component catalog.">
-    <meta name="theme-color" content="#132968">
+    <meta name="theme-color" content="#0e1728">
     <title>Wayfinder | Generative travel UI</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23132968'/%3E%3Ccircle cx='32' cy='32' r='13' fill='%23fb7074'/%3E%3C/svg%3E">
     <link rel="preload" as="image" href="assets/04-date-calendar.png">
@@ -78,7 +78,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> Help me choose how to travel from London to Paris on 8 December 2026. Make a visual dashboard for every transport mode present in the synthetic data, showing the number of options, the cheapest fare and the fastest journey for each mode. Keep a short comparison table visible so I can choose one, and tell me whether paying more for the faster option looks worthwhile.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>TravelHero</li><li>ResponsiveGrid</li><li>ModeBreakdown</li><li>ComparisonMatrix</li><li>CheapestFastest</li><li>ComparisonTable</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-mode-breakdown">ModeBreakdown</a></li><li><a href="#subcomponent-comparison-matrix">ComparisonMatrix</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -95,7 +95,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> I’m going from London to Paris on 8 December 2026. Help me choose between saving money and saving time. Show the exact options and make the price-versus-duration tradeoff obvious.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>CheapestFastest</li><li>ResponsiveGrid</li><li>ComparisonTable</li><li>DurationPricePlot</li><li>SplitPane</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-duration-price-plot">DurationPricePlot</a></li><li><a href="#subcomponent-split-pane">SplitPane</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -112,7 +112,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> Find me a direct London to Paris trip between 8 and 14 December 2026 for at most €80. Give me a compact shortlist I can add to my trip, with useful filters close by.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>Section</li><li>Inline</li><li>DateWindow</li><li>ModeChips</li><li>CarrierFilter</li><li>PriceRange</li><li>DirectToggle</li><li>ComparisonTable</li><li>CheapestFastest</li><li>SelectedFareCount</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-date-window">DateWindow</a></li><li><a href="#subcomponent-mode-chips">ModeChips</a></li><li><a href="#subcomponent-carrier-filter">CarrierFilter</a></li><li><a href="#subcomponent-price-range">PriceRange</a></li><li><a href="#subcomponent-direct-toggle">DirectToggle</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-selected-fare-count">SelectedFareCount</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -129,7 +129,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> Track Berlin to Amsterdam fares from 8 to 14 December 2026. Put a simple departure-date strip above a price-by-day calendar, keep cheapest versus fastest visible, and let me add a fare from the calendar.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>DateStrip</li><li>PriceCalendar</li><li>CheapestFastest</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-date-strip">DateStrip</a></li><li><a href="#subcomponent-price-calendar">PriceCalendar</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -146,7 +146,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> Show me Berlin-to-Amsterdam journeys for 8 December 2026 in one easy-to-read list, with the company, departure and arrival times, journey length, stops and price for each, and a way to add one to my trip. Above the list, I want to change the departure day and filter the results by company and by train, bus or flight. For the transport filter, give me small buttons I can turn on or off independently, so I can include more than one type. Keep these choices together on one line and the rest of the view in one column. Under the details, compare the cheapest and fastest journeys so I can decide whether the time saving is worth paying more.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>Stack</li><li>Inline</li><li>TravelDate</li><li>ModeChips</li><li>CarrierFilter</li><li>FareCards</li><li>CheapestFastest</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-stack">Stack</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-travel-date">TravelDate</a></li><li><a href="#subcomponent-mode-chips">ModeChips</a></li><li><a href="#subcomponent-carrier-filter">CarrierFilter</a></li><li><a href="#subcomponent-fare-cards">FareCards</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -163,7 +163,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> I'm going from London to Paris on 8 December 2026 and want an easy way to choose. Start with a quick introduction to the trip. Let me switch between a small table of the exact options and a chart showing what each price buys me in travel time. Under that, let me swipe between a cheapest-versus-fastest comparison and the day's departure and arrival schedule. Keep those choices next to my chosen journey and its total cost, and keep my selection visible while I browse.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>TravelHero</li><li>SplitPane</li><li>Tabs</li><li>Section</li><li>Carousel</li><li>CheapestFastest</li><li>ComparisonMatrix</li><li>ComparisonTable</li><li>StickySummary</li><li>SelectedItinerary</li><li>SyntheticTotal</li><li>Callout</li><li>Stack</li><li>ItineraryTimeline</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-split-pane">SplitPane</a></li><li><a href="#subcomponent-tabs">Tabs</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-carousel">Carousel</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-comparison-matrix">ComparisonMatrix</a></li><li><a href="#subcomponent-comparison-table">ComparisonTable</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-selected-itinerary">SelectedItinerary</a></li><li><a href="#subcomponent-synthetic-total">SyntheticTotal</a></li><li><a href="#subcomponent-callout">Callout</a></li><li><a href="#subcomponent-stack">Stack</a></li><li><a href="#subcomponent-itinerary-timeline">ItineraryTimeline</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -180,7 +180,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> I want a flexible-date booking workspace for London to Paris from 8 through 14 December 2026. Show the local cheapest option on each date, let me inspect and add a fare for a day, and keep the cheapest-versus-fastest comparison visible.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>SplitPane</li><li>FareCalendar</li><li>StickySummary</li><li>CheapestFastest</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-split-pane">SplitPane</a></li><li><a href="#subcomponent-fare-calendar">FareCalendar</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -197,7 +197,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> I'm planning London to Paris to Barcelona starting 8 December 2026, with two nights in Paris. Before I choose a fare, I want to change the first London-to-Paris journey on its own and see each change: where I'm leaving from and going to separately, the departure day, how I travel, my Paris stay and whether the journeys are ordered by cheapest, fastest or departure time. Put the travel type, Paris stay and ordering choices next to each other, and let me scroll through the matching fares with their details and add one to my trip. Show the cheapest and fastest options for this first journey. Keep the whole trip underneath, where I can change and choose both journeys together, and show the cheapest and fastest Paris-to-Barcelona options there. Keep my chosen journeys and total cost in a compact summary beneath both areas while I browse.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>Section</li><li>CityField</li><li>Inline</li><li>TravelDate</li><li>TransportSelect</li><li>StayDuration</li><li>FareOrder</li><li>FadeFares</li><li>ResponsiveGrid</li><li>CheapestFastest</li><li>MultiCityPlanGrid</li><li>StickySummary</li><li>SelectedItinerary</li><li>SyntheticTotal</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-section">Section</a></li><li><a href="#subcomponent-city-field">CityField</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-travel-date">TravelDate</a></li><li><a href="#subcomponent-transport-select">TransportSelect</a></li><li><a href="#subcomponent-stay-duration">StayDuration</a></li><li><a href="#subcomponent-fare-order">FareOrder</a></li><li><a href="#subcomponent-fade-fares">FadeFares</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-multi-city-plan-grid">MultiCityPlanGrid</a></li><li><a href="#subcomponent-sticky-summary">StickySummary</a></li><li><a href="#subcomponent-selected-itinerary">SelectedItinerary</a></li><li><a href="#subcomponent-synthetic-total">SyntheticTotal</a></li>
               </ul>
             </div>
             <figure class="composition-figure">
@@ -214,7 +214,7 @@
               <blockquote><strong class="prompt-label">Prompts like:</strong> Plan London to Paris to Barcelona starting 8 December 2026, with two nights in Paris and four in Barcelona. Give me one editable all-leg workspace, plus a route headline, the ordered city sequence, stay allocation, selected-fare count, coverage details, and a concise explanation of how each leg connects.</blockquote>
               <p class="component-label">Components used</p>
               <ul class="components" aria-label="Components used in this composition">
-                <li>TravelSurface</li><li>TravelHero</li><li>CitySequence</li><li>StayAllocation</li><li>MultiCityPlanGrid</li><li>ResponsiveGrid</li><li>CheapestFastest</li><li>Inline</li><li>SelectedFareCount</li><li>CoverageSummary</li>
+                <li><a href="#subcomponent-travel-surface">TravelSurface</a></li><li><a href="#subcomponent-travel-hero">TravelHero</a></li><li><a href="#subcomponent-city-sequence">CitySequence</a></li><li><a href="#subcomponent-stay-allocation">StayAllocation</a></li><li><a href="#subcomponent-multi-city-plan-grid">MultiCityPlanGrid</a></li><li><a href="#subcomponent-responsive-grid">ResponsiveGrid</a></li><li><a href="#subcomponent-cheapest-fastest">CheapestFastest</a></li><li><a href="#subcomponent-inline">Inline</a></li><li><a href="#subcomponent-selected-fare-count">SelectedFareCount</a></li><li><a href="#subcomponent-coverage-summary">CoverageSummary</a></li>
               </ul>
               <p class="internal-note">MultiCityPlanGrid internally rendered CityField, TravelDate, StayDuration, TransportSelect, FareOrder and FadeFares for each leg.</p>
             </div>
@@ -247,95 +247,91 @@
         <section class="component-chapter subcomponents" id="subcomponents" aria-labelledby="subcomponents-title">
           <div class="component-heading">
             <h3 id="subcomponents-title">Subcomponents</h3>
-            <p>These 49 reusable subcomponents are used in the construction of the dynamically composed components above. Layouts arrange the interface; controls, data views and status displays provide its behavior.</p>
-          </div>
-          <div class="shared-properties" id="shared-properties">
-            <p><strong>Shared properties.</strong> Every entry requires <code>artifactRef</code> (the travel workspace). Optional properties are <code>datasetRef</code> (data), <code>actionRef</code> (local action), <code>selectorRef</code> (local selector), <code>title</code>, <code>tabLabel</code>, <code>routeTextLegIndex</code> (route text binding), <code>variant</code> (default, compact or emphasis layout) and <code>body</code> (Callout text).</p>
-            <p>Only layouts accept <code>children</code>. Where listed, <code>legIndex</code> is required and identifies a journey leg, starting at zero. Live fares, dates and filter values come from the shared workspace.</p>
+            <p>These 49 reusable subcomponents are used in the construction of the dynamically composed components above. Layouts arrange the interface; controls, data views and status displays provide its behavior. Controls share the chosen cities, dates and filters. The Python backend executes fixed SQL queries for fare results using those inputs. Route-aware labels follow the selected cities, and every block uses the same Wayfinder theme.</p>
           </div>
           <div class="subcomponent-reference">
             <details class="reference-group" id="subcomponent-layout" open>
               <summary><h4>Layouts</h4><span class="reference-count">11 subcomponents</span></summary>
               <table class="reference-table" role="table">
-                <caption>Layouts: purposes and properties</caption>
-                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose</th><th scope="col">Properties</th></tr></thead>
+                <caption>Layouts: purposes and connections</caption>
+                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose and connections</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">TravelSurface</th><td>Root container for a composed travel interface.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">Callout</th><td>Show a short heading and explanatory body.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">Carousel</th><td>Arrange child views as horizontal panels.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">Inline</th><td>Arrange child components horizontally with wrapping.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">ResponsiveGrid</th><td>Place children in equal responsive columns.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">Section</th><td>Group related content under a section heading.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">SplitPane</th><td>Pair a main view with supporting content.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">Stack</th><td>Arrange child components vertically.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">StickySummary</th><td>Keep a chosen-trip summary visible while browsing.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">Tabs</th><td>Switch between child views with accessible tabs.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
-                  <tr><th scope="row">TravelHero</th><td>Introduce the journey with a headline and live route text.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + <code>children</code>.</td></tr>
+                  <tr id="subcomponent-travel-surface" tabindex="-1"><th scope="row">TravelSurface</th><td>Frame a composed travel scene and its child controls, views and summaries. The children connect to the same host-managed trip state, while the shared travel theme supplies the surface, spacing and typography.</td></tr>
+                  <tr id="subcomponent-callout" tabindex="-1"><th scope="row">Callout</th><td>Present a short explanation, warning or travel note alongside other components. Its heading and body can use registered route text that follows the selected cities and stays, and it uses the common themed notice surface.</td></tr>
+                  <tr id="subcomponent-carousel" tabindex="-1"><th scope="row">Carousel</th><td>Browse child panels horizontally with scroll snapping. Each panel keeps its own trip-state and fare-selection connection, while the shared theme supplies the surrounding presentation.</td></tr>
+                  <tr id="subcomponent-inline" tabindex="-1"><th scope="row">Inline</th><td>Place related controls or small views on one wrapping row. The shared theme sets the spacing, while each child keeps its connection to the current trip inputs as the available width changes.</td></tr>
+                  <tr id="subcomponent-responsive-grid" tabindex="-1"><th scope="row">ResponsiveGrid</th><td>Arrange child components in a grid that adapts to the available width. Each control or view keeps its own state and query binding, allowing parallel comparisons within one composed scene.</td></tr>
+                  <tr id="subcomponent-section" tabindex="-1"><th scope="row">Section</th><td>Group related controls and views beneath an optional heading. Its children retain their existing trip-state and data connections, so a section can organize one leg or a whole planning task.</td></tr>
+                  <tr id="subcomponent-split-pane" tabindex="-1"><th scope="row">SplitPane</th><td>Place a primary view beside a supporting pane, such as filters or a summary. The layout positions its children; their shared trip state carries changes and selections between the panes.</td></tr>
+                  <tr id="subcomponent-stack" tabindex="-1"><th scope="row">Stack</th><td>Arrange child components vertically with consistent spacing. Controls, fare results and summaries can share a column while keeping their own connections to the current trip.</td></tr>
+                  <tr id="subcomponent-sticky-summary" tabindex="-1"><th scope="row">StickySummary</th><td>Keep a child summary near the top of its scrolling container. A selected-itinerary or total view inside it still reads the shared selection state, so the pinned summary follows choices made elsewhere.</td></tr>
+                  <tr id="subcomponent-tabs" tabindex="-1"><th scope="row">Tabs</th><td>Switch between child views in an accessible tabbed panel, with keyboard navigation. Tab labels can resolve the current selected cities, while the active tab is local presentation state and each view keeps its data binding.</td></tr>
+                  <tr id="subcomponent-travel-hero" tabindex="-1"><th scope="row">TravelHero</th><td>Introduce the journey with a prominent heading and optional supporting content. Route-aware headings follow the selected cities, and the shared theme supplies the hero presentation.</td></tr>
                 </tbody>
               </table>
             </details>
             <details class="reference-group" id="subcomponent-control">
               <summary><h4>Controls</h4><span class="reference-count">15 subcomponents</span></summary>
               <table class="reference-table" role="table">
-                <caption>Controls: purposes and properties</caption>
-                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose</th><th scope="col">Properties</th></tr></thead>
+                <caption>Controls: purposes and connections</caption>
+                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose and connections</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">CarrierFilter</th><td>Filter one leg’s options by carrier.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">CityField</th><td>Edit a leg’s origin and destination using location suggestions.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">DateStrip</th><td>Select a local departure date with a native date input.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">DateWindow</th><td>Set the bounded date range for the trip.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">DirectToggle</th><td>Restrict results to direct journeys.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">DurationRange</th><td>Limit the maximum journey duration.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">FareOrder</th><td>Order one leg’s fares by cheapest, fastest or departure.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">FarePicker</th><td>Choose a fare from a compact leg-specific selector.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">ModeChips</th><td>Toggle transport-mode filters for one leg.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">PriceRange</th><td>Limit the maximum local fare price.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">SortSelect</th><td>Sort fares by price, duration or departure.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">StayAllocation</th><td>Allocate stay nights across the trip’s stops.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">StayDuration</th><td>Adjust the destination stay from 0 to 30 nights.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">TransportSelect</th><td>Choose available transport modes for one leg.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">TravelDate</th><td>Change one leg’s departure date within trip timing rules.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
+                  <tr id="subcomponent-carrier-filter" tabindex="-1"><th scope="row">CarrierFilter</th><td>Choose carriers from the available company names and matching-fare counts. The Python backend runs fixed carrier-facet SQL queries using the current travel scope, and each checkbox writes the shared carrier filter used by connected fare views.</td></tr>
+                  <tr id="subcomponent-city-field" tabindex="-1"><th scope="row">CityField</th><td>Choose a route leg’s origin and destination from city suggestions loaded from the location catalog. The Python backend reads that catalog with fixed SQL queries when the control loads; choosing a city stores its stable identifier in the shared route, so connected legs, labels and fare scopes follow the revised cities.</td></tr>
+                  <tr id="subcomponent-date-strip" tabindex="-1"><th scope="row">DateStrip</th><td>Set a departure date with a native date input. Changing this date updates the shared trip and shifts its leg windows, so connected fare views load the revised schedule.</td></tr>
+                  <tr id="subcomponent-date-window" tabindex="-1"><th scope="row">DateWindow</th><td>Set an inclusive start and end date with two native date inputs. Changes update the trip’s dates, prompt a coverage check and refresh connected fare requests.</td></tr>
+                  <tr id="subcomponent-direct-toggle" tabindex="-1"><th scope="row">DirectToggle</th><td>Limit matching results to direct connections. Its checkbox updates the shared filter, which the host includes in connected fare and comparison requests.</td></tr>
+                  <tr id="subcomponent-duration-range" tabindex="-1"><th scope="row">DurationRange</th><td>Set an optional maximum journey duration in minutes. The typed duration filter narrows connected fare requests, and clearing the field removes the limit.</td></tr>
+                  <tr id="subcomponent-fare-order" tabindex="-1"><th scope="row">FareOrder</th><td>Choose Departure, Cheapest or Fastest ordering for one route leg. It writes the leg’s sort state, which the connected fare list and calendar use when requesting their fixed results.</td></tr>
+                  <tr id="subcomponent-fare-picker" tabindex="-1"><th scope="row">FarePicker</th><td>Choose a fare from a compact dropdown with previous and next result pages. The Python backend runs fixed SQL queries using the shared route, dates, filters and ordering, and choosing an option synchronizes selection with other fare views.</td></tr>
+                  <tr id="subcomponent-mode-chips" tabindex="-1"><th scope="row">ModeChips</th><td>Include or exclude transport modes with pressed-state buttons; choosing none means all modes. It updates the selected leg’s mode filter, which connected fare views use when retrieving results.</td></tr>
+                  <tr id="subcomponent-price-range" tabindex="-1"><th scope="row">PriceRange</th><td>Set an optional maximum fare in euros per passenger, stored as integer cents. The typed price filter is shared by connected fare requests, and clearing the field removes the limit.</td></tr>
+                  <tr id="subcomponent-sort-select" tabindex="-1"><th scope="row">SortSelect</th><td>Choose price, duration or departure ordering in a native dropdown. It writes the trip-wide sort state for views that use that ordering; route-leg views can keep their separate FareOrder selection.</td></tr>
+                  <tr id="subcomponent-stay-allocation" tabindex="-1"><th scope="row">StayAllocation</th><td>Set 0–30 nights for each configured destination, shown with readable city names. It writes the shared stays and shifts downstream leg windows, which combine with selected arrival times to constrain the next departures.</td></tr>
+                  <tr id="subcomponent-stay-duration" tabindex="-1"><th scope="row">StayDuration</th><td>Set a stay of 0–30 nights after the bound leg’s destination. The shared itinerary combines that stay with the selected arrival time to update the earliest departure for the next leg and its connected fare requests.</td></tr>
+                  <tr id="subcomponent-transport-select" tabindex="-1"><th scope="row">TransportSelect</th><td>Include or exclude the available transport modes for one route leg. Available choices come from the host’s fare-scope metadata, and the selection updates the leg’s shared filters so connected fare views refresh.</td></tr>
+                  <tr id="subcomponent-travel-date" tabindex="-1"><th scope="row">TravelDate</th><td>Set the departure date for a route leg using the shared itinerary schedule. The first leg updates the trip dates; later legs adjust the stay after the preceding arrival, keeping downstream fare scopes connected.</td></tr>
                 </tbody>
               </table>
             </details>
             <details class="reference-group" id="subcomponent-view">
               <summary><h4>Data views and summaries</h4><span class="reference-count">17 subcomponents</span></summary>
               <table class="reference-table" role="table">
-                <caption>Data views and summaries: purposes and properties</caption>
-                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose</th><th scope="col">Properties</th></tr></thead>
+                <caption>Data views and summaries: purposes and connections</caption>
+                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose and connections</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">CheapestFastest</th><td>Compare the cheapest and fastest fares and add or remove either.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">CitySequence</th><td>Show ordered stops and their stay nights.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">ComparisonMatrix</th><td>Compare grouped transport-mode results.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">ComparisonTable</th><td>Rank exact fares in a table with selection actions.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">CoverageSummary</th><td>Explain available data bounds and completeness.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">DurationPricePlot</th><td>Compare price and duration; inspect fare points and add or remove a fare.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">FadeFares</th><td>Browse a progressively loaded, vertically scrolling list of leg fares.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">FareCalendar</th><td>Browse one leg’s fares by date, inspect a day and select a fare.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">FareCards</th><td>Show expanded fare details with trip-selection actions.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">ItineraryTimeline</th><td>Show fare chronology with trip-selection actions.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">ModeBreakdown</th><td>Show available option counts by transport mode.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">MultiCityPlanGrid</th><td>Editable workspace for every trip leg; its internal controls are fixed.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared, except <code>datasetRef</code>; no <code>legIndex</code> or <code>children</code>.</td></tr>
-                  <tr><th scope="row">PriceCalendar</th><td>Show prices by day with date browsing and cheapest-fare selection.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared + required <code>legIndex</code>.</td></tr>
-                  <tr><th scope="row">RouteMap</th><td>Show a schematic connection diagram.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">SelectedFareCount</th><td>Show the number of currently selected fares.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">SelectedItinerary</th><td>Show selected fare routes, dates, modes and per-passenger facts.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">SyntheticTotal</th><td>Total selected synthetic fares in EUR for all passengers.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
+                  <tr id="subcomponent-cheapest-fastest" tabindex="-1"><th scope="row">CheapestFastest</th><td>Show the cheapest fare and fastest journey for the current route scope, with company and departure/arrival details. The Python backend runs fixed highlights SQL queries using the shared cities, dates and filters; either result can be added to or removed from the shared trip.</td></tr>
+                  <tr id="subcomponent-city-sequence" tabindex="-1"><th scope="row">CitySequence</th><td>List the shared route’s stops in their configured order and show the planned nights at each destination. It reads city identifiers and stays from the same itinerary state used by the trip controls, formatting identifiers as readable city names.</td></tr>
+                  <tr id="subcomponent-comparison-matrix" tabindex="-1"><th scope="row">ComparisonMatrix</th><td>Compare transport modes by minimum fare, fastest duration and number of matching options. The Python backend runs fixed summary SQL queries using the current cities, dates and active filters, aggregating all matching fares in that scope.</td></tr>
+                  <tr id="subcomponent-comparison-table" tabindex="-1"><th scope="row">ComparisonTable</th><td>Compare individual fares in a table of mode, company, date, departure, duration and price. The Python backend runs fixed SQL queries using the shared travel inputs, providing ten results per page; each row connects to the shared fare selection.</td></tr>
+                  <tr id="subcomponent-coverage-summary" tabindex="-1"><th scope="row">CoverageSummary</th><td>Explain the route and date coverage of the loaded fare scopes, including completeness and the number of matching options. It reads the host’s saved coverage metadata for the current trip, alongside the same scope information used by fare controls and results.</td></tr>
+                  <tr id="subcomponent-duration-price-plot" tabindex="-1"><th scope="row">DurationPricePlot</th><td>Compare up to fifty matching fares as duration-versus-price points. The Python backend runs fixed SQL queries using the shared route, dates, filters and ordering. Clicking a point opens its exact route, company and departure/arrival details, with an action to add or remove that fare from the shared trip.</td></tr>
+                  <tr id="subcomponent-fade-fares" tabindex="-1"><th scope="row">FadeFares</th><td>Browse a leg’s selectable fares in a vertically scrolling list that loads further result pages. The Python backend runs fixed SQL queries for the current cities, date window, transport choices and arrival threshold; selections are shared with other fare views.</td></tr>
+                  <tr id="subcomponent-fare-calendar" tabindex="-1"><th scope="row">FareCalendar</th><td>Compare available days for one route leg, then inspect and select fares for the active day. The Python backend runs fixed SQL queries using that leg’s shared dates, filters and preceding-arrival threshold. Choosing a date or fare updates the shared plan.</td></tr>
+                  <tr id="subcomponent-fare-cards" tabindex="-1"><th scope="row">FareCards</th><td>Show selectable fare cards with company, departure, duration, route and price details. The Python backend runs fixed SQL queries using the shared route, dates, filters and ordering, while previous and next controls page through seven results at a time.</td></tr>
+                  <tr id="subcomponent-itinerary-timeline" tabindex="-1"><th scope="row">ItineraryTimeline</th><td>Show departure date, time, route, duration and price in a journey list with shared Add/Remove actions. It requests up to five fallback fares through fixed SQL queries in the Python backend using the shared travel inputs, while preferring cached selected-fare facts for display when available.</td></tr>
+                  <tr id="subcomponent-mode-breakdown" tabindex="-1"><th scope="row">ModeBreakdown</th><td>Show how many matching fares are available for each transport mode. The Python backend runs fixed summary SQL queries using the current cities, dates and filters, so the counts update alongside connected fare views.</td></tr>
+                  <tr id="subcomponent-multi-city-plan-grid" tabindex="-1"><th scope="row">MultiCityPlanGrid</th><td>Arrange every route leg into one planner with city, departure, transport, fare-order and fare controls, plus stays between legs. It reads the shared itinerary and delegates fare retrieval to fixed internal panels whose requests run predefined SQL in the Python backend, keeping changes connected across the plan.</td></tr>
+                  <tr id="subcomponent-price-calendar" tabindex="-1"><th scope="row">PriceCalendar</th><td>Show a date calendar with the cheapest representative fare and matching-option count for each available day. The Python backend runs fixed calendar SQL queries using the leg’s shared cities, filters and date window. Date selection and Add cheapest actions update the shared plan.</td></tr>
+                  <tr id="subcomponent-route-map" tabindex="-1"><th scope="row">RouteMap</th><td>Draw a schematic route connecting the shared itinerary’s cities in order. It reads the same city sequence as the trip controls and turns those identifiers into readable labels, so city edits update the diagram.</td></tr>
+                  <tr id="subcomponent-selected-fare-count" tabindex="-1"><th scope="row">SelectedFareCount</th><td>Display the number of fares currently selected in the shared trip. It subscribes directly to the shared selection state and updates as any connected fare view adds or removes an option.</td></tr>
+                  <tr id="subcomponent-selected-itinerary" tabindex="-1"><th scope="row">SelectedItinerary</th><td>List the fares already selected in the shared trip, including route, date, mode and per-passenger price. It reads cached selected-fare facts, so selections made in another fare view appear here without a separate result query.</td></tr>
+                  <tr id="subcomponent-synthetic-total" tabindex="-1"><th scope="row">SyntheticTotal</th><td>Show the synthetic total cost of the fares selected in the shared trip. It sums the saved fare prices and applies the passenger count, updating as selections change in other views.</td></tr>
                 </tbody>
               </table>
             </details>
             <details class="reference-group" id="subcomponent-status">
               <summary><h4>Status displays</h4><span class="reference-count">6 subcomponents</span></summary>
               <table class="reference-table" role="table">
-                <caption>Status displays: purposes and properties</caption>
-                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose</th><th scope="col">Properties</th></tr></thead>
+                <caption>Status displays: purposes and connections</caption>
+                <thead><tr><th scope="col">Subcomponent</th><th scope="col">Purpose and connections</th></tr></thead>
                 <tbody>
-                  <tr><th scope="row">ArtifactSkeleton</th><td>Show a placeholder while an interface loads.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">CoverageNotice</th><td>Explain that the available resource is partial.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">EmptyState</th><td>Show that no fares match the current choices.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">InlineError</th><td>Show a sanitized local failure message.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">RetryAction</th><td>Retry a failed local resource operation.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
-                  <tr><th scope="row">StaleBadge</th><td>Mark a mismatch between displayed and current revisions.</td><td><span class="reference-label" aria-hidden="true">Properties</span>Shared.</td></tr>
+                  <tr id="subcomponent-artifact-skeleton" tabindex="-1"><th scope="row">ArtifactSkeleton</th><td>Show a themed placeholder while a travel scene is being prepared. It displays the supplied or default status text; the host decides when this status belongs in the composition.</td></tr>
+                  <tr id="subcomponent-coverage-notice" tabindex="-1"><th scope="row">CoverageNotice</th><td>Explain that some requested dates may lie outside the loaded fare coverage. It presents a supplied or default notice in the shared theme; coverage detection belongs to the host.</td></tr>
+                  <tr id="subcomponent-empty-state" tabindex="-1"><th scope="row">EmptyState</th><td>Explain that no options match the current filters and suggest adjusting them. It renders a supplied or default status message, while the connected data view and host determine whether results are empty.</td></tr>
+                  <tr id="subcomponent-inline-error" tabindex="-1"><th scope="row">InlineError</th><td>Show a loading failure as an accessible alert within the scene. Its text comes from the supplied or default label, and a separate RetryAction can connect recovery to the host.</td></tr>
+                  <tr id="subcomponent-retry-action" tabindex="-1"><th scope="row">RetryAction</th><td>Ask the host to re-check fare coverage for the current trip inputs. The action shares the same artifact context as the other components, and the host can load any missing scopes without another AI composition.</td></tr>
+                  <tr id="subcomponent-stale-badge" tabindex="-1"><th scope="row">StaleBadge</th><td>Warn that a newer edit is active. It displays a supplied or default status label in the common theme; the host decides when the warning should appear.</td></tr>
                 </tbody>
               </table>
             </details>
