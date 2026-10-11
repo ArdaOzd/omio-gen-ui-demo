@@ -65,6 +65,7 @@ a:focus-visible, summary:focus-visible, .diagram-scroll:focus-visible, .theme-to
 }
 
 section[id], aside[id] { scroll-margin-top: 32px; }
+#dynamic-components-title { scroll-margin-top: 32px; }
 
 .skip-link {
   position: absolute;
@@ -337,6 +338,10 @@ section[id], aside[id] { scroll-margin-top: 32px; }
 }
 
 .film-link:hover { text-decoration-color: var(--blue); transform: translateX(2px); }
+
+.film-copy > .film-followup { margin: 6px 0 0; color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
+
+.film-followup a { color: var(--blue); text-decoration-color: var(--coral); text-underline-offset: 4px; }
 
 .contents {
   display: flex;
