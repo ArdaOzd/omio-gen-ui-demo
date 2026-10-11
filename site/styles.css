@@ -1,31 +1,9 @@
 :root {
-  color-scheme: dark;
-  --blue: #c4d1ff;
-  --blue-soft: #202f4d;
-  --blue-faint: #141f34;
-  --coral: #fb7074;
-  --coral-text: #ff969c;
-  --ink: #e0e7f4;
-  --muted: #a8b6cf;
-  --paper: #0e1728;
-  --white: #17243c;
-  --line: #2c3a54;
-  --image-line: #3a4b6a;
-  --radius: 12px;
-  --radius-small: 6px;
-  --content: min(1280px, calc(100% - 80px));
-  --font: "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --button-text: #132968;
-  --shadow: 2 8 22;
-  --film-scrim: linear-gradient(90deg, #141f34 0%, #141f34 32%, rgb(20 31 52 / 96%) 52%, rgb(20 31 52 / 28%) 100%);
-}
-
-:root[data-theme="light"] {
   color-scheme: light;
   --blue: #132968;
   --blue-soft: #e9eef8;
   --blue-faint: #f0f4fa;
+  --coral: #fb7074;
   --coral-text: #b83c50;
   --ink: #172747;
   --muted: #586681;
@@ -33,9 +11,31 @@
   --white: #fdfefe;
   --line: #d6dfed;
   --image-line: #ccd7e8;
+  --radius: 12px;
+  --radius-small: 6px;
+  --content: min(1280px, calc(100% - 80px));
+  --font: "Avenir Next", Avenir, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --button-text: #fdfefe;
   --shadow: 19 41 104;
   --film-scrim: linear-gradient(90deg, #f0f4fa 0%, #f0f4fa 32%, rgb(240 244 250 / 94%) 44%, rgb(240 244 250 / 0%) 75%);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --blue: #c4d1ff;
+  --blue-soft: #202f4d;
+  --blue-faint: #141f34;
+  --coral-text: #ff969c;
+  --ink: #e0e7f4;
+  --muted: #a8b6cf;
+  --paper: #0e1728;
+  --white: #17243c;
+  --line: #2c3a54;
+  --image-line: #3a4b6a;
+  --button-text: #132968;
+  --shadow: 2 8 22;
+  --film-scrim: linear-gradient(90deg, #141f34 0%, #141f34 32%, rgb(20 31 52 / 96%) 52%, rgb(20 31 52 / 28%) 100%);
 }
 
 * { box-sizing: border-box; }
@@ -116,9 +116,9 @@ section[id], aside[id] { scroll-margin-top: 32px; }
 .theme-toggle:hover { border-color: var(--blue); background: var(--blue-soft); }
 .theme-toggle:active { transform: translateY(1px); }
 .theme-icon { flex: 0 0 auto; }
-.theme-icon-light { display: none; }
-:root[data-theme="light"] .theme-icon-dark { display: none; }
-:root[data-theme="light"] .theme-icon-light { display: block; }
+.theme-icon-dark { display: none; }
+:root[data-theme="dark"] .theme-icon-light { display: none; }
+:root[data-theme="dark"] .theme-icon-dark { display: block; }
 
 .wordmark {
   display: inline-flex;
