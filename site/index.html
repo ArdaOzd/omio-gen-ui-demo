@@ -42,15 +42,12 @@
           </div>
         </div>
         <figure class="hero-proof">
-          <div class="hero-placeholder" role="img" aria-label="GIF or video preview placeholder for the Wayfinder prototype">
-            <div class="hero-placeholder-copy">
-              <span class="hero-placeholder-label">GIF / VIDEO</span>
-              <strong>Prototype preview</strong>
-              <span>Coming soon</span>
-            </div>
-            <span class="hero-placeholder-play" aria-hidden="true">▶</span>
+          <div class="hero-video-frame">
+            <video class="hero-video" data-hero-video autoplay muted loop playsinline preload="metadata" poster="assets/omio-gen-ui-demo-poster.jpg" aria-label="Wayfinder generative travel interface demo">
+              <source src="assets/omio-gen-ui-demo-short.mp4" type="video/mp4">
+            </video>
           </div>
-          <figcaption><span>Animated prototype preview coming soon.</span></figcaption>
+          <figcaption><span>Wayfinder prototype highlights · 2 min 41 sec</span></figcaption>
         </figure>
       </section>
 
@@ -423,6 +420,7 @@
       <p>Wayfinder is a personal, unofficial prototype. It is not affiliated with Omio.</p>
       <p>No live inventory or booking is available. Any Buy control is a demo confirmation only. All data shown in this demo is synthetic and randomly generated. The demo landing page was designed to resemble <a href="https://www.omio.com/">omio.com</a>.</p>
     </footer>
+    <script type="module" src="/hero-video.js"></script>
     <script type="module" src="/src/showcase.tsx"></script>
   </body>
 </html>
