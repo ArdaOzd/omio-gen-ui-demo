@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1793" height="744" viewBox="0 0 1793 744" preserveAspectRatio="xMidYMid meet" style="--mask:#fbfcff" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase" data-reader-fit="intrinsic-height" data-reader-min-text="7.5" data-reader-primary-text="14">
         <title id="archify-diagram-title">Wayfinder: bounded generative travel UI</title>
-        <desc id="archify-diagram-description">A source-backed system diagram. A traveler request moves from the browser chat shell to a strict local Codex agent, through scene validation into a TravelSurface of registered React components. Browser-owned state, the PlanningTracker and bounded projection coordinator remain outside model control; a closed Python API queries the server-side 50-million-row synthetic SQLite fixture.</desc>
+        <desc id="archify-diagram-description">A source-backed system diagram. A traveler request moves from the browser chat shell to a strict local Codex agent, through scene validation into a TravelSurface of registered React components. Browser-owned state, the PlanningTracker and bounded projection coordinator remain outside model control; a closed Python API queries the server-side 50-million-row SQLite fare fixture.</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -257,8 +257,8 @@
         <text data-detail="fine" x="1631" y="478" class="t-backend" font-size="7" text-anchor="middle">fixed projections</text>
         </g>
 
-        <g id="node-fareFixture" data-node-id="fareFixture" data-node-label="SQLite fare fixture" data-node-kind="database" data-node-sublabel="50M synthetic fares" data-node-tag="server-side only" data-node-context="Python + server-side inventory">
-          <title>SQLite fare fixture · 50M synthetic fares · Python + server-side inventory · server-side only</title>
+        <g id="node-fareFixture" data-node-id="fareFixture" data-node-label="SQLite fare fixture" data-node-kind="database" data-node-sublabel="50M fares" data-node-tag="server-side only" data-node-context="Python + server-side inventory">
+          <title>SQLite fare fixture · 50M fares · Python + server-side inventory · server-side only</title>
           <rect x="1531" y="570" width="200" height="86" rx="6" class="c-mask"/>
           <rect x="1531" y="570" width="200" height="86" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1537 576) scale(0.6875)">
@@ -266,7 +266,7 @@
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="1631" y="611" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite fare fixture</text>
-        <text data-detail="context" x="1631" y="627" class="t-muted" font-size="9" text-anchor="middle">50M synthetic fares</text>
+        <text data-detail="context" x="1631" y="627" class="t-muted" font-size="9" text-anchor="middle">50M fares</text>
         <text data-detail="fine" x="1631" y="648" class="t-database" font-size="7" text-anchor="middle">server-side only</text>
         </g>
 
