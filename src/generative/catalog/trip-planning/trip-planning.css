@@ -16,11 +16,23 @@
 
 .trip-mode-options button {
   display: flex;
+  height: auto;
+  min-height: 64px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  padding: 10px 9px;
+  line-height: 1.2;
+}
+
+.trip-mode-options button svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
 }
 
 .trip-mode-options button span {
   display: block;
+  line-height: 1.2;
 }

@@ -105,6 +105,22 @@ describe('FareCards keyset pagination', () => {
 })
 
 describe('interactive selector pagination',()=>{
+  it('renders every advertised transport mode with its icon and label',async()=>{
+    const fixture=createFixedProjectionFixture({rows:items,sourceVersion:'all-transport-modes-1'})
+    const manifest=await fixture.bridge.loadScope(scope,new AbortController().signal)
+    const binding=fixture.bridge.getBinding(manifest.resourceKey)
+    const artifactId=ArtifactIdSchema.parse('artifact-all-transport-modes')
+    const state=createUIStateStore({now:()=> '2026-10-26T00:00:00.000Z'})
+    state.initializeMissing(artifactId,{datasetRefs:[binding.datasetId],citySequence:['london','paris'],dates:{start:'2026-10-26'},availableModesByLeg:{'london:paris':['train','bus','flight','ferry']}})
+    const router=createActionRouter(state,{bridge:fixture.bridge})
+    const services={bridge:fixture.bridge,state,dispatch:router,activeId:()=>artifactId,activate:()=>{}} satisfies TravelServices
+    const {container}=render(<TravelProvider services={services}><TransportSelect artifactRef={artifactId} datasetRef={binding.datasetId} legIndex={0}/></TravelProvider>)
+
+    expect(container.querySelectorAll('.trip-mode-options button')).toHaveLength(4)
+    for(const label of ['Train','Bus','Flight','Ferry'])expect(screen.getByRole('button',{name:label}).querySelector('svg')).toBeInTheDocument()
+    router.dispose()
+  })
+
   it('reaches and selects a second FarePicker page while recording its exact order',async()=>{
     const {artifactId,state,displayStore,router}=await renderSelector('picker')
     await screen.findByRole('option',{name:/Selector Rail 1 ·/})

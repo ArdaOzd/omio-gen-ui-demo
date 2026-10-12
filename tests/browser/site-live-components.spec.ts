@@ -77,30 +77,38 @@ async function assertOpaquePlotDialog(dialog: Locator): Promise<void> {
 
 async function assertInlineTransportLabelsStack(root: Locator): Promise<void> {
   const metrics = await root.locator('.trip-mode-options button').evaluateAll(buttons => buttons.map(button => {
+    const buttonRect = button.getBoundingClientRect()
     const icon = button.querySelector('svg')!.getBoundingClientRect()
     const label = button.querySelector('span')!.getBoundingClientRect()
     const style = window.getComputedStyle(button)
     return {
       label: button.textContent?.trim() ?? '',
+      buttonHeight: buttonRect.height,
       display: style.display,
       direction: style.flexDirection,
       iconCenter: icon.left + icon.width / 2,
       labelCenter: label.left + label.width / 2,
       iconBottom: icon.bottom,
       labelTop: label.top,
+      topClearance: icon.top - buttonRect.top,
+      bottomClearance: buttonRect.bottom - label.bottom,
       labelWidth: label.width,
       labelHeight: label.height,
     }
   }))
 
   expect(metrics.map(metric => metric.label)).toEqual(['Train', 'Bus', 'Flight'])
+  expect(new Set(metrics.map(metric => Math.round(metric.buttonHeight))).size).toBe(1)
   for (const metric of metrics) {
     expect(metric.display).toBe('flex')
     expect(metric.direction).toBe('column')
+    expect(metric.buttonHeight).toBeGreaterThanOrEqual(64)
     expect(metric.labelWidth).toBeGreaterThan(0)
     expect(metric.labelHeight).toBeGreaterThan(0)
     expect(Math.abs(metric.iconCenter - metric.labelCenter)).toBeLessThanOrEqual(1)
     expect(metric.iconBottom).toBeLessThanOrEqual(metric.labelTop)
+    expect(metric.topClearance).toBeGreaterThanOrEqual(8)
+    expect(metric.bottomClearance).toBeGreaterThanOrEqual(8)
   }
 }
 
@@ -193,11 +201,18 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   await page.setViewportSize({ width: 1440, height: 960 })
   await page.goto('./', { waitUntil: 'domcontentloaded' })
 
+  const referenceGroups = page.locator('details.reference-group')
+  await expect(referenceGroups).toHaveCount(4)
+  expect(await referenceGroups.evaluateAll(groups => groups.every(group => !(group as HTMLDetailsElement).open))).toBe(true)
+  const firstCase = page.locator('details.case').first()
+  expect(await firstCase.evaluate((element: HTMLDetailsElement) => element.open)).toBe(true)
+
   const mounts = page.locator('.composition-live[data-showcase-case]')
   await expect(mounts).toHaveCount(10)
   expect(await mounts.evaluateAll(elements => elements.map(element => element.getAttribute('data-showcase-case')))).toEqual(scenarioKeys)
   expect((await mounts.evaluateAll(elements => elements.slice(0, 4).map(element => element.getAttribute('data-showcase-case'))))).toEqual(requestedFirstFour)
   await expect(mounts.locator('img')).toHaveCount(0)
+  await expect(scenario(page, 'price-versus-time')).toHaveAttribute('data-showcase-mounted', 'price-versus-time', { timeout: 45_000 })
 
   const roots = new Map<(typeof scenarioKeys)[number], Locator>()
   for (const key of scenarioKeys) roots.set(key, await openScenario(page, key))
@@ -513,19 +528,25 @@ test('all ten audited compositions are live, interactive, bounded, and responsiv
   await toggleFirstFare(cards)
   await expect(page.locator('.composition-live button[aria-pressed="true"]').filter({ hasText: /Added|Selected/ })).toHaveCount(0)
 
-  for (const viewport of [
-    { width: 1470, height: 960 },
-    { width: 1440, height: 960 },
-    { width: 960, height: 800 },
-    { width: 390, height: 844 },
-    { width: 320, height: 720 },
-  ]) {
-    await page.setViewportSize(viewport)
-    for (const key of scenarioKeys) await assertNoHorizontalOverflow(page, roots.get(key)!)
-    await assertInlineTransportLabelsStack(manual)
-    await assertPlannerFieldsDoNotOverlap(manual)
-    await assertPlannerFieldsDoNotOverlap(multiCity)
+  for (const themePass of [0, 1]) {
+    if (themePass === 1) await page.locator('#theme-toggle').click()
+    for (const viewport of [
+      { width: 1470, height: 960 },
+      { width: 1440, height: 960 },
+      { width: 960, height: 800 },
+      { width: 390, height: 844 },
+      { width: 320, height: 720 },
+    ]) {
+      await page.setViewportSize(viewport)
+      for (const key of scenarioKeys) await assertNoHorizontalOverflow(page, roots.get(key)!)
+      await assertInlineTransportLabelsStack(manual)
+      await assertPlannerFieldsDoNotOverlap(manual)
+      await assertPlannerFieldsDoNotOverlap(multiCity)
+    }
   }
+  await page.locator('#theme-toggle').click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme ?? '')
+  await page.setViewportSize({ width: 1440, height: 960 })
 
   expect(apiRequests).toEqual([])
   expect(unexpectedLoopbackRequests).toEqual([])
