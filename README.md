@@ -4,7 +4,7 @@ Wayfinder is an unofficial Omio generative UI study. It pairs a familiar travel 
 
 **[Open the GitHub Pages project presentation](https://ardaozd.github.io/omio-gen-ui-demo/)**
 
-> The Pages site is a static case study with recorded captures. Run the repository locally for search, local SQLite data, and signed-in Codex composition.
+> The Pages site includes browser-local interactive compositions and recorded captures. Run the repository locally for search, local SQLite data, and signed-in Codex composition.
 
 [![Wayfinder generative travel planner with a date strip, price calendar, and shared trip tracker](site/assets/04-date-calendar.png)](https://ardaozd.github.io/omio-gen-ui-demo/)
 

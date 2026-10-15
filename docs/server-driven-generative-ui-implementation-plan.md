@@ -1,5 +1,7 @@
 # Server-driven generative UI implementation plan
 
+> Historical implementation record. Paths, branches, process IDs, verification counts, and delivery restrictions below describe the original development sessions. They are not setup instructions for a new clone. Follow [AGENTS.md](../AGENTS.md) and the [macOS setup skill](../.agents/skills/setup-omio-macos/SKILL.md) for current setup and workflow. The architecture and ownership contracts remain useful; verify them against the current source.
+
 Status: implementation complete, verified, and running locally for user testing
 
 Target branch: `feature/server-driven-generative-ui-review`
@@ -10,9 +12,9 @@ Working directory: `/Users/ardaozdogru/.codex/worktrees/server-driven-generative
 
 Delivery boundary: produce the first complete browser render for user testing. Keep the branch local, unmerged, and unpushed.
 
-## Authoritative current state — 2026-10-08
+## Historical implementation checkpoint — 2026-10-08
 
-This section supersedes the earlier clean-base assumptions preserved later in this document as planning history.
+Within this historical record, this checkpoint supersedes the earlier clean-base assumptions preserved later in the document.
 
 - Work only in `/Users/ardaozdogru/.codex/worktrees/server-driven-generative-ui/omio-gen-ui-demo` on local branch `feature/server-driven-generative-ui-review`. The original checkout and `/tmp/server-driven-generative-ui-baseline.FcThYk` remain read-only evidence. Do not merge or push.
 - The active source is generator v4 on schema v3: 50,000,000 fares, 120 cities, all ordered city pairs, and date coverage from 2026-10-08 through 2027-12-31. Public fares include bounded ordered `legs`; `direct` agrees with leg count. Manifests distinguish the requested `coverage` from `availableDateWindow` and report partial or unavailable windows with `complete: false`.
