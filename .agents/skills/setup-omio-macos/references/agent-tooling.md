@@ -52,25 +52,15 @@ code-review-graph install --platform codex --repo . --no-instructions -y
 
 An integration installed during the current agent session may not become invocable until the next session. If `/graphify` is still unavailable, locate and read the newly installed Graphify `SKILL.md` through the host's skill inventory and follow it directly. If the host cannot expose that file in-session, record a restart/resume checkpoint and continue after a new session. Do not substitute Graphify's code-only hook extraction for the required full semantic corpus.
 
-Build a missing or invalid Graphify corpus with `/graphify .`. If a tracked graph came from another checkout or is stale, use `/graphify . --update`. Continue the full-corpus warning and select local or Codex extraction. Then validate graph structure, manifest coverage, and clone-relative paths:
+Build a missing or invalid Graphify corpus with `/graphify .`. If a tracked graph came from another checkout or is stale, use `/graphify . --update`. Continue the full-corpus warning and select local or Codex extraction. Then normalize recognized parser provenance and validate graph structure, manifest coverage, and clone-relative paths:
 
 ```sh
-python3 - <<'PY'
-import json, os
-graph = json.load(open("graphify-out/graph.json"))
-manifest = json.load(open("graphify-out/manifest.json"))
-source_paths = [node["source_file"] for node in graph.get("nodes", []) if node.get("source_file")]
-if not manifest or not source_paths:
-    raise SystemExit("Graphify graph or manifest has no local source corpus")
-paths = source_paths + list(manifest)
-invalid = [path for path in paths if os.path.isabs(path) or not os.path.exists(path)]
-if invalid:
-    raise SystemExit(f"Graph paths are missing or non-portable: {invalid[:10]}")
-print(f"Graphify valid: {len(graph.get('nodes', []))} nodes, {len(manifest)} manifest files")
-PY
+python3 scripts/verify-graph-paths.py --repair
 code-review-graph build --repo .
 code-review-graph status --repo .
 ```
+
+Graphify's language parsers can describe an imported package or a browser-root import in `source_file`, even though neither value is a clone-relative local path. The helper preserves declared package provenance as `source_module`, repairs a browser-root label only when it identifies an existing local file with the same basename, and rejects every other missing, absolute, or escaping path. It validates all proposed repairs before atomically replacing `graph.json`; running it without `--repair` is a read-only validation pass.
 
 Compare the manifest with the current source/document/asset corpus; if relevant tracked files are absent or changed, run `/graphify . --update` and validate again. Do not authorize or configure an external extraction provider during setup. Leave generated graph changes uncommitted during setup so the repository owner can review them separately. In later agent work, call code-review-graph's `get_minimal_context_tool` before broad searches. After code edits run `code-review-graph update --repo .` and `graphify update .`; after documentation or asset edits invoke `/graphify . --update` with local or Codex extraction.
 
