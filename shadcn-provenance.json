@@ -62,7 +62,18 @@
     "toggle": "aafa82253550574c833d0072c9f6f4a71e36efdbbeddb8ddf1b09db1fbc1f621",
     "toggle-group": "f0dcdf5d73ec55d4700d530c86611d12dd9071f5cf04d5f2def16757f1381d37"
   },
-  "allowedNativeCompositions": [],
+  "allowedNativeCompositions": [
+    {
+      "file": "src/generative/catalog/views/index.tsx",
+      "element": "g",
+      "role": "button",
+      "builtFrom": [
+        "card",
+        "button"
+      ],
+      "explanation": "Duration-price plot points remain native SVG groups to preserve chart geometry and interaction; Card owns fare details and Button owns the fare action."
+    }
+  ],
   "localAdaptations": [
     {
       "file": "src/shadcn.css",

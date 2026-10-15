@@ -1,6 +1,7 @@
 import { createContext, useContext, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import type { UIMessage } from 'ai'
 import { z } from 'zod'
+import { FieldSet } from '@/components/ui/field'
 import { ArtifactIdSchema, ArtifactUIStateSchema, LIMITS, UIStateRevisionSchema, type ArtifactId, type ArtifactUIState, type DatasetId, type FareId, type FareScopeBinding, type UIStateStore } from '../contracts'
 import type { ResourceKey } from '../contracts/query-groups'
 import { TravelProvider, type TravelServices } from '../catalog/context'
@@ -233,5 +234,5 @@ export function useSceneView(toolCallId:string):SceneView{
 export function FrozenScene({services,children}:{services:TravelServices;children:ReactNode}){
   const displayStore=useRef<DisplayContextStore|undefined>(undefined)
   if(!displayStore.current)displayStore.current=createDisplayContextStore()
-  return <DisplayContextProvider store={displayStore.current}><TravelProvider services={services}><fieldset disabled inert aria-label="Previous travel view" className="travel-frozen-scene" style={{border:0,margin:0,minWidth:0,padding:0,pointerEvents:'none'}}>{children}</fieldset></TravelProvider></DisplayContextProvider>
+  return <DisplayContextProvider store={displayStore.current}><TravelProvider services={services}><FieldSet disabled inert aria-label="Previous travel view" className="travel-frozen-scene" style={{border:0,display:'block',gap:0,margin:0,minWidth:0,padding:0,pointerEvents:'none'}}>{children}</FieldSet></TravelProvider></DisplayContextProvider>
 }
