@@ -42,7 +42,14 @@ brew install node@22 python@3.12 uv
 brew install --cask google-chrome
 ```
 
-If Homebrew reports a keg-only Node or Python, use `brew --prefix node@22` or `brew --prefix python@3.12` to build the current shell's `PATH`; never paste one Mac's prefix into repository files.
+After installing these versioned formulas, put their commands first in the current shell:
+
+```sh
+export PATH="$(brew --prefix node@22)/bin:$(brew --prefix python@3.12)/libexec/bin:$PATH"
+rehash
+```
+
+Homebrew's `python@3.12/bin` contains `python3.12`; the unversioned `python3` command is in `libexec/bin`. Using only `bin` can leave Apple's unsupported Python first on `PATH`. Add the same export to `~/.zprofile`, after `brew shellenv`, only when absent so new Terminal and Finder launcher sessions use the same runtimes. Reopen Terminal and verify the versions below. Derive both prefixes on the current Mac.
 
 - Vite 7.3.1 requires Node `^20.19.0 || >=22.12.0`; Node 22 LTS is the preferred clean setup.
 - The Python backend imports `typing.Never`, so it requires Python 3.11 or newer; Python 3.12 is the preferred clean setup.

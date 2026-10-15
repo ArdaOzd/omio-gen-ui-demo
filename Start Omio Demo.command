@@ -3,7 +3,7 @@
 set -u
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-export PATH="/opt/homebrew/bin:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
+export PATH="${PATH:-}:/opt/homebrew/bin:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 API_PORT="${API_PORT:-8000}"
 AGENT_PORT="${AGENT_PORT:-8010}"
