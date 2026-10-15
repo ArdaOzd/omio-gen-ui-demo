@@ -668,10 +668,10 @@ test.describe('mobile touch shell', () => {
     await seedSessions(page, 40)
     await page.goto('/generative')
 
-    await page.getByRole('button', { name: beta.title }).tap()
+    await page.getByRole('button', { name: beta.title, exact: true }).tap()
     await expect(page.getByText(`${beta.title} generated itinerary`, { exact: true })).toBeVisible()
     await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(beta.carrier)
-    await page.getByRole('button', { name: alpha.prompt }).tap()
+    await page.getByRole('button', { name: alpha.prompt, exact: true }).tap()
     await expect(page.getByText(`${alpha.title} generated itinerary`, { exact: true })).toBeVisible()
 
     const composer = page.getByRole('textbox', { name: 'Message' })
@@ -701,7 +701,7 @@ test.describe('mobile touch shell', () => {
     await expect(page.getByRole('navigation', { name: 'Previous chats' })).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Start new chat' })).toBeVisible()
     await page.getByRole('button', { name: 'Expand session sidebar' }).tap()
-    await expect(page.getByRole('button', { name: beta.prompt })).toBeVisible()
+    await expect(page.getByRole('button', { name: beta.prompt, exact: true })).toBeVisible()
     await expectShellGeometry(page, { desktop: false, trackerVisible: true, longHistory: true })
   })
 })
@@ -746,14 +746,14 @@ test('two sessions restore their own generated layout and selected fare across s
   await expect(page.getByRole('complementary', { name: 'Chat sessions' })).toBeVisible()
   await expectSession(page, alpha)
 
-  await page.getByRole('button', { name: beta.title }).click()
+  await page.getByRole('button', { name: beta.title, exact: true }).click()
   await expectSession(page, beta)
   await expect(page.locator('.travel-chat').getByText(alpha.prompt, { exact: true })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: beta.title })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('button', { name: beta.title, exact: true })).toHaveAttribute('aria-current', 'page')
 
   await page.reload()
   await expectSession(page, beta)
-  await page.getByRole('button', { name: alpha.prompt }).click()
+  await page.getByRole('button', { name: alpha.prompt, exact: true }).click()
   await expectSession(page, alpha)
   await expect(page.locator('.travel-chat').getByText(beta.prompt, { exact: true })).toHaveCount(0)
 })
@@ -779,7 +779,7 @@ for (const width of [360, 1280]) test(`fare lists show seven complete rows witho
   await expect(eighth.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText('Alpha Rail 8')
 
-  await page.getByRole('button', { name: beta.title }).click()
+  await page.getByRole('button', { name: beta.title, exact: true }).click()
   const shortList = page.getByRole('region', { name: 'Fare options' })
   await expect(shortList.getByRole('article')).toHaveCount(7)
   await expect(shortList).toHaveAttribute('data-scrollable', 'false')
@@ -813,7 +813,7 @@ test('UI-created sessions save generated cards, filters, and selected fares befo
   await page.getByRole('button', { name: /^Select / }).first().click()
   await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(beta.carrier)
 
-  await page.getByRole('button', { name: 'Alpha UI-created itinerary' }).click()
+  await page.getByRole('button', { name: 'Alpha UI-created itinerary', exact: true }).click()
   await expect(page.getByText(`${alpha.title} is ready.`, { exact: true })).toBeVisible()
   await expect(page.getByText(`${alpha.title} live generated itinerary`, { exact: true })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Fare buying tracker' })).toContainText(alpha.carrier)
@@ -873,7 +873,7 @@ test('New chat snapshots an in-flight user turn and isolates a late response', a
   await page.waitForTimeout(100)
   await expect(page.getByText('LATE RESPONSE MUST STAY OLD', { exact: true })).toHaveCount(0)
 
-  await page.getByRole('button', { name: inflightPrompt }).click()
+  await page.getByRole('button', { name: inflightPrompt, exact: true }).click()
   await expect(page.locator('.travel-chat').getByText(inflightPrompt, { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Send message' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Stop response' })).toBeDisabled()

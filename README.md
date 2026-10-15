@@ -149,7 +149,10 @@ With Google Chrome installed, run the browser suite:
 
 ```sh
 npm run test:browser
+npm run test:browser:site
 ```
+
+The first command checks the local application. The second builds and checks the static project presentation.
 
 With the app running, check the two owned services directly:
 

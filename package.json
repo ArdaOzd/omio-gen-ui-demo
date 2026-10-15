@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:browser": "playwright test",
+    "test:browser:site": "playwright test --config playwright.site.config.ts",
     "test:leakage": "vitest run src/generative/contracts/privacy.test.ts",
     "check:catalog": "tsx src/generative/catalog/generate.ts --check",
     "check:shadcn": "node scripts/check-shadcn.mjs",

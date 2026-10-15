@@ -37,6 +37,8 @@ npm run test:browser
 
 The browser suite starts an isolated Vite frontend and exercises deterministic mocked API and chat boundaries in the browser. It uses the installed Chrome channel. A successful suite is useful regression evidence, but it does not replace the final signed-in planner smoke test.
 
+Run the GitHub Pages presentation checks separately with `npm run test:browser:site`. That command builds the presentation and starts its own preview server on port 4174. It does not require the fare API or a Codex login.
+
 ## Services and ports
 
 `npm run dev` starts all three services under one parent process:
